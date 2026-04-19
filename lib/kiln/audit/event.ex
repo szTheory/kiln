@@ -22,7 +22,7 @@ defmodule Kiln.Audit.Event do
 
   alias Kiln.Audit.EventKind
 
-  @primary_key {:id, :binary_id, autogenerate: false}
+  @primary_key {:id, :binary_id, autogenerate: false, read_after_writes: true}
   @foreign_key_type :binary_id
 
   @type t :: %__MODULE__{}

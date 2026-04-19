@@ -74,10 +74,22 @@ defmodule Kiln.Repo.Migrations.AuditEventsImmutability do
       "DROP TRIGGER IF EXISTS audit_events_no_truncate ON audit_events"
     )
 
-    # Layer 3 — RULE DO INSTEAD NOTHING. If both the role REVOKE and
-    # the trigger are bypassed (e.g. a superuser disables the trigger),
-    # the RULE rewrites UPDATE/DELETE to a no-op. The row is not modified
-    # and num_rows returns 0.
+    # Layer 3 — RULE DO INSTEAD NOTHING, created DISABLED by default.
+    #
+    # Postgres query rewriting runs BEFORE triggers fire: an active
+    # `DO INSTEAD NOTHING` RULE would mask the Layer 2 trigger — every
+    # UPDATE would silently become a no-op and the trigger's loud
+    # `RAISE EXCEPTION` would never fire. Ship the RULE in a disabled
+    # state so Layer 2 is the active enforcement; a disabled RULE
+    # doesn't participate in query rewriting.
+    #
+    # The RULE is a break-glass safety net: if a privileged session
+    # needs to legitimately disable the trigger (e.g. a schema
+    # migration that rewrites audit_events table structure), the
+    # operator also enables the RULE first so UPDATEs remain a no-op
+    # during the window the trigger is off. See
+    # `test/kiln/repo/migrations/audit_events_immutability_test.exs`
+    # AUD-03 for the canonical enable-and-verify dance.
     execute(
       "CREATE RULE audit_events_no_update_rule AS ON UPDATE TO audit_events DO INSTEAD NOTHING",
       "DROP RULE IF EXISTS audit_events_no_update_rule ON audit_events"
@@ -86,6 +98,16 @@ defmodule Kiln.Repo.Migrations.AuditEventsImmutability do
     execute(
       "CREATE RULE audit_events_no_delete_rule AS ON DELETE TO audit_events DO INSTEAD NOTHING",
       "DROP RULE IF EXISTS audit_events_no_delete_rule ON audit_events"
+    )
+
+    execute(
+      "ALTER TABLE audit_events DISABLE RULE audit_events_no_update_rule",
+      "ALTER TABLE audit_events ENABLE RULE audit_events_no_update_rule"
+    )
+
+    execute(
+      "ALTER TABLE audit_events DISABLE RULE audit_events_no_delete_rule",
+      "ALTER TABLE audit_events ENABLE RULE audit_events_no_delete_rule"
     )
   end
 

@@ -108,7 +108,7 @@ defmodule Kiln.Audit do
   defp insert_event(attrs) do
     attrs =
       attrs
-      |> Map.put_new(:correlation_id, correlation_id_from_logger())
+      |> Map.put_new_lazy(:correlation_id, &correlation_id_from_logger/0)
       |> Map.put_new(:schema_version, 1)
       |> Map.put_new(:occurred_at, DateTime.utc_now())
 

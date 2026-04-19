@@ -1,0 +1,202 @@
+defmodule Kiln.AuditTest do
+  use Kiln.DataCase, async: true
+
+  alias Kiln.Audit
+  alias Kiln.Audit.EventKind
+
+  describe "append/1 — valid payloads" do
+    test "run_state_transitioned with minimal valid payload inserts" do
+      cid = Ecto.UUID.generate()
+
+      assert {:ok, event} =
+               Audit.append(%{
+                 event_kind: :run_state_transitioned,
+                 payload: %{"from" => "queued", "to" => "planning"},
+                 correlation_id: cid
+               })
+
+      assert event.event_kind == :run_state_transitioned
+      assert event.schema_version == 1
+      assert event.correlation_id == cid
+    end
+
+    test "accepts string event_kind and normalizes to atom" do
+      assert {:ok, event} =
+               Audit.append(%{
+                 event_kind: "stage_started",
+                 payload: %{"stage_kind" => "coding"},
+                 correlation_id: Ecto.UUID.generate()
+               })
+
+      assert event.event_kind == :stage_started
+    end
+
+    test "every one of the 22 kinds accepts its minimal payload" do
+      for kind <- EventKind.values() do
+        payload = minimal_payload_for(kind)
+        cid = Ecto.UUID.generate()
+
+        assert {:ok, _event} =
+                 Audit.append(%{
+                   event_kind: kind,
+                   payload: payload,
+                   correlation_id: cid
+                 }),
+               "append failed for kind=#{inspect(kind)} payload=#{inspect(payload)}"
+      end
+    end
+
+    test "fills correlation_id from Logger.metadata when not passed" do
+      cid = Ecto.UUID.generate()
+      Logger.metadata(correlation_id: cid)
+
+      try do
+        assert {:ok, event} =
+                 Audit.append(%{
+                   event_kind: :stage_started,
+                   payload: %{"stage_kind" => "coding"}
+                 })
+
+        assert event.correlation_id == cid
+      after
+        Logger.metadata(correlation_id: nil)
+      end
+    end
+  end
+
+  describe "append/1 — invalid payloads are rejected before INSERT" do
+    test "run_state_transitioned with bogus 'from' enum value" do
+      cid = Ecto.UUID.generate()
+
+      assert {:error, {:audit_payload_invalid, _}} =
+               Audit.append(%{
+                 event_kind: :run_state_transitioned,
+                 payload: %{"from" => "bogus_state", "to" => "planning"},
+                 correlation_id: cid
+               })
+
+      # No row persisted.
+      assert Repo.aggregate(Kiln.Audit.Event, :count) == 0
+    end
+
+    test "stage_started with unknown key (additionalProperties: false)" do
+      cid = Ecto.UUID.generate()
+
+      assert {:error, {:audit_payload_invalid, _}} =
+               Audit.append(%{
+                 event_kind: :stage_started,
+                 payload: %{"stage_kind" => "coding", "definitely_not_a_known_key" => true},
+                 correlation_id: cid
+               })
+    end
+
+    test "stage_completed missing required field" do
+      cid = Ecto.UUID.generate()
+
+      assert {:error, {:audit_payload_invalid, _}} =
+               Audit.append(%{
+                 event_kind: :stage_completed,
+                 payload: %{"stage_kind" => "coding"},
+                 correlation_id: cid
+               })
+    end
+  end
+
+  describe "append/1 — unknown event_kind" do
+    test "atom not in taxonomy returns :unknown_event_kind" do
+      assert {:error, {:unknown_event_kind, :made_up_kind}} =
+               Audit.append(%{
+                 event_kind: :made_up_kind,
+                 payload: %{},
+                 correlation_id: Ecto.UUID.generate()
+               })
+    end
+
+    test "string not in taxonomy returns :unknown_event_kind" do
+      assert {:error, {:unknown_event_kind, "made_up_kind"}} =
+               Audit.append(%{
+                 event_kind: "made_up_kind",
+                 payload: %{},
+                 correlation_id: Ecto.UUID.generate()
+               })
+    end
+  end
+
+  describe "append/1 — correlation_id requirements" do
+    test "raises ArgumentError when correlation_id neither passed nor in metadata" do
+      Logger.metadata(correlation_id: nil)
+
+      assert_raise ArgumentError, ~r/correlation_id/, fn ->
+        Audit.append(%{
+          event_kind: :stage_started,
+          payload: %{"stage_kind" => "coding"}
+        })
+      end
+    end
+  end
+
+  # One minimal-valid payload per kind; mirrors the 22 JSON schemas.
+  defp minimal_payload_for(:run_state_transitioned), do: %{"from" => "queued", "to" => "planning"}
+
+  defp minimal_payload_for(:stage_started), do: %{"stage_kind" => "coding"}
+
+  defp minimal_payload_for(:stage_completed),
+    do: %{"stage_kind" => "coding", "duration_ms" => 42}
+
+  defp minimal_payload_for(:stage_failed), do: %{"stage_kind" => "coding", "reason" => "x"}
+
+  defp minimal_payload_for(:external_op_intent_recorded),
+    do: %{"op_kind" => "git_push", "idempotency_key" => "r:s:x"}
+
+  defp minimal_payload_for(:external_op_action_started),
+    do: %{"op_kind" => "git_push", "idempotency_key" => "r:s:x"}
+
+  defp minimal_payload_for(:external_op_completed),
+    do: %{"op_kind" => "git_push", "idempotency_key" => "r:s:x", "result_summary" => "ok"}
+
+  defp minimal_payload_for(:external_op_failed),
+    do: %{"op_kind" => "git_push", "idempotency_key" => "r:s:x", "error" => "x"}
+
+  defp minimal_payload_for(:secret_reference_resolved), do: %{"name" => "ANTHROPIC_API_KEY"}
+
+  defp minimal_payload_for(:model_routing_fallback),
+    do: %{
+      "from_model" => "opus-4",
+      "to_model" => "sonnet-4",
+      "role" => "coder",
+      "reason" => "429"
+    }
+
+  defp minimal_payload_for(:budget_check_passed),
+    do: %{"scope" => "run", "consumed" => 0, "limit" => 1000}
+
+  defp minimal_payload_for(:budget_check_failed),
+    do: %{"scope" => "run", "consumed" => 1001, "limit" => 1000}
+
+  defp minimal_payload_for(:stuck_detector_alarmed),
+    do: %{"failure_class" => "schema_mismatch", "count" => 3}
+
+  defp minimal_payload_for(:scenario_runner_verdict),
+    do: %{"run_id" => Ecto.UUID.generate(), "verdict" => "pass", "exit_code" => 0}
+
+  defp minimal_payload_for(:work_unit_created),
+    do: %{"work_unit_id" => Ecto.UUID.generate(), "kind" => "task"}
+
+  defp minimal_payload_for(:work_unit_state_changed),
+    do: %{"work_unit_id" => Ecto.UUID.generate(), "from" => "open", "to" => "closed"}
+
+  defp minimal_payload_for(:git_op_completed), do: %{"op" => "push", "sha" => "abc1234"}
+
+  defp minimal_payload_for(:pr_created),
+    do: %{"number" => 1, "url" => "https://github.com/x/y/pull/1"}
+
+  defp minimal_payload_for(:ci_status_observed), do: %{"status" => "success"}
+
+  defp minimal_payload_for(:block_raised),
+    do: %{"reason" => "missing_api_key", "details" => %{}}
+
+  defp minimal_payload_for(:block_resolved),
+    do: %{"reason" => "missing_api_key", "resolved_by" => "operator"}
+
+  defp minimal_payload_for(:escalation_triggered), do: %{"reason" => "stuck_detector"}
+end
