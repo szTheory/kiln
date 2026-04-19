@@ -68,8 +68,8 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 ### Local Dev & Distribution
 
-- [ ] **LOCAL-01**: `docker compose up` spins up Kiln (Phoenix app) + Postgres + DTU mock network; health check passes; ready to start first run
-- [ ] **LOCAL-02**: `.tool-versions` pins Elixir 1.19.5 / Erlang 28.1+ for `asdf`; Phoenix 1.8.5 + LiveView 1.1.28 pinned in `mix.exs`
+- [x] **LOCAL-01**: `docker compose up` spins up Kiln (Phoenix app) + Postgres + DTU mock network; health check passes; ready to start first run
+- [x] **LOCAL-02**: `.tool-versions` pins Elixir 1.19.5 / Erlang 28.1+ for `asdf`; Phoenix 1.8.5 + LiveView 1.1.28 pinned in `mix.exs`
 - [ ] **LOCAL-03**: README with zero-to-first-run walkthrough, validated against a fresh clone during Phase 8
 
 ### Automation & Zero-Human Verification
@@ -229,8 +229,8 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | OBS-02 | Phase 9 | Pending |
 | OBS-03 | Phase 1 | Pending |
 | OBS-04 | Phase 5 | Pending |
-| LOCAL-01 | Phase 1 | Pending |
-| LOCAL-02 | Phase 1 | Pending |
+| LOCAL-01 | Phase 1 | Partial (Plan 01-01 — structural; Plan 01-06 closes runtime smoke) |
+| LOCAL-02 | Phase 1 | Done (Plan 01-01, commit f567c7e) |
 | LOCAL-03 | Phase 9 | Pending |
 | UAT-01 | Phase 5 | Pending |
 | UAT-02 | Phase 5 | Pending |
