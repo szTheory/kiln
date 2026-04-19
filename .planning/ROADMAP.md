@@ -49,7 +49,7 @@ Plans:
 - [ ] 01-04-PLAN.md — `external_operations` intent table + `Kiln.Oban.BaseWorker` with safe defaults + 30-day TTL pruner (D-18, D-44, D-49; P3 idempotency groundwork)
 - [ ] 01-05-PLAN.md — `logger_json` config + `Kiln.Logger.Metadata.with_metadata/2` + `Kiln.Telemetry.{pack_ctx,unpack_ctx,async_stream,pack_meta}` + Oban handler + contrived D-47 multi-process test (OBS-01)
 - [ ] 01-06-PLAN.md — `Kiln.HealthPlug` (mounted pre-`Plug.Logger`) + `Kiln.BootChecks.run!/0` (5 invariants) + `mix kiln.boot_checks` + first_run.sh integration test (LOCAL-01, OBS-03)
-- [ ] 01-07-PLAN.md — Spec upgrades D-50 (CLAUDE.md) + D-51 (ARCHITECTURE.md §9 rename) + D-52 (STACK.md pg_uuidv7) + D-53 (Elixir/OTP version drift fix)
+- [x] 01-07-PLAN.md — Spec upgrades D-50 (CLAUDE.md) + D-51 (ARCHITECTURE.md §9 rename) + D-52 (STACK.md pg_uuidv7) + D-53 (Elixir/OTP version drift fix) — **complete 2026-04-18 (6f4438e, a2bc420)**
 
 ### Phase 2: Workflow Engine Core
 **Goal**: A YAML workflow loads, validates, compiles into a topologically-sorted stage graph, and a run driven by that graph transitions durably through the state machine with per-stage checkpointing and idempotent retries.
@@ -243,7 +243,7 @@ Phases needing `/gsd-research-phase` before planning:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Durability Floor | 1/7 | In progress | - |
+| 1. Foundation & Durability Floor | 2/7 | In progress | - |
 | 2. Workflow Engine Core | 0/TBD | Not started | - |
 | 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |
