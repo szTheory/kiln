@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: in_progress
-stopped_at: Phase 1 COMPLETE (7/7) — durability floor mechanically asserted at every boot. Ready for Phase 2 (Workflow Engine Core).
-last_updated: "2026-04-19T13:56:00.000Z"
-last_activity: 2026-04-19 — Phase 1 Plan 06 executed (Kiln.HealthPlug ~100 LOC with D-31 locked JSON shape mounted pre-Plug.Telemetry in KilnWeb.Endpoint; Kiln.BootChecks.run!/0 with 4 invariants (contexts_compiled, audit_revoke_active, audit_trigger_active, required_secrets) + KILN_SKIP_BOOTCHECKS=1 escape hatch wired into staged Application.start/2 per D-32; mix kiln.boot_checks CI-parity task into .check.exs + dedicated GHA step per D-34; 9 P1 stub context modules pin the 12-context SSOT from P1 per D-42; test/integration/first_run.sh LOCAL-01 smoke test; test/kiln/application_test.exs proves post-boot 7-child invariant; 83 tests 0 failures; mix check 12-tool gate green; 8 auto-fixes — 6 Rule-1 bugs (SAVEPOINT pattern, per-row trigger probe, INSERT missing inserted_at, Dialyzer contract supertypes, Credo ObviousComment, Credo AliasUsage) + 2 Rule-3 blockers (9 missing context modules, NoMixEnvAtRuntime config/*.exs exemption))
+status: completed
+stopped_at: Phase 2 context gathered
+last_updated: "2026-04-19T15:14:57.261Z"
+last_activity: "2026-04-19 — Plan 06 executed (Kiln.HealthPlug mounted pre-Plug.Telemetry in Endpoint returns locked D-31 JSON shape {status, postgres, oban, contexts, version}; Kiln.BootChecks.run!/0 with 4 invariants raises Kiln.BootChecks.Error with structured operator message — invoked from staged Application.start/2 between Repo+Oban and Endpoint per D-32; KILN_SKIP_BOOTCHECKS=1 escape hatch per D-33; mix kiln.boot_checks CI-parity task per D-34 wired into .check.exs + dedicated GHA step; 9 P1 stub context modules pin the 12-context SSOT; test/integration/first_run.sh with port-5432-conflict detection; test/kiln/application_test.exs asserts post-boot D-42 7-child invariant. 83 tests 0 failures. mix check 12-tool gate green. BootChecks.run!/0 wall time: ~12ms. 8 auto-fixes — see 01-06-SUMMARY.md.)"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 1
   total_plans: 7
   completed_plans: 7
@@ -148,7 +148,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-19
-Stopped at: Phase 1 COMPLETE (7/7). All plans: 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), 01-05 (5888aac, 0a5ba87), 01-04 (2c3984c, 0f41dc3, c714e0c), 01-06 (a271a6a, a82d070, 6e88813). Durability floor mechanically asserted at every boot (4 BootChecks invariants + pre-Plug.Logger HealthPlug + mix kiln.boot_checks CI parity + first_run.sh LOCAL-01 smoke). 83 tests 0 failures. mix check 12-tool gate green.
-Resume file: (none — Phase 1 done)
+Last session: --stopped-at
+Stopped at: Phase 2 context gathered
+Resume file: --resume-file
 Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
