@@ -136,6 +136,31 @@ Deferred to a future milestone. Tracked here so they don't become ambiguous late
 - **TEAM-03**: SSO / OIDC
 - **TEAM-04**: Audit log export APIs for compliance
 
+### Self-Evaluation & Continuous Improvement (v1.5)
+
+Originally surfaced in `.planning/phases/01-foundation-durability-floor/01-CONTEXT.md` lines 238–260 during Phase 1 discussion. Formalized here so the cluster is addressable by ID instead of being buried in a phase context file.
+
+- **SELF-01**: Run post-mortem record — every merged run emits structured artifact (token usage by stage/agent/role, wall time, retry counts, `requested_model` vs `actual_model_used`, scenario verdict trail, BLOCK reasons hit, escalations, checkpoint resumes). Stored in `run_postmortems` table or typed artifact file.
+- **SELF-02**: Operator subjective rating — after each merged run, prompt 1–5 satisfaction + free-text "what went wrong / right"; stored alongside the run.
+- **SELF-03**: Aggregated insights view — "Across the last N runs, the Coder role on profile X averaged Y tokens / $Z / T minutes; switching to model M would save A%, drop scenario pass rate by B%."
+- **SELF-04**: Spec-to-result LLM-judge quality scoring — layered on top of scenario pass rate (which remains the deterministic oracle); LLM-judge is *advisory only*, never overrides scenario verdict.
+- **SELF-05**: Model bake-off workflow — when a new Anthropic / OpenAI / Google model ships, run canned spec against old vs new; compare cost, latency, scenario pass rate; recommend profile updates. Closes the loop on `OPS-02/03` over time.
+- **SELF-06**: Kiln-builds-Kiln learning artifact — each Kiln self-run produces a "Kiln-on-Kiln learnings" summary that informs the next Kiln spec. (Phase 9 dogfoods once; the *loop* is this v1.5 item.)
+- **SELF-07**: External signal capture — post-merge GitHub Actions outcomes, real-world bug reports filed against produced PRs (`INTAKE-03` is the entry point), runtime telemetry of shipped code when Kiln has access.
+- **FEEDBACK-01**: In-flight async operator nudges — during a run, Kiln periodically surfaces a lightweight "what I'm doing right now" summary (text + screenshot/video/diff/diagram depending on stage) via the operator UI or a notification channel. Operator can leave one-line async feedback that Kiln considers as *soft guidance* on subsequent stages — NOT a blocking approval gate (preserves dark-factory autonomy per `UAT-01/02`). Feedback is persisted as an `audit_events` row of kind `operator_feedback_received`; subsequent runs and model-bake-offs can train on it. Distinct from `INTAKE-03` (post-PR follow-up filing) and from `BLOCK-01..04` (typed unblock). This is *steering*, not *gating*. See `.planning/seeds/SEED-001-operator-feedback-loop.md` for full context, open questions, and design constraints.
+
+## Docs & Release (v1.0+)
+
+Captured in backlog as `999.1-docs-landing-site` (see `ROADMAP.md § Backlog`). Slot decision — new Phase 10 inside v0.1.0 milestone vs v1.1 milestone post-tag — is deferred to late Phase 8 / early Phase 9. Both slots remain defensible; deciding now risks scope-creeping v0.1.0.
+
+- **DOCS-01**: Landing / home page — single-page why-Kiln, 60–90s operator video or live demo embed, "run your first spec in 10 minutes" CTA. Brand-matched per `prompts/kiln-brand-book.md` (Inter + IBM Plex Mono, coal/char/iron/bone/ash/ember palette, borders over shadows, restrained operator voice).
+- **DOCS-02**: Operator onboarding guide — zero-to-first-run walkthrough (`.env`, `docker compose up`, writing your first spec), common footguns and their fixes. Happy-path first, edge cases in collapsible sections. Supersedes/extends `LOCAL-03` (Phase 9 README walkthrough) with guided long-form content.
+- **DOCS-03**: Workflow & spec authoring guide — YAML workflow schema reference, BDD scenario patterns, holdout strategy, budget-cap tuning. Examples > prose.
+- **DOCS-04**: Architecture & internals — four-layer model (intent → workflow → execution → control), supervision tree, audit ledger (three-layer INSERT-only), `external_operations` idempotency table, scenario runner. Mermaid diagrams rendered from markdown in CI, kept in sync with code. Answers "how does Kiln actually work?" for both users and contributors.
+- **DOCS-05**: Configuration reference — every env var, every `.planning/config.json` key, every `kiln.toml` / `workflow.yaml` field. Scannable, searchable, cross-linked from runtime error messages (so operator hitting an error has a one-click path to the docs).
+- **DOCS-06**: CI/CD auto-publish — GitHub Actions workflow publishes site to `gh-pages` branch on every merge to `main`. Broken-link check + spell-check integrated into `mix check`. Automated initial setup via `mix kiln.docs_init` task or short runbook (no manual GitHub settings clicks required beyond enabling Pages).
+- **DOCS-07**: Static site generator choice — decide during Phase 10 discuss. Candidates: Astro Starlight (markdown-first, type-safe), Docusaurus (React, versioning built in), VitePress (fast, Vue), MkDocs Material (Python, mature). Research reference designs — Stripe, Linear, Prisma, Tailwind, Astro, Raycast, Framer, Vercel — for lessons; do NOT clone any one of them (Fabro explicitly off-limits as a copy target, inspiration only).
+
 ## Out of Scope
 
 | Feature | Reason |
