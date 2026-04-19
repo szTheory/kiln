@@ -16,7 +16,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED) — none at creation
 
-- [ ] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline
+- [x] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline — **complete 2026-04-19**
 - [ ] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper
 - [ ] **Phase 3: Agent Adapter, Sandbox, DTU & Safety** - Provider-agnostic LLM adapter, ephemeral Docker sandbox with egress-blocked DTU, secret references, adaptive model routing, typed block reasons, cost budget circuit breaker
 - [ ] **Phase 4: Agent Tree & Shared Memory** - Mayor/worker OTP process tree, specialized agent roles, native beads-equivalent work-unit store with PubSub
@@ -48,7 +48,7 @@ Plans:
 - [x] 01-03-PLAN.md — `audit_events` table + `pg_uuidv7` + `kiln_owner`/`kiln_app` roles + three-layer enforcement (D-12) + `Kiln.Audit` context + JSV payload validation (OBS-03) — **complete 2026-04-19 (ea6b174, aeede36, 00a3782)**
 - [x] 01-04-PLAN.md — `external_operations` intent table + `Kiln.Oban.BaseWorker` with safe defaults + 30-day TTL pruner (D-18, D-44, D-49; P3 idempotency groundwork) — **complete 2026-04-19 (2c3984c, 0f41dc3, c714e0c)**
 - [x] 01-05-PLAN.md — `logger_json` config + `Kiln.Logger.Metadata.with_metadata/2` + `Kiln.Telemetry.{pack_ctx,unpack_ctx,async_stream,pack_meta}` + Oban handler + contrived D-47 multi-process test (OBS-01) — **complete 2026-04-19 (5888aac, 0a5ba87)**
-- [ ] 01-06-PLAN.md — `Kiln.HealthPlug` (mounted pre-`Plug.Logger`) + `Kiln.BootChecks.run!/0` (5 invariants) + `mix kiln.boot_checks` + first_run.sh integration test (LOCAL-01, OBS-03)
+- [x] 01-06-PLAN.md — `Kiln.HealthPlug` (mounted pre-`Plug.Logger`) + `Kiln.BootChecks.run!/0` (4 invariants: contexts_compiled, audit_revoke_active, audit_trigger_active, required_secrets) + KILN_SKIP_BOOTCHECKS=1 escape hatch + `mix kiln.boot_checks` CI-parity task + first_run.sh integration test + supervision-tree assertions (LOCAL-01, OBS-03) — **complete 2026-04-19 (a271a6a, a82d070, 6e88813)**
 - [x] 01-07-PLAN.md — Spec upgrades D-50 (CLAUDE.md) + D-51 (ARCHITECTURE.md §9 rename) + D-52 (STACK.md pg_uuidv7) + D-53 (Elixir/OTP version drift fix) — **complete 2026-04-18 (6f4438e, a2bc420)**
 
 ### Phase 2: Workflow Engine Core
@@ -243,7 +243,7 @@ Phases needing `/gsd-research-phase` before planning:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Durability Floor | 5/7 | In progress | - |
+| 1. Foundation & Durability Floor | 7/7 | Complete | 2026-04-19 |
 | 2. Workflow Engine Core | 0/TBD | Not started | - |
 | 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |

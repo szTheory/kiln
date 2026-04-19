@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 1 Plans 01, 02, 03, 04, 05, 07 complete — only Plan 06 (BootChecks + HealthPlug) remaining
-last_updated: "2026-04-19T13:35:00.000Z"
-last_activity: 2026-04-19 — Phase 1 Plan 04 executed (external_operations single polymorphic intent table per D-14 Brandur Stripe pattern; Kiln.ExternalOperations context with two-phase intent→action→completion machine and D-18 dual-audit-event tx invariant; Kiln.Oban.BaseWorker macro with D-44 safe defaults max_attempts: 3 + insert-time idempotency_key unique; 30-day TTL Pruner registered via Oban.Plugins.Cron keeping 7-child supervision tree invariant; behaviors 10-14 mechanically proven; 59 tests all green; mix check 11-tool gate green; zero deviations)
+stopped_at: Phase 1 COMPLETE (7/7) — durability floor mechanically asserted at every boot. Ready for Phase 2 (Workflow Engine Core).
+last_updated: "2026-04-19T13:56:00.000Z"
+last_activity: 2026-04-19 — Phase 1 Plan 06 executed (Kiln.HealthPlug ~100 LOC with D-31 locked JSON shape mounted pre-Plug.Telemetry in KilnWeb.Endpoint; Kiln.BootChecks.run!/0 with 4 invariants (contexts_compiled, audit_revoke_active, audit_trigger_active, required_secrets) + KILN_SKIP_BOOTCHECKS=1 escape hatch wired into staged Application.start/2 per D-32; mix kiln.boot_checks CI-parity task into .check.exs + dedicated GHA step per D-34; 9 P1 stub context modules pin the 12-context SSOT from P1 per D-42; test/integration/first_run.sh LOCAL-01 smoke test; test/kiln/application_test.exs proves post-boot 7-child invariant; 83 tests 0 failures; mix check 12-tool gate green; 8 auto-fixes — 6 Rule-1 bugs (SAVEPOINT pattern, per-row trigger probe, INSERT missing inserted_at, Dialyzer contract supertypes, Credo ObviousComment, Credo AliasUsage) + 2 Rule-3 blockers (9 missing context modules, NoMixEnvAtRuntime config/*.exs exemption))
 progress:
   total_phases: 9
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 7
-  completed_plans: 6
-  percent: 86
+  completed_plans: 7
+  percent: 100
 ---
 
 # Project State
@@ -25,31 +25,31 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 ## Current Position
 
-Phase: 1 of 9 (Foundation & Durability Floor)
-Plan: 6/7 complete (01-01, 01-02, 01-03, 01-04, 01-05, 01-07) — remaining: 01-06 (BootChecks + HealthPlug)
-Status: In progress
-Last activity: 2026-04-19 — Plan 04 executed (external_operations single polymorphic table per D-14 Brandur Stripe pattern — 16 columns, 5-state CHECK, UNIQUE INDEX on idempotency_key, D-48 role grants with T-03 DELETE-denial; Kiln.ExternalOperations context with fetch_or_record_intent/2, complete_op/2, fail_op/2, abandon_op/2 — each Repo.transaction writes state change + paired audit event atomically per D-18; Kiln.Oban.BaseWorker macro ships max_attempts: 3 + insert-time idempotency_key unique dedupe per D-44; 30-day TTL Pruner registered as Oban.Plugins.Cron entry — supervision tree stays 7 children per D-42; behaviors 10-14 from 01-VALIDATION.md mechanically proven by 15 new tests; 59 tests total all green; mix check 11-tool gate green; zero deviations — plan executed as written)
+Phase: 1 of 9 (Foundation & Durability Floor) — **COMPLETE**
+Plan: 7/7 complete (01-01, 01-02, 01-03, 01-04, 01-05, 01-06, 01-07)
+Status: Phase 1 done — ready to move to Phase 2 (Workflow Engine Core)
+Last activity: 2026-04-19 — Plan 06 executed (Kiln.HealthPlug mounted pre-Plug.Telemetry in Endpoint returns locked D-31 JSON shape {status, postgres, oban, contexts, version}; Kiln.BootChecks.run!/0 with 4 invariants raises Kiln.BootChecks.Error with structured operator message — invoked from staged Application.start/2 between Repo+Oban and Endpoint per D-32; KILN_SKIP_BOOTCHECKS=1 escape hatch per D-33; mix kiln.boot_checks CI-parity task per D-34 wired into .check.exs + dedicated GHA step; 9 P1 stub context modules pin the 12-context SSOT; test/integration/first_run.sh with port-5432-conflict detection; test/kiln/application_test.exs asserts post-boot D-42 7-child invariant. 83 tests 0 failures. mix check 12-tool gate green. BootChecks.run!/0 wall time: ~12ms. 8 auto-fixes — see 01-06-SUMMARY.md.)
 
-Progress: [████████░░] 86%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: ~20 min
-- Total execution time: ~123 min
+- Total execution time: ~140 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1     | 6/7   | ~123m | ~20m     |
+| 1     | 7/7   | ~140m | ~20m     |
 
 **Recent Trend:**
 
-- Last 6 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs + 1 Rule-3 environment blocker fix), 01-05 (~15m, feat+test — 7 auto-fixes), 01-04 (~20m, feat — ZERO deviations; plan executed exactly as written; prior-attempt uncommitted migration files kept as-is after cross-check against plan spec)
-- Trend: Plan 04 was the cleanest execution so far. Key take: when a plan text is precise enough (LOCKED interfaces block + explicit `action` blocks quoting full source), deviations collapse to zero. The prior-attempt residue (2 uncommitted migration files) was usable without modification, saving ~10 tool calls of rewrite.
+- Last 7 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs + 1 Rule-3 environment blocker fix), 01-05 (~15m, feat+test — 7 auto-fixes), 01-04 (~20m, feat — ZERO deviations), 01-06 (~17m, feat — 8 auto-fixes; SAVEPOINT-probe pattern took two iterations; 9 stub context modules shipped to pin 12-context SSOT)
+- Trend: Phase 1 closed cleanly at exactly 7/7. Plan 06's closing-brace role (BootChecks verifying what all prior plans shipped) surfaced two non-trivial Postgres-interaction patterns: (a) SAVEPOINT + ROLLBACK TO SAVEPOINT for probe transactions that must survive deliberately-failing statements, (b) BEFORE-UPDATE triggers are per-row and need a real target row (not `WHERE FALSE`). Both captured as "patterns-established" in 01-06-SUMMARY.md for Phase 2+ to reuse.
 
 *Updated after each plan completion.*
 
@@ -108,6 +108,17 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - `fetch_or_record_intent/2` uses Brandur's `INSERT ... ON CONFLICT DO NOTHING` + `SELECT FOR UPDATE` fallback. When conflict hits, Ecto returns `%Operation{id: nil}` because no RETURNING row; the fallback `SELECT` observes the winner deterministically. Operation PK uses `read_after_writes: true` so first-winner path hydrates `id` automatically.
 - BaseWorker test uses `Worker.__opts__/0` introspection (documented `@callback __opts__` at `deps/oban/lib/oban/worker.ex:464`) for max_attempts/unique assertions. Rejected brittle alternatives like changeset-data inspection or perform-job-observes-opts.
 
+### Plan 01-06 decisions
+
+- **Audit-mutation probe uses SAVEPOINT + ROLLBACK TO SAVEPOINT**, not a naive try/rescue inside Repo.transaction. The initial design failed: a deliberately-failing UPDATE puts Postgres in ABORT state (SQLSTATE 25P02), so the next COMMIT returns `{:error, :rollback}` and the probe misreports as a connectivity failure. SAVEPOINT restores a runnable state after the catch; `Repo.rollback(outcome)` cleanly unwinds the outer txn. Works identically in sandboxed tests and fresh boot connections.
+- **BEFORE UPDATE triggers are per-row** — `UPDATE audit_events WHERE FALSE` matches zero rows, so the trigger never fires and `:audit_trigger_active` would falsely report "invariant violated" on every healthy boot. Fix: INSERT a throwaway `stage_started` row inside the probe's SAVEPOINT first, then UPDATE it. Outer `Repo.rollback` ensures the INSERT never lands.
+- **9 P1 stub context modules** (Specs, Intents, Workflows, Runs, Stages, Agents, Sandboxes, GitHub, Policies) shipped empty (@moduledoc-only) rather than deferred to owning phases. Pins the 12-context naming SSOT at P1 per D-42 so Phase 2+ can't silently drift. Each stub's docstring names the phase it activates in.
+- **Staged Application.start/2** uses `Supervisor.start_link` with 6 infra children → `Kiln.BootChecks.run!/0` → `ObanHandler.attach/0` → `Supervisor.start_child(..., KilnWeb.Endpoint.child_spec([]))`. Post-boot `Supervisor.which_children/1` returns EXACTLY 7 entries. A panic during BootChecks leaves a 6-child tree (still healthy, Repo+Oban both running) rather than a partial 7-child tree. Asserted by test/kiln/application_test.exs.
+- **`Kiln.Credo.NoMixEnvAtRuntime` exempts `config/*.exs`** via `Path.split/1` + `"config" in segments`. Same compile-time exemption class as `mix.exs`. Enables `config :kiln, :env, Mix.env()` in config/config.exs so BootChecks can dispatch secrets checks on :dev vs :prod without re-reading Mix.env at runtime (CLAUDE.md anti-pattern).
+- **Dialyzer tight types shipped for BootChecks + HealthPlug** — `@type context_module` as a union of the 12 specific modules eliminates the `contract_supertype` warning on `context_modules/0`; `@type health_payload :: %{required(String.t()) => String.t() | non_neg_integer()}` pins the D-31 JSON shape so a future drift (e.g., adding a bool key) surfaces as a Dialyzer mismatch, not a silent contract break.
+- **`KILN_SKIP_BOOTCHECKS=1` is the SOLE escape hatch** per D-33. No verbose mode, no per-invariant skip flags. The log line is grep-friendly (`grep KILN_SKIP_BOOTCHECKS /var/log/kiln.log` surfaces every bypass). A richer API would encourage normalising the bypass.
+- **first_run.sh probes host port 5432 before `docker compose up`** via `lsof` + `docker ps`. Pre-existing `sigra-uat-postgres` container on this dev host is detected and the script fails fast with two remediation options. Operator action unblocks in seconds rather than debugging a cryptic bind error deep in compose.
+
 ### Plan 01-03 decisions
 
 - D-12 Layer 3 RULE shipped **DISABLED** by default (Rule 1 deviation from plan spec). Postgres query rewriting runs BEFORE triggers fire — an active `DO INSTEAD NOTHING` RULE masks Layer 2's trigger. Disabled RULE keeps Layer 2 the loud error path; AUD-03 test enables the RULE explicitly to verify it works.
@@ -138,6 +149,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-19
-Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), 01-05 (5888aac, 0a5ba87), and 01-04 (2c3984c, 0f41dc3, c714e0c) complete; only remaining Phase 1 work: Plan 06 (BootChecks + HealthPlug)
-Resume file: .planning/phases/01-foundation-durability-floor/01-06-PLAN.md
-Next command: /gsd-execute-phase 1 (continues with 01-06)
+Stopped at: Phase 1 COMPLETE (7/7). All plans: 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), 01-05 (5888aac, 0a5ba87), 01-04 (2c3984c, 0f41dc3, c714e0c), 01-06 (a271a6a, a82d070, 6e88813). Durability floor mechanically asserted at every boot (4 BootChecks invariants + pre-Plug.Logger HealthPlug + mix kiln.boot_checks CI parity + first_run.sh LOCAL-01 smoke). 83 tests 0 failures. mix check 12-tool gate green.
+Resume file: (none — Phase 1 done)
+Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
