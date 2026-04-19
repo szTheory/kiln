@@ -2,7 +2,7 @@
 
 **Domain:** Elixir/Phoenix LiveView dark software factory (multi-agent LLM orchestrator)
 **Researched:** 2026-04-18
-**Confidence:** HIGH (stack decisions are locked; patterns validated against current Elixir 1.18/OTP 27/Phoenix 1.8/LiveView 1.1/Oban 2.21 docs and idiomatic guidance)
+**Confidence:** HIGH (stack decisions are locked; patterns validated against current Elixir 1.19.5/OTP 28.1+/Phoenix 1.8.5/LiveView 1.1.28/Oban 2.21 docs and idiomatic guidance)
 
 ---
 
@@ -972,7 +972,7 @@ None of the data model above precludes this; it's additive.
 ```
 kiln/
 ├── .formatter.exs
-├── .tool-versions              # asdf: Elixir 1.18, OTP 27
+├── .tool-versions              # asdf: Elixir 1.19.5-otp-28, Erlang 28.1.2
 ├── .gitignore
 ├── .github/
 │   └── workflows/

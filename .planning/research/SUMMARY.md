@@ -17,7 +17,7 @@ The **dominant risk** is unbounded autonomy. Every public postmortem in the cate
 
 ### Recommended Stack
 
-Elixir 1.19.5 / OTP 28.1+ on Phoenix 1.8 is the current stable baseline as of April 2026 — PROJECT.md currently pins Elixir 1.18+/OTP 27+, which is one major behind from day one. **Flag this for user acceptance during the roadmap phase.** The four load-bearing picks beyond the locked core are: **Oban OSS** for transactionally-inserted durable jobs (the insert-in-same-tx-as-checkpoint guarantee is *the* correctness lever for Kiln's stage pattern); **Req over raw Finch** so the HTTP-adapter step pipeline is reusable across the four LLM providers; **JSV (not ex_json_schema)** for Draft 2020-12 workflow validation; **yaml_elixir (not fast_yaml)** to avoid a C build dep at workflow-file scale. LLM SDK strategy is behaviour-first: `Kiln.Agents.Adapter` with Anthropix for Anthropic and ~200 LOC per provider rolling own on Req for OpenAI / Google / Ollama — LLM APIs drift monthly and community SDKs lag.
+Elixir 1.19.5 / OTP 28.1+ on Phoenix 1.8 is the current stable baseline as of April 2026 — PROJECT.md pins `Elixir 1.19.5+/OTP 28.1+`, matching this research baseline (locked via Phase 1 Plan 07, D-53). The four load-bearing picks beyond the locked core are: **Oban OSS** for transactionally-inserted durable jobs (the insert-in-same-tx-as-checkpoint guarantee is *the* correctness lever for Kiln's stage pattern); **Req over raw Finch** so the HTTP-adapter step pipeline is reusable across the four LLM providers; **JSV (not ex_json_schema)** for Draft 2020-12 workflow validation; **yaml_elixir (not fast_yaml)** to avoid a C build dep at workflow-file scale. LLM SDK strategy is behaviour-first: `Kiln.Agents.Adapter` with Anthropix for Anthropic and ~200 LOC per provider rolling own on Req for OpenAI / Google / Ollama — LLM APIs drift monthly and community SDKs lag.
 
 **Decisions locked by research:**
 - Single Phoenix app, **not** umbrella
@@ -197,7 +197,7 @@ Research gaps still open for the planning phase (not roadmap-blocking; each is a
 - **Dialyzer enable/disable gate** — deep-research doc is ambivalent; recommendation is enable with cached PLT, non-gating on early merges; early call needed.
 - **Workflow YAML signing scheme** — should workflow files be signed? Mini-ADR during Phase 2.
 - **Parallel runs in v1 vs v1.1** — PROJECT.md currently implies sequential v1; operator UX decision pending.
-- **Constraint update** — PROJECT.md Constraints pins Elixir 1.18+/OTP 27+; STACK research shows 1.19.5/OTP 28.1+ is the current stable baseline. **Flag for user acceptance during roadmap phase.**
+- **Constraint update** — Resolved. `PROJECT.md` Constraints block now reads `Elixir 1.19.5+/OTP 28.1+`, matching STACK research and the Phase 1 Plan 07 alignment (D-53).
 
 ## Sources
 

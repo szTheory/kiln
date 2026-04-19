@@ -11,7 +11,7 @@
 
 Build Kiln on **Elixir 1.19.5 + OTP 28 + Phoenix 1.8.5 + LiveView 1.1.28 + Ecto 3.13.5 + Postgrex 0.22.0 + Oban 2.21.1 + Bandit 1.10.4 + Req 0.5.17**, with **Anthropix 0.6.2** as the Anthropic client behind a **`Kiln.Agents.Adapter` behaviour** that also admits OpenAI, Google, and Ollama adapters. Parse workflows with **yaml_elixir 2.12.1** + validate with **JSV 0.18.1**. Observe with **opentelemetry 1.6 + opentelemetry_api 1.4 + opentelemetry_exporter 1.8** plus the phoenix/ecto/oban instrumentation packages; log structured JSON via **logger_json 7.0.4**. Sandbox stages using `System.cmd("docker", ...)` + **docker_engine_api 1.43** for introspection, and reuse **testcontainers 1.13** in integration tests. Static analysis: **Credo 1.7.16 + Dialyxir 1.4 + mix xref** (built-in). Security: **mix_audit + sobelow** via **ex_check 0.16**. CI: **erlef/setup-beam@v1.23.0** on GitHub Actions.
 
-This is a step forward from the `PROJECT.md` constraint line ("Elixir 1.18+/OTP 27+"). As of April 2026 the actively maintained stable is 1.19.5/OTP 28 and Phoenix generators assume that baseline; pinning 1.18/OTP 27 would freeze Kiln one major behind from day one. See "Stale items in existing `/prompts/` docs" below.
+This is validated against current Elixir 1.19.5/OTP 28.1+/Phoenix 1.8.5/LiveView 1.1.28/Oban 2.21 docs. As of April 2026 the actively maintained stable is 1.19.5/OTP 28.1+ and Phoenix generators assume that baseline; the stack is pinned to that baseline across `.tool-versions` and `mix.exs`. See "Stale items in existing `/prompts/` docs" below.
 
 ---
 
@@ -30,6 +30,11 @@ This is a step forward from the `PROJECT.md` constraint line ("Elixir 1.18+/OTP 
 | ecto_sql | **3.13.5** | SQL adapter + migrations | Matches Ecto. Migrations support partial indexes, check constraints, `migration_lock`. **HIGH** |
 | Postgrex | **0.22.0** (2026-01-10) | PostgreSQL driver | Current stable; supports Postgres 16/17 wire protocol, replication connections (potentially useful for audit-ledger streaming later). **HIGH** |
 | PostgreSQL | **16.x** (17.x fine if available) | Durable source of truth | `citext`, partial unique indexes, `nulls_distinct: false` (15+), advisory locks for migration coordination, strong JSON/JSONB for event payloads. **HIGH** |
+
+**Postgres extensions:**
+
+- **`pg_uuidv7`** (<https://github.com/fboulnois/pg_uuidv7>, version 1.7.0 as of 2025-10) — Postgres 16-compatible extension exposing `uuid_generate_v7()` for time-sortable, b-tree-locality-preserving primary keys. Used by `audit_events` and `external_operations`. Kiln's compose.yaml pins `ghcr.io/fboulnois/pg_uuidv7:1.7.0` which ships the extension pre-built; migrations run `CREATE EXTENSION IF NOT EXISTS pg_uuidv7`. **Migration note:** when the project moves to Postgres 18, drop this extension in favor of the native `uuidv7()` function. Fallback: `kjmph` pure-SQL implementation (see CONTEXT.md D-06 canonical_refs) if the extension cannot be installed on some exotic Postgres host.
+
 | Bandit | **1.10.4** | HTTP/1.1, HTTP/2, WebSocket server | Default Phoenix server since 1.7.11; pure Elixir; up to 4x faster than Cowboy on HTTP/1; 100% h2spec + Autobahn compliance. Required by `opentelemetry_phoenix` adapter config. **HIGH** |
 | Plug | **1.19.x** | HTTP plumbing | Kiln needs `Plug.RequestId`, `Plug.Telemetry`, `Plug.SSL` for structured log correlation and edge hygiene. **HIGH** |
 
@@ -274,6 +279,8 @@ volumes:
   kiln_pgdata:
 ```
 
+> Kiln's `compose.yaml` uses `ghcr.io/fboulnois/pg_uuidv7:1.7.0` (PG 16 + pg_uuidv7 extension pre-installed) instead of `postgres:16-alpine` — see CONTEXT.md D-52.
+
 **Notes:**
 - Postgres 16-alpine is fine for dev. Phoenix docs recommend Debian/Ubuntu bases for *production* releases to avoid Alpine DNS issues — that applies to Kiln's own runtime image, not Postgres.
 - Kiln runs on the host (asdf Elixir) in dev, not in a container. Faster reload, easier `iex -S mix phx.server`.
@@ -446,7 +453,7 @@ end
 | Avoid | Why | Use Instead |
 |---|---|---|
 | **Cowboy (plug_cowboy)** as production Phoenix server | Phoenix 1.7.11+ ships Bandit by default; Cowboy is in maintenance. Bandit is faster and passes h2spec/Autobahn 100%. | Bandit 1.10+ |
-| **Poison** JSON library | Replaced by built-in `JSON` module (OTP 27+ / Elixir 1.18+) and by `Jason` for anything the stdlib does not cover. | Elixir 1.19's `JSON` stdlib module (already used by Phoenix 1.8 generators) |
+| **Poison** JSON library | Replaced by the stdlib `JSON` module (available on the current Elixir 1.19.5/OTP 28.1+ baseline) and by `Jason` for anything the stdlib does not cover. | Elixir 1.19's `JSON` stdlib module (already used by Phoenix 1.8 generators) |
 | **HTTPoison** | Legacy hackney-based client. Blocks scheduler on CPU-heavy TLS; weaker connection reuse than Finch. | Req |
 | **ex_json_schema** (jonasschmidt/ex_json_schema) | Draft 4 only; dormant. | JSV 0.18 |
 | **fast_yaml** | C NIF build-time dependency for no meaningful runtime win at Kiln scale. | yaml_elixir |
@@ -464,7 +471,7 @@ end
 
 | Package | Compatible with | Notes |
 |---|---|---|
-| Elixir 1.19.5 | OTP 28.1+ | Required. OTP 27 also works but deprecates 1.19 features. |
+| Elixir 1.19.5 | OTP 28.1+ | Required. Kiln pins OTP 28.1+ to keep the type-checker and `mix xref` improvements that Elixir 1.19 depends on. |
 | Phoenix 1.8.5 | Elixir 1.14+ | Generators assume Bandit + LiveView 1.1. |
 | LiveView 1.1.28 | Phoenix 1.7+ | LazyHTML test matcher replaces Floki. Do not mix Floki selectors in new tests. |
 | Ecto 3.13.5 | Elixir 1.14+ | `Repo.transact/2` replaces deprecated `Repo.transaction/2` — use the new name. |
@@ -479,7 +486,7 @@ end
 
 Read this list as *minor* corrections to otherwise excellent docs — the architectural guidance in those files is sound and should still be followed.
 
-1. **`elixir-plug-ecto-phoenix-system-design-best-practices-deep-research.md`** correctly notes Elixir 1.19.x is current on OTP 28.x. **The `PROJECT.md` Constraints block ("Elixir 1.18+/OTP 27+") is one version behind.** Recommendation: update the constraint to "Elixir 1.19+/OTP 28+".
+1. **`elixir-plug-ecto-phoenix-system-design-best-practices-deep-research.md`** correctly notes Elixir 1.19.x is current on OTP 28.x. **Resolved:** `PROJECT.md` Constraints block now reads `Elixir 1.19.5+/OTP 28.1+`, matching this research baseline (see Phase 1 Plan 07, D-53).
 2. **`elixir-best-practices-deep-research.md`** is explicitly ambivalent about Dialyzer. For Kiln I recommend enabling it anyway — the LLM adapter behaviour + Ecto context boundaries are exactly where `@spec`s pay. Treat this as an opinion difference, not a correction.
 3. **`elixir-search-lib-deep-research.md`** targets a hypothetical search-library project (Typesense/Meilisearch) — irrelevant to Kiln's v1. Keep in `prompts/` as reference context but do not wire search into Kiln.
 4. **`phoenix-best-practices-deep-research.md`** mentions Phoenix 1.7/1.8 interchangeably in places; new Kiln code should target 1.8 conventions explicitly (`~p`, scopes, `<.form>` with `to_form/1`, function components over LiveComponents).
