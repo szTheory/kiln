@@ -177,4 +177,12 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after initialization*
+## Current State (as of 2026-04-19)
+
+- **Phase 1 complete** — Foundation & Durability Floor shipped. All 7 plans verified, 83 tests green, `mix check` 12-tool gate green. Mechanical proofs in place: append-only `audit_events` table with three-layer enforcement (REVOKE + trigger + RULE), `external_operations` two-phase intent machine, `logger_json` + six-key metadata threading across Task.async_stream + Oban boundaries, `Kiln.BootChecks.run!/0` asserting invariants at every Application start, 7-child supervision tree, `/health` endpoint.
+- **Validated requirements:** LOCAL-01, LOCAL-02, OBS-01, OBS-03.
+- **Known operator action:** Host port 5432 conflict with `sigra-uat-postgres` blocks `docker compose up -d db` on primary dev host — pre-existing condition, pg_uuidv7 migration ships with kjmph pure-SQL fallback so tests run against any Postgres 16.
+- **New seeds planted:** SEED-002 (remote operator control plane), SEED-003 (onboarding template library), SEED-004 (GitHub credential management) — dormant until their trigger conditions fire.
+
+---
+*Last updated: 2026-04-19 after Phase 1 completion*
