@@ -1,7 +1,8 @@
 defmodule KilnWeb.Layouts do
   @moduledoc """
-  This module holds layouts and related functionality
-  used by your application.
+  HEEx layouts (root + inner) + shared layout components (`app`,
+  `flash_group`, `theme_toggle`) embedded from `layouts/*.html.heex`
+  and rendered from every Phoenix view.
   """
   use KilnWeb, :html
 

@@ -13,9 +13,7 @@ defmodule Mix.Tasks.CheckNoManualQaGates do
 
   @impl Mix.Task
   def run(_args) do
-    Mix.shell().info(
-      "check_no_manual_qa_gates: stub — full enforcement in Phase 5 (UAT-01)"
-    )
+    Mix.shell().info("check_no_manual_qa_gates: stub — full enforcement in Phase 5 (UAT-01)")
 
     :ok
   end

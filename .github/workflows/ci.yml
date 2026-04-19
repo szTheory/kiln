@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: mix check
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: kiln_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MIX_ENV: test
+      # All env reads happen in config/runtime.exs per T-02; CI mirrors
+      # the local dev contract rather than introducing a second path.
+      DATABASE_URL: ecto://postgres:postgres@localhost:5432/kiln_test
+      SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      PHX_HOST: localhost
+      PORT: "4000"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+        uses: erlef/setup-beam@v1.23.0
+        with:
+          elixir-version: "1.19.5-otp-28"
+          otp-version: "28.1.2"
+
+      - name: Cache deps + _build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+
+      - name: Cache Dialyzer PLT (D-27 — key matches mix.lock hash)
+        uses: actions/cache@v4
+        with:
+          path: priv/plts
+          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-
+
+      - name: Install deps
+        run: mix deps.get
+
+      - name: Compile (warnings as errors — separate step so cache-miss compile surfaces clearly)
+        run: mix compile --warnings-as-errors --all-warnings
+
+      - name: Build Dialyzer PLT (no-op if cache hit)
+        run: |
+          mkdir -p priv/plts
+          mix dialyzer --plt
+
+      - name: Run mix check (full CI gate — format, compile, test, credo, dialyzer, sobelow, mix_audit, xref cycles, grep gates)
+        run: mix check

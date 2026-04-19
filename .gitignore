@@ -39,3 +39,6 @@ tmp/
 # Kiln local
 priv/artifacts/*
 !priv/artifacts/.gitkeep
+
+# Dialyzer PLTs (D-27) — rebuilt on CI via cache-keyed restore; never committed.
+/priv/plts/

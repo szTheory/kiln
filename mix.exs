@@ -11,7 +11,26 @@ defmodule Kiln.MixProject do
       aliases: aliases(),
       deps: deps(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
-      listeners: [Phoenix.CodeReloader]
+      listeners: [Phoenix.CodeReloader],
+      # Dialyzer (D-27) — PLT cached at priv/plts; cache key in
+      # .github/workflows/ci.yml is keyed on ${OS}-${OTP}-${ELIXIR}-${hashFiles('mix.lock')}.
+      dialyzer: [
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
+        plt_core_path: "priv/plts",
+        # :credo is required because lib/kiln/credo/* modules use the
+        # `Credo.Check` behaviour. `runtime: false` in mix.exs means it is
+        # not loaded at app boot, but Dialyzer still needs the specs.
+        plt_add_apps: [
+          :ex_unit,
+          :mix,
+          :oban,
+          :phoenix_live_dashboard,
+          :oban_web,
+          :credo
+        ],
+        ignore_warnings: ".dialyzer_ignore.exs",
+        flags: [:error_handling, :extra_return, :missing_return, :underspecs]
+      ]
     ]
   end
 

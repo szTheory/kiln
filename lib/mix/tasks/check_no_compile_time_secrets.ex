@@ -28,13 +28,11 @@ defmodule Mix.Tasks.CheckNoCompileTimeSecrets do
 
       list ->
         detail =
-          list
-          |> Enum.map(fn {file, line_no, line} -> "  #{file}:#{line_no}  #{line}" end)
-          |> Enum.join("\n")
+          Enum.map_join(list, "\n", fn {file, line_no, line} ->
+            "  #{file}:#{line_no}  #{line}"
+          end)
 
-        Mix.raise(
-          "Compile-time secret read detected (move to config/runtime.exs):\n" <> detail
-        )
+        Mix.raise("Compile-time secret read detected (move to config/runtime.exs):\n" <> detail)
     end
   end
 
