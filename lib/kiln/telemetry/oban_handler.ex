@@ -48,7 +48,12 @@ defmodule Kiln.Telemetry.ObanHandler do
   end
 
   @doc false
-  def handle_event([:oban, :job, :start], _measurements, %{job: %{meta: %{"kiln_ctx" => ctx}}}, _config)
+  def handle_event(
+        [:oban, :job, :start],
+        _measurements,
+        %{job: %{meta: %{"kiln_ctx" => ctx}}},
+        _config
+      )
       when is_map(ctx) do
     Telemetry.unpack_ctx(ctx)
   end

@@ -24,6 +24,12 @@ config :kiln, KilnWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warning
 
+# Oban in manual testing mode (D-47 metadata-threading test calls
+# `Oban.drain_queue/1` explicitly — :inline mode can bypass the
+# `[:oban, :job, :start]` telemetry handler in some Oban 2.21 paths,
+# and manual drain is deterministic).
+config :kiln, Oban, testing: :manual
+
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 

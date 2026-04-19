@@ -2,6 +2,8 @@ defmodule Kiln.Application do
   @moduledoc false
   use Application
 
+  alias Kiln.Telemetry.ObanHandler
+
   # D-42 locks the children list to EXACTLY 7 — no DNSCluster, no stub
   # Phase 2+ children. Plan 06 will re-topologise into a staged start
   # (infra_children → BootChecks.run! → Endpoint); this wave-3 version is
@@ -27,7 +29,7 @@ defmodule Kiln.Application do
         # here rather than adding an 8th supervisor child (D-42 7-child
         # invariant). Idempotent: returns `{:error, :already_exists}` on
         # re-attach (tolerated so code-reload / iex restarts don't crash).
-        _ = Kiln.Telemetry.ObanHandler.attach()
+        _ = ObanHandler.attach()
         {:ok, pid}
 
       other ->
@@ -43,7 +45,7 @@ defmodule Kiln.Application do
 
   @impl true
   def stop(_state) do
-    _ = Kiln.Telemetry.ObanHandler.detach()
+    _ = ObanHandler.detach()
     :ok
   end
 end

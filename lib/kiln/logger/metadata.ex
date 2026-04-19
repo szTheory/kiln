@@ -26,7 +26,10 @@ defmodule Kiln.Logger.Metadata do
   Returns the six D-46 mandatory metadata keys. Exposed so callers can
   iterate without duplicating the list.
   """
-  @spec mandatory_keys() :: [atom()]
+  @spec mandatory_keys() :: [
+          :actor | :actor_role | :causation_id | :correlation_id | :run_id | :stage_id,
+          ...
+        ]
   def mandatory_keys, do: @mandatory_keys
 
   @doc """
