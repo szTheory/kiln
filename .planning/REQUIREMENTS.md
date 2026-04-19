@@ -72,6 +72,38 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 - [ ] **LOCAL-02**: `.tool-versions` pins Elixir 1.19.5 / Erlang 28.1+ for `asdf`; Phoenix 1.8.5 + LiveView 1.1.28 pinned in `mix.exs`
 - [ ] **LOCAL-03**: README with zero-to-first-run walkthrough, validated against a fresh clone during Phase 8
 
+### Automation & Zero-Human Verification
+
+- [ ] **UAT-01**: All scenarios (including SPEC-04 holdouts) are executable in the sandbox by the deterministic scenario runner; `mix check` + GitHub Actions CI runs them automatically. Zero manual QA steps for code paths — the scenario runner's exit code is the acceptance oracle.
+- [ ] **UAT-02**: Human intervention is reserved for a short, explicit, typed list: credential/secret provisioning, first-time external integration auth, budget approvals above configured cap, and hard escalations (ORCH-06). Nothing else is allowed to require a human; anything else that blocks automatically escalates as a bug against Kiln itself.
+
+### Unblock Flow (when human IS required)
+
+- [ ] **BLOCK-01**: Typed block reasons — `:missing_api_key`, `:invalid_api_key`, `:rate_limit_exhausted`, `:quota_exceeded`, `:gh_auth_expired`, `:gh_permissions_insufficient`, `:budget_exceeded`, `:unrecoverable_stage_failure`, `:policy_violation`. Each reason maps to a remediation playbook.
+- [ ] **BLOCK-02**: Unblock panel — when a run blocks, LiveView surfaces a clear panel with: what happened (typed reason), what to do (exact commands / config changes), "I fixed it — retry" action that resumes from last checkpoint. Panels are scannable at a glance.
+- [ ] **BLOCK-03**: Desktop notification (macOS/Linux via `osascript`/`notify-send` shell-out, configurable) when a run enters blocked/escalated state; optional email/webhook integration for remote operators (v1.1+).
+- [ ] **BLOCK-04**: First-run onboarding wizard — on empty-state (`docker compose up` fresh clone), the UI walks the operator through provisioning API keys (Anthropic required, others optional), GitHub App install, sandbox prerequisites check. No run can start until the wizard passes.
+
+### Intake (how work enters the factory)
+
+- [ ] **INTAKE-01**: New-spec entry points: (a) freeform text in the LiveView spec editor, (b) import markdown file, (c) convert a GitHub issue (by URL or `owner/repo#N`) into a spec draft — title+body+labels populate; operator edits and commits.
+- [ ] **INTAKE-02**: Inbox view — list of spec drafts not yet promoted to runs; operator can triage (promote, archive, edit). `INTAKE-01(c)` issues land here by default.
+- [ ] **INTAKE-03**: Feedback loop — when a produced PR is merged and real-world usage reveals a bug or missing capability, a "File as follow-up" button on the run detail view creates a new spec draft in the inbox pre-populated with the run's artifacts as context.
+
+### Operations & SRE (self-healing where possible, hands-off where not)
+
+- [ ] **OPS-01**: Provider health panel — per-LLM-provider status card showing: API key present/valid, last successful call timestamp, rate-limit headroom (from provider response headers), recent error rate, token budget remaining today. Red-amber-green indicators. No digging through logs to answer "why did my run stall?"
+- [ ] **OPS-02**: Adaptive model routing — on HTTP 429 (rate limit) or 5xx (provider outage), `Kiln.ModelRegistry` automatically falls back to the workflow-configured alternate model/provider for the same role; both `requested_model` and `actual_model_used` recorded on the stage; operator notified if fallback crosses a tier (e.g., Opus→Sonnet acceptable, Sonnet→Haiku warns).
+- [ ] **OPS-03**: Opinionated model-profile presets — Kiln ships with profiles keyed to software type: `elixir_lib` / `phoenix_saas_feature` / `typescript_web_feature` / `python_cli` / `bugfix_critical` / `docs_update`. Each preset maps `{role → model}` pairs. Operator selects a profile when starting a run; workflow YAML can override per-stage. Presets documented, not magic.
+- [ ] **OPS-04**: Cost intelligence — per-run / per-workflow / per-agent / per-provider spend broken down; daily/weekly/monthly views; "you're spending $X/week on Opus for the Coder role; `phoenix_saas_feature_budget` profile would cost $Y with these tradeoffs" advisory.
+- [ ] **OPS-05**: Diagnostic snapshot — one-click "bundle last 60 minutes of runs + config + logs" into a sharable zip for support/debugging (secrets redacted).
+
+### Progress Visibility
+
+- [ ] **UI-07**: Global factory header — visible on every page: active runs count, blocked runs count (with color/badge), spend today, provider-health summary lights. One-click to the relevant detail.
+- [ ] **UI-08**: Per-run progress indicator — percent-complete (stages done / total), elapsed time, estimated remaining (from historical stage-duration percentiles when the workflow has prior runs), "last activity" timestamp with staleness color ramp (green <30s, amber <5min, red ≥5min). Surfaces on run board cards and run detail header.
+- [ ] **UI-09**: Agent activity ticker — live-updating rolling log of agent events across all active runs ("Coder completed `lib/foo.ex` — 430 tokens, $0.013", "Verifier running 12 scenarios"); makes it unmistakable that the factory IS doing something.
+
 ## v2 Requirements
 
 Deferred to a future milestone. Tracked here so they don't become ambiguous later.
@@ -127,6 +159,9 @@ Deferred to a future milestone. Tracked here so they don't become ambiguous late
 | `fast_yaml` | C-NIF build footgun at Kiln scale; using `yaml_elixir` instead |
 | Full event sourcing on all domains | Operational cost not justified for v1; append-only audit ledger + current-state tables instead |
 | Oban Pro / Oban Web paid | Oban Web became OSS in v2.12.2 (Apache-2.0); zero reason to pay |
+| Manual QA step for generated code | UAT-01 / UAT-02: the scenario runner is the acceptance oracle; any manual QA is a bug against Kiln |
+| Human-in-the-loop "mid-run steering" / chat-with-the-agent | BLOCK-* contract: humans unblock only via typed block reasons, never via freeform chat mid-run |
+| Freeform chat as the primary unblock mechanism | Remediation playbooks are structured, not conversational — preserves determinism and audit clarity |
 
 ## Traceability
 
@@ -172,11 +207,28 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | LOCAL-01 | TBD | Pending |
 | LOCAL-02 | TBD | Pending |
 | LOCAL-03 | TBD | Pending |
+| UAT-01 | TBD | Pending |
+| UAT-02 | TBD | Pending |
+| BLOCK-01 | TBD | Pending |
+| BLOCK-02 | TBD | Pending |
+| BLOCK-03 | TBD | Pending |
+| BLOCK-04 | TBD | Pending |
+| INTAKE-01 | TBD | Pending |
+| INTAKE-02 | TBD | Pending |
+| INTAKE-03 | TBD | Pending |
+| OPS-01 | TBD | Pending |
+| OPS-02 | TBD | Pending |
+| OPS-03 | TBD | Pending |
+| OPS-04 | TBD | Pending |
+| OPS-05 | TBD | Pending |
+| UI-07 | TBD | Pending |
+| UI-08 | TBD | Pending |
+| UI-09 | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 38 total
+- v1 requirements: 54 total
 - Mapped to phases: 0 (roadmapper will populate)
-- Unmapped: 38 (expected at this stage)
+- Unmapped: 54 (expected at this stage)
 
 ---
 *Requirements defined: 2026-04-18*

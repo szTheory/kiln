@@ -74,6 +74,33 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [ ] **LOCAL-02** `.tool-versions` pins Elixir/Erlang for `asdf`
 - [ ] **LOCAL-03** README with zero-to-first-run walkthrough
 
+**Automation & zero-human verification**
+- [ ] **UAT-01** Scenario runner is the sole acceptance oracle; all UAT/integration/E2E runs in CI, zero manual QA steps
+- [ ] **UAT-02** Human intervention reserved for typed short list only (credentials, first-time auth, budget approvals, hard escalations); anything else auto-blocking = Kiln bug
+
+**Unblock flow (when human IS required)**
+- [ ] **BLOCK-01** Typed block reasons (`:missing_api_key`, `:rate_limit_exhausted`, etc.) with remediation playbooks
+- [ ] **BLOCK-02** Unblock panel with clear what-happened/what-to-do/retry action
+- [ ] **BLOCK-03** Desktop notification on block/escalation
+- [ ] **BLOCK-04** First-run onboarding wizard gates run start on API keys + GitHub auth + Docker prerequisites
+
+**Intake**
+- [ ] **INTAKE-01** Spec drafts from freeform text, markdown file, or GitHub issue conversion
+- [ ] **INTAKE-02** Inbox view for triage (promote/archive/edit)
+- [ ] **INTAKE-03** "File as follow-up" from a shipped run to generate a new spec draft with context
+
+**Operations & SRE**
+- [ ] **OPS-01** Provider health panel (API key status, rate-limit headroom, token budget) with RAG indicators
+- [ ] **OPS-02** Adaptive model routing with automatic fallback on 429/5xx; `actual_model_used` recorded
+- [ ] **OPS-03** Opinionated model-profile presets per software type (`elixir_lib`, `phoenix_saas_feature`, etc.); switchable
+- [ ] **OPS-04** Cost intelligence — spend breakdown + switching advisories
+- [ ] **OPS-05** Diagnostic snapshot bundle (secrets redacted)
+
+**Progress visibility**
+- [ ] **UI-07** Global factory header (active / blocked / spend / provider-health)
+- [ ] **UI-08** Per-run progress indicator with estimated remaining + staleness color ramp
+- [ ] **UI-09** Agent activity ticker (live-updating rolling event feed across all runs)
+
 ### Out of Scope
 
 <!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
@@ -87,6 +114,8 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - **SSO / OIDC / enterprise auth** — solo use, no login needed in v1
 - **Workflow marketplace or sharing** — single-user, single-workspace
 - **Mobile app / mobile UI** — desktop-first operator dashboard
+- **Manual QA on generated code** — scenario runner is the acceptance oracle; any manual QA is a Kiln bug
+- **Freeform chat as the primary unblock mechanism** — unblocks are typed + playbook-driven, not conversational (preserves determinism + audit clarity)
 
 ## Context
 
@@ -100,7 +129,7 @@ That single promise is what the whole system must deliver. Every design tradeoff
 
 ## Constraints
 
-- **Tech stack (locked)**: Elixir 1.18+ / OTP 27+ / Phoenix 1.8+ / LiveView 1.1+ / Postgres 16+ / Oban / Bandit / OpenTelemetry. Deviate only with explicit written reason in a Key Decisions row.
+- **Tech stack (locked)**: Elixir 1.19.5+ / OTP 28.1+ / Phoenix 1.8.5+ / LiveView 1.1.28+ / Postgres 16+ / Oban 2.21+ OSS / Bandit 1.10+ / OpenTelemetry (traces stable). Deviate only with explicit written reason in a Key Decisions row.
 - **Platform**: macOS + Linux local dev; Docker Desktop / Docker Engine 24+; GitHub as the sole source host.
 - **Persona**: Solo operator. No auth, no multi-tenant, no team permissions until self-use is proven.
 - **Autonomy bounds**: Every run MUST cap retries, token spend, and elapsed steps. Escalation = halt + diagnostic artifact, never silent continue.
@@ -124,6 +153,11 @@ That single promise is what the whole system must deliver. Every design tradeoff
 | **No human approval gates** in the execution loop | Defining feature of the dark factory model; bounded autonomy (caps + escalation) handles safety instead | — Pending |
 | **Sandbox = ephemeral Docker + network egress blocked + DTU mocks** | Safety + reproducibility + offline-friendly specs; validated by StrongDM's public writeup | — Pending |
 | **Public repo** at `github.com/szTheory/kiln` from day one | Dogfood GitHub/gh/Actions integration; build in public | ✓ Good |
+| **Scenario runner is sole acceptance oracle** — UAT/integration/E2E fully automated; zero manual QA | Dark factory thesis depends on no manual verification bottleneck; shift-left into CI; human unblocks only for typed blockers (credentials, auth, budget, escalation) | — Pending |
+| **Typed block reasons + remediation playbooks** (not freeform chat) | Structured unblock UX preserves determinism and audit clarity; chat-to-unblock breaks replay and hides intent | — Pending |
+| **Adaptive model routing** with automatic 429/5xx fallback + recorded `actual_model_used` | Avoids Fabro-class silent-fallback cost/quality drift; makes quota/rate-limit visible, not hidden | — Pending |
+| **Opinionated model-profile presets** per software-type scenario; switchable per run/stage | Good defaults are the difference between "it works out of the box" and "another config nightmare"; stays switchable so operators keep control | — Pending |
+| Bump Elixir/OTP baseline to **1.19.5 / 28.1+** per STACK research | Current stable as of April 2026; Phoenix 1.8 generators assume it; starting one major behind on day one is avoidable cost | — Pending |
 
 ## Evolution
 
