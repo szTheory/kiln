@@ -41,7 +41,15 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 **Phase artifacts**: `Kiln.Application` supervision tree; `Kiln.Repo`; `Kiln.Audit` context (INSERT-only events, replay query); `Kiln.Telemetry` context; `Kiln.Oban.BaseWorker` with safe defaults + idempotency helpers; `external_operations` migration + schema; `logger_json` config + `Kiln.Logger.Metadata` threading helper; `docker-compose.yml` (app + Postgres 16 + DTU mock-network container placeholder); `.tool-versions`; `mix check` alias (`mix test`, credo, dialyzer, xref, sobelow, mix_audit); GitHub Actions workflow running `mix check`.
 **Pitfalls addressed** (from PITFALLS.md): P9 (Oban max_attempts default lowered to 3), P11 (GenServer overuse — Credo custom check), P12 (unsupervised process — supervision-tree review in CI), P14 (N+1 groundwork — preload discipline), P15 (compile-time secrets — `mix check_no_compile_time_secrets`). Engineers groundwork for P2 (circuit breaker hook point), P3 (idempotency intent table), P13 (stream-first LiveView convention documented).
 **Research flag**: standard (Oban, Phoenix, supervision-tree patterns are well-established).
-**Plans**: TBD
+**Plans:** 7 plans
+Plans:
+- [ ] 01-01-PLAN.md — Phoenix 1.8.5 scaffold + `.tool-versions` + compose.yaml + P1 supervision tree (D-42) + `/ops/dashboard` + `/ops/oban` (LOCAL-01, LOCAL-02)
+- [ ] 01-02-PLAN.md — `mix check` gate + GHA CI + custom Credo checks (`NoProcessPut`, `NoMixEnvAtRuntime`) + grep Mix tasks (LOCAL-02, T-02 compile-time secrets mitigation)
+- [ ] 01-03-PLAN.md — `audit_events` table + `pg_uuidv7` + `kiln_owner`/`kiln_app` roles + three-layer enforcement (D-12) + `Kiln.Audit` context + JSV payload validation (OBS-03)
+- [ ] 01-04-PLAN.md — `external_operations` intent table + `Kiln.Oban.BaseWorker` with safe defaults + 30-day TTL pruner (D-18, D-44, D-49; P3 idempotency groundwork)
+- [ ] 01-05-PLAN.md — `logger_json` config + `Kiln.Logger.Metadata.with_metadata/2` + `Kiln.Telemetry.{pack_ctx,unpack_ctx,async_stream,pack_meta}` + Oban handler + contrived D-47 multi-process test (OBS-01)
+- [ ] 01-06-PLAN.md — `Kiln.HealthPlug` (mounted pre-`Plug.Logger`) + `Kiln.BootChecks.run!/0` (5 invariants) + `mix kiln.boot_checks` + first_run.sh integration test (LOCAL-01, OBS-03)
+- [ ] 01-07-PLAN.md — Spec upgrades D-50 (CLAUDE.md) + D-51 (ARCHITECTURE.md §9 rename) + D-52 (STACK.md pg_uuidv7) + D-53 (Elixir/OTP version drift fix)
 
 ### Phase 2: Workflow Engine Core
 **Goal**: A YAML workflow loads, validates, compiles into a topologically-sorted stage graph, and a run driven by that graph transitions durably through the state machine with per-stage checkpointing and idempotent retries.
