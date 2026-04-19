@@ -52,9 +52,36 @@ config :kiln, Oban,
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7}
   ]
 
-# LoggerJSON (D-45, D-46) — consumed fully in Plan 05
+# LoggerJSON (D-45, D-46, D-47) — structured JSON logging with the six
+# mandatory metadata keys on every log line (OBS-01). Two parts:
+#
+#   * `:default_handler` — swaps the Erlang logger's stock text formatter
+#     for `LoggerJSON.Formatters.Basic`. Tuple form is required in
+#     compile-time config (`LoggerJSON.Formatters.Basic.new/1` isn't
+#     callable here).
+#   * `:default_handler.filters` — `Kiln.Logger.Metadata.default_filter/2`
+#     defaults the six D-46 keys to `:none` (rendered `"none"` in JSON)
+#     when absent, so grep pipelines see a consistent schema even for
+#     log lines emitted before any scope-setter ran.
+#
+# `:default_formatter` stays set too so any handler that falls back to
+# the generic formatter (e.g. in unusual test harnesses) still whitelists
+# the same keys.
 config :logger, :default_formatter,
   metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id]
+
+config :logger, :default_handler,
+  formatter:
+    {LoggerJSON.Formatters.Basic,
+     metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id]},
+  filters: [
+    kiln_metadata_defaults: {&Kiln.Logger.Metadata.default_filter/2, []}
+  ],
+  filters_config: [
+    # `:log` keeps the (possibly mutated) log event flowing through the
+    # handler. `:stop` would drop the line entirely.
+    default: :log
+  ]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
