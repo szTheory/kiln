@@ -23,6 +23,7 @@ erl_crash.dump
 /config/*.secret.exs
 .env
 .env.*
+!.env.sample
 
 # OS
 .DS_Store
@@ -34,3 +35,7 @@ node_modules/
 # Misc
 tmp/
 *.log
+
+# Kiln local
+priv/artifacts/*
+!priv/artifacts/.gitkeep

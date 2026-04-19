@@ -1,0 +1,112 @@
+defmodule Kiln.MixProject do
+  use Mix.Project
+
+  def project do
+    [
+      app: :kiln,
+      version: "0.1.0",
+      elixir: "~> 1.19",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
+      deps: deps(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader]
+    ]
+  end
+
+  # Configuration for the OTP application.
+  #
+  # Type `mix help compile.app` for more information.
+  def application do
+    [
+      mod: {Kiln.Application, []},
+      extra_applications: [:logger, :runtime_tools]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [precommit: :test]
+    ]
+  end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  # Specifies your project dependencies.
+  #
+  # Type `mix help deps` for examples and options.
+  defp deps do
+    [
+      # Phoenix + LV (LOCKED per D-01, STACK.md, LOCAL-02)
+      {:phoenix, "~> 1.8.5"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:ecto_sql, "~> 3.13"},
+      {:postgrex, "~> 0.22"},
+      {:phoenix_html, "~> 4.2"},
+      {:phoenix_live_reload, "~> 1.5", only: :dev},
+      {:phoenix_live_view, "~> 1.1.28"},
+      {:phoenix_live_dashboard, "~> 0.8"},
+      {:lazy_html, ">= 0.1.0", only: :test},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.3", runtime: Mix.env() == :dev},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.2.0",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.0"},
+      {:jason, "~> 1.4"},
+      {:bandit, "~> 1.10"},
+
+      # Data / HTTP / LLM
+      {:req, "~> 0.5"},
+      {:finch, "~> 0.19"},
+      {:anthropix, "~> 0.6"},
+
+      # Workflow / audit
+      {:yaml_elixir, "~> 2.12"},
+      {:jsv, "~> 0.18"},
+
+      # Durable jobs
+      {:oban, "~> 2.21"},
+      {:oban_web, "~> 2.12"},
+
+      # Logging / observability
+      {:logger_json, "~> 7.0"},
+      {:opentelemetry, "~> 1.6"},
+      {:opentelemetry_api, "~> 1.4"},
+      {:opentelemetry_exporter, "~> 1.8"},
+      {:telemetry, "~> 1.3"},
+
+      # Dev/test tooling (Plan 02 wires `.check.exs`; deps ship here)
+      {:ex_check, "~> 0.16", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo_envvar, "~> 0.1", only: [:dev, :test], runtime: false},
+      {:ex_slop, "~> 0.2", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+      {:stream_data, "~> 1.1", only: [:dev, :test]},
+      {:mox, "~> 1.2", only: :test}
+    ]
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  defp aliases do
+    [
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["tailwind kiln", "esbuild kiln"],
+      "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"]
+    ]
+  end
+end
