@@ -1,9 +1,16 @@
 import Config
 
-# Configure your database
+# Configure your database.
+#
+# Credentials match `compose.yaml` (`POSTGRES_USER=kiln` /
+# `POSTGRES_PASSWORD=kiln_dev`). When `KILN_DB_ROLE` is set in the
+# environment, `config/runtime.exs` issues `SET ROLE <role>` after
+# connect — the migration runbook is
+# `KILN_DB_ROLE=kiln_owner mix ecto.migrate` (DDL as owner), and the
+# default runtime session runs as kiln_app (D-48).
 config :kiln, Kiln.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "kiln",
+  password: "kiln_dev",
   hostname: "localhost",
   database: "kiln_dev",
   stacktrace: true,

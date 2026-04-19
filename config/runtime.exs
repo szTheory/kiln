@@ -66,5 +66,24 @@ if config_env() == :prod do
     secret_key_base: secret_key_base
 end
 
-# KILN_DB_ROLE switching hook (Plan 03 activates; stub in P1)
-# config :kiln, Kiln.Repo, parameters: [role: System.get_env("KILN_DB_ROLE", "kiln_app")]
+# D-48: two-role Postgres access model. Postgrex reads the `:parameters`
+# keyword and issues `SET ROLE <role>` after connect, so every subsequent
+# query in that session runs as the chosen role.
+#
+# Behavior by `KILN_DB_ROLE` value:
+#
+#   * unset (bootstrap / tooling like `mix ecto.drop|create|migrate`):
+#     no role switch — the session keeps the connecting user. This avoids
+#     the chicken-and-egg where `mix ecto.drop` tries to `SET ROLE kiln_app`
+#     before migration 20260418000002 has created the role.
+#   * `kiln_owner` (DDL: `KILN_DB_ROLE=kiln_owner mix ecto.migrate`):
+#     session runs as kiln_owner; new tables are owned by it.
+#   * `kiln_app` (runtime — application boot in dev/prod):
+#     session runs with restricted privileges (no UPDATE/DELETE/TRUNCATE
+#     on audit_events). This is the intended default once the DB is
+#     fully migrated.
+case System.get_env("KILN_DB_ROLE") do
+  nil -> :ok
+  "" -> :ok
+  role -> config :kiln, Kiln.Repo, parameters: [role: role]
+end

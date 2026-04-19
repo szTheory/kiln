@@ -1,14 +1,14 @@
 import Config
 
-# Configure your database
+# Configure your database.
 #
-# Per T-02 (proactive), env-variable reads are forbidden in compile-time config
-# files — all env reads happen in config/runtime.exs. The MIX_TEST_PARTITION env
-# var (used for parallel CI test DBs) is therefore read in runtime.exs and
-# overrides `:database` below.
+# Matches compose.yaml credentials (kiln / kiln_dev). The base database
+# name is kiln_test; the MIX_TEST_PARTITION env var (parallel CI test
+# DBs) is appended in config/runtime.exs per T-02 (no env reads in
+# compile-time config).
 config :kiln, Kiln.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "kiln",
+  password: "kiln_dev",
   hostname: "localhost",
   database: "kiln_test",
   pool: Ecto.Adapters.SQL.Sandbox,
