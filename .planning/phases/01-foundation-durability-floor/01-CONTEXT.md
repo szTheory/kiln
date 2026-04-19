@@ -255,6 +255,8 @@ Concrete sub-themes to address in a future milestone (suggested name: **"Self-Ev
 - Add as a v2 / v1.5 requirement cluster in `.planning/REQUIREMENTS.md` under a new section "Self-Evaluation & Continuous Improvement (v1.5 / v2)" — so it doesn't get rediscovered.
 - Plant a seed via `gsd-plant-seed` triggered to surface at "Phase 9 verification" or "v1 release prep" so it's actively raised at the right milestone, not buried.
 
+**Captured (2026-04-18):** Both capture mechanisms executed — `REQUIREMENTS.md § Self-Evaluation & Continuous Improvement (v1.5)` now carries `SELF-01..07` + `FEEDBACK-01`; `.planning/seeds/SEED-001-operator-feedback-loop.md` planted with trigger "Phase 9 verification / v1 release prep". Separately, a backlog item `999.1-docs-landing-site` was created for a future docs + landing site (slot decision — new Phase 10 inside v0.1.0 vs v1.1 milestone post-tag — deferred to late Phase 8 / early Phase 9). See `ROADMAP.md § Backlog` and `REQUIREMENTS.md § Docs & Release (v1.0+)` for `DOCS-01..07`.
+
 This is **NOT** Phase 1 scope. Captured here so it survives the discuss → plan → execute hand-off without scope creep into the durability floor.
 
 </deferred>
