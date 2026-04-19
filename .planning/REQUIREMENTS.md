@@ -61,7 +61,7 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 ### Observability & Audit
 
-- [ ] **OBS-01**: Structured JSON logging via logger_json with correlation_id, causation_id, actor, run_id, stage_id on every log line; Logger metadata propagates through Oban/Task boundaries via explicit threading (never `Process.put/2`)
+- [x] **OBS-01**: Structured JSON logging via logger_json with correlation_id, causation_id, actor, run_id, stage_id on every log line; Logger metadata propagates through Oban/Task boundaries via explicit threading (never `Process.put/2`) — **Done (Plan 01-05)**
 - [ ] **OBS-02**: OpenTelemetry traces (Erlang SDK, stable as of 2026) — spans per stage, per agent call, per Docker op, per LLM call; `opentelemetry_process_propagator` wired through Oban workers
 - [x] **OBS-03**: Append-only audit ledger (`audit_events` table) with three-layer INSERT-only enforcement at the Postgres level (REVOKE UPDATE/DELETE/TRUNCATE from runtime role; `BEFORE UPDATE/DELETE/TRUNCATE` trigger `audit_events_immutable()`; `CREATE RULE … DO INSTEAD NOTHING` safety net — see 01-CONTEXT.md D-12); time-travel query support via event replay — **Done (Plan 01-03)**
 - [ ] **OBS-04**: Stuck-run detector — sliding window over (stage, failure-class) tuples; halts run with `escalated` state + diagnostic artifact when the same failure class repeats N times (N configurable per workflow, defaults to 3)
@@ -225,7 +225,7 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | UI-04 | Phase 7 | Pending |
 | UI-05 | Phase 7 | Pending |
 | UI-06 | Phase 7 | Pending |
-| OBS-01 | Phase 1 | Pending |
+| OBS-01 | Phase 1 | Done (Plan 01-05 — 5888aac, 0a5ba87) |
 | OBS-02 | Phase 9 | Pending |
 | OBS-03 | Phase 1 | Done (Plan 01-03 — ea6b174, aeede36, 00a3782) |
 | OBS-04 | Phase 5 | Pending |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 1 Plans 01, 02, 03, 07 complete — ready for Plan 04 (external_operations + BaseWorker)
-last_updated: "2026-04-19T00:10:00.000Z"
-last_activity: 2026-04-19 — Phase 1 Plan 03 executed (audit_events + pg_uuidv7 + two-role model + D-12 three-layer INSERT-only enforcement + Kiln.Audit context + 22 JSV schemas + 37 green tests)
+stopped_at: Phase 1 Plans 01, 02, 03, 05, 07 complete — ready for Plans 04 (external_operations + BaseWorker) and 06 (BootChecks + HealthPlug)
+last_updated: "2026-04-19T04:22:00.000Z"
+last_activity: 2026-04-19 — Phase 1 Plan 05 executed (logger_json formatter + D-45 metadata-threading API + Kiln.Telemetry.ObanHandler + D-47 contrived multi-process proof; OBS-01 mechanically proven; 44 green tests; mix check all 11 tools green)
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -26,30 +26,30 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 1 of 9 (Foundation & Durability Floor)
-Plan: 4/7 complete (01-01, 01-02, 01-03, 01-07) — next is 01-04-PLAN.md (external_operations + Kiln.Oban.BaseWorker)
+Plan: 5/7 complete (01-01, 01-02, 01-03, 01-05, 01-07) — remaining: 01-04 (external_operations + Kiln.Oban.BaseWorker) and 01-06 (BootChecks + HealthPlug)
 Status: In progress
-Last activity: 2026-04-19 — Plan 03 executed (audit_events ledger with D-12 three-layer enforcement; pg_uuidv7 extension + kjmph SQL fallback; D-48 two-role Postgres access model; Kiln.Audit context + JSV-validated append/1; 22 Draft 2020-12 per-kind schemas; 37 tests green; mix check all 11 tools green)
+Last activity: 2026-04-19 — Plan 05 executed (logger_json formatter on :default_handler; D-45 dual API — Kiln.Logger.Metadata.with_metadata/2 block + Kiln.Telemetry.{pack_ctx, unpack_ctx, async_stream, pack_meta} cross-process; Kiln.Telemetry.ObanHandler on [:oban, :job, :start] restores job.meta["kiln_ctx"] into worker Logger.metadata; D-47 contrived test proves LOG-01 Task.async_stream + LOG-02 Oban paths; 44 tests green; mix check all 11 tools green; D-42 7-child supervision tree invariant preserved)
 
-Progress: [██████░░░░] 57%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
-- Average duration: ~22 min
-- Total execution time: ~88 min
+- Total plans completed: 5
+- Average duration: ~20 min
+- Total execution time: ~103 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1     | 4/7   | ~88m  | ~22m     |
+| 1     | 5/7   | ~103m | ~20m     |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs discovered + 1 Rule-3 environment blocker fix)
-- Trend: Plan 03 took longer because of the D-12 RULE/trigger interaction bug in the plan spec (Postgres query rewriting runs before triggers — masking the trigger). Fix preserves three-layer intent while making each layer independently testable.
+- Last 5 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs + 1 Rule-3 environment blocker fix), 01-05 (~15m, feat+test — 7 auto-fixes: 2 Rule-3 blocking [primary-level logger floor, Oban migrations not yet in place → switch drain_queue→perform_job], 5 Rule-1 strict-gate fixups)
+- Trend: Plan 05 stayed within the plan's estimate. Key architectural discovery: `ExUnit.CaptureLog` cannot be used for JSON-metadata assertions (installs its own plain-text formatter); Kiln.LoggerCaptureHelper.capture_json/1 is the required-tool alternative, reusable by every log-asserting test in Phases 2-9.
 
 *Updated after each plan completion.*
 
@@ -89,6 +89,15 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - `mix deps.unlock --unused` required to pass ex_check's `unused_deps` tool — Plan 01-01 removed `:dns_cluster` from mix.exs but didn't clean mix.lock; one-time cleanup
 - All 23 ex_slop checks enabled (full default set) — the P1 scaffold was clean after the Task 2 Rule-3 fixups; revisit in Phase 9 dogfood if noisy
 
+### Plan 01-05 decisions
+
+- **LoggerJSON.Formatters.Basic JSON shape:** metadata nested under a top-level `"metadata"` object (not flattened). Top-level keys are `time` (ISO 8601 UTC ms), `severity`, `message`, `metadata`. Plan 06 HealthPlug JSON emission and every log-asserting test in Phases 2-9 should read via `line["metadata"][key] || line[key]` (works against `Basic` today + flat-metadata formatters like `GoogleCloud`/`Datadog` tomorrow).
+- **`Kiln.Logger.Metadata.default_filter/2` ships (not skipped).** `take_metadata/2` inside `LoggerJSON.Formatters.Basic` uses `Map.take/2`, which omits absent keys — without the filter, missing keys would not appear in JSON (inconsistent schema). Filter `Map.put_new`s `:none` atom for each of the six D-46 keys; Jason serialises to `"none"` string.
+- **Oban test mode = `testing: :manual` + `perform_job/2`**, NOT `:inline` (can bypass `[:oban, :job, :start]` telemetry in some Oban 2.21 paths) and NOT `drain_queue/1` (requires Oban migrations — those land in Plan 01-04). `perform_job/2` executes via `Executor.call/1` synchronously in the test process and DOES fire the telemetry event (verified in `deps/oban/lib/oban/queue/executor.ex:97`). LOG-02's proof: clear test-process `Logger.metadata` BEFORE `perform_job`, so a passing assertion means the `ObanHandler` restored ctx.
+- **Primary-level logger lift inside `capture_json/1`.** `config/test.exs` sets `level: :warning` to quiet dev-noise; Erlang's logger primary filter drops `:info` events before any handler sees them. `capture_json/1` snapshots `:logger.get_primary_config()`, sets level to `:all`, restores in `after`. Alternative (use `Logger.warning` everywhere in tests) rejected as fragile + fights OBS-01's intent.
+- **`Kiln.Telemetry.ObanHandler` attaches via `:telemetry.attach_many/4`, NOT as a supervision-tree child.** Telemetry handlers are ETS-backed, not process-backed. Attach happens in `Kiln.Application.start/2` post-`Supervisor.start_link`; matching detach in `stop/1`. Supervision tree stays at exactly 7 children (D-42 invariant preserved).
+- **`:logger` callback fns (`log/2`, `adding_handler/1`, `removing_handler/1`, `changing_config/3`) MUST be public.** Erlang dispatches by MFA. ex_slop's `DocFalseOnPublicFunction` trips on `@doc false` on public fns — resolution is to give each callback a real `@doc` string explaining the Erlang contract. Established the pattern in `test/support/logger_capture_helper.ex` for any future Erlang callback modules.
+
 ### Plan 01-03 decisions
 
 - D-12 Layer 3 RULE shipped **DISABLED** by default (Rule 1 deviation from plan spec). Postgres query rewriting runs BEFORE triggers fire — an active `DO INSTEAD NOTHING` RULE masks Layer 2's trigger. Disabled RULE keeps Layer 2 the loud error path; AUD-03 test enables the RULE explicitly to verify it works.
@@ -119,6 +128,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-19
-Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), and 01-03 (ea6b174, aeede36, 00a3782) complete; ready for Plan 04 (external_operations + Kiln.Oban.BaseWorker)
+Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), and 01-05 (5888aac, 0a5ba87) complete; remaining Phase 1 work: Plan 04 (external_operations + Kiln.Oban.BaseWorker) and Plan 06 (BootChecks + HealthPlug)
 Resume file: .planning/phases/01-foundation-durability-floor/01-04-PLAN.md
-Next command: /gsd-execute-phase 1 (continues with 01-04)
+Next command: /gsd-execute-phase 1 (continues with 01-04 then 01-06)
