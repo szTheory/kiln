@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 1 Plans 01 and 07 complete — ready for Plan 02
-last_updated: "2026-04-19T03:13:00.000Z"
-last_activity: 2026-04-19 — Phase 1 Plan 07 executed (D-50/D-51/D-52/D-53 spec upgrades to CLAUDE.md + research docs)
+stopped_at: Phase 1 Plans 01, 02, 07 complete — ready for Plan 03 (audit_events)
+last_updated: "2026-04-19T03:31:47.000Z"
+last_activity: 2026-04-19 — Phase 1 Plan 02 executed (mix check gate + GHA CI workflow + 2 custom Credo checks + 2 grep Mix tasks)
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 7
-  completed_plans: 2
-  percent: 29
+  completed_plans: 3
+  percent: 43
 ---
 
 # Project State
@@ -26,30 +26,30 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 1 of 9 (Foundation & Durability Floor)
-Plan: 2/7 complete (01-01, 01-07) — next is 01-02-PLAN.md
+Plan: 3/7 complete (01-01, 01-02, 01-07) — next is 01-03-PLAN.md (audit_events)
 Status: In progress
-Last activity: 2026-04-19 — Plan 07 executed (spec upgrades D-50/D-51/D-52/D-53 applied to CLAUDE.md + ARCHITECTURE.md §9 + STACK.md + research/SUMMARY.md)
+Last activity: 2026-04-19 — Plan 02 executed (mix check gate + GHA CI workflow on ubuntu-24.04 + PG 16 + setup-beam@v1.23.0 + 2 custom Credo checks + 2 grep Mix tasks; all 11 tools green end-to-end in 7s warm-cache)
 
-Progress: [███░░░░░░░] 29%
+Progress: [████░░░░░░] 43%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 2
-- Average duration: ~12 min
-- Total execution time: ~25 min
+- Total plans completed: 3
+- Average duration: ~13 min
+- Total execution time: ~38 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1     | 2/7   | ~25m  | ~12m     |
+| 1     | 3/7   | ~38m  | ~13m     |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (~15m, feat), 01-07 (~10m, docs)
-- Trend: two data points — too early for trend
+- Last 5 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat)
+- Trend: three data points — Plan 02 on pace with Plan 01 despite being a denser gate-wiring task; auto-fix Rule 3 fixups absorbed the Phoenix-scaffold strict-credo cost
 
 *Updated after each plan completion.*
 
@@ -80,6 +80,15 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - D-53: version drift eliminated from research docs — PROJECT.md already carried `Elixir 1.19.5+/OTP 28.1+`, so ARCHITECTURE.md (2 hits) + STACK.md (4 hits) + SUMMARY.md (2 hits) were aligned to it; two "stale items" paragraphs rewritten as resolved
 - D-51 scope boundary respected: ARCHITECTURE.md line 143's `Kiln.Audit` public-API description still says `event_type` (outside section 9); logged as a deferred cross-reference for a future audit plan
 
+### Plan 01-02 decisions
+
+- xref cycles uses `--label compile-connected` (Elixir xref docs best practice); the Phoenix scaffold has harmless runtime cycles between router/endpoint/controllers/layouts that don't cause recompilation pain — compile-connected cycles are the recompile tax we care about for the 12-context DAG
+- `:credo` added to Dialyzer `plt_add_apps` because `lib/kiln/credo/*` modules `use Credo.Check`; without it Dialyzer flags 9 "unknown function" errors despite Credo being `runtime: false`
+- Custom Credo checks compiled as normal project code (no `requires:` list in `.credo.exs`) — adding the list caused "redefining module" warnings because Credo evaluated the file twice
+- Sobelow baseline intentionally non-empty at P1 — Phoenix scaffold `:browser` pipeline ships without a CSP plug; Phase 7 (UI) adds the real CSP and removes the `.sobelow-skips` entry
+- `mix deps.unlock --unused` required to pass ex_check's `unused_deps` tool — Plan 01-01 removed `:dns_cluster` from mix.exs but didn't clean mix.lock; one-time cleanup
+- All 23 ex_slop checks enabled (full default set) — the P1 scaffold was clean after the Task 2 Rule-3 fixups; revisit in Phase 9 dogfood if noisy
+
 ### Pending Todos
 
 From .planning/todos/pending/ — ideas captured during sessions.
@@ -100,6 +109,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-19
-Stopped at: Plans 01-01 (f567c7e) and 01-07 (6f4438e, a2bc420) complete; ready for Plan 02
-Resume file: .planning/phases/01-foundation-durability-floor/01-02-PLAN.md
-Next command: /gsd-execute-phase 1 (continues with 01-02)
+Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), and 01-02 (cb05fa1, 18de9a4) complete; ready for Plan 03 (audit_events)
+Resume file: .planning/phases/01-foundation-durability-floor/01-03-PLAN.md
+Next command: /gsd-execute-phase 1 (continues with 01-03)

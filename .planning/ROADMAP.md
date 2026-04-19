@@ -44,7 +44,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 **Plans:** 7 plans
 Plans:
 - [x] 01-01-PLAN.md — Phoenix 1.8.5 scaffold + `.tool-versions` + compose.yaml + P1 supervision tree (D-42) + `/ops/dashboard` + `/ops/oban` (LOCAL-01, LOCAL-02) — **complete 2026-04-19 (f567c7e)**
-- [ ] 01-02-PLAN.md — `mix check` gate + GHA CI + custom Credo checks (`NoProcessPut`, `NoMixEnvAtRuntime`) + grep Mix tasks (LOCAL-02, T-02 compile-time secrets mitigation)
+- [x] 01-02-PLAN.md — `mix check` gate + GHA CI + custom Credo checks (`NoProcessPut`, `NoMixEnvAtRuntime`) + grep Mix tasks (LOCAL-02, T-02 compile-time secrets mitigation) — **complete 2026-04-19 (cb05fa1, 18de9a4)**
 - [ ] 01-03-PLAN.md — `audit_events` table + `pg_uuidv7` + `kiln_owner`/`kiln_app` roles + three-layer enforcement (D-12) + `Kiln.Audit` context + JSV payload validation (OBS-03)
 - [ ] 01-04-PLAN.md — `external_operations` intent table + `Kiln.Oban.BaseWorker` with safe defaults + 30-day TTL pruner (D-18, D-44, D-49; P3 idempotency groundwork)
 - [ ] 01-05-PLAN.md — `logger_json` config + `Kiln.Logger.Metadata.with_metadata/2` + `Kiln.Telemetry.{pack_ctx,unpack_ctx,async_stream,pack_meta}` + Oban handler + contrived D-47 multi-process test (OBS-01)
@@ -243,7 +243,7 @@ Phases needing `/gsd-research-phase` before planning:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Durability Floor | 2/7 | In progress | - |
+| 1. Foundation & Durability Floor | 3/7 | In progress | - |
 | 2. Workflow Engine Core | 0/TBD | Not started | - |
 | 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |

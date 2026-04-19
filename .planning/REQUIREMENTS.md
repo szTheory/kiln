@@ -230,7 +230,7 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | OBS-03 | Phase 1 | Pending |
 | OBS-04 | Phase 5 | Pending |
 | LOCAL-01 | Phase 1 | Partial (Plan 01-01 — structural; Plan 01-06 closes runtime smoke) |
-| LOCAL-02 | Phase 1 | Done (Plan 01-01, commit f567c7e) |
+| LOCAL-02 | Phase 1 | Done (Plan 01-01 — `.tool-versions` + `mix.exs` pins, f567c7e; Plan 01-02 — `mix check` gate + GHA CI, cb05fa1/18de9a4) |
 | LOCAL-03 | Phase 9 | Pending |
 | UAT-01 | Phase 5 | Pending |
 | UAT-02 | Phase 5 | Pending |
