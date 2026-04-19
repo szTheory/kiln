@@ -43,13 +43,28 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
-# Oban configuration (D-44 — safer defaults; full base worker lands in Plan 04)
+# Oban configuration (D-44 — safer defaults; Kiln.Oban.BaseWorker lands in
+# Plan 04 and inherits `max_attempts: 3` + idempotency-key unique config).
+# Two queues:
+#   * `:default` (concurrency 10) — all run/stage workers
+#   * `:maintenance` (concurrency 1) — the external_operations 30-day TTL
+#     pruner (D-19), scheduled by the Cron plugin below.
+# Plugins:
+#   * `Oban.Plugins.Pruner` — deletes Oban's own completed/discarded job
+#     rows after 7 days (not Kiln.ExternalOperations.Pruner).
+#   * `Oban.Plugins.Cron` — triggers `Kiln.ExternalOperations.Pruner`
+#     daily at 03:00 UTC (D-19). Registering the pruner here keeps the
+#     7-child supervision tree invariant (D-42) — no new supervisor child.
 config :kiln, Oban,
   repo: Kiln.Repo,
   engine: Oban.Engines.Basic,
-  queues: [default: 10],
+  queues: [default: 10, maintenance: 1],
   plugins: [
-    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7}
+    {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"0 3 * * *", Kiln.ExternalOperations.Pruner}
+     ]}
   ]
 
 # LoggerJSON (D-45, D-46, D-47) — structured JSON logging with the six
