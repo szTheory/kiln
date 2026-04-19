@@ -60,12 +60,27 @@ defmodule Kiln.BootChecks do
   @spec context_count() :: non_neg_integer()
   def context_count, do: length(@context_modules)
 
+  @typedoc "The 12 bounded-context modules pinned by D-42."
+  @type context_module ::
+          Kiln.Specs
+          | Kiln.Intents
+          | Kiln.Workflows
+          | Kiln.Runs
+          | Kiln.Stages
+          | Kiln.Agents
+          | Kiln.Sandboxes
+          | Kiln.GitHub
+          | Kiln.Audit
+          | Kiln.Telemetry
+          | Kiln.Policies
+          | Kiln.ExternalOperations
+
   @doc """
   Returns the P1 context module list. Exposed for
   `test/kiln/boot_checks_test.exs` behavior-18 assertion; prefer
   `context_count/0` in production code.
   """
-  @spec context_modules() :: [module()]
+  @spec context_modules() :: [context_module(), ...]
   def context_modules, do: @context_modules
 
   @doc """
@@ -130,34 +145,21 @@ defmodule Kiln.BootChecks do
   # privilege check runs before predicate evaluation, so the error
   # fires regardless of table contents.
   defp check_audit_revoke_active! do
-    result =
-      Repo.transaction(fn ->
-        Repo.query!("SET LOCAL ROLE kiln_app")
+    # Use a session-level `SET ROLE` (not `SET LOCAL` — that needs an
+    # explicit transaction) inside a `Repo.checkout/1` block so the
+    # probe uses a single pinned connection. The failing UPDATE is
+    # OUTSIDE any transaction, so Postgres returns the permission
+    # error as a single-statement failure without poisoning a tx.
+    # `RESET ROLE` in the `after` clause guarantees the pool connection
+    # isn't returned with a non-default role set (would leak into the
+    # next checkout).
+    outcome = probe_audit_mutation("kiln_app", :revoke_classifier)
 
-        try do
-          Repo.query!(
-            "UPDATE audit_events SET actor_id = 'probe' WHERE FALSE",
-            []
-          )
-
-          # If the UPDATE succeeded (or silently no-oped), REVOKE is
-          # absent — the runtime role has mutation privilege, which is
-          # the exact scenario D-12 Layer 1 is meant to prevent.
-          :no_error_raised
-        rescue
-          e in Postgrex.Error ->
-            case e.postgres.code do
-              :insufficient_privilege -> :revoke_active
-              other -> {:unexpected_postgres_code, other}
-            end
-        end
-      end)
-
-    case result do
-      {:ok, :revoke_active} ->
+    case outcome do
+      :revoke_active ->
         :ok
 
-      {:ok, :no_error_raised} ->
+      :no_error_raised ->
         raise Error,
           invariant: :audit_revoke_active,
           details: %{hint: "kiln_app role has UPDATE privilege on audit_events"},
@@ -165,7 +167,7 @@ defmodule Kiln.BootChecks do
             "Run: KILN_DB_ROLE=kiln_owner mix ecto.migrate ; or execute: " <>
               "REVOKE UPDATE, DELETE, TRUNCATE ON audit_events FROM kiln_app;"
 
-      {:ok, {:unexpected_postgres_code, code}} ->
+      {:unexpected_postgres_code, code} ->
         raise Error,
           invariant: :audit_revoke_active,
           details: %{unexpected_code: code},
@@ -173,11 +175,11 @@ defmodule Kiln.BootChecks do
             "Probe raised unexpected SQLSTATE #{inspect(code)} (expected :insufficient_privilege). " <>
               "Inspect role grants with: \\dp audit_events in psql."
 
-      {:error, reason} ->
+      {:probe_failed, reason} ->
         raise Error,
           invariant: :audit_revoke_active,
-          details: %{repo_error: reason},
-          remediation_hint: "Unable to open probe transaction. Check Repo connectivity."
+          details: %{probe_error: reason},
+          remediation_hint: "Unable to open probe connection. Check Repo connectivity."
     end
   end
 
@@ -191,32 +193,16 @@ defmodule Kiln.BootChecks do
   # where a future migration accidentally drops/renames the trigger
   # while leaving the REVOKE intact.
   defp check_audit_trigger_active! do
-    result =
-      Repo.transaction(fn ->
-        Repo.query!("SET LOCAL ROLE kiln_owner")
+    # Same non-transactional pattern as :audit_revoke_active. See
+    # `probe_audit_mutation/2` for the RESET-ROLE + connection-pinning
+    # details.
+    outcome = probe_audit_mutation("kiln_owner", :trigger_classifier)
 
-        try do
-          Repo.query!(
-            "UPDATE audit_events SET actor_id = 'probe' WHERE FALSE",
-            []
-          )
-
-          :no_error_raised
-        rescue
-          e in Postgrex.Error ->
-            if e.postgres.message =~ "audit_events is append-only" do
-              :trigger_active
-            else
-              {:unexpected_message, e.postgres.message}
-            end
-        end
-      end)
-
-    case result do
-      {:ok, :trigger_active} ->
+    case outcome do
+      :trigger_active ->
         :ok
 
-      {:ok, :no_error_raised} ->
+      :no_error_raised ->
         raise Error,
           invariant: :audit_trigger_active,
           details: %{hint: "BEFORE UPDATE trigger audit_events_no_update did not fire"},
@@ -225,7 +211,7 @@ defmodule Kiln.BootChecks do
               "or manually: CREATE TRIGGER audit_events_no_update BEFORE UPDATE ON " <>
               "audit_events FOR EACH ROW EXECUTE FUNCTION audit_events_immutable();"
 
-      {:ok, {:unexpected_message, msg}} ->
+      {:unexpected_message, msg} ->
         raise Error,
           invariant: :audit_trigger_active,
           details: %{unexpected_message: msg},
@@ -233,11 +219,108 @@ defmodule Kiln.BootChecks do
             "Trigger fired with an unexpected message. Check pg_trigger + function " <>
               "audit_events_immutable() body — expected substring 'audit_events is append-only'."
 
-      {:error, reason} ->
+      {:probe_failed, reason} ->
         raise Error,
           invariant: :audit_trigger_active,
-          details: %{repo_error: reason},
-          remediation_hint: "Unable to open probe transaction."
+          details: %{probe_error: reason},
+          remediation_hint: "Unable to open probe connection."
+    end
+  end
+
+  # Shared probe for the two Layer-1/Layer-2 audit invariants.
+  #
+  # Why the SAVEPOINT-and-rollback pattern: A BEFORE UPDATE trigger only
+  # fires when at least one row matches, so the probe MUST operate on a
+  # real row (not `WHERE FALSE`). The rollback chain guarantees zero
+  # trace in audit_events:
+  #
+  #   * UPDATE raising (the success case) leaves the subtxn in ABORT
+  #     state — the inner `ROLLBACK TO SAVEPOINT probe` restores the
+  #     txn to a runnable state so we can exit the outer
+  #     `Repo.transaction` cleanly.
+  #   * UPDATE succeeding (the invariant-broken case) means the D-12
+  #     layers leaked a mutation. We roll back the outer txn too via
+  #     `Repo.rollback(outcome)` so the spurious row never lands.
+  #
+  # The OUTER `Repo.transaction` is required because `SET LOCAL ROLE`
+  # only takes effect inside a transaction; nesting it as a SAVEPOINT
+  # inside the test sandbox's existing txn is how the same code path
+  # works both in boot (fresh connection) and in tests (sandboxed).
+  @spec probe_audit_mutation(String.t(), :revoke_classifier | :trigger_classifier) ::
+          :revoke_active
+          | :trigger_active
+          | :no_error_raised
+          | {:unexpected_postgres_code, term()}
+          | {:unexpected_message, String.t()}
+          | {:probe_failed, term()}
+  defp probe_audit_mutation(role, classifier) do
+    result =
+      Repo.transaction(fn ->
+        Repo.query!("SET LOCAL ROLE #{role}")
+        Repo.query!("SAVEPOINT probe")
+
+        outcome =
+          try do
+            Repo.query!(
+              """
+              INSERT INTO audit_events
+                (event_kind, correlation_id, schema_version, payload, actor_id, inserted_at)
+              VALUES
+                ('stage_started', $1::uuid, 1,
+                 '{"stage_kind":"coding","attempt":1}'::jsonb,
+                 'probe', now())
+              """,
+              [Ecto.UUID.dump!(Ecto.UUID.generate())]
+            )
+
+            Repo.query!(
+              "UPDATE audit_events SET actor_id = 'probe-update' WHERE actor_id = 'probe'",
+              []
+            )
+
+            # UPDATE succeeded ⇒ invariant is broken. Release the
+            # savepoint so the outer txn can still clean up, but
+            # before that record that the INSERT+UPDATE pair leaked
+            # a row — we'll roll back the outer txn via rollback/1.
+            Repo.query!("ROLLBACK TO SAVEPOINT probe")
+            :no_error_raised
+          rescue
+            e in Postgrex.Error ->
+              # The UPDATE (or INSERT — shouldn't happen, kiln_app has
+              # INSERT) raised and Postgres put the current subtxn in
+              # ABORT state. ROLLBACK TO SAVEPOINT undoes that and
+              # restores the txn to a runnable state so we can exit
+              # the outer Repo.transaction cleanly via rollback/1.
+              Repo.query!("ROLLBACK TO SAVEPOINT probe")
+              classify(classifier, e)
+          end
+
+        # Always roll back the outer txn too — the probe is idempotent
+        # by design and must leave zero trace in audit_events even
+        # when Layer 1/Layer 2 allowed the UPDATE to succeed.
+        Repo.rollback(outcome)
+      end)
+
+    case result do
+      {:error, outcome} -> outcome
+      other -> {:probe_failed, other}
+    end
+  rescue
+    e -> {:probe_failed, Exception.message(e)}
+  end
+
+  defp classify(:revoke_classifier, %Postgrex.Error{postgres: %{code: code}}) do
+    case code do
+      :insufficient_privilege -> :revoke_active
+      other -> {:unexpected_postgres_code, other}
+    end
+  end
+
+  defp classify(:trigger_classifier, %Postgrex.Error{postgres: %{message: msg}}) do
+    if msg =~ "audit_events is append-only" do
+      :trigger_active
+    else
+      {:unexpected_message, msg}
     end
   end
 

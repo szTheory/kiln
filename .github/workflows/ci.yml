@@ -79,3 +79,12 @@ jobs:
 
       - name: Run mix check (full CI gate — format, compile, test, credo, dialyzer, sobelow, mix_audit, xref cycles, grep gates)
         run: mix check
+
+      # Plan 06 / D-34: dedicated CI step for `mix kiln.boot_checks` so
+      # a durability-floor-invariant failure lands in its own log
+      # section (easier operator triage than a nested `mix check`
+      # failure). Runs against the same `postgres:16` service container
+      # `mix check` used — proves CI parity for the REVOKE + trigger
+      # probes even though GitHub Actions does NOT run `docker compose`.
+      - name: Kiln boot checks (CI parity — D-34)
+        run: KILN_DB_ROLE=kiln_owner mix ecto.migrate && mix kiln.boot_checks

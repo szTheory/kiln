@@ -46,6 +46,13 @@
 
     # ---- Kiln-specific grep gates (D-26) ----
     {:no_compile_secrets, "mix check_no_compile_time_secrets"},
-    {:no_manual_qa, "mix check_no_manual_qa_gates"}
+    {:no_manual_qa, "mix check_no_manual_qa_gates"},
+
+    # ---- Plan 06 / D-34: boot-time invariants (REVOKE + trigger + contexts + secrets).
+    #      Runs the same `Kiln.BootChecks.run!/0` the Application.start/2
+    #      flow calls, so CI and local get identical "durability floor
+    #      intact?" signal. Depends on a live Postgres (CI provides one
+    #      via the `postgres:16` service container). ----
+    {:kiln_boot_checks, "mix kiln.boot_checks"}
   ]
 ]

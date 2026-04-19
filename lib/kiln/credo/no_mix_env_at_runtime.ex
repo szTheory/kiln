@@ -18,12 +18,28 @@ defmodule Kiln.Credo.NoMixEnvAtRuntime do
 
   @impl true
   def run(%SourceFile{filename: filename} = source_file, params \\ []) do
-    # Allow Mix.env() inside the mix.exs project file (compile-time project config).
-    if Path.basename(filename) == "mix.exs" do
+    # Allow Mix.env() inside mix.exs (project config) AND inside
+    # config/*.exs (compile-time app config — Config import is evaluated
+    # at compile time, not runtime). Plan 06 adds `env: Mix.env()` to
+    # config/config.exs so `Kiln.BootChecks.run!/0` can read a runtime
+    # :kiln, :env value via `Application.get_env/3`.
+    if compile_time_config_file?(filename) do
       []
     else
       issue_meta = IssueMeta.for(source_file, params)
       Code.prewalk(source_file, &traverse(&1, &2, issue_meta))
+    end
+  end
+
+  # mix.exs OR any file under config/ (matching both "config/foo.exs" and
+  # "./config/foo.exs" absolute forms Credo may pass). Normalise with
+  # `Path.split/1` so the check is separator-agnostic.
+  defp compile_time_config_file?(filename) do
+    if Path.basename(filename) == "mix.exs" do
+      true
+    else
+      segments = filename |> Path.split()
+      "config" in segments
     end
   end
 

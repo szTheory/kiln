@@ -25,4 +25,14 @@ defmodule Kiln.Credo.NoMixEnvAtRuntimeTest do
     |> run_check(NoMixEnvAtRuntime)
     |> refute_issues()
   end
+
+  test "does NOT flag Mix.env() inside config/*.exs (compile-time config)" do
+    """
+    import Config
+    config :kiln, env: Mix.env()
+    """
+    |> to_source_file("config/config.exs")
+    |> run_check(NoMixEnvAtRuntime)
+    |> refute_issues()
+  end
 end

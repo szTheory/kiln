@@ -31,6 +31,8 @@ defmodule Kiln.HealthPlug do
   @behaviour Plug
   import Plug.Conn
 
+  alias Ecto.Adapters.SQL
+
   @version Mix.Project.config()[:version] || "0.0.0-unknown"
 
   @impl Plug
@@ -48,12 +50,17 @@ defmodule Kiln.HealthPlug do
 
   def call(conn, _opts), do: conn
 
+  @typedoc "D-31 JSON-shape map. LOCKED for Phase 7 UI-07 factory header."
+  @type health_payload :: %{
+          required(String.t()) => String.t() | non_neg_integer()
+        }
+
   @doc """
   Public so operators can evaluate the same JSON shape from IEx + so
   Phase 7's factory header can call it directly (avoids a loopback HTTP
   round-trip for a LiveView that lives in the same BEAM).
   """
-  @spec status() :: map()
+  @spec status() :: health_payload()
   def status do
     pg = postgres_status()
     oban = oban_status()
@@ -80,7 +87,7 @@ defmodule Kiln.HealthPlug do
   # want a fast "down" signal rather than a slow timeout that cascades
   # into request-queue backpressure.
   defp postgres_status do
-    case Ecto.Adapters.SQL.query(Kiln.Repo, "SELECT 1", [], timeout: 500) do
+    case SQL.query(Kiln.Repo, "SELECT 1", [], timeout: 500) do
       {:ok, _} -> "up"
       _ -> "down"
     end
