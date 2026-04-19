@@ -568,16 +568,17 @@ This is **append-only**, **queryable**, **replayable**, and **lives in the DB**.
 defmodule Kiln.Audit.Event do
   use Ecto.Schema
 
-  @primary_key {:id, :binary_id, autogenerate: true}
+  @primary_key {:id, :binary_id, autogenerate: false}
 
-  schema "events" do
-    field :event_type,      :string       # "run.transition.planning", "stage.started", "agent.invoked"
-    field :actor_id,        :string       # "operator:jon", "agent:planner:session_abc", "system:stuck_detector"
+  schema "audit_events" do
+    field :event_kind,      Ecto.Enum, values: Kiln.Audit.EventKind.values()
+    field :actor_id,        :string
+    field :actor_role,      :string
     field :run_id,          :binary_id
-    field :stage_run_id,    :binary_id
-    field :agent_session_id,:binary_id
+    field :stage_id,        :binary_id
     field :correlation_id,  :binary_id, null: false
     field :causation_id,    :binary_id
+    field :schema_version,  :integer, default: 1
     field :payload,         :map, default: %{}
     field :occurred_at,     :utc_datetime_usec
     timestamps(updated_at: false)
@@ -586,31 +587,47 @@ end
 ```
 
 ```sql
-CREATE TABLE events (
-  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  event_type       TEXT NOT NULL,
-  actor_id         TEXT NOT NULL,
+CREATE TABLE audit_events (
+  id               UUID PRIMARY KEY DEFAULT uuid_generate_v7(),
+  event_kind       TEXT NOT NULL,
+  actor_id         TEXT,
+  actor_role       TEXT,
   run_id           UUID,
-  stage_run_id     UUID,
-  agent_session_id UUID,
+  stage_id         UUID,
   correlation_id   UUID NOT NULL,
   causation_id     UUID,
+  schema_version   INTEGER NOT NULL DEFAULT 1,
   payload          JSONB NOT NULL DEFAULT '{}'::jsonb,
   occurred_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   inserted_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Append-only enforcement at the DB level
-CREATE RULE no_update_events AS ON UPDATE TO events DO INSTEAD NOTHING;
-CREATE RULE no_delete_events AS ON DELETE TO events DO INSTEAD NOTHING;
+-- CHECK constraint enumerates the 22 event kinds per CONTEXT.md D-08.
 
-CREATE INDEX ON events (run_id, occurred_at);
-CREATE INDEX ON events (correlation_id);
-CREATE INDEX ON events (event_type, occurred_at);
-CREATE INDEX ON events (actor_id, occurred_at);
+-- Three-layer INSERT-only enforcement (CONTEXT.md D-12):
+--   Layer 1 (role-based; SQLSTATE 42501 when mutated as kiln_app):
+REVOKE UPDATE, DELETE, TRUNCATE ON audit_events FROM kiln_app;
+GRANT INSERT, SELECT ON audit_events TO kiln_app;
+
+--   Layer 2 (trigger; role-bypass-resistant):
+CREATE TRIGGER audit_events_no_update
+  BEFORE UPDATE ON audit_events
+  FOR EACH ROW EXECUTE FUNCTION audit_events_immutable();
+-- (equivalent triggers for DELETE, TRUNCATE)
+
+--   Layer 3 (RULE; final no-op safety net):
+CREATE RULE audit_events_no_update_rule AS ON UPDATE TO audit_events DO INSTEAD NOTHING;
+CREATE RULE audit_events_no_delete_rule AS ON DELETE TO audit_events DO INSTEAD NOTHING;
+
+-- Five b-tree composite indexes per CONTEXT.md D-10:
+CREATE INDEX ON audit_events (run_id, occurred_at DESC) WHERE run_id IS NOT NULL;
+CREATE INDEX ON audit_events (stage_id, occurred_at DESC) WHERE stage_id IS NOT NULL;
+CREATE INDEX ON audit_events (event_kind, occurred_at DESC);
+CREATE INDEX ON audit_events (actor_id, occurred_at DESC);
+CREATE INDEX ON audit_events (correlation_id);
 ```
 
-**Why the DB-level rule block:** the ledger must be append-only even against well-meaning (or malicious) future developers. The operator-facing `Kiln.Audit.append/1` is the only sanctioned entry point, and the DB enforces it.
+**Why three-layer enforcement (D-12):** the ledger must be append-only even against well-meaning (or malicious) future developers or accidental migrations. `CREATE RULE` alone has documented silent-bypass modes (its WHERE-clause AND-ing with the query's WHERE can produce `UPDATE 0` on a malformed mutation without raising). For a security-critical audit ledger, silent enforcement failure is the worst possible outcome. Three independent layers provide defense in depth: REVOKE is loud (SQLSTATE 42501), the trigger is role-bypass-resistant, and the RULE is the final no-op safety net. The operator-facing `Kiln.Audit.append/1` is the only sanctioned entry point. See `.planning/phases/01-foundation-durability-floor/01-CONTEXT.md` D-12.
 
 ### Pattern-Matching on Events for Read Models
 
@@ -624,16 +641,16 @@ def run_timeline(run_id) do
   |> Enum.map(&classify_event/1)
 end
 
-defp classify_event(%{event_type: "run.transition." <> new_state} = e) do
+defp classify_event(%{event_kind: :run_state_transitioned, payload: %{"to" => new_state}} = e) do
   {:state_change, new_state, e}
 end
 
-defp classify_event(%{event_type: "stage.started", payload: %{"stage_id" => stage}} = e) do
+defp classify_event(%{event_kind: :stage_started, payload: %{"stage_kind" => stage}} = e) do
   {:stage_start, stage, e}
 end
 
-defp classify_event(%{event_type: "agent.invoked", payload: %{"role" => role}} = e) do
-  {:agent_call, role, e}
+defp classify_event(%{event_kind: :external_op_completed, payload: %{"op_kind" => op}} = e) do
+  {:external_op_completed, op, e}
 end
 ```
 

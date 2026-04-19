@@ -34,7 +34,7 @@ See `.planning/research/STACK.md` for verified versions, alternatives, and insta
 ## Conventions
 
 - **Postgres is source of truth.** OTP processes are transient accelerators that hydrate from the database on boot. If every BEAM process died now, a fresh boot must continue every in-flight run from its last checkpoint with no human intervention.
-- **Append-only audit ledger is non-negotiable.** Every state transition writes an `Audit.Event` in the same Postgres transaction as the state change. INSERT-only is enforced at the DB level via `CREATE RULE ... DO INSTEAD NOTHING`.
+- **Append-only audit ledger is non-negotiable.** Every state transition writes an `Audit.Event` in the same Postgres transaction as the state change. INSERT-only is enforced via three-layer defense in depth: `REVOKE UPDATE, DELETE, TRUNCATE` from the runtime role `kiln_app` (role-based, SQLSTATE 42501), a `BEFORE UPDATE OR DELETE OR TRUNCATE` trigger `audit_events_immutable()` (role-bypass-resistant), and `CREATE RULE ... DO INSTEAD NOTHING` (final no-op safety net). See `.planning/phases/01-foundation-durability-floor/01-CONTEXT.md` D-12.
 - **Idempotency everywhere.** Oban unique jobs are **insert-time only**, not execution-time — pair every external side-effect with an `external_operations` intent-table row (two-phase intent → action → completion).
 - **No Docker socket mounts.** Sandboxes use `System.cmd("docker", ...)` + `--cap-drop=ALL` + rootless + egress blocked at the Docker network layer (`internal: true`). Never mount `/var/run/docker.sock`.
 - **Secrets are references, not values.** `SEC-01`: store secret names, fetch from `persistent_term` at point-of-use, redact via `@derive {Inspect, except: [:api_key]}`, never persist to workspace, never render to UI/logs.
