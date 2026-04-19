@@ -1,0 +1,211 @@
+software dark factory prompt feedback.txt
+---
+
+It’s strong as source material and too big/noisy as an actual prompt.
+
+My take: 8.5/10 as a vision doc, 5.5/10 as an agent prompt.
+
+The biggest problem is not the ideas. The ideas are mostly good. The problem is that the prompt currently mixes:
+
+1. product vision,
+2. architecture defaults,
+3. language/framework idioms,
+4. testing/style rules,
+5. research instructions,
+6. orchestration behavior,
+7. UI/design taste.
+
+That makes it expensive to parse, easy to contradict, and hard for an agent to know which rules are truly binding.
+
+Your Elixir/Phoenix instincts are broadly aligned with current docs: Phoenix recommends runtime config via config/runtime.exs; LiveView has first-class async patterns like assign_async and stream_async plus strong built-in testing via LiveViewTest; Plug still documents CSRF protection in the standard session-backed stack; LiveDashboard supports custom pages; and Oban Web explicitly recommends restricting dashboard access. Your “vendor-agnostic observability boundary” instinct is also good because OpenTelemetry Erlang/Elixir currently lists traces as stable while metrics and logs are still marked development.  ￼
+
+Your architecture instincts also match current Elixir guidance: Elixir docs explicitly warn about “boolean obsession” and about organizing code around processes when runtime properties do not justify it; mix xref is still the right tool for catching compile-connected cycles; Mox still pushes behaviour-based mocks rather than ad-hoc mocking; Credo supports custom checks; Dialyxir remains the standard Dialyzer wrapper; and StreamData gives you property-based testing for domain invariants.  ￼
+
+The best ideas to steal from the current “factory” ecosystem are also pretty clear. GSD is leaning hard into artifactized workflows such as UI design contracts and forensics. GSD 2 adds direct agent-harness control, per-phase model selection, “thinking level as effort,” and budget-capped multi-session orchestration. Fabro is pushing stage-level Git checkpointing and isolated sandboxes. Gas Town/Beads emphasizes durable work tracking, agent persistence, merge-queue verification gates, and graph-backed memory. Attractor formalizes artifact stores, status files, retry/backoff, and audit trails. StrongDM’s public writeup adds two especially important ideas: holdout scenarios and digital twins for external systems.  ￼
+
+The cautionary lesson from current public feedback is: these systems become fragile when autonomy, retries, and artifacts are not tightly bounded. Recent GSD 2 issues publicly show stuck loops, repeated retries, and cost spikes, while discussion around GSD/Gas Town is split between “mind-blowing for bigger projects” and “overengineered, slow, burns limits.” So your prompt should optimize for bounded autonomy, not just maximum autonomy.  ￼
+
+What to add
+
+1. Add an output contract.
+Right now you specify values, but not enough about the exact shape of the answer. Make every major response return:
+
+* recommendation
+* why it fits this software type
+* alternatives considered
+* tradeoffs
+* artifacts/files to create or update
+* test plan
+* CI/ops implications
+* rollback/failure mode
+
+That one change will improve consistency more than almost anything else.
+
+2. Add a software-type decision matrix.
+You already hint at this, but make it explicit:
+
+* SaaS/internal tools/API server → modular monolith, DDD default
+* CLI/library → simpler layers, less ceremony
+* workflow/agent engine → durable state machine + jobs
+* game/real-time system → do not force DDD if ECS/data-oriented design fits better
+
+3. Add a validation contract.
+This should be a non-negotiable section:
+
+* hidden holdout scenarios for major workflows
+* ExUnit + LiveViewTest for most server/UI behavior
+* browser E2E only for a small set of critical flows
+* property tests for core domain invariants
+* CI gates: tests, lint, dialyzer, xref, security checks
+
+This is where your prompt becomes a factory instead of a vibes doc. LiveViewTest, StreamData, Credo, Dialyxir, and mix xref all support this direction today.  ￼
+
+4. Add a budget/retry/escalation policy.
+You care about token efficiency, but the prompt does not yet say what to do when a task loops or gets expensive. Add rules like:
+
+* cap retries per phase
+* cap total spend / tool calls / elapsed steps per unit of work
+* escalate when confidence is low or progress stalls
+* summarize current state before retrying
+* never silently continue after repeated verification failure
+
+This is strongly justified by the current public reliability issues in GSD-style systems.  ￼
+
+5. Add an idempotency contract.
+You already say jobs should be retry-safe; tighten it. Example:
+
+* every side effect must have an idempotency key or dedupe strategy
+* every job must log correlation_id, causation_id, actor, and tenant
+* enqueue uniqueness is helpful but not sufficient
+* handlers must be safe under replay, retry, timeout, and partial failure
+
+That matters because Oban’s unique jobs prevent duplicate enqueueing, but uniqueness is insert-time logic and does not itself serialize concurrent execution.  ￼
+
+6. Add a docs/artifacts inventory.
+Instead of “some markdown files somewhere,” make the canonical set explicit:
+
+* DOMAIN-GLOSSARY.md
+* WORKFLOWS-BDD.md
+* ARCHITECTURE-DECISIONS.md
+* ACCEPTANCE-CRITERIA.md
+* OPERATIONS-RUNBOOK.md
+* FAILURE-MODES.md
+* POSTMORTEMS.md
+
+What to remove or move
+
+Move language-specific style rules out of the core prompt.
+Your Ruby/RSpec rules about let, ivars, #call, etc. should live in language templates, not in the main system prompt. The core prompt should say: “use idiomatic language-specific templates.” Then have a Ruby template, Elixir template, TypeScript template, etc.
+
+Remove repeated aesthetic language.
+“Great UI/UX,” “joy to use,” “great documentation,” “great motion graphics,” “very readable,” and similar ideas appear many times. Keep one strong section on product/design quality. Repetition here burns tokens without improving behavior.
+
+Remove duplicate principles.
+You repeat:
+
+* durable unit of work
+* DDD/layers
+* app vs infrastructure separation
+* append-only/event history
+* service/SRP classes
+* great UX
+* docs as source of truth
+
+Say each once, clearly.
+
+What to delete or rewrite
+
+Delete or rewrite these exact patterns:
+
+“always DDD/hexagonal/clean”
+Replace with:
+“Default to modular-monolith DDD/layered architecture for SaaS, internal tools, and HTTP services. Deviate when the software type has materially different access patterns or runtime constraints.”
+
+“one-shot a perfect set of recommendations so i dont have to think”
+Replace with:
+“Produce a coherent recommendation set with explicit tradeoffs and the minimum number of choices left unresolved.”
+
+“research using subagents…” at every decision step
+Keep the research rule once, globally. Otherwise you are forcing expensive re-research for trivial decisions.
+
+“event sourcing where applicable”
+Tighten to:
+“Default to current-state tables plus append-only audit/event ledger. Escalate to full event sourcing only when replay, temporal queries, multi-consumer projections, or compliance requirements justify the operational cost.”
+
+That version matches your own intent better and is closer to the public lessons coming out of StrongDM/GSD/Fabro-style systems.  ￼
+
+My strongest recommendation
+
+Turn this into a 3-layer prompt stack:
+
+1. Core constitution
+
+Short. Stable. About 1–2 pages.
+
+* mission
+* stack
+* defaults
+* non-negotiables
+* safety / security / auditability
+* stop conditions
+
+2. Per-language / per-software-type templates
+
+* Elixir/Phoenix SaaS
+* Ruby/Rails SaaS
+* TypeScript web app
+* CLI/tooling
+* workflow engine
+* game/real-time system
+
+3. Task output contract
+
+For every task, force the model to emit:
+
+* decision
+* rationale
+* artifacts
+* tests
+* ops
+* risks
+* open questions
+
+That structure will outperform one giant mega-prompt.
+
+A tighter replacement for your opener
+
+You are designing and operating an Elixir/Phoenix “software dark factory.”
+Primary stack:
+- Elixir / Phoenix / LiveView
+- PostgreSQL
+- Oban for durable background jobs
+- Docker-based local + CI reproducibility
+Mission:
+Build maintainable, well-tested, operator-friendly software with durable artifacts, strong auditability, great UX, and minimal human intervention.
+Default architecture:
+- For SaaS/internal tools/API systems: modular monolith, layered/hexagonal boundaries, DDD by bounded context
+- Prefer functional style where idiomatic; use small SRP service objects in OO-heavy languages
+- Separate application logic from infrastructure adapters
+- Prefer append-only audit/event ledgers; use full event sourcing only when replay/time-travel materially pays off
+Non-negotiables:
+- Runtime config, not build-time secrets
+- Idempotent, retry-safe jobs and external side effects
+- Structured logging, correlation IDs, telemetry boundary
+- Role-gated operator/admin/debug surfaces
+- CI gates for tests, lint, static analysis, dependency/boundary checks
+- Reliable integration/e2e coverage on critical workflows
+Research rule:
+This ecosystem changes quickly. Before recommending libraries, patterns, or operational choices, research current idiomatic Elixir/Phoenix guidance and current project learnings from GSD, GSD2, Fabro, Gas Town, Beads, Attractor, and StrongDM-style software-factory work.
+Output format for each recommendation:
+1. Recommendation
+2. Why this fits this software type
+3. Alternatives considered
+4. Tradeoffs
+5. Files/artifacts to create or update
+6. Test/validation plan
+7. CI/ops implications
+8. Risks and escalation points
+
+That is much closer to something an agent will reliably obey.
+
+If you want the best next step, make me rewrite this into a clean v1 prompt targeted to one actual runtime: Claude Code, Codex CLI, Cursor, OpenCode, GSD/Fabro-style orchestrator, or your own Phoenix factory agent.

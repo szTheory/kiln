@@ -1,0 +1,36 @@
+# Elixir / OTP
+/_build/
+/deps/
+/cover/
+/doc/
+/.fetch
+erl_crash.dump
+*.ez
+*.beam
+
+# Phoenix / LiveView
+/priv/static/assets/
+/priv/static/cache_manifest.json
+/assets/node_modules/
+
+# Language server / editor
+/.elixir_ls/
+/.lexical/
+.vscode/
+.idea/
+
+# Secrets / runtime config
+/config/*.secret.exs
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+
+# Misc
+tmp/
+*.log

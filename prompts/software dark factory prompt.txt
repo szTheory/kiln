@@ -1,0 +1,131 @@
+software dark factory
+
+written in elixir (phoenix framework). uses liveview for internal dashboards
+
+lessons learned from GSD (get shit done), Gas Town, and Fabro.
+
+use BEADS for our git stuff kind of like how gas town does
+
+!!!ALL OF THIS ECOSYSTEM IS NEW SO ALWAYS RESEARCH UP TO DATE INFO AS OF NOW!!!
+
+so the goal here is to have a "software dark factory" 
+
+
+
+has some preferences for what it builds "by default"
+- ddd/hexagonal/clean (aka layered architecture)
+- functional programming to reduce bugs, or when using classes prefer Single Responsibility Principle (SRP) using the initializer to take DI (dependency injection) deps, and a single public method (using same name if idiomatic for that language, like #call for Ruby) that takes the args that could change at runtime to parameterize the behavior of that instantiated object. prefer OO for languages where that's more expected (using SRP classes), but functional is great too and prefer that or functional languages. or whatever is idiomatic to get the same effect perhaps behaviors in Elixir etc.
+- well tested, specs across happy path, error cases, and boundary cases. focus most energy across happy path and main expected error cases though in terms of integration/e2e style specs which are incredibly important. can mock external deps using our DI with our SRP classes (similar can be done for functions) to make testing easier and faster. all tests especially integration/e2e should be reliable/non-flakey/no-intermittent-failures. using best practices for whatever e2e style testing is used for example playwright best practices.
+- CI/CD is a must, use docker/docker compose or whatever to make standing up integration targets and the runtime for test mode easy and reliable/reproducible in both local testing and CI. dogfood the docker setup, great DX (developer experience) and ergonomics
+- whenever dealing with UI/UX, it's important that we first have an understanding of the persona(s), if applicable ICP (ideal customer persona), and especially the jobs to be done. we should always be maintaining a canonical artifact somewhere like .md files perhaps in a folder and clear filenames, all flat no folders to make it easy to scan... but sorts well based on filenames... in some cases it could be a single giant file but eventually we'll need to split it up into subfiles based on area of the app (DDD domain context) or based on persona or some logical grouping. the point is to have always up to date and accurate descriptions of the behavior (BDD) style workflows in the app that serves as the north star, the record of truth so that we can use that text to drive agent-based testing or other workflows that would benefit greatly from a declarative "feature set" like we could have agents possibly at that point even do integration/e2e testing
+- Domain language: Similarly we always want to maintain an up to date and accurate description ideally in one markdown file of our Domain language, so especially nouns/verbs/events that would happen in the system/use cases/user flows/workflows... this should also serve as source of truth and has the add-on effect of making it very easy for non-technical users to read and understand what is the domain we are working in so that they can become an expert in the domain
+- Consider what type of software is being built. Videogame vs. SaaS app vs http server vs embedded software etc. all have very different needs and we should keep that in focus. Obviously forcing DDD into a videogame design doesn't make sense when there are way different access patterns for video games and sometimes OO is even avoided and things like ECS are used... So I want to tend toward the ideal software architecture but within the domain/usage patterns/software type because some of them are way different beasts than your typical distributed B2B SaaS app...
+- CI/CD and devops/SRE are very important to me. the automation of build, testing, distribution and even operation (SRE) level should be automated as much as possible. SHIFT LEFT! to the point that SRE has only the highest level actionable signals to avoid alert fatigue, and that it can even handle its own runbooks to the extent possible to dogfood
+- cross-cutting concerns like telemetry/logging/error reporting/instrumentation should be abstracted to a level that would make swapping the integration system out for another one easy. prefer structured logging, always use that same logger/error interface everywhere instead of hardcoding console.log for example that way we have great SRE/devops/SWE level instrumentation from the beginning and it's consistent makes things easier to debug. having auditing out of the box, impersonation for saas etc. as close to the beginning as possible is very important. also things like admin/SRE UIs that are very focused on the actual JTBD/SRE risk factor of the system so you always have a dashboard that is high level where you can view all the analytics/logs/metrics (KPI or RED metrics from SRE world) all of it tied together presented optimally to be easy to scan and get an intuition/conceptual understanding while keeping all debug interface easy to work with and also you can always copy the info easily and navigate it easily great UI/UX for this "debug/operator" experience whatever form it takes could even be a CLI especially for simple software
+- where applicable I prefer event sourcing or really I mean a ledger of events in other words something that is auditable and can be replayed and used for time series analysis, allows for rewind and easy debugging when you have a "story" of events
+- Service classes (SRP) are great in those OO languages
+- Command/Query pattern at the application layer is a great way to structure things when using DDD
+- Infrastructure layer with reads and writes separated, makes it easy to swap out data sources and integration test as well using DI for database/network/disk read/write operations being mockable
+- for specs i prefer a flat style, avoid nesting, BDD style, avoid setup state in shared before blocks, avoid let statements (where applicable), avoid ivars (where applicable.), use local vars, keep spec/test code straightforward but you can DRY with support functions we just dont want to be debugging our spec/test code itself, avoid "it should" in descriptions use active verb phrasing, use AAA style arrange act assert demarcarting each block with whitespace (no explicit AAA commenting). specs test happy path, main error cases and most important boundary conditions. specs run fast are reliable/non-flakey/deterministic
+- for saas apps strongly prefer a modular monolithc to microservices, just keep it well structured separate architectural layers and separate DDD "domain contexts" especialluy along context boundaries like core/billing/authentication/etc/etc 
+- whenever designing API make it very obvious user-friendly avoiding N+1 queries by default do the right thing while also supporting intermediate/advanced use cases elegantly
+- for saas/secrets etc we like "12 factory" kind of apps for security in diff envs like staging/production and local/testing/CI
+
+
+
+gastown/fabro type stuff (we are doing an elixir/phoenix version of dark software factory here):
+* every meaningful unit of work should have a durable representation (task / command / bead / workflow node) that can be versioned, resumed, diffed, replayed, and audited. optimize for traceability of work, not just storage of code. Gas Town’s Beads and Fabro’s stage-level git checkpointing both push hard in this direction. 
+*docs are part of the runtime of the factory. architecture decisions, domain glossary, BDD/JTBD workflows, failure modes, and operator runbooks should live close to code and be structured so agents can consume them directly. GSD’s current system is explicitly spec-driven and artifact-heavy; your list is already moving in that same direction.
+* security defaults should be boring and automatic: CSRF on whenever sessions are used, secure browser headers, scoped data access, audited impersonation, and role-gated debug/admin surfaces. Plug’s CSRF docs still recommend CSRF protection whenever a session is used, including JSON cases.
+* use releases and runtime config as the deployment primitive. do not bake environment-dependent secrets or ops config into build-time config. Phoenix’s release docs and current Elixir config docs both push toward runtime configuration via config/runtime.exs.
+*prefer append-only history for critical domains. full event sourcing only where replay/audit/time-travel actually pays for the extra complexity; otherwise an append-only audit ledger plus current-state tables is often the better trade. that recommendation follows from the real operational overhead in CQRS/ES tooling: dedicated event stores, handler semantics, projections, and replay/backoff concerns. 
+* build a dedicated operator experience. job queues, failed workflows, replays, audits, impersonation traces, rate limits, and “why is this stuck?” should have first-class UI/UX. Phoenix LiveDashboard gives you real-time metrics/debugging and custom pages; Oban Web adds a job dashboard and explicitly recommends securing dashboard access.
+* treat observability as a first-class product surface. define a stable internal instrumentation API, emit domain-level telemetry events, propagate correlation ids, and build purpose-specific operator dashboards rather than dumping people into raw logs. Phoenix LiveDashboard supports custom pages, and OpenTelemetry’s Erlang/Elixir docs currently list traces as stable while metrics and logs are still development, which is a good reason to keep your instrumentation boundary vendor- and backend-agnostic.
+* prefer explicit domain states over boolean soup. use atoms/enums/state machines for workflow phase, role, status, sync state, review state, etc., so impossible states are harder to represent. Elixir’s design anti-pattern docs explicitly warn about “boolean obsession.”  
+* keep the compile graph shallow and intentional. avoid unnecessary macros, watch compile-connected cycles with mix xref, and enforce architectural boundaries in CI. current Elixir docs point to mix xref for spotting compile-connected cycles, and Boundary exists specifically to restrict cross-module dependencies in Phoenix-style apps. 
+* on the BEAM, do not organize code around processes unless the runtime properties justify it. processes are for concurrency, ownership, isolation, backpressure, or fault containment — not for pretending every abstraction needs a GenServer. Elixir’s official anti-pattern docs now call this out directly. 
+* external integrations should always sit behind behavior-defined ports/adapters. in tests, prefer behavior-based mocks over monkeypatchy/ad hoc mocking. Mox’s current guidance is still: no ad-hoc mocks, only mocks based on behaviours.
+* for the dark software factory itself we want phoenix liveview responsive mobile first easy to use
+* very important that we are token efficient so use heavier thinking models for planning and faster less thinking models as appropriate for the type of task
+* we want smart defaults for the types of models and the graph for how software is built so that it works automatically as much as possible no human intervention is ideal, but can pick from different templates for diff situations/software types if that makes sense
+* white-label branding first, very easy to pick colors/typography and logo, but keep it lightweight
+* dark mode and light mode out of the box system preferences chosen very readable great UI/UX
+* very easy to operate, set it and forget it, easy admin
+* every background action should be idempotent, retry-safe, and correlation-id aware. if it sends email, touches billing, mutates external systems, or fans out work, it must tolerate retries and partial failure cleanly
+* where applicable... long-running or important side effects should be jobs, not vibes. use durable job execution by default for retries, inspection, and progress reporting; reserve raw tasks/processes for truly local ephemeral work.
+* default to server-first UI architecture: LiveView first, function components for reuse, JS only as an escape hatch, streams for large collections, async assigns for slow/remote data. this keeps internal/operator UIs fast and simple without turning the frontend into a second app
+* prefer artifact-first execution. plans, design contracts, domain language, acceptance criteria, diagnostics, and postmortems should exist as durable artifacts that agents and humans both read/write. GSD’s current docs explicitly lean on a UI design contract and workflow forensics artifacts
+* i really like a lot of the GSD stuff like code review phase, ui phase, etc... try to incorporate lessons learned from the latest versions of GSD we can rolle this into our dark software factory
+* every meaningful unit of work should have a durable representation (task / command / bead / workflow node) that can be versioned, resumed, diffed, replayed, and audited. optimize for traceability of work, not just storage of code. Gas Town’s Beads and Fabro’s stage-level git checkpointing both push hard in this direction
+* easy onboarding, easy to plug in starter prompt and it helps you identify biggest gaps or points of clarification needed...
+* is great in early dev, intermediate dev, adavanced dev and ongoing use with your rolled out product to continue to develop and CI/CD it but as hands-off as possible, but practical that you can not necessarily directly steer but perhaps influence and see what is going on, have high level visualization of the code or whatever so you can understand how the software build processir is evolving and its components etc and is great documentation also at a summary high level of how the software that was built actually works to orient the reader to the design of the software and how to onboard with it, use it intermediate/advanced levels as well... how it really works and especially makes it clear that the software does what it should the use cases personas jtbd etc...
+* makes it easy to plug in your "branding" for the software etc maybe you have to plug in your branding ahead of time like the name/colors/typography/brand voice/acceptable imagery or maybe it auto-generates a name and brand for you or presents you with chocies that are distinct from other softwares/brand names/etc in the space so that your "brand" or name for whatever is being built is not overlapping with existing ones, so that it's distinct and that you automatically have a "brand book" for whatever software you build...
+* i will definitely be using this to build saas apps for b2b/b2c... also things like web browsers, compilers, http servers, emulators... mobile apps (ios/android), sometimes will need a monorepo with like multiple things like web version, ios version, android version of an app... will also build a lot of libraries (most oss).... probably CLIs too, that's just a sampling many other types of software i'm sure too that i wouldn't antitipcate... maybe even like data pipelines that use LLM to build me things like curriculums for language learning software... that are correct/efficient/fast... 
+* want to be token efficient/cost efficient and have great presents for models for different scenarios, project of things like token/spend... and actual...
+* great dashboard that makes it easy to operate the software dark factory like a dashboard easy to SRE/devops it, is very hands off set it and forget it it just works deployed locally, online maybe with terraform to render.com etc.. maybe AWS... but especially very easy to run locally with docker as well...
+
+
+
+
+
+
+-this doesn't apply to all languages but generally when supported, we should use duck typing for flexibility. so accept private interfaces, export types for return values and ones that should truly be exposed.
+- avoid circular dependencies within internal components/architectural layers. if possible and it's feasible/easy enough then use some kind of static or runtime (CI tested) enforcement of this principle so we can lint away issues
+- a little copy and paste is better than another dep in many cases. the less deps the better, especially transitive deps we want to keep the dependency tree footprint low
+- prefer named args/params over position args/params
+- prefer result types where that is a natural idiom of the language being used (easier to refactor)
+- don't (DO NOT!!!) blanket rescue/catch and then swallow all errors to logs INSTEAD rescue known/expected error classes and handle them bespoke, if we error is not a somewhat normal situation then we should let the error bubble up so that we have more signal to fix the bug faster!
+- great UI/UX is paramount, when relevant do responsive first for good experience
+- integrated brand, great graphic design, great motion graphics where applicable, great UI/UX, is a joy to use
+- documentation that is very clear, a joy to read, respects attention span, guides for best practices and footguns to avoid, makes it easy for new adopters who are onboarding, people who are "living into" the software and using it, and also long term users the documentation is great for all of them. digestable chunks of info, visual with diagrams where helpful, memorable readable scannable, audience-first, easy to navigate
+- great code comments where the code is not already self-documenting (it should be self documenting and idiomatic code principle of lease surprise great DX as much as possible) so the comments are short, include input/output data shapes, ad in intuition and conceptual understanding orient the reader's brain to what the code does, example data shapes displayed, the comments avoid jargon/avoid boilerplate
+- consider the likely categories of software that our dark software factory would build and use the idiomatic well performant and highly maintainable software architecture for it that provides high testability and flexibility, self-discoverable code that uses the domain language for consistency
+- separate the application and infrastructure layer per DDD style in most apps that are not games (even that it might be useful) and also separate reads/writes
+- when dealing with distributed systems architecture, be lightweight in approach but idiomatic and fault tolerant/highly available by default without overengineering. use the VM and language idiomatic what it provides as much as possible "life off of the land" of the standard library and stable dependencies from package ecosystem of the language/framework
+
+
+
+
+
+
+- at any decision step alon the way, use something like this pattern to keep on track :::  for each of these...
+---
+research using subagents, what is pros/cons/tradeoffs of each considering the example for each approach, what is idiomatic for elixir/plug/ecto/phoenix for this type of lib and in this ecosystem, lessons learned from other libs in same space even from other languages/frameworks if thehy are popular successful, what did they do right that we should learn from, what did they do wrong/footguns we can learn from, great developer ergeonomics/dx emphasized... think deeply one-shot a perfect set of recommendations so i dont have to think, all recommendations are coherent/cohensive with each other and move us toward the goals/vision of this project... using great software architecture/engineering, principle of least surprise and great UI/UX wheere applicable great dev experience... 
+:::
+
+
+
+
+
+
+
+
+
+====
+
+Gastown jumpoff point: https://steve-yegge.medium.com/welcome-to-gas-town-4f25ee16dd04
+also cloned to /Users/jon/projects/gastown
+
+Beads: https://github.com/gastownhall/beads
+also cloned to /Users/jon/projects/beads
+
+Fabro jumpoff points: https://github.com/fabro-sh/fabro
+https://fabro.sh/
+also cloned to /Users/jon/projects/fabro
+
+
+GSD Get Shit Done: https://github.com/gsd-build/get-shit-done
+also cloned to /Users/jon/projects/get-shit-done
+
+GSD2 https://github.com/gsd-build/gsd-2
+also cloned to /Users/jon/projects/gsd-2
+
+
+Attractor: https://github.com/strongdm/attractor
+also clone to /Users/jon/projects/attractor
+
+also scan online research using subagents about StrongDM dark software factory, GSD, Fabro like discussions about it, people's feedback like on github issues or blog posts written discussions about it on y combinator hacker news, reddit, etc...
+
+try to understand their motivations, their architecture, lessons learned, pros/cons/tradeoffs
+
+we want to incorporate the best of all of these, avoiding the pitfalls, do want to be somewhat opinionated in how we approach building projects with our dark software factory so that they are well architectured and tested, especially at the e2e/integration level, especially having great UI/UX and being very easy to maintain
