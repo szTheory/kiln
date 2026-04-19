@@ -34,9 +34,39 @@ Open:
 ## Running the test suite
 
 ```bash
-mix check        # full gate: format + compile + test + credo + dialyzer + sobelow + mix_audit + xref
+mix check        # full gate: format + compile + test + credo + dialyzer + sobelow + mix_audit + xref + kiln.boot_checks
 mix test --stale # fast local loop
 ```
+
+## Running the integration smoke test (LOCAL-01 validation)
+
+```bash
+bash test/integration/first_run.sh
+```
+
+This exercises the fresh-clone UX end-to-end: `.env` copy, `docker compose up -d db`, `mix setup`, `mix phx.server`, and `curl /health` returning `{"status":"ok",...}` with all four dependency fields (`postgres`, `oban`, `contexts`, `version`) green. Requires `jq`, `curl`, `lsof` on PATH.
+
+If host port 5432 is held by another container, the script fails fast with a clear operator message + two remediation options (stop the other container, or remap Kiln's compose port). See `.planning/STATE.md > Deferred Items` for the known `sigra-uat-postgres` conflict on this host.
+
+### Running migrations
+
+Plan 03 introduces a two-role Postgres model (`kiln_owner` owns DDL, `kiln_app` is the runtime role). Migrations must be run as `kiln_owner`:
+
+```bash
+KILN_DB_ROLE=kiln_owner mix ecto.migrate
+```
+
+See `config/runtime.exs` for the `KILN_DB_ROLE` switch. The default runtime role is `kiln_app`; only migration / DDL operations need `kiln_owner`.
+
+### Bypassing boot checks (emergency only)
+
+`Kiln.BootChecks.run!/0` asserts the durability-floor invariants at every boot. If you genuinely need to boot with a broken floor (e.g. debugging a migration mid-flight), set `KILN_SKIP_BOOTCHECKS=1`:
+
+```bash
+KILN_SKIP_BOOTCHECKS=1 mix phx.server
+```
+
+The skip emits a loud error-level log line — never use in production.
 
 ## License
 
