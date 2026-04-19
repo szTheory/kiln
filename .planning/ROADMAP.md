@@ -253,6 +253,21 @@ Phases needing `/gsd-research-phase` before planning:
 | 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 0/TBD | Not started | - |
 | 9. Dogfood & Release (v0.1.0) | 0/TBD | Not started | - |
 
+## Backlog
+
+Ideas captured for future planning but unsequenced. These live outside the 1–9 active sequence. Promote to the active milestone via `/gsd-review-backlog` when ready.
+
+### Phase 999.1: Docs & Landing Site (BACKLOG)
+
+**Goal:** [Captured for future planning — see `.planning/phases/999.1-docs-landing-site/` for detail]
+**Requirements:** `DOCS-01..DOCS-07` (see REQUIREMENTS.md § Docs & Release (v1.0+))
+**Slot decision:** Deferred to late Phase 8 / early Phase 9. Two defensible slots: **Phase 10 inside v0.1.0 milestone** (tighter product binding, better first-tag impression) OR **v1.1 milestone post-v0.1.0** (keeps v0.1.0 focused on runtime). Decide once v0.1.0 scope is locked.
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ---
 *Roadmap created: 2026-04-18*
 *Phases derived from 55 v1 requirements + research convergence (FEATURES dependency graph + ARCHITECTURE context DAG + PITFALLS recovery-cost ordering)*
+*Backlog 999.1 added: 2026-04-18*
