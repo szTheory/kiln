@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/escalation_triggered.json",
+  "title": "escalation_triggered",
+  "type": "object",
+  "required": ["reason"],
+  "properties": {
+    "reason": { "type": "string" },
+    "cap_kind": { "type": "string" }
+  },
+  "additionalProperties": false
+}

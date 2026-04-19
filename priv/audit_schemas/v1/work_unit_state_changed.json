@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/work_unit_state_changed.json",
+  "title": "work_unit_state_changed",
+  "type": "object",
+  "required": ["work_unit_id", "from", "to"],
+  "properties": {
+    "work_unit_id": { "type": "string", "format": "uuid" },
+    "from": { "type": "string" },
+    "to": { "type": "string" }
+  },
+  "additionalProperties": false
+}

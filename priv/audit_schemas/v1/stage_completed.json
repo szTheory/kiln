@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/stage_completed.json",
+  "title": "stage_completed",
+  "type": "object",
+  "required": ["stage_kind", "duration_ms"],
+  "properties": {
+    "stage_kind": { "type": "string" },
+    "duration_ms": { "type": "integer", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

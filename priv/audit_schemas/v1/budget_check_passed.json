@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/budget_check_passed.json",
+  "title": "budget_check_passed",
+  "type": "object",
+  "required": ["scope", "consumed", "limit"],
+  "properties": {
+    "scope": { "type": "string" },
+    "consumed": { "type": "number", "minimum": 0 },
+    "limit": { "type": "number", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

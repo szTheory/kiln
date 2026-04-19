@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/stage_failed.json",
+  "title": "stage_failed",
+  "type": "object",
+  "required": ["stage_kind", "reason"],
+  "properties": {
+    "stage_kind": { "type": "string" },
+    "reason": { "type": "string" }
+  },
+  "additionalProperties": false
+}

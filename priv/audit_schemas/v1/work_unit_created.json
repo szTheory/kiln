@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/work_unit_created.json",
+  "title": "work_unit_created",
+  "type": "object",
+  "required": ["work_unit_id", "kind"],
+  "properties": {
+    "work_unit_id": { "type": "string", "format": "uuid" },
+    "kind": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/external_op_failed.json",
+  "title": "external_op_failed",
+  "type": "object",
+  "required": ["op_kind", "idempotency_key", "error"],
+  "properties": {
+    "op_kind": { "type": "string" },
+    "idempotency_key": { "type": "string" },
+    "error": { "type": "string" }
+  },
+  "additionalProperties": false
+}

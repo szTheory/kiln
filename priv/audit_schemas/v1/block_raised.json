@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/block_raised.json",
+  "title": "block_raised",
+  "type": "object",
+  "required": ["reason"],
+  "properties": {
+    "reason": { "type": "string" },
+    "details": { "type": "object" }
+  },
+  "additionalProperties": false
+}

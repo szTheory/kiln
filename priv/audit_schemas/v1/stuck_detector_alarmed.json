@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/stuck_detector_alarmed.json",
+  "title": "stuck_detector_alarmed",
+  "type": "object",
+  "required": ["failure_class", "count"],
+  "properties": {
+    "failure_class": { "type": "string" },
+    "count": { "type": "integer", "minimum": 1 }
+  },
+  "additionalProperties": false
+}

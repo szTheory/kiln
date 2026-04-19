@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/run_state_transitioned.json",
+  "title": "run_state_transitioned",
+  "type": "object",
+  "required": ["from", "to"],
+  "properties": {
+    "from": {
+      "type": "string",
+      "enum": ["queued", "planning", "coding", "testing", "verifying", "merged", "failed", "escalated"]
+    },
+    "to": {
+      "type": "string",
+      "enum": ["queued", "planning", "coding", "testing", "verifying", "merged", "failed", "escalated"]
+    },
+    "reason": { "type": "string" }
+  },
+  "additionalProperties": false
+}

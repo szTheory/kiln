@@ -46,14 +46,14 @@ defmodule Kiln.Audit.EventKind do
   @doc """
   Returns the canonical ordered list of event kinds as atoms.
   """
-  @spec values() :: [atom()]
+  @spec values() :: [atom(), ...]
   def values, do: @kinds
 
   @doc """
   Returns the canonical ordered list of event kinds as strings, for migration
   CHECK constraint generation and string-payload callers.
   """
-  @spec values_as_strings() :: [String.t()]
+  @spec values_as_strings() :: [String.t(), ...]
   def values_as_strings, do: Enum.map(@kinds, &Atom.to_string/1)
 
   @doc """

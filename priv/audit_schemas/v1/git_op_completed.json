@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/git_op_completed.json",
+  "title": "git_op_completed",
+  "type": "object",
+  "required": ["op", "sha"],
+  "properties": {
+    "op": { "type": "string", "enum": ["push", "commit", "fetch", "pull", "tag"] },
+    "sha": { "type": "string" }
+  },
+  "additionalProperties": false
+}

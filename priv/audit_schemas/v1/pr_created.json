@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/pr_created.json",
+  "title": "pr_created",
+  "type": "object",
+  "required": ["number", "url"],
+  "properties": {
+    "number": { "type": "integer", "minimum": 1 },
+    "url": { "type": "string", "format": "uri" }
+  },
+  "additionalProperties": false
+}

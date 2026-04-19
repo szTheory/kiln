@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/scenario_runner_verdict.json",
+  "title": "scenario_runner_verdict",
+  "type": "object",
+  "required": ["run_id", "verdict", "exit_code"],
+  "properties": {
+    "run_id": { "type": "string", "format": "uuid" },
+    "verdict": { "type": "string", "enum": ["pass", "fail"] },
+    "exit_code": { "type": "integer" }
+  },
+  "additionalProperties": false
+}

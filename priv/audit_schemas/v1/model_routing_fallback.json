@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/model_routing_fallback.json",
+  "title": "model_routing_fallback",
+  "type": "object",
+  "required": ["from_model", "to_model", "role", "reason"],
+  "properties": {
+    "from_model": { "type": "string" },
+    "to_model": { "type": "string" },
+    "role": { "type": "string" },
+    "reason": { "type": "string" }
+  },
+  "additionalProperties": false
+}

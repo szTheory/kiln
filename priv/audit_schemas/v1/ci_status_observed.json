@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/ci_status_observed.json",
+  "title": "ci_status_observed",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": { "type": "string", "enum": ["pending", "success", "failure"] }
+  },
+  "additionalProperties": false
+}
