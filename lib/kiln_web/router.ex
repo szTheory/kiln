@@ -23,13 +23,10 @@ defmodule KilnWeb.Router do
     get "/", PageController, :redirect_to_ops
   end
 
-  # Health endpoint (Plug mounted in Endpoint BEFORE Plug.Logger in Plan 06; this is the
-  # Phoenix route placeholder — returns a P1 stub until Plan 06 ships Kiln.HealthPlug).
-  scope "/", KilnWeb do
-    pipe_through :api
-
-    get "/health", HealthController, :show
-  end
+  # NOTE (Plan 06 / D-31): `/health` is handled by `Kiln.HealthPlug`,
+  # mounted at the Endpoint level BEFORE `Plug.Logger`. The probe
+  # short-circuits before the Router pipeline runs — do NOT add a
+  # `/health` route here (it would be dead code shadowed by the plug).
 
   # Ops dashboards (D-02)
   scope "/ops" do

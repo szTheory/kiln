@@ -41,6 +41,14 @@ defmodule KilnWeb.Endpoint do
     cookie_key: "request_logger"
 
   plug Plug.RequestId
+
+  # D-31: `Kiln.HealthPlug` MUST be mounted BEFORE `Plug.Telemetry` /
+  # `Plug.Logger` so `/health` probes don't pollute the request log or
+  # the `[:phoenix, :endpoint]` telemetry measurements. The plug
+  # short-circuits with `halt/1` when `conn.request_path == "/health"`;
+  # all other requests pass through untouched.
+  plug Kiln.HealthPlug
+
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
