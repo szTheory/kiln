@@ -169,67 +169,67 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCH-01 | TBD | Pending |
-| ORCH-02 | TBD | Pending |
-| ORCH-03 | TBD | Pending |
-| ORCH-04 | TBD | Pending |
-| ORCH-05 | TBD | Pending |
-| ORCH-06 | TBD | Pending |
-| ORCH-07 | TBD | Pending |
-| AGENT-01 | TBD | Pending |
-| AGENT-02 | TBD | Pending |
-| AGENT-03 | TBD | Pending |
-| AGENT-04 | TBD | Pending |
-| AGENT-05 | TBD | Pending |
-| SAND-01 | TBD | Pending |
-| SAND-02 | TBD | Pending |
-| SAND-03 | TBD | Pending |
-| SAND-04 | TBD | Pending |
-| SPEC-01 | TBD | Pending |
-| SPEC-02 | TBD | Pending |
-| SPEC-03 | TBD | Pending |
-| SPEC-04 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| GIT-01 | TBD | Pending |
-| GIT-02 | TBD | Pending |
-| GIT-03 | TBD | Pending |
-| GIT-04 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| UI-03 | TBD | Pending |
-| UI-04 | TBD | Pending |
-| UI-05 | TBD | Pending |
-| UI-06 | TBD | Pending |
-| OBS-01 | TBD | Pending |
-| OBS-02 | TBD | Pending |
-| OBS-03 | TBD | Pending |
-| OBS-04 | TBD | Pending |
-| LOCAL-01 | TBD | Pending |
-| LOCAL-02 | TBD | Pending |
-| LOCAL-03 | TBD | Pending |
-| UAT-01 | TBD | Pending |
-| UAT-02 | TBD | Pending |
-| BLOCK-01 | TBD | Pending |
-| BLOCK-02 | TBD | Pending |
-| BLOCK-03 | TBD | Pending |
-| BLOCK-04 | TBD | Pending |
-| INTAKE-01 | TBD | Pending |
-| INTAKE-02 | TBD | Pending |
-| INTAKE-03 | TBD | Pending |
-| OPS-01 | TBD | Pending |
-| OPS-02 | TBD | Pending |
-| OPS-03 | TBD | Pending |
-| OPS-04 | TBD | Pending |
-| OPS-05 | TBD | Pending |
-| UI-07 | TBD | Pending |
-| UI-08 | TBD | Pending |
-| UI-09 | TBD | Pending |
+| ORCH-01 | Phase 2 | Pending |
+| ORCH-02 | Phase 2 | Pending |
+| ORCH-03 | Phase 2 | Pending |
+| ORCH-04 | Phase 2 | Pending |
+| ORCH-05 | Phase 5 | Pending |
+| ORCH-06 | Phase 5 | Pending |
+| ORCH-07 | Phase 2 | Pending |
+| AGENT-01 | Phase 3 | Pending |
+| AGENT-02 | Phase 3 | Pending |
+| AGENT-03 | Phase 4 | Pending |
+| AGENT-04 | Phase 4 | Pending |
+| AGENT-05 | Phase 3 | Pending |
+| SAND-01 | Phase 3 | Pending |
+| SAND-02 | Phase 3 | Pending |
+| SAND-03 | Phase 3 | Pending |
+| SAND-04 | Phase 3 | Pending |
+| SPEC-01 | Phase 5 | Pending |
+| SPEC-02 | Phase 5 | Pending |
+| SPEC-03 | Phase 5 | Pending |
+| SPEC-04 | Phase 5 | Pending |
+| SEC-01 | Phase 3 | Pending |
+| GIT-01 | Phase 6 | Pending |
+| GIT-02 | Phase 6 | Pending |
+| GIT-03 | Phase 6 | Pending |
+| GIT-04 | Phase 9 | Pending |
+| UI-01 | Phase 7 | Pending |
+| UI-02 | Phase 7 | Pending |
+| UI-03 | Phase 7 | Pending |
+| UI-04 | Phase 7 | Pending |
+| UI-05 | Phase 7 | Pending |
+| UI-06 | Phase 7 | Pending |
+| OBS-01 | Phase 1 | Pending |
+| OBS-02 | Phase 9 | Pending |
+| OBS-03 | Phase 1 | Pending |
+| OBS-04 | Phase 5 | Pending |
+| LOCAL-01 | Phase 1 | Pending |
+| LOCAL-02 | Phase 1 | Pending |
+| LOCAL-03 | Phase 9 | Pending |
+| UAT-01 | Phase 5 | Pending |
+| UAT-02 | Phase 5 | Pending |
+| BLOCK-01 | Phase 3 | Pending |
+| BLOCK-02 | Phase 8 | Pending |
+| BLOCK-03 | Phase 3 | Pending |
+| BLOCK-04 | Phase 8 | Pending |
+| INTAKE-01 | Phase 8 | Pending |
+| INTAKE-02 | Phase 8 | Pending |
+| INTAKE-03 | Phase 8 | Pending |
+| OPS-01 | Phase 8 | Pending |
+| OPS-02 | Phase 3 | Pending |
+| OPS-03 | Phase 3 | Pending |
+| OPS-04 | Phase 8 | Pending |
+| OPS-05 | Phase 8 | Pending |
+| UI-07 | Phase 8 | Pending |
+| UI-08 | Phase 8 | Pending |
+| UI-09 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 54 total
-- Mapped to phases: 0 (roadmapper will populate)
-- Unmapped: 54 (expected at this stage)
+- v1 requirements: 55 total
+- Mapped to phases: 55 (all mapped)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after initial definition*
+*Last updated: 2026-04-18 after roadmap created (traceability populated, 9 phases)*
