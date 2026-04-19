@@ -63,7 +63,7 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 - [ ] **OBS-01**: Structured JSON logging via logger_json with correlation_id, causation_id, actor, run_id, stage_id on every log line; Logger metadata propagates through Oban/Task boundaries via explicit threading (never `Process.put/2`)
 - [ ] **OBS-02**: OpenTelemetry traces (Erlang SDK, stable as of 2026) — spans per stage, per agent call, per Docker op, per LLM call; `opentelemetry_process_propagator` wired through Oban workers
-- [ ] **OBS-03**: Append-only audit ledger (`audit_events` table) with three-layer INSERT-only enforcement at the Postgres level (REVOKE UPDATE/DELETE/TRUNCATE from runtime role; `BEFORE UPDATE/DELETE/TRUNCATE` trigger `audit_events_immutable()`; `CREATE RULE … DO INSTEAD NOTHING` safety net — see 01-CONTEXT.md D-12); time-travel query support via event replay
+- [x] **OBS-03**: Append-only audit ledger (`audit_events` table) with three-layer INSERT-only enforcement at the Postgres level (REVOKE UPDATE/DELETE/TRUNCATE from runtime role; `BEFORE UPDATE/DELETE/TRUNCATE` trigger `audit_events_immutable()`; `CREATE RULE … DO INSTEAD NOTHING` safety net — see 01-CONTEXT.md D-12); time-travel query support via event replay — **Done (Plan 01-03)**
 - [ ] **OBS-04**: Stuck-run detector — sliding window over (stage, failure-class) tuples; halts run with `escalated` state + diagnostic artifact when the same failure class repeats N times (N configurable per workflow, defaults to 3)
 
 ### Local Dev & Distribution
@@ -227,7 +227,7 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | UI-06 | Phase 7 | Pending |
 | OBS-01 | Phase 1 | Pending |
 | OBS-02 | Phase 9 | Pending |
-| OBS-03 | Phase 1 | Pending |
+| OBS-03 | Phase 1 | Done (Plan 01-03 — ea6b174, aeede36, 00a3782) |
 | OBS-04 | Phase 5 | Pending |
 | LOCAL-01 | Phase 1 | Partial (Plan 01-01 — structural; Plan 01-06 closes runtime smoke) |
 | LOCAL-02 | Phase 1 | Done (Plan 01-01 — `.tool-versions` + `mix.exs` pins, f567c7e; Plan 01-02 — `mix check` gate + GHA CI, cb05fa1/18de9a4) |
