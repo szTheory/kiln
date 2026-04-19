@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: in_progress
-stopped_at: Phase 1 Plans 01, 02, 03, 05, 07 complete — ready for Plans 04 (external_operations + BaseWorker) and 06 (BootChecks + HealthPlug)
-last_updated: "2026-04-19T04:22:00.000Z"
-last_activity: 2026-04-19 — Phase 1 Plan 05 executed (logger_json formatter + D-45 metadata-threading API + Kiln.Telemetry.ObanHandler + D-47 contrived multi-process proof; OBS-01 mechanically proven; 44 green tests; mix check all 11 tools green)
+stopped_at: Phase 1 Plans 01, 02, 03, 04, 05, 07 complete — only Plan 06 (BootChecks + HealthPlug) remaining
+last_updated: "2026-04-19T13:35:00.000Z"
+last_activity: 2026-04-19 — Phase 1 Plan 04 executed (external_operations single polymorphic intent table per D-14 Brandur Stripe pattern; Kiln.ExternalOperations context with two-phase intent→action→completion machine and D-18 dual-audit-event tx invariant; Kiln.Oban.BaseWorker macro with D-44 safe defaults max_attempts: 3 + insert-time idempotency_key unique; 30-day TTL Pruner registered via Oban.Plugins.Cron keeping 7-child supervision tree invariant; behaviors 10-14 mechanically proven; 59 tests all green; mix check 11-tool gate green; zero deviations)
 progress:
   total_phases: 9
   completed_phases: 0
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -26,30 +26,30 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 1 of 9 (Foundation & Durability Floor)
-Plan: 5/7 complete (01-01, 01-02, 01-03, 01-05, 01-07) — remaining: 01-04 (external_operations + Kiln.Oban.BaseWorker) and 01-06 (BootChecks + HealthPlug)
+Plan: 6/7 complete (01-01, 01-02, 01-03, 01-04, 01-05, 01-07) — remaining: 01-06 (BootChecks + HealthPlug)
 Status: In progress
-Last activity: 2026-04-19 — Plan 05 executed (logger_json formatter on :default_handler; D-45 dual API — Kiln.Logger.Metadata.with_metadata/2 block + Kiln.Telemetry.{pack_ctx, unpack_ctx, async_stream, pack_meta} cross-process; Kiln.Telemetry.ObanHandler on [:oban, :job, :start] restores job.meta["kiln_ctx"] into worker Logger.metadata; D-47 contrived test proves LOG-01 Task.async_stream + LOG-02 Oban paths; 44 tests green; mix check all 11 tools green; D-42 7-child supervision tree invariant preserved)
+Last activity: 2026-04-19 — Plan 04 executed (external_operations single polymorphic table per D-14 Brandur Stripe pattern — 16 columns, 5-state CHECK, UNIQUE INDEX on idempotency_key, D-48 role grants with T-03 DELETE-denial; Kiln.ExternalOperations context with fetch_or_record_intent/2, complete_op/2, fail_op/2, abandon_op/2 — each Repo.transaction writes state change + paired audit event atomically per D-18; Kiln.Oban.BaseWorker macro ships max_attempts: 3 + insert-time idempotency_key unique dedupe per D-44; 30-day TTL Pruner registered as Oban.Plugins.Cron entry — supervision tree stays 7 children per D-42; behaviors 10-14 from 01-VALIDATION.md mechanically proven by 15 new tests; 59 tests total all green; mix check 11-tool gate green; zero deviations — plan executed as written)
 
-Progress: [███████░░░] 71%
+Progress: [████████░░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: ~20 min
-- Total execution time: ~103 min
+- Total execution time: ~123 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1     | 5/7   | ~103m | ~20m     |
+| 1     | 6/7   | ~123m | ~20m     |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs + 1 Rule-3 environment blocker fix), 01-05 (~15m, feat+test — 7 auto-fixes: 2 Rule-3 blocking [primary-level logger floor, Oban migrations not yet in place → switch drain_queue→perform_job], 5 Rule-1 strict-gate fixups)
-- Trend: Plan 05 stayed within the plan's estimate. Key architectural discovery: `ExUnit.CaptureLog` cannot be used for JSON-metadata assertions (installs its own plain-text formatter); Kiln.LoggerCaptureHelper.capture_json/1 is the required-tool alternative, reusable by every log-asserting test in Phases 2-9.
+- Last 6 plans: 01-01 (~15m, feat), 01-07 (~10m, docs), 01-02 (~13m, feat), 01-03 (~50m, feat+test — 3 Rule-1 bugs + 1 Rule-3 environment blocker fix), 01-05 (~15m, feat+test — 7 auto-fixes), 01-04 (~20m, feat — ZERO deviations; plan executed exactly as written; prior-attempt uncommitted migration files kept as-is after cross-check against plan spec)
+- Trend: Plan 04 was the cleanest execution so far. Key take: when a plan text is precise enough (LOCKED interfaces block + explicit `action` blocks quoting full source), deviations collapse to zero. The prior-attempt residue (2 uncommitted migration files) was usable without modification, saving ~10 tool calls of rewrite.
 
 *Updated after each plan completion.*
 
@@ -98,6 +98,16 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - **`Kiln.Telemetry.ObanHandler` attaches via `:telemetry.attach_many/4`, NOT as a supervision-tree child.** Telemetry handlers are ETS-backed, not process-backed. Attach happens in `Kiln.Application.start/2` post-`Supervisor.start_link`; matching detach in `stop/1`. Supervision tree stays at exactly 7 children (D-42 invariant preserved).
 - **`:logger` callback fns (`log/2`, `adding_handler/1`, `removing_handler/1`, `changing_config/3`) MUST be public.** Erlang dispatches by MFA. ex_slop's `DocFalseOnPublicFunction` trips on `@doc false` on public fns — resolution is to give each callback a real `@doc` string explaining the Erlang contract. Established the pattern in `test/support/logger_capture_helper.ex` for any future Erlang callback modules.
 
+### Plan 01-04 decisions
+
+- @oban_migration_version = 14 (not 12 from plan text, not 13 from Plan 01-01 SUMMARY). Verified against `deps/oban/lib/oban/migrations/postgres.ex` `@current_version 14`. D-49 mandates pinning; the integer is whatever current Oban version exposes.
+- Kept the two uncommitted migration files left by a prior stalled agent attempt after cross-checking against plan spec. Files matched the plan + added reversibility niceties (reversible CHECK + owner transfer + grants via `execute/2`) consistent with 01-03's patterns. Avoided ~10 tool calls of unnecessary rewrite.
+- 30-day TTL pruner registered via `Oban.Plugins.Cron` crontab in `config/config.exs`, NOT as a new supervision-tree child — keeps D-42 7-child invariant.
+- Pruner uses `SET LOCAL ROLE kiln_owner` inside its `Repo.transaction` to escalate DELETE privilege (T-03 mitigation keeps kiln_app without DELETE on `external_operations`). Same mechanism as `AuditLedgerCase.with_role/2` from Plan 01-03; LOCAL scope auto-resets role on txn commit.
+- `Kiln.Oban.BaseWorker` is a `__using__/1` macro (NOT a shared behaviour). Macro expansion at compile time injects safe defaults per-worker; callers override via `use Kiln.Oban.BaseWorker, max_attempts: 5` — `Keyword.put_new` means explicit opts always win.
+- `fetch_or_record_intent/2` uses Brandur's `INSERT ... ON CONFLICT DO NOTHING` + `SELECT FOR UPDATE` fallback. When conflict hits, Ecto returns `%Operation{id: nil}` because no RETURNING row; the fallback `SELECT` observes the winner deterministically. Operation PK uses `read_after_writes: true` so first-winner path hydrates `id` automatically.
+- BaseWorker test uses `Worker.__opts__/0` introspection (documented `@callback __opts__` at `deps/oban/lib/oban/worker.ex:464`) for max_attempts/unique assertions. Rejected brittle alternatives like changeset-data inspection or perform-job-observes-opts.
+
 ### Plan 01-03 decisions
 
 - D-12 Layer 3 RULE shipped **DISABLED** by default (Rule 1 deviation from plan spec). Postgres query rewriting runs BEFORE triggers fire — an active `DO INSTEAD NOTHING` RULE masks Layer 2's trigger. Disabled RULE keeps Layer 2 the loud error path; AUD-03 test enables the RULE explicitly to verify it works.
@@ -128,6 +138,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-19
-Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), and 01-05 (5888aac, 0a5ba87) complete; remaining Phase 1 work: Plan 04 (external_operations + Kiln.Oban.BaseWorker) and Plan 06 (BootChecks + HealthPlug)
-Resume file: .planning/phases/01-foundation-durability-floor/01-04-PLAN.md
-Next command: /gsd-execute-phase 1 (continues with 01-04 then 01-06)
+Stopped at: Plans 01-01 (f567c7e), 01-07 (6f4438e, a2bc420), 01-02 (cb05fa1, 18de9a4), 01-03 (ea6b174, aeede36, 00a3782), 01-05 (5888aac, 0a5ba87), and 01-04 (2c3984c, 0f41dc3, c714e0c) complete; only remaining Phase 1 work: Plan 06 (BootChecks + HealthPlug)
+Resume file: .planning/phases/01-foundation-durability-floor/01-06-PLAN.md
+Next command: /gsd-execute-phase 1 (continues with 01-06)
