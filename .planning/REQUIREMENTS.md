@@ -9,13 +9,16 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 ### Core Orchestration
 
-- [ ] **ORCH-01**: Workflow definition is a YAML/JSON graph, versioned in git, schema-validated (JSON Schema Draft 2020-12) at load time
+- [x] **ORCH-01
+**: Workflow definition is a YAML/JSON graph, versioned in git, schema-validated (JSON Schema Draft 2020-12) at load time
 - [ ] **ORCH-02**: Stage executor runs each stage in a supervised BEAM process with crash isolation (agent failure must not kill the run)
 - [ ] **ORCH-03**: Run state machine persists to Postgres with explicit allowed transitions: queued → planning → coding → testing → verifying → (merged | failed | escalated); every transition writes an Audit.Event in the same Postgres transaction
-- [ ] **ORCH-04**: Every stage writes an artifact + event before emitting success; runs are resumable from the last checkpoint after crash or redeploy
+- [x] **ORCH-04
+**: Every stage writes an artifact + event before emitting success; runs are resumable from the last checkpoint after crash or redeploy
 - [ ] **ORCH-05**: When the Verifier reports failure, the run loops back to the Planner with a structured `%VerifierResult{}` diagnostic — this is the "loop until spec met" core
 - [ ] **ORCH-06**: Bounded autonomy — per-run hard caps on retries, token spend (USD and tokens), and elapsed steps; escalation = halt with diagnostic artifact; never silently continue after repeated verification failure
-- [ ] **ORCH-07**: Idempotency — every Oban job has an insert-time unique key AND handler-level dedupe; every external side-effect (git push, GitHub API call, LLM API call, Docker op) has an `external_operations` intent-table row with two-phase (intent → action → completion) semantics
+- [x] **ORCH-07
+**: Idempotency — every Oban job has an insert-time unique key AND handler-level dedupe; every external side-effect (git push, GitHub API call, LLM API call, Docker op) has an `external_operations` intent-table row with two-phase (intent → action → completion) semantics
 
 ### Agents
 

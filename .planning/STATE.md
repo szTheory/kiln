@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-00-PLAN.md (Wave 0 test infrastructure)
-last_updated: "2026-04-20T01:19:52.763Z"
+stopped_at: Completed 02-01-PLAN.md (schemas + registries + audit CHECK extension)
+last_updated: "2026-04-20T01:32:35.072Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 16
-  completed_plans: 8
-  percent: 50
+  completed_plans: 9
+  percent: 56
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 02 (workflow-engine-core) — EXECUTING
-Plan: 2 of 9
+Plan: 3 of 9
 Status: Ready to execute
 Last activity: 2026-04-20
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 56%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [█████░░░░░] 50%
 
 *Updated after each plan completion.*
 | Phase 02 P00 | ~7m | 2 tasks | 13 files |
+| Phase 02 P01 | ~7min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Zero-human-QA (UAT-01/02) and typed-block contract (BLOCK-01..04) are cross-cutting invariants; scenario runner is the sole acceptance oracle
 - Phases 3, 4, 5 flagged HIGH for `/gsd-research-phase` before planning
 - Plan 02-00 decisions: (a) SHELL-vs-LIVE factory discipline — live for workflow raw maps, shells with placeholder_*_attrs/0 markers for Run/StageRun/Artifact which Plans 02/03 fill; (b) Defensive Module.concat + Code.ensure_loaded + function_exported? indirection in Kiln.RehydrationCase + Kiln.StuckDetectorCase so case templates compile against Plan 02-00 codebase AND auto-activate once Plan 06 / Plan 07 ship their target GenServers — no arrow-dependency cross-plan edits required; (c) Kiln.CasTestHelper uses process-dict keyed by base directory for capture-and-restore of Application.get_env(:kiln, :artifacts) — prevents env-bleed across async tests without a global-state agent; (d) Block-list YAML syntax in cyclic.yaml (idiomatic for priv/workflows/*.yaml authoring) rather than inline [c] arrays — YamlElixir parses both identically; (e) SHELL factory moduledocs describe the eventual live ex_machina/Ecto shape using prose rather than inline use-directive examples, satisfying grep acceptance checks while preserving documentation intent
+- Plan 02-01 decisions: (a) Audit schemas (3 new D-85 kinds) shipped payload-only matching Phase 1 convention, not full-envelope shape implied by plan spec text — Kiln.Audit.append/1 validates only the payload map; (b) verifying.json relaxes holdout_excluded to type boolean (not const true) per D-74 — verifier stages may run against the holdout set, the 4 other kinds enforce const: true structurally; (c) new registries' fetch/1 returns {:error, :unknown_kind}; Phase 1's Kiln.Audit.SchemaRegistry still returns :schema_missing (retrofit deferred); (d) migration down/0 hard-codes the original 22-kind list because reading EventKind at rollback time would observe the 25-atom current-source module attribute and make down a silent no-op; (e) Phase 2 registries opt in to JSV formats: true; Phase 1 Kiln.Audit.SchemaRegistry does not — deferred retrofit flagged by RESEARCH.md correction #1 / STACK.md D-100.
 
 ### Plan 01-01 decisions
 
@@ -150,8 +152,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T01:19:52.755Z
-Stopped at: Completed 02-00-PLAN.md (Wave 0 test infrastructure)
+Last session: 2026-04-20T01:32:35.067Z
+Stopped at: Completed 02-01-PLAN.md (schemas + registries + audit CHECK extension)
 Resume file: None
 Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
 

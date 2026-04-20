@@ -67,7 +67,7 @@ Plans:
 **Plans:** 9 plans
 Plans:
 - [x] 02-00-PLAN.md — Nyquist test infrastructure (5 workflow YAML fixtures + 4 ex_machina factories + 4 ExUnit case templates + ex_machina dep) — **complete 2026-04-20 (2c7e48d, 7e13a72)**
-- [ ] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry
+- [x] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry — **complete 2026-04-20 (e64acc4, 4aed708)**
 - [ ] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories
 - [ ] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs)
 - [ ] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts
@@ -254,7 +254,7 @@ Phases needing `/gsd-research-phase` before planning:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Durability Floor | 7/7 | Complete | 2026-04-19 |
-| 2. Workflow Engine Core | 0/TBD | Not started | - |
+| 2. Workflow Engine Core | 2/9 | In progress | - |
 | 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |
 | 5. Spec, Verification & Bounded Loop | 0/TBD | Not started | - |
