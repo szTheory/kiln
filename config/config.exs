@@ -120,7 +120,14 @@ config :logger, :default_formatter,
 config :logger, :default_handler,
   formatter:
     {LoggerJSON.Formatters.Basic,
-     metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id]},
+     metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id],
+     # D-133 Layer 4: scrub secret-shaped keys + values from structured
+     # log metadata BEFORE serialisation. The tuple form is required in
+     # compile-time config (`Kiln.Logging.SecretRedactor.new/1` isn't
+     # defined — the `@optional_callbacks new: 1` behaviour contract
+     # lets redactors ship without one, and LoggerJSON resolves the
+     # tuple per log line).
+     redactors: [{Kiln.Logging.SecretRedactor, []}]},
   filters: [
     kiln_metadata_defaults: {&Kiln.Logger.Metadata.default_filter/2, []}
   ],
@@ -129,6 +136,17 @@ config :logger, :default_handler,
     # handler. `:stop` would drop the line entirely.
     default: :log
   ]
+
+# D-133 Layer 4 companion registration — the LoggerJSON 7.x app config
+# reads `:redactors` at the top level of the `:logger_json` app so any
+# handler that creates a formatter via
+# `LoggerJSON.Formatters.<F>.new/1` at runtime (config/runtime.exs,
+# test harnesses) picks up the redactor automatically. Both the
+# handler-level (`default_handler.formatter.redactors`) registration
+# above and this app-level registration point at the same redactor
+# module; multiple registrations are idempotent (the redactor is
+# stateless).
+config :logger_json, :redactors, [{Kiln.Logging.SecretRedactor, []}]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
