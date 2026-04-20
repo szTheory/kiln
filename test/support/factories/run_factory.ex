@@ -1,37 +1,60 @@
 defmodule Kiln.Factory.Run do
   @moduledoc """
-  SHELL module — placeholder for the Wave 1+ live `Kiln.Runs.Run` factory.
+  ex_machina factory for `Kiln.Runs.Run` rows (Plan 02-02).
 
-  Plan 02 (runs schema + `Kiln.Runs.Run` Ecto module) REPLACES this file
-  wholesale with a live factory that pairs `ExMachina`'s Ecto integration
-  with a `Kiln.Runs.Run` factory function. Shape of the eventual body
-  (placeholder keys; real schema fields are decided in Plan 02):
+  Replaces the SHELL factory shipped in Plan 02-00. The Ecto-backed
+  variant supports `build(:run)` (in-memory struct) and
+  `insert(:run)` (persisted via `Kiln.Repo`).
 
-    * top-level: ex_machina + Kiln.Repo
-    * `run_factory/0` returns `%Kiln.Runs.Run{state: :queued, ...}`
+  Default attrs:
+    * `workflow_id` — auto-sequenced (`wf_0`, `wf_1`, ...) for test
+      isolation
+    * `workflow_version` — 1
+    * `workflow_checksum` — canonical 64-char lowercase hex placeholder
+      (matches the DB CHECK format)
+    * `state` — `:queued` (the only state `Kiln.Runs.create/1` should
+      produce)
+    * `model_profile_snapshot` / `caps_snapshot` — non-empty maps
+      matching the D-56/D-57 shapes so downstream consumers can pattern
+      match on them
+    * `correlation_id` — fresh UUID per built row
+    * `tokens_used_usd` — `Decimal.new("0.0")`
+    * `elapsed_seconds` — 0
 
-  Until Plan 02 lands, this shell ships with a lone `placeholder_run_attrs/0`
-  marker so the file can be imported without raising and its SHELL status
-  is grep-verifiable. The shell deliberately does NOT declare the
-  ex_machina Ecto integration at compile time — that would fail because
-  `Kiln.Runs.Run` does not yet exist.
+  Tests that need a specific field override pass it as the second arg
+  to `build/2` or `insert/2`:
 
-  Grep markers (used by Plan 02's acceptance-criteria automation):
-
-    * `SHELL` / `Plan 02` — shell-vs-live discriminator
-    * `placeholder_run_attrs` — function name
-
-  Part of Plan 02-00 Wave 0 infrastructure (see PLAN.md Task 2a).
+      build(:run, state: :planning, workflow_id: "my_wf")
+      insert(:run, correlation_id: "fixed-cid-for-assertion")
   """
+
+  use ExMachina.Ecto, repo: Kiln.Repo
 
   @doc """
-  Placeholder — returns an empty map.
-
-  This function exists SOLELY as a compile-time marker for the SHELL
-  status of this module. Plan 02 replaces this module wholesale with a
-  live ex_machina / Ecto-backed factory; at that point
-  `placeholder_run_attrs/0` disappears.
+  Build a `Kiln.Runs.Run` struct with sensible defaults. Use `build/1`
+  for in-memory assertions and `insert/1` for persisted fixtures.
   """
-  @spec placeholder_run_attrs() :: map()
-  def placeholder_run_attrs, do: %{}
+  @spec run_factory() :: Kiln.Runs.Run.t()
+  def run_factory do
+    %Kiln.Runs.Run{
+      workflow_id: sequence(:workflow_id, &"wf_#{&1}"),
+      workflow_version: 1,
+      # 64-char lowercase hex satisfies the DB CHECK + changeset regex
+      workflow_checksum: String.duplicate("a", 64),
+      state: :queued,
+      model_profile_snapshot: %{
+        "profile" => "elixir_lib",
+        "roles" => %{"planner" => "sonnet-class", "coder" => "sonnet-class"}
+      },
+      caps_snapshot: %{
+        "max_retries" => 3,
+        "max_tokens_usd" => 1.0,
+        "max_elapsed_seconds" => 600,
+        "max_stage_duration_seconds" => 300
+      },
+      correlation_id: Ecto.UUID.generate(),
+      tokens_used_usd: Decimal.new("0.0"),
+      elapsed_seconds: 0
+    }
+  end
 end
