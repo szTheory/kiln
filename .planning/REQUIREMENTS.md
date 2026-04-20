@@ -11,8 +11,10 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 - [x] **ORCH-01
 **: Workflow definition is a YAML/JSON graph, versioned in git, schema-validated (JSON Schema Draft 2020-12) at load time
-- [ ] **ORCH-02**: Stage executor runs each stage in a supervised BEAM process with crash isolation (agent failure must not kill the run)
-- [ ] **ORCH-03**: Run state machine persists to Postgres with explicit allowed transitions: queued → planning → coding → testing → verifying → (merged | failed | escalated); every transition writes an Audit.Event in the same Postgres transaction
+- [x] **ORCH-02
+**: Stage executor runs each stage in a supervised BEAM process with crash isolation (agent failure must not kill the run)
+- [x] **ORCH-03
+**: Run state machine persists to Postgres with explicit allowed transitions: queued → planning → coding → testing → verifying → (merged | failed | escalated); every transition writes an Audit.Event in the same Postgres transaction
 - [x] **ORCH-04
 **: Every stage writes an artifact + event before emitting success; runs are resumable from the last checkpoint after crash or redeploy
 - [ ] **ORCH-05**: When the Verifier reports failure, the run loops back to the Planner with a structured `%VerifierResult{}` diagnostic — this is the "loop until spec met" core
@@ -198,9 +200,9 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ORCH-01 | Phase 2 | Pending |
-| ORCH-02 | Phase 2 | Pending |
-| ORCH-03 | Phase 2 | Pending |
-| ORCH-04 | Phase 2 | Pending |
+| ORCH-02 | Phase 2 | Complete |
+| ORCH-03 | Phase 2 | Complete |
+| ORCH-04 | Phase 2 | Complete |
 | ORCH-05 | Phase 5 | Pending |
 | ORCH-06 | Phase 5 | Pending |
 | ORCH-07 | Phase 2 | Pending |
