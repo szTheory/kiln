@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/integrity_violation.json",
+  "title": "integrity_violation",
+  "description": "Audit payload for a CAS integrity mismatch detected by Kiln.Artifacts.read!/1 or Kiln.Artifacts.ScrubWorker (D-84, D-85). Raised when a blob's re-hashed SHA-256 diverges from the stored artifacts.sha256.",
+  "type": "object",
+  "required": ["artifact_id", "expected_sha", "actual_sha", "path"],
+  "properties": {
+    "artifact_id": { "type": "string", "format": "uuid" },
+    "expected_sha": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "actual_sha": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "path": { "type": "string" }
+  },
+  "additionalProperties": false
+}

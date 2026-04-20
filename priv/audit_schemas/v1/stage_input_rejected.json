@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/stage_input_rejected.json",
+  "title": "stage_input_rejected",
+  "description": "Audit payload for the D-76 boundary rejection. Fired when Kiln.Stages.StageWorker.perform/1 rejects a stage input against the per-kind contract (Kiln.Stages.ContractRegistry) before any agent is invoked. D-85 extension of the event_kind taxonomy (22 -> 25).",
+  "type": "object",
+  "required": ["stage_run_id", "stage_kind", "errors"],
+  "properties": {
+    "stage_run_id": { "type": "string", "format": "uuid" },
+    "stage_kind": {
+      "type": "string",
+      "enum": ["planning", "coding", "testing", "verifying", "merge"]
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  },
+  "additionalProperties": false
+}

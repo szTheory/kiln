@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/artifact_written.json",
+  "title": "artifact_written",
+  "description": "Audit payload recording a successful content-addressed-storage (CAS) write by Kiln.Artifacts.put/3 (D-80, D-85). Mirrors the external_op_completed shape for in-process file-system side-effects.",
+  "type": "object",
+  "required": ["name", "sha256", "size_bytes", "content_type"],
+  "properties": {
+    "name": { "type": "string" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "size_bytes": { "type": "integer", "minimum": 0 },
+    "content_type": { "type": "string" }
+  },
+  "additionalProperties": false
+}

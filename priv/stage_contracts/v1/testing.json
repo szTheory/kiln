@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://stage_contract/v1/testing",
+  "title": "testing_stage_input",
+  "description": "Stage input envelope for kind=testing stages (D-74). Validated at Kiln.Stages.StageWorker.perform/1 boundary BEFORE agent invocation.",
+  "type": "object",
+  "required": [
+    "run_id",
+    "stage_run_id",
+    "attempt",
+    "spec_ref",
+    "budget_remaining",
+    "model_profile_snapshot",
+    "holdout_excluded",
+    "code_ref"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "format": "uuid" },
+    "stage_run_id": { "type": "string", "format": "uuid" },
+    "attempt": { "type": "integer", "minimum": 1, "maximum": 10 },
+    "spec_ref": { "$ref": "#/$defs/artifact_ref" },
+    "budget_remaining": { "$ref": "#/$defs/budget_remaining" },
+    "model_profile_snapshot": { "$ref": "#/$defs/model_profile_snapshot" },
+    "holdout_excluded": { "type": "boolean", "const": true },
+    "code_ref": { "$ref": "#/$defs/artifact_ref" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "artifact_ref": {
+      "type": "object",
+      "required": ["sha256", "size_bytes", "content_type"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size_bytes": { "type": "integer", "minimum": 0, "maximum": 52428800 },
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "text/markdown",
+            "text/plain",
+            "application/x-diff",
+            "application/json",
+            "text/x-elixir"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "budget_remaining": {
+      "type": "object",
+      "required": ["tokens_usd", "tokens", "elapsed_seconds"],
+      "properties": {
+        "tokens_usd": { "type": "number", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 },
+        "elapsed_seconds": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "model_profile_snapshot": {
+      "type": "object",
+      "required": ["role", "requested_model", "fallback_chain"],
+      "properties": {
+        "role": { "type": "string" },
+        "requested_model": { "type": "string" },
+        "fallback_chain": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

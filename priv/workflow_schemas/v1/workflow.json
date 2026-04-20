@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://workflow/v1/workflow",
+  "title": "workflow",
+  "description": "Top-level Kiln workflow dialect (D-55..D-62). Versioned at kiln.dev/v1 via the const-checked apiVersion migration lever. v1 requires signature to be null (v2 WFE-02 lifts the reservation).",
+  "type": "object",
+  "required": [
+    "apiVersion",
+    "id",
+    "version",
+    "metadata",
+    "signature",
+    "spec"
+  ],
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "const": "kiln.dev/v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{2,63}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "author": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "signature": {
+      "type": ["null", "object"],
+      "x-kiln-reserved": true,
+      "description": "Reserved for v2 WFE-02 workflow signing. v1 invariant: MUST be null (enforced by D-62 validator 6 in Kiln.Workflows.load!/1; JSON Schema alone cannot express 'must be null' cleanly across the null/object union)."
+    },
+    "spec": {
+      "type": "object",
+      "required": ["caps", "model_profile", "stages"],
+      "properties": {
+        "caps": {
+          "type": "object",
+          "required": [
+            "max_retries",
+            "max_tokens_usd",
+            "max_elapsed_seconds",
+            "max_stage_duration_seconds"
+          ],
+          "properties": {
+            "max_retries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "max_tokens_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "max_elapsed_seconds": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 86400
+            },
+            "max_stage_duration_seconds": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 3600
+            }
+          },
+          "additionalProperties": false
+        },
+        "model_profile": {
+          "type": "string",
+          "enum": [
+            "elixir_lib",
+            "phoenix_saas_feature",
+            "typescript_web_feature",
+            "python_cli",
+            "bugfix_critical",
+            "docs_update"
+          ]
+        },
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stage" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stage": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "agent_role",
+        "depends_on",
+        "timeout_seconds",
+        "retry_policy",
+        "sandbox"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,31}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["planning", "coding", "testing", "verifying", "merge"]
+        },
+        "agent_role": {
+          "type": "string",
+          "enum": [
+            "planner",
+            "coder",
+            "tester",
+            "reviewer",
+            "uiux",
+            "qa_verifier",
+            "mayor"
+          ]
+        },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 3600
+        },
+        "retry_policy": {
+          "type": "object",
+          "required": ["max_attempts", "backoff", "base_delay_seconds"],
+          "properties": {
+            "max_attempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "backoff": {
+              "type": "string",
+              "enum": ["fixed", "exponential"]
+            },
+            "base_delay_seconds": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 300
+            }
+          },
+          "additionalProperties": false
+        },
+        "sandbox": {
+          "type": "string",
+          "enum": ["none", "readonly", "readwrite"]
+        },
+        "model_preference": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]+-class$"
+        },
+        "on_failure": {
+          "oneOf": [
+            { "type": "string", "const": "escalate" },
+            {
+              "type": "object",
+              "required": ["action", "to", "attach"],
+              "properties": {
+                "action": { "type": "string", "const": "route" },
+                "to": { "type": "string" },
+                "attach": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
