@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Wave 3 complete (03-07 merged); Wave 4 ready for 03-08/03-09
-last_updated: "2026-04-20T22:10:00.000Z"
-last_activity: 2026-04-20 -- executed 03-07 sandbox substrate plan; Wave 4 ready
+stopped_at: Wave 4 complete (03-08/03-09 recovered and documented); Wave 5 ready for 03-10/03-11
+last_updated: "2026-04-20T23:30:00.000Z"
+last_activity: 2026-04-20 -- recovered missing Wave 4 sandbox/DTU work, validated, and documented
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 28
-  completed_plans: 24
-  percent: 86
+  completed_plans: 26
+  percent: 93
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 03 (agent-adapter-sandbox-dtu-safety) — EXECUTING
-Plan: 9 of 12 (Wave 3 complete: 03-07 merged; Wave 4 ready for 03-08/03-09)
+Plan: 11 of 12 (Wave 4 complete: 03-08/03-09 documented; Wave 5 ready for 03-10/03-11)
 Status: Executing Phase 03
-Last activity: 2026-04-20 -- 03-07 executed and documented; targeted sandbox suites green
+Last activity: 2026-04-20 -- 03-08/03-09 recovered, validated, and documented; Wave 5 ready
 
-Progress: [█████████░] 86%
+Progress: [█████████▎] 93%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 24
+- Total plans completed: 26
 - Average duration: ~19 min
 - Total execution time: ~155 min
 
@@ -46,12 +46,12 @@ Progress: [█████████░] 86%
 |-------|-------|-------|----------|
 | 1     | 7/7   | ~140m | ~20m     |
 | 02    | 9/9   | -     | -        |
-| 03    | 8/12  | -     | -        |
+| 03    | 10/12 | -     | -        |
 
 **Recent Trend:**
 
-- Last 7 plans: 02-08 (~15m, feat), 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged), 03-07 (sandbox substrate, 7 commits)
-- Trend: Phase 3 is now through Wave 3. Sandbox substrate is in place, which unlocks the container-driver and DTU wave without additional recovery work.
+- Last 9 plans: 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged), 03-07 (sandbox substrate), 03-08 (sandbox runtime recovery), 03-09 (DTU host-side recovery)
+- Trend: Phase 3 is now through Wave 4. Sandbox driver/runtime and DTU scaffolding are both present, and the next work is the StageWorker integration wave.
 
 *Updated after each plan completion.*
 | Phase 02 P00 | ~7m | 2 tasks | 13 files |
@@ -66,6 +66,8 @@ Progress: [█████████░] 86%
 | Phase 03 P05 | recovered | 3 tasks | 18 files |
 | Phase 03 P06 | recovered | 2 tasks | 24 files |
 | Phase 03 P07 | ~wave-3 | 3 tasks | 19 files |
+| Phase 03 P08 | recovered | 3 tasks | 5 files |
+| Phase 03 P09 | recovered | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -174,9 +176,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20 -- executed 03-07 sandbox substrate plan
-Stopped at: Wave 3 complete; 03-08 and 03-09 are the next pending plans
-Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-07-SUMMARY.md
-Next command: /gsd-execute-phase 3 (continue from Wave 4: 03-08/03-09)
+Last session: 2026-04-20 -- recovered and validated Wave 4 sandbox/DTU work
+Stopped at: Wave 4 complete; 03-10 and 03-11 are the next pending plans
+Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-09-SUMMARY.md
+Next command: /gsd-execute-phase 3 (continue from Wave 5: 03-10/03-11)
 
 **Planned Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — 2026-04-20T16:34:38.407Z
