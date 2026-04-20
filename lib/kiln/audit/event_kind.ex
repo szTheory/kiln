@@ -1,10 +1,15 @@
 defmodule Kiln.Audit.EventKind do
   @moduledoc """
-  Single source of truth for the `audit_events.event_kind` taxonomy (D-07, D-08, D-85).
+  Single source of truth for the `audit_events.event_kind` taxonomy
+  (D-07, D-08, D-85, D-145, D-106).
 
-  The list declared here is the authoritative 25-value enum (22 shipped in Phase 1;
-  3 added in Phase 2 per D-85: `:stage_input_rejected`, `:artifact_written`,
-  `:integrity_violation`). Two consumers import from it:
+  The list declared here is the authoritative 33-value enum (22 shipped in
+  Phase 1; 3 added in Phase 2 per D-85: `:stage_input_rejected`,
+  `:artifact_written`, `:integrity_violation`; 8 added in Phase 3 per D-145:
+  `:orphan_container_swept`, `:dtu_contract_drift_detected`,
+  `:dtu_health_degraded`, `:factory_circuit_opened`, `:factory_circuit_closed`,
+  `:model_deprecated_resolved`, `:notification_fired`,
+  `:notification_suppressed`). Two consumers import from it:
 
     * Migration `20260418000003_create_audit_events.exs` — builds the
       `event_kind IN (...)` CHECK constraint from `values_as_strings/0` so the
@@ -26,9 +31,31 @@ defmodule Kiln.Audit.EventKind do
     * `:artifact_written` — D-80 successful CAS write by `Kiln.Artifacts.put/3`.
     * `:integrity_violation` — D-84 CAS re-hash mismatch on read or scrub.
 
-  The 3 new atoms are APPENDED at the end of `@kinds` so the Phase 1 ordering
-  is preserved (migration 20260419000001 drops the old CHECK and re-adds a
-  25-entry CHECK generated from `values_as_strings/0`).
+  Phase 3 extends the taxonomy by 8 kinds per D-145 (note:
+  `:model_routing_fallback` was already declared in Phase 1's 22-kind list;
+  its JSON schema is REWRITTEN in P3 to match D-106's full payload shape —
+  `requested_model`, `actual_model_used`, `tier_crossed`, `attempt_number`,
+  `fallback_reason`, `wall_clock_ms` — but no new atom is added):
+
+    * `:orphan_container_swept` — D-120 OrphanSweeper removes a container
+      left behind by a crashed BEAM (boot_epoch_found != current epoch).
+    * `:dtu_contract_drift_detected` — D-122 DTU contract-test stub body
+      in P3; P6 emits against real GitHub OpenAPI snapshots.
+    * `:dtu_health_degraded` — D-125 consecutive-miss count exceeds
+      threshold on the DTU `/healthz` endpoint.
+    * `:factory_circuit_opened` / `:factory_circuit_closed` — D-139
+      `Kiln.Policies.FactoryCircuitBreaker` state transitions (P3 scaffold
+      emits `scaffolded: true`; P5 fills the sliding-window body).
+    * `:model_deprecated_resolved` — D-108 resolution succeeded but the
+      resolved model has a `@deprecated_on` date set; operator warning.
+    * `:notification_fired` — D-140 desktop notification dispatched
+      (`osascript` on macOS, `notify-send` on Linux).
+    * `:notification_suppressed` — D-140 dedup window suppressed a
+      fire (5-minute ETS TTL on `{run_id, reason}` key).
+
+  The 8 new atoms are APPENDED at the end of `@kinds` so the Phase 1/2
+  ordering is preserved (migration 20260420000001 drops the old CHECK and
+  re-adds a 33-entry CHECK generated from `values_as_strings/0`).
   """
 
   @kinds [
@@ -57,7 +84,20 @@ defmodule Kiln.Audit.EventKind do
     # Phase 2 D-85 extension — append only, never reorder.
     :stage_input_rejected,
     :artifact_written,
-    :integrity_violation
+    :integrity_violation,
+    # Phase 3 D-145 extension — append only, never reorder.
+    # Note: `:model_routing_fallback` is NOT in this block; it was already
+    # declared in Phase 1 (position 10 above). The P3 schema rewrite
+    # (D-106 payload shape) lives at priv/audit_schemas/v1/model_routing_fallback.json
+    # and is shipped alongside the 8 new atoms below.
+    :orphan_container_swept,
+    :dtu_contract_drift_detected,
+    :dtu_health_degraded,
+    :factory_circuit_opened,
+    :factory_circuit_closed,
+    :model_deprecated_resolved,
+    :notification_fired,
+    :notification_suppressed
   ]
 
   @doc """

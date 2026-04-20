@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/notification_fired.json",
+  "title": "audit_events notification_fired payload",
+  "type": "object",
+  "required": ["reason", "platform"],
+  "additionalProperties": true,
+  "properties": {
+    "reason": { "type": "string" },
+    "platform": {
+      "type": "string",
+      "enum": ["macos", "linux", "unsupported"]
+    },
+    "dedup_key": { "type": "string" },
+    "run_id": { "type": ["string", "null"] }
+  }
+}

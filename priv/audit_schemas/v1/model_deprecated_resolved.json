@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/model_deprecated_resolved.json",
+  "title": "audit_events model_deprecated_resolved payload",
+  "type": "object",
+  "required": ["model_id", "deprecated_on", "preset", "role"],
+  "additionalProperties": true,
+  "properties": {
+    "model_id": { "type": "string" },
+    "deprecated_on": { "type": "string", "format": "date" },
+    "preset": { "type": "string" },
+    "role": { "type": "string" }
+  }
+}

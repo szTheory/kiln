@@ -31,7 +31,7 @@ defmodule Kiln.AuditTest do
       assert event.event_kind == :stage_started
     end
 
-    test "every one of the 25 kinds accepts its minimal payload" do
+    test "every one of the 33 kinds accepts its minimal payload" do
       for kind <- EventKind.values() do
         payload = minimal_payload_for(kind)
         cid = Ecto.UUID.generate()
@@ -162,10 +162,14 @@ defmodule Kiln.AuditTest do
 
   defp minimal_payload_for(:model_routing_fallback),
     do: %{
-      "from_model" => "opus-4",
-      "to_model" => "sonnet-4",
-      "role" => "coder",
-      "reason" => "429"
+      # D-106 / Phase 3 schema rewrite — see
+      # priv/audit_schemas/v1/model_routing_fallback.json (Plan 03-03).
+      "requested_model" => "claude-opus-4-5",
+      "actual_model_used" => "claude-sonnet-4-5",
+      "fallback_reason" => "http_429",
+      "tier_crossed" => false,
+      "attempt_number" => 2,
+      "wall_clock_ms" => 350
     }
 
   defp minimal_payload_for(:budget_check_passed),
@@ -224,4 +228,42 @@ defmodule Kiln.AuditTest do
       "actual_sha" => String.duplicate("b", 64),
       "path" => "priv/artifacts/cas/aa/aa/aa..."
     }
+
+  # Phase 3 D-145 extensions.
+  defp minimal_payload_for(:orphan_container_swept),
+    do: %{
+      "container_id" => "sandbox-abc1234",
+      "boot_epoch_found" => 1_700_000_000,
+      "age_seconds" => 120
+    }
+
+  defp minimal_payload_for(:dtu_contract_drift_detected),
+    do: %{
+      "endpoint" => "/repos/octocat/hello-world/pulls",
+      "method" => "GET",
+      "drift_kind" => "new_required_field"
+    }
+
+  defp minimal_payload_for(:dtu_health_degraded),
+    do: %{"consecutive_misses" => 3}
+
+  defp minimal_payload_for(:factory_circuit_opened),
+    do: %{"reason" => "scaffolded", "scaffolded" => true}
+
+  defp minimal_payload_for(:factory_circuit_closed),
+    do: %{"reason" => "scaffolded", "scaffolded" => true}
+
+  defp minimal_payload_for(:model_deprecated_resolved),
+    do: %{
+      "model_id" => "claude-opus-4-5",
+      "deprecated_on" => "2026-12-01",
+      "preset" => "elixir_lib",
+      "role" => "planner"
+    }
+
+  defp minimal_payload_for(:notification_fired),
+    do: %{"reason" => "missing_api_key", "platform" => "macos"}
+
+  defp minimal_payload_for(:notification_suppressed),
+    do: %{"reason" => "missing_api_key", "dedup_key" => "run:abc:missing_api_key"}
 end

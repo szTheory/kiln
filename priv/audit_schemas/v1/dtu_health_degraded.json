@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/dtu_health_degraded.json",
+  "title": "audit_events dtu_health_degraded payload",
+  "type": "object",
+  "required": ["consecutive_misses"],
+  "additionalProperties": true,
+  "properties": {
+    "consecutive_misses": { "type": "integer", "minimum": 1 },
+    "last_success_at": { "type": ["string", "null"] },
+    "endpoint": { "type": "string", "default": "/healthz" }
+  }
+}
