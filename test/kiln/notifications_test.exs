@@ -81,8 +81,9 @@ defmodule Kiln.NotificationsTest do
   describe "desktop/2 suppression path emits audit event without shelling out" do
     # The :suppress path emits `notification_suppressed` without calling
     # System.cmd, so this is safe to run in unit mode on any platform.
+    # `run_id` is :binary_id on Kiln.Audit.Event, so use a real UUID.
     test "second identical (run_id, reason) within TTL emits :notification_suppressed" do
-      run_id = "run-suppress-1"
+      run_id = Ecto.UUID.generate()
       reason = :missing_api_key
 
       # Pre-seed dedup entry so the FIRST call through `desktop/2` takes
@@ -105,15 +106,18 @@ defmodule Kiln.NotificationsTest do
     end
   end
 
-  @tag :integration
   describe "desktop/2 platform routing (integration — shells out)" do
+    @describetag :integration
+
     test "returns :ok on macOS/Linux or {:error, _} on other platforms" do
-      result = Notifications.desktop(:missing_api_key, %{run_id: "run-os-1", provider: "anthropic"})
+      # Integration tests use real UUID run_ids since ExternalOperations.run_id is :binary_id.
+      run_id = Ecto.UUID.generate()
+      result = Notifications.desktop(:missing_api_key, %{run_id: run_id, provider: "anthropic"})
       assert result == :ok or match?({:error, _}, result)
     end
 
     test "first call within TTL fires + writes :notification_fired audit event" do
-      run_id = "run-integration-#{System.unique_integer([:positive])}"
+      run_id = Ecto.UUID.generate()
       assert :ok = Notifications.desktop(:missing_api_key, %{run_id: run_id, provider: "anthropic"})
 
       events = Audit.replay(event_kind: :notification_fired)
@@ -121,7 +125,7 @@ defmodule Kiln.NotificationsTest do
     end
 
     test "second call for same (run_id, reason) within TTL is dedup-suppressed" do
-      run_id = "run-integration-dedup-#{System.unique_integer([:positive])}"
+      run_id = Ecto.UUID.generate()
 
       assert :ok = Notifications.desktop(:missing_api_key, %{run_id: run_id})
       assert :ok = Notifications.desktop(:missing_api_key, %{run_id: run_id})
