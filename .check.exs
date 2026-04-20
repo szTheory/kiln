@@ -48,6 +48,21 @@
     {:no_compile_secrets, "mix check_no_compile_time_secrets"},
     {:no_manual_qa, "mix check_no_manual_qa_gates"},
 
+    # ---- Phase 2 D-65: no v1 workflow populates the reserved
+    #      `signature:` top-level key (workflow signing defers to v2
+    #      WFE-02; sign via `git commit -S` for v1). Scans
+    #      priv/workflows/*.yaml; test-support fixtures are out of scope. ----
+    {:no_signature_block, "mix check_no_signature_block"},
+
+    # ---- Phase 2 D-97: 13 bounded contexts (was 12 in P1; Plan 02-03
+    #      admitted Kiln.Artifacts as the 13th). The task source ships
+    #      in Plan 02-04 so the gate is WIRED now; Plan 02-07 Task 2
+    #      extends Kiln.BootChecks.@context_modules from 12 to 13,
+    #      after which this gate asserts end-to-end. Plan 02-03 already
+    #      shipped Kiln.Artifacts so the expected-module list loads at
+    #      the end of Wave 1. ----
+    {:bounded_contexts, "mix check_bounded_contexts"},
+
     # ---- Plan 06 / D-34: boot-time invariants (REVOKE + trigger + contexts + secrets).
     #      Runs the same `Kiln.BootChecks.run!/0` the Application.start/2
     #      flow calls, so CI and local get identical "durability floor
