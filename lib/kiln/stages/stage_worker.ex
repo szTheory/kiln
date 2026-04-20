@@ -63,8 +63,9 @@ defmodule Kiln.Stages.StageWorker do
   use Kiln.Oban.BaseWorker, queue: :stages
 
   alias Kiln.Artifacts
+  alias Kiln.Repo
   alias Kiln.Runs.Transitions
-  alias Kiln.Stages.ContractRegistry
+  alias Kiln.Stages.{ContractRegistry, NextStageDispatcher, StageRun}
 
   require Logger
 
@@ -99,12 +100,17 @@ defmodule Kiln.Stages.StageWorker do
              stage_id: stage_run_id
            }),
          :ok <- guard_not_completed(op),
+         {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :running}),
          {:ok, _artifact} <- stub_dispatch(run_id, stage_run_id, stage_kind),
-         :ok <- maybe_transition_after_stage(run_id, stage_kind) do
+         {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :succeeded}),
+         :ok <- maybe_transition_after_stage(run_id, stage_kind),
+         :ok <- enqueue_next_stage(run_id, stage_run_id) do
       _ = complete_op(op, %{"result" => "stub_ok", "stage_kind" => args["stage_kind"]})
       :ok
     else
       {:error, {:stage_input_rejected, err}} ->
+        _ = update_stage_run(stage_run_id, %{state: :failed, error_summary: "invalid_stage_input"})
+
         _ =
           Kiln.Audit.append(%{
             event_kind: :stage_input_rejected,
@@ -135,6 +141,8 @@ defmodule Kiln.Stages.StageWorker do
         {:cancel, err}
 
       {:error, reason} ->
+        _ = update_stage_run(stage_run_id, %{state: :failed, error_summary: inspect(reason)})
+
         Logger.error(
           "StageWorker failure stage_run_id=#{stage_run_id} reason=#{inspect(reason)}",
           run_id: run_id,
@@ -213,6 +221,23 @@ defmodule Kiln.Stages.StageWorker do
   # :merge kind does NOT transition in Phase 2 — the run already reached :merged
   # via :verifying. Phase 3 adds real merge semantics + correct transition owner.
   defp maybe_transition_after_stage(_run_id, :merge), do: :ok
+
+  defp enqueue_next_stage(run_id, stage_run_id) do
+    stage_run = Repo.get!(StageRun, stage_run_id)
+    NextStageDispatcher.enqueue_next!(run_id, stage_run.workflow_stage_id)
+  end
+
+  defp update_stage_run(stage_run_id, attrs) do
+    case Repo.get(StageRun, stage_run_id) do
+      nil ->
+        {:error, :stage_run_not_found}
+
+      %StageRun{} = stage_run ->
+        stage_run
+        |> StageRun.changeset(attrs)
+        |> Repo.update()
+    end
+  end
 
   # The :stage_input_rejected audit schema requires `errors` to be an
   # array of objects. `JSV.normalize_error/1` returns a single map

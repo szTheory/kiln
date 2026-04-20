@@ -95,3 +95,8 @@ case System.get_env("KILN_DB_ROLE") do
   "" -> :ok
   role -> config :kiln, Kiln.Repo, parameters: [role: role]
 end
+
+Kiln.Secrets.put(:anthropic_api_key, System.get_env("ANTHROPIC_API_KEY"))
+Kiln.Secrets.put(:openai_api_key, System.get_env("OPENAI_API_KEY"))
+Kiln.Secrets.put(:google_api_key, System.get_env("GOOGLE_API_KEY"))
+Kiln.Secrets.put(:ollama_host, System.get_env("OLLAMA_HOST"))

@@ -19,11 +19,14 @@ defmodule Kiln.Sandboxes.DTU.CallbackRouter do
   def child_spec(opts) do
     port = Keyword.get(opts, :port, callback_port())
 
-    {Bandit,
-     plug: __MODULE__,
-     scheme: :http,
-     ip: {127, 0, 0, 1},
-     port: port}
+    Supervisor.child_spec(
+      {Bandit,
+       plug: __MODULE__,
+       scheme: :http,
+       ip: {127, 0, 0, 1},
+       port: port},
+      id: __MODULE__
+    )
   end
 
   post "/internal/dtu/event" do
@@ -42,7 +45,13 @@ defmodule Kiln.Sandboxes.DTU.CallbackRouter do
   end
 
   defp callback_port do
+    default_port =
+      case Application.get_env(:kiln, :env, :prod) do
+        :test -> 0
+        _ -> 4011
+      end
+
     Application.get_env(:kiln, __MODULE__, [])
-    |> Keyword.get(:port, 4011)
+    |> Keyword.get(:port, default_port)
   end
 end

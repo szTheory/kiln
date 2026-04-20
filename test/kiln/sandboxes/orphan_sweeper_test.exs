@@ -21,10 +21,15 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
   end
 
   test "start_link/1 starts successfully and survives unexpected messages" do
-    pid = start_supervised!(OrphanSweeper)
+    pid =
+      case start_supervised(OrphanSweeper) do
+        {:ok, pid} -> pid
+        {:error, {:already_started, pid}} -> pid
+      end
 
     send(pid, :unexpected)
-    assert %{boot_epoch: 12345} = :sys.get_state(pid)
+    assert %{boot_epoch: boot_epoch} = :sys.get_state(pid)
+    assert is_integer(boot_epoch)
   end
 
   test "init/1 defers work by sending itself :boot_scan" do

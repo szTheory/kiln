@@ -141,6 +141,59 @@ defmodule Kiln.BootChecksTest do
     end
   end
 
+  describe ":secrets_presence_map_non_empty invariant (Phase 3 / D-143)" do
+    setup do
+      for key <- [:anthropic_api_key, :openai_api_key, :google_api_key, :ollama_host] do
+        Kiln.Secrets.put(key, nil)
+      end
+
+      original_env = Application.get_env(:kiln, :env, :test)
+      original_secret_key_base = System.get_env("SECRET_KEY_BASE")
+      original_database_url = System.get_env("DATABASE_URL")
+
+      on_exit(fn ->
+        Application.put_env(:kiln, :env, original_env)
+        reset_env("SECRET_KEY_BASE", original_secret_key_base)
+        reset_env("DATABASE_URL", original_database_url)
+
+        for key <- [:anthropic_api_key, :openai_api_key, :google_api_key, :ollama_host] do
+          Kiln.Secrets.put(key, nil)
+        end
+      end)
+
+      :ok
+    end
+
+    test "raises in :prod when all provider secrets are missing" do
+      Application.put_env(:kiln, :env, :prod)
+      System.put_env("SECRET_KEY_BASE", "phase3-test-secret")
+      System.put_env("DATABASE_URL", "ecto://kiln:kiln_dev@localhost/kiln_test")
+
+      assert_raise Error, ~r/secrets_presence_map_non_empty/, fn ->
+        BootChecks.run!()
+      end
+    end
+
+    test "passes in :prod when one provider secret is present" do
+      Application.put_env(:kiln, :env, :prod)
+      System.put_env("SECRET_KEY_BASE", "phase3-test-secret")
+      System.put_env("DATABASE_URL", "ecto://kiln:kiln_dev@localhost/kiln_test")
+      :ok = Kiln.Secrets.put(:anthropic_api_key, "test-key")
+
+      assert :ok = BootChecks.run!()
+    end
+
+    test "logs and does not raise in :dev when zero provider secrets are present" do
+      Application.put_env(:kiln, :env, :dev)
+      System.put_env("DATABASE_URL", "ecto://kiln:kiln_dev@localhost/kiln_test")
+
+      assert :ok = BootChecks.run!()
+    end
+  end
+
+  defp reset_env(var, nil), do: System.delete_env(var)
+  defp reset_env(var, value), do: System.put_env(var, value)
+
   describe ":workflow_schema_loads invariant (Plan 02-07 / D-97)" do
     test "run!/0 completes without raising when priv/workflow_schemas/v1/workflow.json is healthy" do
       # Positive branch: the schema is present + valid → run!/0 is a

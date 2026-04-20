@@ -18,7 +18,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 
 - [x] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline — **complete 2026-04-19**
 - [x] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper — **complete 2026-04-20**
-- [ ] **Phase 3: Agent Adapter, Sandbox, DTU & Safety** - Provider-agnostic LLM adapter, ephemeral Docker sandbox with egress-blocked DTU, secret references, adaptive model routing, typed block reasons, cost budget circuit breaker
+- [x] **Phase 3: Agent Adapter, Sandbox, DTU & Safety** - Provider-agnostic LLM adapter, ephemeral Docker sandbox with egress-blocked DTU, secret references, adaptive model routing, typed block reasons, cost budget circuit breaker — **complete 2026-04-20**
 - [ ] **Phase 4: Agent Tree & Shared Memory** - Mayor/worker OTP process tree, specialized agent roles, native beads-equivalent work-unit store with PubSub
 - [ ] **Phase 5: Spec, Verification & Bounded Loop** - Spec editor + executable BDD scenarios + deterministic verifier + holdout scenarios + loop-until-spec-met + bounded autonomy caps + stuck detector + zero-human-QA enforcement
 - [ ] **Phase 6: GitHub Integration** - Idempotent git commit/push, PR creation via `gh`, GitHub Actions status read/write
@@ -106,8 +106,8 @@ Plans:
 - [x] 03-07-PLAN.md — Sandboxes pure modules: ContainerSpec/ImageResolver/Limits/EnvBuilder/Hydrator/Harvester (SAND-01, SAND-04) — **complete 2026-04-20 (67c8ae3)**
 - [x] 03-08-PLAN.md — DockerDriver + OrphanSweeper + adversarial negative-test suite (SAND-01, SAND-02) — **complete 2026-04-20 (recovered Wave 4 work)**
 - [x] 03-09-PLAN.md — DTU mini-mix-project + HealthPoll + ContractTest (SAND-03) — **complete 2026-04-20 (recovered Wave 4 work)**
-- [ ] 03-10-PLAN.md — NextStageDispatcher + StageWorker integrated chain
-- [ ] 03-11-PLAN.md — 14-child supervision tree + BootChecks 8-invariants + RunDirector secret-presence gate
+- [x] 03-10-PLAN.md — NextStageDispatcher + StageWorker integrated chain — **complete 2026-04-20**
+- [x] 03-11-PLAN.md — 14-child supervision tree + BootChecks 8-invariants + RunDirector secret-presence gate — **complete 2026-04-20**
 
 ### Phase 4: Agent Tree & Shared Memory
 **Goal**: Specialized agents (Planner, Coder, Tester, Reviewer, UI/UX, QA/Verifier, Mayor) run as supervised OTP processes per-run and coordinate through a native Ecto work-unit store with PubSub — no shell-out to `bd`, no GenServer-per-unit.

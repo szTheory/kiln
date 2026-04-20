@@ -1,25 +1,12 @@
 defmodule Kiln.Integration.WorkflowEndToEndTest do
   @moduledoc """
-  End-to-end integration test that drives a run through the 4 non-merge
-  stages of `priv/workflows/elixir_phoenix_feature.yaml` — plan, code,
-  test, verify — and asserts the run reaches `:merged` via the LOCKED
-  `:verifying → :merged` transition in `Kiln.Stages.StageWorker`
-  (Plan 02-08 Task 2).
+  End-to-end integration test that drives a run through the full queued
+  job chain of `priv/workflows/elixir_phoenix_feature.yaml`.
 
-  The 5th `:merge` stage in the workflow is NOT driven here: it is
-  Phase-3 territory per Plan 02-08's locked decision (the `:merge` kind
-  stage performs no StageWorker-level transition because the terminal
-  `:merged` state is already reached via `:verifying`, and the actual
-  git-merge operation + the correct transition owner for the `:merge`
-  kind ship in Phase 3).
-
-  Per Plan 02-08 CONTEXT.md `<deferred>` entry, next-stage auto-enqueue
-  is deferred to Phase 3. Phase 2's test drives dispatch with an
-  explicit test-level for-loop, simulating the future dispatcher. This
-  is intentional: Phase 2 demonstrates rehydration + per-stage
-  idempotency under externally-driven stage dispatch; auto-dispatch
-  depends on stage-output → next-stage-input wiring (diff_ref,
-  test_output_ref) that Phase 3's real agents produce.
+  Phase 3 replaces the old explicit test-level for-loop with
+  `Kiln.Stages.NextStageDispatcher`, so this test now seeds only the
+  first planning stage and then drains the `:stages` queue until the
+  workflow advances itself to `:merged`.
 
   ## Requirements exercised
 
@@ -51,12 +38,7 @@ defmodule Kiln.Integration.WorkflowEndToEndTest do
     {:ok, correlation_id: cid}
   end
 
-  # Drives 4 stages (plan, code, test, verify) via the LOCKED StageWorker
-  # transition mapping. verifying → :merged takes the run to terminal.
-  # The 5th :merge stage is NOT driven in Phase 2 — see CONTEXT.md
-  # <deferred> entry for "Auto-enqueue of next stage's Oban job..."
-  # (Phase 3).
-  test "4 stages (plan→code→test→verify) drive a run queued → merged", %{correlation_id: cid} do
+  test "seed planning stage and drain queue to drive run queued → merged", %{correlation_id: cid} do
     {:ok, cg} = Workflows.load("priv/workflows/elixir_phoenix_feature.yaml")
 
     run =
@@ -69,62 +51,57 @@ defmodule Kiln.Integration.WorkflowEndToEndTest do
         caps_snapshot: cg.caps
       )
 
-    # Drive: first transition to :planning (normally the Intents kickoff does this)
+    # Kick the run from queued -> planning, then seed only the entry stage.
     {:ok, _} = Transitions.transition(run.id, :planning)
 
-    # Drive 4 stages (skip :merge — Phase 3 territory per LOCKED decision)
-    stages_to_drive =
-      Enum.filter(cg.stages, fn s -> s.kind in [:planning, :coding, :testing, :verifying] end)
+    planning_stage = Enum.find(cg.stages, &(&1.id == cg.entry_node))
 
-    assert length(stages_to_drive) == 4,
-           "elixir_phoenix_feature.yaml MUST have exactly 4 non-merge stages; got #{length(stages_to_drive)}"
+    sr =
+      StageRunFactory.insert(:stage_run,
+        run_id: run.id,
+        workflow_stage_id: planning_stage.id,
+        kind: planning_stage.kind,
+        agent_role: planning_stage.agent_role,
+        state: :pending,
+        timeout_seconds: planning_stage.timeout_seconds,
+        sandbox: planning_stage.sandbox
+      )
 
-    for stage <- stages_to_drive do
-      sr =
-        StageRunFactory.insert(:stage_run,
-          run_id: run.id,
-          workflow_stage_id: stage.id,
-          kind: stage.kind,
-          agent_role: stage.agent_role,
-          state: :pending,
-          timeout_seconds: stage.timeout_seconds,
-          sandbox: stage.sandbox
-        )
+    args = %{
+      "idempotency_key" => "run:#{run.id}:stage:#{sr.id}",
+      "run_id" => run.id,
+      "stage_run_id" => sr.id,
+      "stage_kind" => Atom.to_string(planning_stage.kind),
+      "stage_input" => build_stage_input(run, sr, planning_stage.kind)
+    }
 
-      args = %{
-        "idempotency_key" => "run:#{run.id}:stage:#{sr.id}",
-        "run_id" => run.id,
-        "stage_run_id" => sr.id,
-        "stage_kind" => Atom.to_string(stage.kind),
-        "stage_input" => build_stage_input(run, sr, stage.kind)
-      }
+    assert :ok = perform_job(StageWorker, args)
+    assert_enqueued(worker: StageWorker, args: %{"stage_kind" => "coding"})
 
-      assert :ok = perform_job(StageWorker, args),
-             "StageWorker for kind=#{stage.kind} MUST complete successfully"
-    end
+    assert %{success: success_count, failure: 0} = Oban.drain_queue(queue: :stages)
+    assert success_count >= 3
 
-    # After verifying stage, run reaches :merged via LOCKED mapping
-    # :verifying → :merged.
     final = Repo.get!(Run, run.id)
 
     assert final.state == :merged,
-           "After 4 stages driven (plan→code→test→verify), run MUST be in :merged (verifying→merged per LOCKED StageWorker mapping)"
+           "After queue drain, run MUST be in :merged"
 
-    # Assert stage_runs count = 4 (the four driven stages)
+    # Phase 3 auto-enqueue creates the remaining stage_run rows.
     sr_count =
       StageRun
       |> where([s], s.run_id == ^run.id)
       |> Repo.aggregate(:count)
 
-    assert sr_count == 4,
-           "Phase 2 drives exactly 4 stages (merge deferred to Phase 3); got #{sr_count}"
+    assert sr_count == 5,
+           "Phase 3 auto-enqueue should materialize all 5 workflow stages; got #{sr_count}"
 
-    # Assert audit events for state transitions: 1 (queued→planning) + 4 (stage-driven) = 5
+    # Assert audit events for state transitions: queued->planning, then the
+    # StageWorker chain reaches merged by way of the locked progression.
     events = Audit.replay(correlation_id: cid)
     transition_events = Enum.filter(events, &(&1.event_kind == :run_state_transitioned))
 
     assert length(transition_events) >= 5,
-           "Expected ≥5 run_state_transitioned events (queued→planning + 4 stage-driven transitions); got #{length(transition_events)}"
+           "Expected ≥5 run_state_transitioned events from the auto-enqueued flow; got #{length(transition_events)}"
   end
 
   defp build_stage_input(run, sr, kind) do

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: executing
-stopped_at: Wave 4 complete (03-08/03-09 recovered and documented); Wave 5 ready for 03-10/03-11
-last_updated: "2026-04-20T23:30:00.000Z"
-last_activity: 2026-04-20 -- recovered missing Wave 4 sandbox/DTU work, validated, and documented
+status: ready_to_plan
+stopped_at: Phase 03 complete; Phase 04 is next
+last_updated: "2026-04-20T23:59:00.000Z"
+last_activity: 2026-04-20 -- completed Wave 5 wiring, ran full test suite, and closed Phase 03
 progress:
   total_phases: 10
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 28
-  completed_plans: 26
-  percent: 93
+  completed_plans: 28
+  percent: 100
 ---
 
 # Project State
@@ -21,22 +21,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase 03 — agent-adapter-sandbox-dtu-safety
+**Current focus:** Phase 04 — agent-tree-and-shared-memory
 
 ## Current Position
 
-Phase: 03 (agent-adapter-sandbox-dtu-safety) — EXECUTING
-Plan: 11 of 12 (Wave 4 complete: 03-08/03-09 documented; Wave 5 ready for 03-10/03-11)
-Status: Executing Phase 03
-Last activity: 2026-04-20 -- 03-08/03-09 recovered, validated, and documented; Wave 5 ready
+Phase: 04 (agent-tree-and-shared-memory) — READY TO PLAN
+Plan: 0 of TBD
+Status: Phase 03 complete; Phase 04 not started
+Last activity: 2026-04-20 -- 03-10/03-11 shipped, validated, and Phase 03 closed
 
-Progress: [█████████▎] 93%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 26
+- Total plans completed: 28
 - Average duration: ~19 min
 - Total execution time: ~155 min
 
@@ -46,12 +46,12 @@ Progress: [█████████▎] 93%
 |-------|-------|-------|----------|
 | 1     | 7/7   | ~140m | ~20m     |
 | 02    | 9/9   | -     | -        |
-| 03    | 10/12 | -     | -        |
+| 03    | 12/12 | -     | -        |
 
 **Recent Trend:**
 
-- Last 9 plans: 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged), 03-07 (sandbox substrate), 03-08 (sandbox runtime recovery), 03-09 (DTU host-side recovery)
-- Trend: Phase 3 is now through Wave 4. Sandbox driver/runtime and DTU scaffolding are both present, and the next work is the StageWorker integration wave.
+- Last 11 plans: 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged), 03-07 (sandbox substrate), 03-08 (sandbox runtime recovery), 03-09 (DTU host-side recovery), 03-10 (stage auto-enqueue), 03-11 (application wiring)
+- Trend: Phase 03 is complete. The runtime scaffolding, DTU sidecar, provider-secret gate, and workflow auto-enqueue are all in place; the next phase is the agent-session/work-unit layer.
 
 *Updated after each plan completion.*
 | Phase 02 P00 | ~7m | 2 tasks | 13 files |
@@ -68,6 +68,8 @@ Progress: [█████████▎] 93%
 | Phase 03 P07 | ~wave-3 | 3 tasks | 19 files |
 | Phase 03 P08 | recovered | 3 tasks | 5 files |
 | Phase 03 P09 | recovered | 3 tasks | 7 files |
+| Phase 03 P10 | ~wave-5 | 3 tasks | 4 files |
+| Phase 03 P11 | ~wave-5 | 4 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -176,9 +178,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20 -- recovered and validated Wave 4 sandbox/DTU work
-Stopped at: Wave 4 complete; 03-10 and 03-11 are the next pending plans
-Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-09-SUMMARY.md
-Next command: /gsd-execute-phase 3 (continue from Wave 5: 03-10/03-11)
+Last session: 2026-04-20 -- completed and validated Phase 03
+Stopped at: Phase 03 complete; Phase 04 is next
+Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-11-SUMMARY.md
+Next command: /gsd-research-phase 4
 
-**Planned Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — 2026-04-20T16:34:38.407Z
+**Completed Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — completed 2026-04-20

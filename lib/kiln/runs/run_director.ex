@@ -79,6 +79,23 @@ defmodule Kiln.Runs.RunDirector do
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
+  @spec start_run(Ecto.UUID.t()) :: {:ok, Kiln.Runs.Run.t()} | no_return()
+  def start_run(run_id) when is_binary(run_id) do
+    run = Runs.get!(run_id)
+
+    case missing_provider_keys(run) do
+      [] ->
+        Kiln.Runs.Transitions.transition(run.id, :planning)
+
+      missing ->
+        maybe_notify_missing_key(run.id, missing)
+
+        Kiln.Blockers.raise_block(:missing_api_key, run.id, %{
+          provider_keys_missing: Enum.map(missing, &Atom.to_string/1)
+        })
+    end
+  end
+
   @impl true
   def init(_opts) do
     # D-92 — supervisor boot NEVER blocks on the scan. Defer to a
@@ -200,6 +217,72 @@ defmodule Kiln.Runs.RunDirector do
           {:error, _reason} ->
             {:error, :workflow_changed}
         end
+    end
+  end
+
+  defp missing_provider_keys(run) do
+    run.model_profile_snapshot
+    |> required_provider_keys()
+    |> Enum.reject(&Kiln.Secrets.present?/1)
+    |> Enum.uniq()
+  end
+
+  defp required_provider_keys(%{"profile" => profile} = snapshot) when is_binary(profile) do
+    roles =
+      case Enum.find(Kiln.ModelRegistry.all_presets(), &(Atom.to_string(&1) == profile)) do
+        nil -> snapshot["roles"] || %{}
+        preset -> Kiln.ModelRegistry.resolve(preset)
+      end
+
+    roles
+    |> Map.values()
+    |> Enum.map(&model_id_from_role_spec/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&provider_key_for_model/1)
+  end
+
+  defp required_provider_keys(%{"roles" => roles}) when is_map(roles) do
+    roles
+    |> Map.values()
+    |> Enum.map(&model_id_from_role_spec/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&provider_key_for_model/1)
+  end
+
+  defp required_provider_keys(_), do: []
+
+  defp model_id_from_role_spec(model) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{model: model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{"model" => model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(_), do: nil
+
+  defp provider_key_for_model("claude-" <> _), do: :anthropic_api_key
+  defp provider_key_for_model("gpt-" <> _), do: :openai_api_key
+  defp provider_key_for_model("gemini-" <> _), do: :google_api_key
+  defp provider_key_for_model(model) when is_binary(model) do
+    cond do
+      String.contains?(model, "sonnet") or String.contains?(model, "haiku") or
+          String.contains?(model, "opus") ->
+        :anthropic_api_key
+
+      String.contains?(model, "llama") or String.contains?(model, "ollama") ->
+        :ollama_host
+
+      true ->
+        :anthropic_api_key
+    end
+  end
+
+  defp maybe_notify_missing_key(run_id, missing) do
+    if Code.ensure_loaded?(Kiln.Notifications) and
+         function_exported?(Kiln.Notifications, :desktop, 2) and
+         :ets.whereis(Kiln.Notifications.DedupCache) != :undefined do
+      Kiln.Notifications.desktop(:missing_api_key, %{
+        run_id: run_id,
+        provider_keys_missing: Enum.map_join(missing, ",", &Atom.to_string/1)
+      })
+    else
+      :ok
     end
   end
 end

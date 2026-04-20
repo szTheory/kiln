@@ -28,7 +28,12 @@ defmodule Kiln.Agents.AdapterContractTest do
   end
 
   test "Kiln.Agents.SessionSupervisor starts empty as DynamicSupervisor" do
-    {:ok, pid} = Kiln.Agents.SessionSupervisor.start_link([])
+    {pid, started_here?} =
+      case Kiln.Agents.SessionSupervisor.start_link([]) do
+        {:ok, pid} -> {pid, true}
+        {:error, {:already_started, pid}} -> {pid, false}
+      end
+
     assert Process.alive?(pid)
 
     assert DynamicSupervisor.count_children(Kiln.Agents.SessionSupervisor) == %{
@@ -38,6 +43,8 @@ defmodule Kiln.Agents.AdapterContractTest do
              workers: 0
            }
 
-    :ok = Supervisor.stop(pid)
+    if started_here? do
+      :ok = Supervisor.stop(pid)
+    end
   end
 end

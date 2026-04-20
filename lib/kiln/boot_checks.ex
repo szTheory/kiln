@@ -41,8 +41,10 @@ defmodule Kiln.BootChecks do
   """
 
   require Logger
+  alias Kiln.Audit
   alias Kiln.BootChecks.Error
   alias Kiln.Repo
+  alias Kiln.Sandboxes.{DockerDriver, OrphanSweeper}
 
   # SSOT for the 13 bounded contexts (ARCHITECTURE.md §4 + D-97
   # spec upgrade — Phase 2 admitted `Kiln.Artifacts` as the 13th
@@ -127,6 +129,8 @@ defmodule Kiln.BootChecks do
       check_oban_queue_budget!()
       check_workflow_schema_loads!()
       check_required_secrets!()
+      check_secrets_presence_map_non_empty!()
+      check_no_prior_boot_sandbox_orphans!()
       :ok
     end
   end
@@ -440,9 +444,68 @@ defmodule Kiln.BootChecks do
         raise Error,
           invariant: :required_secrets,
           details: %{missing_env_vars: vars, env: env},
-          remediation_hint:
+        remediation_hint:
             "Set #{Enum.join(vars, ", ")} before booting " <>
               "(cp .env.sample .env and edit; direnv allow; re-run mix phx.server)."
+    end
+  end
+
+  defp check_secrets_presence_map_non_empty! do
+    env = Application.get_env(:kiln, :env, :prod)
+    provider_keys = [:anthropic_api_key, :openai_api_key, :google_api_key, :ollama_host]
+    {present, missing} = Enum.split_with(provider_keys, &Kiln.Secrets.present?/1)
+
+    Logger.info(
+      "provider_keys_loaded=#{inspect(present)} provider_keys_missing=#{inspect(missing)} " <>
+        "database_url=#{presence_for_env("DATABASE_URL")} " <>
+        "secret_key_base_bytes=#{secret_key_base_bytes()}"
+    )
+
+    case {env, present} do
+      {:prod, []} ->
+        raise Error,
+          invariant: :secrets_presence_map_non_empty,
+          details: %{present: present, missing: missing, env: env},
+          remediation_hint:
+            "At least one provider credential must be present in :prod. " <>
+              "Set ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY, or OLLAMA_HOST before boot."
+
+      _ ->
+        :ok
+    end
+  end
+
+  defp check_no_prior_boot_sandbox_orphans! do
+    boot_epoch = OrphanSweeper.boot_epoch_now()
+
+    boot_epoch
+    |> DockerDriver.list_orphans()
+    |> Enum.each(fn container_id ->
+      _ =
+        Audit.append(%{
+          event_kind: :orphan_container_swept,
+          correlation_id: Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
+          payload: %{
+            "container_id" => container_id,
+            "boot_epoch_found" => boot_epoch,
+            "age_seconds" => 0
+          }
+        })
+
+      _ = System.cmd("docker", ["rm", "-f", container_id], stderr_to_stdout: true)
+    end)
+
+    :ok
+  end
+
+  defp presence_for_env(var) do
+    if System.get_env(var) in [nil, ""], do: "missing", else: "present"
+  end
+
+  defp secret_key_base_bytes do
+    case System.get_env("SECRET_KEY_BASE") do
+      nil -> 0
+      value -> byte_size(value)
     end
   end
 end
