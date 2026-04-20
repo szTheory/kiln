@@ -100,9 +100,9 @@ Plans:
 - [x] 03-01-PLAN.md — Kiln.Secrets + SecretRedactor (SEC-01) — **complete 2026-04-20 (b599134, f5d4e89, 5801685, 197919b)**
 - [x] 03-02-PLAN.md — Kiln.Blockers typed reasons + playbook registry (BLOCK-01) — **complete 2026-04-20 (01e3bf1, 23f20ba, 34c806f)**
 - [x] 03-03-PLAN.md — 9 new audit event kinds + migration (OPS-02, SEC-01) — **complete 2026-04-20 (143393f, 7919e7e)**
-- [ ] 03-04-PLAN.md — FactoryCircuitBreaker scaffold + Notifications (BLOCK-03)
-- [ ] 03-05-PLAN.md — Kiln.Agents.Adapter behaviour + Anthropic live + 3 scaffolded adapters (AGENT-01)
-- [ ] 03-06-PLAN.md — Pricing + ModelRegistry + BudgetGuard + TelemetryHandler (AGENT-02, AGENT-05)
+- [x] 03-04-PLAN.md — FactoryCircuitBreaker scaffold + Notifications (BLOCK-03) — **complete 2026-04-20 (d4ac82a)**
+- [x] 03-05-PLAN.md — Kiln.Agents.Adapter behaviour + Anthropic live + 3 scaffolded adapters (AGENT-01) — **complete 2026-04-20 (2be7904)**
+- [x] 03-06-PLAN.md — Pricing + ModelRegistry + BudgetGuard + TelemetryHandler (AGENT-02, AGENT-05) — **complete 2026-04-20 (recovered from interrupted Wave 2 worktree output; see 03-06-SUMMARY.md)**
 - [ ] 03-07-PLAN.md — Sandboxes pure modules: ContainerSpec/ImageResolver/Limits/EnvBuilder/Hydrator/Harvester (SAND-01, SAND-04)
 - [ ] 03-08-PLAN.md — DockerDriver + OrphanSweeper + adversarial negative-test suite (SAND-01, SAND-02)
 - [ ] 03-09-PLAN.md — DTU mini-mix-project + HealthPoll + ContractTest (SAND-03)

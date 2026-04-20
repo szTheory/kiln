@@ -67,9 +67,7 @@ defmodule Kiln.Notifications do
   @spec desktop(atom(), map()) :: :ok | {:error, term()}
   def desktop(reason, ctx) when is_atom(reason) and is_map(ctx) do
     if not Blockers.Reason.valid?(reason) do
-      Logger.error(
-        "Kiln.Notifications.desktop/2 received invalid reason: " <> inspect(reason)
-      )
+      Logger.error("Kiln.Notifications.desktop/2 received invalid reason: " <> inspect(reason))
 
       {:error, :invalid_reason}
     else
@@ -124,21 +122,28 @@ defmodule Kiln.Notifications do
 
     case dispatch_result do
       :ok ->
-        _ = ExternalOperations.complete_op(op, %{"result" => "fired", "platform" => Atom.to_string(platform)})
+        _ =
+          ExternalOperations.complete_op(op, %{
+            "result" => "fired",
+            "platform" => Atom.to_string(platform)
+          })
+
         audit_fired(reason, run_id, key, platform, correlation_id)
         :ok
 
       {:error, err} = err_tuple ->
-        _ = ExternalOperations.fail_op(op, %{"reason" => inspect(err), "platform" => Atom.to_string(platform)})
+        _ =
+          ExternalOperations.fail_op(op, %{
+            "reason" => inspect(err),
+            "platform" => Atom.to_string(platform)
+          })
 
         # On unsupported platform, still emit a suppressed audit event so
         # the operator's trace shows "we would have notified here."
         if platform == :unsupported do
           audit_suppressed_unsupported(reason, run_id, key, correlation_id)
         else
-          Logger.error(
-            "Kiln.Notifications dispatch failed on #{platform}: #{inspect(err)}"
-          )
+          Logger.error("Kiln.Notifications dispatch failed on #{platform}: #{inspect(err)}")
         end
 
         err_tuple

@@ -173,10 +173,18 @@ defmodule Kiln.AuditTest do
     }
 
   defp minimal_payload_for(:budget_check_passed),
-    do: %{"scope" => "run", "consumed" => 0, "limit" => 1000}
+    do: %{
+      "estimated_usd" => "0.01",
+      "remaining_usd" => "0.99",
+      "model" => "claude-sonnet-4-5-20250929"
+    }
 
   defp minimal_payload_for(:budget_check_failed),
-    do: %{"scope" => "run", "consumed" => 1001, "limit" => 1000}
+    do: %{
+      "estimated_usd" => "1.50",
+      "remaining_usd" => "0.01",
+      "model" => "claude-opus-4-5-20250929"
+    }
 
   defp minimal_payload_for(:stuck_detector_alarmed),
     do: %{"failure_class" => "schema_mismatch", "count" => 3}

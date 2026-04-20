@@ -17,7 +17,9 @@ defmodule Kiln.Agents.Adapter.OpenAITest do
   end
 
   test "declares @behaviour Kiln.Agents.Adapter" do
-    behaviours = OpenAI.module_info(:attributes) |> Keyword.get_values(:behaviour) |> List.flatten()
+    behaviours =
+      OpenAI.module_info(:attributes) |> Keyword.get_values(:behaviour) |> List.flatten()
+
     assert Kiln.Agents.Adapter in behaviours
   end
 

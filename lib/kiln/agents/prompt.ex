@@ -23,8 +23,7 @@ defmodule Kiln.Agents.Prompt do
   `test/kiln/agents/prompt_test.exs` assert this exclusion.
   """
 
-  @derive {Jason.Encoder,
-           only: [:messages, :system, :model, :max_tokens, :temperature, :tools]}
+  @derive {Jason.Encoder, only: [:messages, :system, :model, :max_tokens, :temperature, :tools]}
 
   defstruct [
     :model,

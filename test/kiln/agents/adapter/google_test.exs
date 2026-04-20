@@ -15,7 +15,9 @@ defmodule Kiln.Agents.Adapter.GoogleTest do
   end
 
   test "declares @behaviour Kiln.Agents.Adapter" do
-    behaviours = Google.module_info(:attributes) |> Keyword.get_values(:behaviour) |> List.flatten()
+    behaviours =
+      Google.module_info(:attributes) |> Keyword.get_values(:behaviour) |> List.flatten()
+
     assert Kiln.Agents.Adapter in behaviours
   end
 

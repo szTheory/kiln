@@ -118,7 +118,9 @@ defmodule Kiln.NotificationsTest do
 
     test "first call within TTL fires + writes :notification_fired audit event" do
       run_id = Ecto.UUID.generate()
-      assert :ok = Notifications.desktop(:missing_api_key, %{run_id: run_id, provider: "anthropic"})
+
+      assert :ok =
+               Notifications.desktop(:missing_api_key, %{run_id: run_id, provider: "anthropic"})
 
       events = Audit.replay(event_kind: :notification_fired)
       assert Enum.any?(events, fn ev -> ev.payload["run_id"] == run_id end)

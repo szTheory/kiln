@@ -30,6 +30,7 @@ defmodule Kiln.Agents.AdapterContractTest do
   test "Kiln.Agents.SessionSupervisor starts empty as DynamicSupervisor" do
     {:ok, pid} = Kiln.Agents.SessionSupervisor.start_link([])
     assert Process.alive?(pid)
+
     assert DynamicSupervisor.count_children(Kiln.Agents.SessionSupervisor) == %{
              active: 0,
              specs: 0,

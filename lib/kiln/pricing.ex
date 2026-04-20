@@ -33,9 +33,9 @@ defmodule Kiln.Pricing do
                         end)
 
   # Flat %{model_id => rates} map — the hot-path lookup structure.
-  @flat (@pricing_by_provider
-         |> Map.values()
-         |> Enum.reduce(%{}, &Map.merge(&2, &1)))
+  @flat @pricing_by_provider
+        |> Map.values()
+        |> Enum.reduce(%{}, &Map.merge(&2, &1))
 
   @doc """
   Estimate USD cost for a completion call: `input_tokens` + `output_tokens`
@@ -54,9 +54,7 @@ defmodule Kiln.Pricing do
              input_tokens >= 0 and output_tokens >= 0 do
     case Map.get(@flat, model) do
       nil ->
-        Logger.warning(
-          "Kiln.Pricing.estimate_usd: unknown model #{inspect(model)} — returning 0"
-        )
+        Logger.warning("Kiln.Pricing.estimate_usd: unknown model #{inspect(model)} — returning 0")
 
         Decimal.new(0)
 

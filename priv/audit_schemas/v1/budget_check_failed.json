@@ -1,13 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "kiln://audit/v1/budget_check_failed.json",
-  "title": "budget_check_failed",
+  "title": "audit_events budget_check_failed payload",
   "type": "object",
-  "required": ["scope", "consumed", "limit"],
+  "required": ["estimated_usd", "remaining_usd", "model"],
+  "additionalProperties": true,
   "properties": {
-    "scope": { "type": "string" },
-    "consumed": { "type": "number", "minimum": 0 },
-    "limit": { "type": "number", "minimum": 0 }
-  },
-  "additionalProperties": false
+    "estimated_usd": { "type": "string" },
+    "remaining_usd": { "type": "string" },
+    "cap_usd": { "type": "string" },
+    "spent_usd": { "type": "string" },
+    "model": { "type": "string" },
+    "tokens_in": { "type": "integer", "minimum": 0 },
+    "tokens_out": { "type": "integer", "minimum": 0 }
+  }
 }

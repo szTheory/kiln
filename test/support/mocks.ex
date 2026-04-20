@@ -72,27 +72,39 @@ unless Code.ensure_loaded?(Kiln.TestMocks) do
 
       :ok
     end
-  end
 
-  # Defmocks execute at module-load time. Each registration is gated on
-  # `Code.ensure_loaded?/1` of the target mock name so this block is
-  # safely re-entrant (elixirc first pass + `Code.require_file` from
-  # `test_helper.exs`). The target-behaviour availability check supports
-  # Wave 0 (no behaviour modules yet) compiling cleanly.
+    @doc """
+    Promote a deferred placeholder to a real Mox defmock once the
+    target behaviour exists.
+    """
+    @spec ensure_mock!(module(), module()) :: :ok
+    def ensure_mock!(mock_name, behaviour) when is_atom(mock_name) and is_atom(behaviour) do
+      deferred? =
+        Code.ensure_loaded?(mock_name) and function_exported?(mock_name, :__deferred__, 0)
 
-  unless Code.ensure_loaded?(Kiln.Agents.AdapterMock) do
-    if Code.ensure_loaded?(Kiln.Agents.Adapter) do
-      Mox.defmock(Kiln.Agents.AdapterMock, for: Kiln.Agents.Adapter)
-    else
-      Kiln.TestMocks.define_placeholder!(Kiln.Agents.AdapterMock)
-    end
-  end
+      if deferred? and Code.ensure_loaded?(behaviour) do
+        :code.purge(mock_name)
+        :code.delete(mock_name)
+      end
 
-  unless Code.ensure_loaded?(Kiln.Sandboxes.DriverMock) do
-    if Code.ensure_loaded?(Kiln.Sandboxes.Driver) do
-      Mox.defmock(Kiln.Sandboxes.DriverMock, for: Kiln.Sandboxes.Driver)
-    else
-      Kiln.TestMocks.define_placeholder!(Kiln.Sandboxes.DriverMock)
+      cond do
+        Code.ensure_loaded?(mock_name) ->
+          :ok
+
+        Code.ensure_loaded?(behaviour) ->
+          Mox.defmock(mock_name, for: behaviour)
+          :ok
+
+        true ->
+          define_placeholder!(mock_name)
+      end
     end
   end
 end
+
+# Defmocks execute at module-load time. This block is intentionally
+# outside the `Kiln.TestMocks` definition guard so `Code.require_file`
+# can promote a deferred placeholder to a real Mox defmock once the
+# target behaviour exists on a later compile.
+Kiln.TestMocks.ensure_mock!(Kiln.Agents.AdapterMock, Kiln.Agents.Adapter)
+Kiln.TestMocks.ensure_mock!(Kiln.Sandboxes.DriverMock, Kiln.Sandboxes.Driver)
