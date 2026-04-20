@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03-PLAN.md (Kiln.Artifacts 13th context — CAS + append-only table + integrity-on-read + P5 worker scaffolds)
-last_updated: "2026-04-20T01:59:13.355Z"
+stopped_at: Completed 02-04-PLAN.md (6-queue Oban taxonomy + pool_size 20 + BootChecks 6th invariant check_oban_queue_budget + 2 custom Mix CI gates)
+last_updated: "2026-04-20T02:11:23.471Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 16
-  completed_plans: 11
-  percent: 69
+  completed_plans: 12
+  percent: 75
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 02 (workflow-engine-core) — EXECUTING
-Plan: 5 of 9
+Plan: 6 of 9
 Status: Ready to execute
 Last activity: 2026-04-20
 
-Progress: [███████░░░] 69%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [███████░░░] 69%
 | Phase 02 P01 | ~7min | 2 tasks | 14 files |
 | Phase 02 P02 | ~6min | 2 tasks | 11 files |
 | Phase Phase 02 P03 P~8min | 2 | 11 tasks | - files |
+| Phase Phase 02 PP04 | ~5min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Plan 02-01 decisions: (a) Audit schemas (3 new D-85 kinds) shipped payload-only matching Phase 1 convention, not full-envelope shape implied by plan spec text — Kiln.Audit.append/1 validates only the payload map; (b) verifying.json relaxes holdout_excluded to type boolean (not const true) per D-74 — verifier stages may run against the holdout set, the 4 other kinds enforce const: true structurally; (c) new registries' fetch/1 returns {:error, :unknown_kind}; Phase 1's Kiln.Audit.SchemaRegistry still returns :schema_missing (retrofit deferred); (d) migration down/0 hard-codes the original 22-kind list because reading EventKind at rollback time would observe the 25-atom current-source module attribute and make down a silent no-op; (e) Phase 2 registries opt in to JSV formats: true; Phase 1 Kiln.Audit.SchemaRegistry does not — deferred retrofit flagged by RESEARCH.md correction #1 / STACK.md D-100.
 - Plan 02-02 decisions: (a) FK on_delete :restrict (D-81) validated at BOTH Ecto.ConstraintError path (Repo.delete!) AND raw Postgrex.Error path (Repo.query! bypass) — proves invariant holds regardless of caller surface; (b) Run factory ships realistic caps_snapshot (max_retries/max_tokens_usd/max_elapsed_seconds/max_stage_duration_seconds) and model_profile_snapshot defaults, not bare %{} — downstream Plan 06/07 and Phase 3 BudgetGuard tests benefit from realistic shapes; (c) StageRun factory leaves run_id: nil by design with moduledoc-documented caller contract — auto-inserting a parent run would hide FK dependency and produce orphan rows on build/1 without persistence; (d) StageRun changeset pre-wires all 6 check_constraints (kind/agent_role/state/sandbox/attempt/cost_usd) so a raw attrs-drift Repo.insert bypass still surfaces clean changeset errors — defence-in-depth mirroring Phase 1 Kiln.ExternalOperations.Operation; (e) Both migrations use def change (reversible) with 2-arg execute/2 for every DDL escape — migrate → rollback --step 2 → migrate round-trip verified clean
 - Plan 02-03 decisions: (a) test-env CAS paths made STABLE (not per-invocation-unique) after System.unique_integer hit :validate_compile_env at boot — content-addressed dedup makes stable paths safe; (b) Kiln.CasTestHelper (Plan 02-00) not used by CAS tests since CAS uses Application.compile_env which ignores runtime put_env — helper retained for future non-CAS consumers; (c) append-only grant pattern applied second time (mirrors audit_events); (d) Repo.transact/2 (Ecto 3.13 new API) preferred over Repo.transaction/1 for put/4's CAS+row+audit atomicity — cleaner {:ok, val}/{:error, reason} contract; (e) audit-before-raise in read!/1 ensures integrity_violation forensic record survives caller rescue handler; (f) artifact_factory leaves stage_run_id + run_id nil by design (mirrors StageRun factory FK-visibility pattern)
+- Plan 02-04 decisions: (a) Raised pool_size in both config/runtime.exs (:prod) and config/dev.exs to 20 — plan text targeted runtime.exs only, but the D-68 budget math has to hold at dev runtime too since dev.exs carries the P1 pool_size:10 that runs the real solo-op local loop; (b) Placed check_oban_queue_budget!/0 4th in the BootChecks invariant chain (contexts→revoke→trigger→oban_queue_budget→secrets) — groups the audit-ledger invariants thematically; Plan 07 will insert workflow_schema_loads near this slot; (c) Did NOT extend BootChecks.@context_modules to 13 in this plan — Plan 07 Task 2 owns the paired SSOT update (BootChecks list + Mix task @expected) to keep them in lockstep; (d) Broke Mix task @expected to one-module-per-line so grep -c "Kiln\." returns 20 (>= 13 acceptance threshold); (e) Rewrote a 'do NOT pass atoms: true' comment to avoid the literal trigger string — future defense-in-depth grep gates (threat-model T3) depend on literal absence
 
 ### Plan 01-01 decisions
 
@@ -156,8 +158,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T01:59:13.352Z
-Stopped at: Completed 02-03-PLAN.md (Kiln.Artifacts 13th context — CAS + append-only table + integrity-on-read + P5 worker scaffolds)
+Last session: 2026-04-20T02:11:23.465Z
+Stopped at: Completed 02-04-PLAN.md (6-queue Oban taxonomy + pool_size 20 + BootChecks 6th invariant check_oban_queue_budget + 2 custom Mix CI gates)
 Resume file: None
 Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
 

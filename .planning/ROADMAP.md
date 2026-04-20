@@ -70,7 +70,7 @@ Plans:
 - [x] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry — **complete 2026-04-20 (e64acc4, 4aed708)**
 - [x] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories — **complete 2026-04-20 (7371684, 64abc7c)**
 - [x] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs) — **complete 2026-04-20 (fc4c21d, cdc109c)**
-- [ ] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts
+- [x] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts + BootChecks 6th invariant :oban_queue_budget — **complete 2026-04-20 (130f8f3, c738b52)**
 - [ ] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml
 - [ ] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError
 - [ ] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant + 13th context
@@ -254,7 +254,7 @@ Phases needing `/gsd-research-phase` before planning:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Durability Floor | 7/7 | Complete | 2026-04-19 |
-| 2. Workflow Engine Core | 2/9 | In progress | - |
+| 2. Workflow Engine Core | 5/9 | In progress | - |
 | 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |
 | 5. Spec, Verification & Bounded Loop | 0/TBD | Not started | - |
