@@ -103,7 +103,7 @@ Plans:
 - [x] 03-04-PLAN.md — FactoryCircuitBreaker scaffold + Notifications (BLOCK-03) — **complete 2026-04-20 (d4ac82a)**
 - [x] 03-05-PLAN.md — Kiln.Agents.Adapter behaviour + Anthropic live + 3 scaffolded adapters (AGENT-01) — **complete 2026-04-20 (2be7904)**
 - [x] 03-06-PLAN.md — Pricing + ModelRegistry + BudgetGuard + TelemetryHandler (AGENT-02, AGENT-05) — **complete 2026-04-20 (recovered from interrupted Wave 2 worktree output; see 03-06-SUMMARY.md)**
-- [ ] 03-07-PLAN.md — Sandboxes pure modules: ContainerSpec/ImageResolver/Limits/EnvBuilder/Hydrator/Harvester (SAND-01, SAND-04)
+- [x] 03-07-PLAN.md — Sandboxes pure modules: ContainerSpec/ImageResolver/Limits/EnvBuilder/Hydrator/Harvester (SAND-01, SAND-04) — **complete 2026-04-20 (67c8ae3)**
 - [ ] 03-08-PLAN.md — DockerDriver + OrphanSweeper + adversarial negative-test suite (SAND-01, SAND-02)
 - [ ] 03-09-PLAN.md — DTU mini-mix-project + HealthPoll + ContractTest (SAND-03)
 - [ ] 03-10-PLAN.md — NextStageDispatcher + StageWorker integrated chain

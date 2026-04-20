@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Wave 2 recovered and merged on main (03-04/05/06 complete); ready to continue with 03-07
-last_updated: "2026-04-20T21:55:00.000Z"
-last_activity: 2026-04-20 -- recovered interrupted Wave 2 worktrees; merged 03-04/05/06 and finished 03-06 follow-up on main
+stopped_at: Wave 3 complete (03-07 merged); Wave 4 ready for 03-08/03-09
+last_updated: "2026-04-20T22:10:00.000Z"
+last_activity: 2026-04-20 -- executed 03-07 sandbox substrate plan; Wave 4 ready
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 28
-  completed_plans: 23
-  percent: 82
+  completed_plans: 24
+  percent: 86
 ---
 
 # Project State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 03 (agent-adapter-sandbox-dtu-safety) — EXECUTING
-Plan: 8 of 12 (Wave 2 complete: 03-04/05/06 recovered and merged; next is 03-07)
+Plan: 9 of 12 (Wave 3 complete: 03-07 merged; Wave 4 ready for 03-08/03-09)
 Status: Executing Phase 03
-Last activity: 2026-04-20 -- recovered and merged Wave 2; targeted recovery suites green
+Last activity: 2026-04-20 -- 03-07 executed and documented; targeted sandbox suites green
 
-Progress: [████████░░] 82%
+Progress: [█████████░] 86%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 23
+- Total plans completed: 24
 - Average duration: ~19 min
 - Total execution time: ~155 min
 
@@ -46,12 +46,12 @@ Progress: [████████░░] 82%
 |-------|-------|-------|----------|
 | 1     | 7/7   | ~140m | ~20m     |
 | 02    | 9/9   | -     | -        |
-| 03    | 7/12  | -     | -        |
+| 03    | 8/12  | -     | -        |
 
 **Recent Trend:**
 
-- Last 7 plans: 02-07 (~9m, feat), 02-08 (~15m, feat), 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged)
-- Trend: Phase 3 is now through the end of Wave 2. The recovery pass established that interrupted executor worktrees can be harvested safely when they have isolated write scopes and green targeted suites, which is now the preferred resumption path over blind re-dispatch.
+- Last 7 plans: 02-08 (~15m, feat), 03-00 (~15m, feat), 03-01 (~7m, feat+test), 03-02 (~7m, feat+test), 03-03 (~8m, feat+migration), 03-04/05/06 (recovered Wave 2 worktree outputs, validated and merged), 03-07 (sandbox substrate, 7 commits)
+- Trend: Phase 3 is now through Wave 3. Sandbox substrate is in place, which unlocks the container-driver and DTU wave without additional recovery work.
 
 *Updated after each plan completion.*
 | Phase 02 P00 | ~7m | 2 tasks | 13 files |
@@ -65,6 +65,7 @@ Progress: [████████░░] 82%
 | Phase 03 P04 | ~7min | 2 tasks | 6 files |
 | Phase 03 P05 | recovered | 3 tasks | 18 files |
 | Phase 03 P06 | recovered | 2 tasks | 24 files |
+| Phase 03 P07 | ~wave-3 | 3 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Plan 03-04 decisions: (a) `FactoryCircuitBreaker` copied the `StuckDetector` scaffold exactly so Phase 5 can fill only the `handle_call/3` body; (b) notifications validate blocker reasons before shell-out and always write either `notification_fired` or `notification_suppressed`; (c) dedup state lives in an ETS table owned by `Kiln.Notifications.DedupCache`, with `:ets.whereis/1` guards protecting restart and teardown windows.
 - Plan 03-05 decisions: (a) Anthropic is the only live provider in Phase 3, with OpenAI/Google/Ollama shipped as compiling scaffolds behind the same behaviour; (b) provider-agnostic prompt/response structs are intentionally narrow and keep metadata out of generic JSON encoding; (c) `SessionSupervisor` ships now as the stable ownership seam for the Phase 4 agent tree.
 - Plan 03-06 decisions: (a) `Kiln.ModelRegistry.next/3` is deterministic by role order so fallback walks are stable and auditable; (b) `BudgetGuard` has no override and writes audit before raising `Kiln.Blockers.BlockedError`; (c) `BudgetGuard` only calls notifications when the dedup ETS table is live, preserving the current Phase 3/11 wiring boundary; (d) `TelemetryHandler` writes `model_routing_fallback` only on `:stop` mismatch events and leaves `:start` / `:exception` as accepted no-ops in Phase 3.
+- Plan 03-07 decisions: (a) sandbox image metadata, limits, and image lock data ship as pure substrate before driver wiring; (b) `EnvBuilder` treats secret-shaped names and non-allowlisted names as separate failure modes while still failing closed; (c) `Hydrator` resolves artifact refs by SHA through the CAS APIs, and `Harvester` writes back through `Kiln.Artifacts.put/4` so audit emission stays on the existing artifact path.
 
 ### Plan 01-01 decisions
 
@@ -172,9 +174,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20 -- recovered interrupted Wave 2 worktrees and merged 03-04/05/06
-Stopped at: Wave 2 complete; 03-07 is the next pending plan
-Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-06-SUMMARY.md
-Next command: /gsd-execute-phase 3 (continue from 03-07 after Wave 2 recovery)
+Last session: 2026-04-20 -- executed 03-07 sandbox substrate plan
+Stopped at: Wave 3 complete; 03-08 and 03-09 are the next pending plans
+Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-07-SUMMARY.md
+Next command: /gsd-execute-phase 3 (continue from Wave 4: 03-08/03-09)
 
 **Planned Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — 2026-04-20T16:34:38.407Z
