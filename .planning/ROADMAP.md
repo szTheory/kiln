@@ -66,7 +66,7 @@ Plans:
 **Research flag**: moderate. Before planning: mini-ADR on **workflow YAML schema** (compare Fabro DOT / GitHub Actions YAML / Temporal workflow shapes), **Oban queue taxonomy** (per-provider vs per-concern segregation), **workflow YAML signing** (defer-or-now decision).
 **Plans:** 9 plans
 Plans:
-- [ ] 02-00-PLAN.md — Nyquist test infrastructure (5 workflow YAML fixtures + 4 ex_machina factories + 3 ExUnit case templates + ex_machina dep)
+- [x] 02-00-PLAN.md — Nyquist test infrastructure (5 workflow YAML fixtures + 4 ex_machina factories + 4 ExUnit case templates + ex_machina dep) — **complete 2026-04-20 (2c7e48d, 7e13a72)**
 - [ ] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry
 - [ ] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories
 - [ ] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs)
