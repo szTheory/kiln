@@ -73,7 +73,7 @@ Plans:
 - [x] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts + BootChecks 6th invariant :oban_queue_budget — **complete 2026-04-20 (130f8f3, c738b52)**
 - [x] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml — **complete 2026-04-20 (f5f689d, 0f7f7e6)**
 - [x] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError — **complete 2026-04-20 (945ba88, d113bc4)**
-- [ ] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant + 13th context
+- [x] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant (:workflow_schema_loads) + 13th context (Kiln.Artifacts) + ORCH-02 integration test + check_bounded_contexts CI gate activation — **complete 2026-04-20 (981fa2c, bd1a211, 05bbc16)**
 - [ ] 02-08-PLAN.md — Kiln.Stages.StageWorker + end-to-end + rehydration integration tests + CLAUDE.md/ARCHITECTURE.md/STACK.md spec upgrades (D-97..D-100)
 
 ### Phase 3: Agent Adapter, Sandbox, DTU & Safety
