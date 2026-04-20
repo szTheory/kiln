@@ -64,7 +64,17 @@ Plans:
 **Phase artifacts**: `Kiln.Workflows` (yaml_elixir loader, JSV 0.18 schema validation, graph compile with topological sort + cycle detection); `Kiln.Runs` (schema + `Kiln.Runs.Transitions` command module — NOT `:gen_statem`); `Kiln.Stages` (schema, input-contract types, artifact pointers); `Kiln.Runs.RunSupervisor` (DynamicSupervisor) + per-run `one_for_all` subtree; `Kiln.Runs.RunDirector` (GenServer — boot-time rehydration scanner); `Kiln.Runs.Transitions` command module with guarded transition matrix; Oban queue taxonomy (`stages`, `github`, `audit_async`, `dtu`).
 **Pitfalls addressed**: P1 (stuck-run detector hook point wired), P3 (idempotency intent table populated), P4 (stage input-contract schema declared — token-bloat defence), P9 (base worker enforces), P19 (artifact content-addressing groundwork).
 **Research flag**: moderate. Before planning: mini-ADR on **workflow YAML schema** (compare Fabro DOT / GitHub Actions YAML / Temporal workflow shapes), **Oban queue taxonomy** (per-provider vs per-concern segregation), **workflow YAML signing** (defer-or-now decision).
-**Plans**: TBD
+**Plans:** 9 plans
+Plans:
+- [ ] 02-00-PLAN.md — Nyquist test infrastructure (5 workflow YAML fixtures + 4 ex_machina factories + 3 ExUnit case templates + ex_machina dep)
+- [ ] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry
+- [ ] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories
+- [ ] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs)
+- [ ] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts
+- [ ] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml
+- [ ] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError
+- [ ] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant + 13th context
+- [ ] 02-08-PLAN.md — Kiln.Stages.StageWorker + end-to-end + rehydration integration tests + CLAUDE.md/ARCHITECTURE.md/STACK.md spec upgrades (D-97..D-100)
 
 ### Phase 3: Agent Adapter, Sandbox, DTU & Safety
 **Goal**: A stage can invoke an LLM via a provider-agnostic adapter inside an ephemeral Docker container with network egress blocked except to DTU mocks, under per-call budget and typed-block-reason supervision, with secrets never materializing in the sandbox.
