@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/dtu_contract_drift_detected.json",
+  "title": "audit_events dtu_contract_drift_detected payload",
+  "type": "object",
+  "required": ["endpoint", "method", "drift_kind"],
+  "additionalProperties": true,
+  "properties": {
+    "endpoint": { "type": "string" },
+    "method": {
+      "type": "string",
+      "enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    },
+    "drift_kind": {
+      "type": "string",
+      "enum": [
+        "new_required_field",
+        "removed_field",
+        "type_changed",
+        "enum_changed",
+        "schema_unparseable",
+        "other"
+      ]
+    },
+    "diff_summary": { "type": ["string", "null"] },
+    "scaffolded": { "type": "boolean", "default": false }
+  }
+}

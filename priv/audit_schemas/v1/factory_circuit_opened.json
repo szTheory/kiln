@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/factory_circuit_opened.json",
+  "title": "audit_events factory_circuit_opened payload",
+  "type": "object",
+  "required": ["reason"],
+  "additionalProperties": true,
+  "properties": {
+    "reason": { "type": "string" },
+    "spend_last_60min_usd": {
+      "type": "string",
+      "description": "Decimal-as-string"
+    },
+    "threshold_usd": { "type": "string" },
+    "scaffolded": { "type": "boolean", "default": true }
+  }
+}

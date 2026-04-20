@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/notification_suppressed.json",
+  "title": "audit_events notification_suppressed payload",
+  "type": "object",
+  "required": ["reason", "dedup_key"],
+  "additionalProperties": true,
+  "properties": {
+    "reason": { "type": "string" },
+    "dedup_key": { "type": "string" },
+    "run_id": { "type": ["string", "null"] },
+    "ttl_remaining_seconds": { "type": "integer", "minimum": 0 }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/orphan_container_swept.json",
+  "title": "audit_events orphan_container_swept payload",
+  "type": "object",
+  "required": ["container_id", "boot_epoch_found", "age_seconds"],
+  "additionalProperties": true,
+  "properties": {
+    "container_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": ["string", "null"] },
+    "stage_run_id": { "type": ["string", "null"] },
+    "boot_epoch_found": { "type": "integer" },
+    "age_seconds": { "type": "integer", "minimum": 0 }
+  }
+}

@@ -3,9 +3,23 @@ defmodule Kiln.Audit.EventKindTest do
 
   alias Kiln.Audit.EventKind
 
+  # Phase 3 D-145 extension atoms — appended to the @kinds list after
+  # the 3 Phase 2 D-85 atoms. `:model_routing_fallback` is NOT in this
+  # list because it was already declared in Phase 1's 22-kind block.
+  @p3_new_kinds [
+    :orphan_container_swept,
+    :dtu_contract_drift_detected,
+    :dtu_health_degraded,
+    :factory_circuit_opened,
+    :factory_circuit_closed,
+    :model_deprecated_resolved,
+    :notification_fired,
+    :notification_suppressed
+  ]
+
   describe "values/0" do
-    test "contains exactly 25 kinds (D-08 Phase 1 taxonomy + D-85 Phase 2 extension)" do
-      assert length(EventKind.values()) == 25
+    test "contains exactly 33 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145)" do
+      assert length(EventKind.values()) == 33
     end
 
     test "every element is an atom" do
@@ -18,12 +32,29 @@ defmodule Kiln.Audit.EventKindTest do
       assert :integrity_violation in EventKind.values()
     end
 
-    test "preserves the Phase 1 append-only ordering (new kinds at the end)" do
-      # The last 3 kinds in the list MUST be the Phase 2 D-85 additions,
-      # in declaration order. Reordering breaks the CHECK-constraint
-      # migration contract (the Phase 1 `down/0` hard-codes the original 22).
-      last_three = EventKind.values() |> Enum.take(-3)
-      assert last_three == [:stage_input_rejected, :artifact_written, :integrity_violation]
+    test "includes all 8 D-145 Phase 3 extensions" do
+      for kind <- @p3_new_kinds do
+        assert kind in EventKind.values(), "missing P3 kind: #{inspect(kind)}"
+      end
+    end
+
+    test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms" do
+      # After Phase 3: the last 8 kinds MUST be the D-145 additions, in
+      # declaration order. The 3 D-85 atoms must be immediately before them
+      # (positions -11..-9 from the tail). Reordering breaks the CHECK
+      # constraint migration contract (each phase's `down/0` hard-codes the
+      # prior list and assumes this ordering).
+      values = EventKind.values()
+      last_eight = Enum.take(values, -8)
+      assert last_eight == @p3_new_kinds
+
+      three_before_last_eight = values |> Enum.drop(-8) |> Enum.take(-3)
+
+      assert three_before_last_eight == [
+               :stage_input_rejected,
+               :artifact_written,
+               :integrity_violation
+             ]
     end
   end
 
@@ -42,6 +73,15 @@ defmodule Kiln.Audit.EventKindTest do
       assert "stage_input_rejected" in strs
       assert "artifact_written" in strs
       assert "integrity_violation" in strs
+    end
+
+    test "includes the 8 Phase 3 D-145 string forms" do
+      strs = EventKind.values_as_strings()
+
+      for kind <- @p3_new_kinds do
+        assert Atom.to_string(kind) in strs,
+               "missing P3 string: #{Atom.to_string(kind)}"
+      end
     end
   end
 
@@ -66,6 +106,15 @@ defmodule Kiln.Audit.EventKindTest do
       assert EventKind.valid?("stage_input_rejected")
       assert EventKind.valid?("artifact_written")
       assert EventKind.valid?("integrity_violation")
+    end
+
+    test "accepts the 8 Phase 3 D-145 atoms and their string forms" do
+      for kind <- @p3_new_kinds do
+        assert EventKind.valid?(kind), "rejected P3 atom: #{inspect(kind)}"
+
+        assert EventKind.valid?(Atom.to_string(kind)),
+               "rejected P3 string: #{Atom.to_string(kind)}"
+      end
     end
 
     test "rejects unknown atoms" do
