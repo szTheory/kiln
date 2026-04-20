@@ -29,10 +29,12 @@ defmodule Kiln.Agents.Adapter.AnthropicTest do
     Kiln.Secrets.put(:anthropic_api_key, "sk-ant-FAKE00000000000000000000000000000000")
     on_exit(fn -> Kiln.Secrets.put(:anthropic_api_key, nil) end)
 
+    # run_id / stage_id are :binary_id in the ExternalOperations.Operation
+    # schema (UUID), so tests set proper UUIDs — not synthetic strings.
     Logger.metadata(
       correlation_id: Ecto.UUID.generate(),
-      run_id: "run-#{:rand.uniform(1_000_000)}",
-      stage_id: "stage-x"
+      run_id: Ecto.UUID.generate(),
+      stage_id: Ecto.UUID.generate()
     )
 
     :ok
