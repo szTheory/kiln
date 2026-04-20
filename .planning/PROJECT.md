@@ -16,20 +16,20 @@ That single promise is what the whole system must deliver. Every design tradeoff
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- [x] **LOCAL-01**, **LOCAL-02**, **OBS-01**, **OBS-03** — validated in Phase 1 (Foundation & Durability Floor).
+- [x] **ORCH-01** Workflow definition format: YAML/JSON graph, versioned in git, schema-validated at load — validated in Phase 2 (Workflow Engine Core).
+- [x] **ORCH-02** Stage executor runs each stage in a supervised BEAM process with crash isolation — validated in Phase 2.
+- [x] **ORCH-03** Run state machine: queued → planning → coding → testing → verifying → (merged | failed | escalated); persisted to Postgres — validated in Phase 2.
+- [x] **ORCH-04** Checkpointing: every stage writes an artifact + event before emitting success; runs resumable from last checkpoint — validated in Phase 2.
+- [x] **ORCH-07** Idempotency: every Oban job has idempotency key; every external side-effect is retry-safe — validated in Phase 2.
 
 ### Active
 
 <!-- Current scope. Building toward v1. -->
 
 **Core orchestration**
-- [ ] **ORCH-01** Workflow definition format: YAML/JSON graph, versioned in git, schema-validated at load
-- [ ] **ORCH-02** Stage executor runs each stage in a supervised BEAM process with crash isolation
-- [ ] **ORCH-03** Run state machine: queued → planning → coding → testing → verifying → (merged | failed | escalated); persisted to Postgres
-- [ ] **ORCH-04** Checkpointing: every stage writes an artifact + event before emitting success; runs resumable from last checkpoint
 - [ ] **ORCH-05** Loop-until-spec-met: Verifier failure routes back to Planner with structured failure diagnostic
 - [ ] **ORCH-06** Bounded autonomy: per-run caps on retries, token spend, elapsed steps; escalation = halt + diagnostic artifact
-- [ ] **ORCH-07** Idempotency: every Oban job has idempotency key; every external side-effect (git push, API call) is retry-safe
 
 **Agents**
 - [ ] **AGENT-01** Provider-agnostic LLM adapter (Anthropic, OpenAI, Google, local Ollama) via behaviour-defined port
@@ -177,12 +177,13 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current State (as of 2026-04-19)
+## Current State (as of 2026-04-20)
 
-- **Phase 1 complete** — Foundation & Durability Floor shipped. All 7 plans verified, 83 tests green, `mix check` 12-tool gate green. Mechanical proofs in place: append-only `audit_events` table with three-layer enforcement (REVOKE + trigger + RULE), `external_operations` two-phase intent machine, `logger_json` + six-key metadata threading across Task.async_stream + Oban boundaries, `Kiln.BootChecks.run!/0` asserting invariants at every Application start, 7-child supervision tree, `/health` endpoint.
-- **Validated requirements:** LOCAL-01, LOCAL-02, OBS-01, OBS-03.
+- **Phase 1 complete** — Foundation & Durability Floor shipped. Append-only `audit_events` table with three-layer enforcement, `external_operations` two-phase intent machine, `logger_json` + six-key metadata threading, `Kiln.BootChecks.run!/0`, 7-child supervision tree, `/health` endpoint.
+- **Phase 2 complete** — Workflow Engine Core shipped. YAML → JSV Draft 2020-12 → 6 D-62 Elixir validators → topological sort → `%CompiledGraph{}`. `Kiln.Runs.Transitions` (9-state D-87 matrix, `Repo.transact` + `SELECT FOR UPDATE` + `StuckDetector.check/1` inside tx + post-commit PubSub). `Kiln.Artifacts` 13th bounded context (CAS with streaming SHA-256 + atomic rename + integrity-on-read). `Kiln.Stages.StageWorker` drives 4-stage workflows end-to-end. RunSupervisor + RunDirector (:permanent boot-scan + DOWN handler + 30s periodic scan) wired into 10-child supervision tree. Oban 6-queue taxonomy (default:2, stages:4, github:2, audit_async:4, dtu:2, maintenance:2; aggregate 16; pool 20). BootChecks extended to 6 invariants (contexts → revoke → trigger → oban_queue_budget → workflow_schema_loads → secrets). 258 tests green (+212 from Phase 1 baseline); `mix check_bounded_contexts` and `mix check_no_signature_block` active CI gates. 4 new migrations (audit CHECK 22→25, runs, stage_runs, artifacts). 5 integration tests (ORCH-02 crash isolation, workflow end-to-end reaches :merged, BEAM-kill rehydration proves ORCH-03 + ORCH-04, D-94 workflow-changed escalation).
+- **Validated requirements:** LOCAL-01, LOCAL-02, OBS-01, OBS-03, ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-07.
 - **Known operator action:** Host port 5432 conflict with `sigra-uat-postgres` blocks `docker compose up -d db` on primary dev host — pre-existing condition, pg_uuidv7 migration ships with kjmph pure-SQL fallback so tests run against any Postgres 16.
 - **New seeds planted:** SEED-002 (remote operator control plane), SEED-003 (onboarding template library), SEED-004 (GitHub credential management) — dormant until their trigger conditions fire.
 
 ---
-*Last updated: 2026-04-19 after Phase 1 completion*
+*Last updated: 2026-04-20 after Phase 2 completion*
