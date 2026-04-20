@@ -1,0 +1,41 @@
+apiVersion: kiln.dev/v1
+id: missing_entry
+version: 1
+metadata:
+  description: "Both stages declare depends_on; no stage has empty depends_on. Kiln.Workflows.load!/1 MUST reject per D-62 validator 1 (exactly one entry node)."
+  author: "kiln-test-suite"
+  tags:
+    - test
+    - rejection
+    - missing-entry
+signature: null
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 1.00
+    max_elapsed_seconds: 600
+    max_stage_duration_seconds: 300
+  model_profile: elixir_lib
+  stages:
+    - id: alpha
+      kind: planning
+      agent_role: planner
+      depends_on:
+        - beta
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+    - id: beta
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - alpha
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite

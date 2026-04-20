@@ -1,0 +1,43 @@
+apiVersion: kiln.dev/v1
+id: signature_populated
+version: 1
+metadata:
+  description: "Valid in every other way, but `signature` is populated (non-null). Kiln.Workflows.load!/1 MUST reject per D-62 validator 6 (v1 invariant: signature is null). Also exercises `mix check_no_signature_block` (Plan 04). Placed under test/support/fixtures/ so the CI guard whitelist allows it."
+  author: "kiln-test-suite"
+  tags:
+    - test
+    - rejection
+    - signature-reserved
+signature:
+  alg: sigstore-bundle
+  bundle: AAAA
+  signed_digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 1.00
+    max_elapsed_seconds: 600
+    max_stage_duration_seconds: 300
+  model_profile: elixir_lib
+  stages:
+    - id: plan
+      kind: planning
+      agent_role: planner
+      depends_on: []
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+    - id: code
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - plan
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite

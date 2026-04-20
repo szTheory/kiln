@@ -1,0 +1,52 @@
+apiVersion: kiln.dev/v1
+id: cyclic
+version: 1
+metadata:
+  description: "3-stage cycle (a -> b -> c -> a) that Kiln.Workflows.Graph.topological_sort/1 MUST reject (D-62 validator 2)."
+  author: "kiln-test-suite"
+  tags:
+    - test
+    - cyclic
+    - rejection
+signature: null
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 1.00
+    max_elapsed_seconds: 600
+    max_stage_duration_seconds: 300
+  model_profile: elixir_lib
+  stages:
+    - id: a
+      kind: planning
+      agent_role: planner
+      depends_on:
+        - c
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+    - id: b
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - a
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite
+    - id: c
+      kind: testing
+      agent_role: tester
+      depends_on:
+        - b
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly

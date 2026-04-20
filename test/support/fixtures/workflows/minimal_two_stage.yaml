@@ -1,0 +1,39 @@
+apiVersion: kiln.dev/v1
+id: minimal_two_stage
+version: 1
+metadata:
+  description: "Minimal 2-stage pass-through fixture used by unit tests (D-64)."
+  author: "kiln-test-suite"
+  tags:
+    - test
+    - minimal
+signature: null
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 1.00
+    max_elapsed_seconds: 600
+    max_stage_duration_seconds: 300
+  model_profile: elixir_lib
+  stages:
+    - id: plan
+      kind: planning
+      agent_role: planner
+      depends_on: []
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+    - id: code
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - plan
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite

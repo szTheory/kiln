@@ -1,0 +1,55 @@
+apiVersion: kiln.dev/v1
+id: forward_edge_on_failure
+version: 1
+metadata:
+  description: "plan -> code -> test; plan.on_failure.to points FORWARD to 'test' (a descendant). Kiln.Workflows.load!/1 MUST reject per D-62 validator 4 (on_failure.to must be an ancestor)."
+  author: "kiln-test-suite"
+  tags:
+    - test
+    - rejection
+    - forward-edge
+signature: null
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 1.00
+    max_elapsed_seconds: 600
+    max_stage_duration_seconds: 300
+  model_profile: elixir_lib
+  stages:
+    - id: plan
+      kind: planning
+      agent_role: planner
+      depends_on: []
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+      on_failure:
+        action: route
+        to: test
+        attach: plan_ref
+    - id: code
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - plan
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite
+    - id: test
+      kind: testing
+      agent_role: tester
+      depends_on:
+        - code
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
