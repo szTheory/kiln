@@ -205,7 +205,7 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | ORCH-04 | Phase 2 | Complete |
 | ORCH-05 | Phase 5 | Pending |
 | ORCH-06 | Phase 5 | Pending |
-| ORCH-07 | Phase 2 | Pending |
+| ORCH-07 | Phase 2 | Complete |
 | AGENT-01 | Phase 3 | Pending |
 | AGENT-02 | Phase 3 | Pending |
 | AGENT-03 | Phase 4 | Pending |

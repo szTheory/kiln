@@ -69,7 +69,7 @@ Plans:
 - [x] 02-00-PLAN.md — Nyquist test infrastructure (5 workflow YAML fixtures + 4 ex_machina factories + 4 ExUnit case templates + ex_machina dep) — **complete 2026-04-20 (2c7e48d, 7e13a72)**
 - [x] 02-01-PLAN.md — JSON Schema 2020-12 schemas + EventKind 22→25 + migration 1 + Kiln.Workflows.SchemaRegistry + Kiln.Stages.ContractRegistry — **complete 2026-04-20 (e64acc4, 4aed708)**
 - [x] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories — **complete 2026-04-20 (7371684, 64abc7c)**
-- [ ] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs)
+- [x] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs) — **complete 2026-04-20 (fc4c21d, cdc109c)**
 - [ ] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts
 - [ ] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml
 - [ ] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError

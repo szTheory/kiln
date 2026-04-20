@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md (runs + stage_runs tables + Ecto schemas + context facades + live factories)
-last_updated: "2026-04-20T01:44:35.519Z"
+stopped_at: Completed 02-03-PLAN.md (Kiln.Artifacts 13th context — CAS + append-only table + integrity-on-read + P5 worker scaffolds)
+last_updated: "2026-04-20T01:59:13.355Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 16
-  completed_plans: 10
-  percent: 63
+  completed_plans: 11
+  percent: 69
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 02 (workflow-engine-core) — EXECUTING
-Plan: 4 of 9
+Plan: 5 of 9
 Status: Ready to execute
 Last activity: 2026-04-20
 
-Progress: [██████░░░░] 63%
+Progress: [███████░░░] 69%
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [██████░░░░] 63%
 | Phase 02 P00 | ~7m | 2 tasks | 13 files |
 | Phase 02 P01 | ~7min | 2 tasks | 14 files |
 | Phase 02 P02 | ~6min | 2 tasks | 11 files |
+| Phase Phase 02 P03 P~8min | 2 | 11 tasks | - files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Plan 02-00 decisions: (a) SHELL-vs-LIVE factory discipline — live for workflow raw maps, shells with placeholder_*_attrs/0 markers for Run/StageRun/Artifact which Plans 02/03 fill; (b) Defensive Module.concat + Code.ensure_loaded + function_exported? indirection in Kiln.RehydrationCase + Kiln.StuckDetectorCase so case templates compile against Plan 02-00 codebase AND auto-activate once Plan 06 / Plan 07 ship their target GenServers — no arrow-dependency cross-plan edits required; (c) Kiln.CasTestHelper uses process-dict keyed by base directory for capture-and-restore of Application.get_env(:kiln, :artifacts) — prevents env-bleed across async tests without a global-state agent; (d) Block-list YAML syntax in cyclic.yaml (idiomatic for priv/workflows/*.yaml authoring) rather than inline [c] arrays — YamlElixir parses both identically; (e) SHELL factory moduledocs describe the eventual live ex_machina/Ecto shape using prose rather than inline use-directive examples, satisfying grep acceptance checks while preserving documentation intent
 - Plan 02-01 decisions: (a) Audit schemas (3 new D-85 kinds) shipped payload-only matching Phase 1 convention, not full-envelope shape implied by plan spec text — Kiln.Audit.append/1 validates only the payload map; (b) verifying.json relaxes holdout_excluded to type boolean (not const true) per D-74 — verifier stages may run against the holdout set, the 4 other kinds enforce const: true structurally; (c) new registries' fetch/1 returns {:error, :unknown_kind}; Phase 1's Kiln.Audit.SchemaRegistry still returns :schema_missing (retrofit deferred); (d) migration down/0 hard-codes the original 22-kind list because reading EventKind at rollback time would observe the 25-atom current-source module attribute and make down a silent no-op; (e) Phase 2 registries opt in to JSV formats: true; Phase 1 Kiln.Audit.SchemaRegistry does not — deferred retrofit flagged by RESEARCH.md correction #1 / STACK.md D-100.
 - Plan 02-02 decisions: (a) FK on_delete :restrict (D-81) validated at BOTH Ecto.ConstraintError path (Repo.delete!) AND raw Postgrex.Error path (Repo.query! bypass) — proves invariant holds regardless of caller surface; (b) Run factory ships realistic caps_snapshot (max_retries/max_tokens_usd/max_elapsed_seconds/max_stage_duration_seconds) and model_profile_snapshot defaults, not bare %{} — downstream Plan 06/07 and Phase 3 BudgetGuard tests benefit from realistic shapes; (c) StageRun factory leaves run_id: nil by design with moduledoc-documented caller contract — auto-inserting a parent run would hide FK dependency and produce orphan rows on build/1 without persistence; (d) StageRun changeset pre-wires all 6 check_constraints (kind/agent_role/state/sandbox/attempt/cost_usd) so a raw attrs-drift Repo.insert bypass still surfaces clean changeset errors — defence-in-depth mirroring Phase 1 Kiln.ExternalOperations.Operation; (e) Both migrations use def change (reversible) with 2-arg execute/2 for every DDL escape — migrate → rollback --step 2 → migrate round-trip verified clean
+- Plan 02-03 decisions: (a) test-env CAS paths made STABLE (not per-invocation-unique) after System.unique_integer hit :validate_compile_env at boot — content-addressed dedup makes stable paths safe; (b) Kiln.CasTestHelper (Plan 02-00) not used by CAS tests since CAS uses Application.compile_env which ignores runtime put_env — helper retained for future non-CAS consumers; (c) append-only grant pattern applied second time (mirrors audit_events); (d) Repo.transact/2 (Ecto 3.13 new API) preferred over Repo.transaction/1 for put/4's CAS+row+audit atomicity — cleaner {:ok, val}/{:error, reason} contract; (e) audit-before-raise in read!/1 ensures integrity_violation forensic record survives caller rescue handler; (f) artifact_factory leaves stage_run_id + run_id nil by design (mirrors StageRun factory FK-visibility pattern)
 
 ### Plan 01-01 decisions
 
@@ -154,8 +156,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T01:44:23.713Z
-Stopped at: Completed 02-02-PLAN.md (runs + stage_runs tables + Ecto schemas + context facades + live factories)
+Last session: 2026-04-20T01:59:13.352Z
+Stopped at: Completed 02-03-PLAN.md (Kiln.Artifacts 13th context — CAS + append-only table + integrity-on-read + P5 worker scaffolds)
 Resume file: None
 Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
 
