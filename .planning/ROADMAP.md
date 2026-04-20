@@ -17,7 +17,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED) — none at creation
 
 - [x] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline — **complete 2026-04-19**
-- [ ] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper
+- [x] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper — **complete 2026-04-20**
 - [ ] **Phase 3: Agent Adapter, Sandbox, DTU & Safety** - Provider-agnostic LLM adapter, ephemeral Docker sandbox with egress-blocked DTU, secret references, adaptive model routing, typed block reasons, cost budget circuit breaker
 - [ ] **Phase 4: Agent Tree & Shared Memory** - Mayor/worker OTP process tree, specialized agent roles, native beads-equivalent work-unit store with PubSub
 - [ ] **Phase 5: Spec, Verification & Bounded Loop** - Spec editor + executable BDD scenarios + deterministic verifier + holdout scenarios + loop-until-spec-met + bounded autonomy caps + stuck detector + zero-human-QA enforcement
@@ -74,7 +74,7 @@ Plans:
 - [x] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml — **complete 2026-04-20 (f5f689d, 0f7f7e6)**
 - [x] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError — **complete 2026-04-20 (945ba88, d113bc4)**
 - [x] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant (:workflow_schema_loads) + 13th context (Kiln.Artifacts) + ORCH-02 integration test + check_bounded_contexts CI gate activation — **complete 2026-04-20 (981fa2c, bd1a211, 05bbc16)**
-- [ ] 02-08-PLAN.md — Kiln.Stages.StageWorker + end-to-end + rehydration integration tests + CLAUDE.md/ARCHITECTURE.md/STACK.md spec upgrades (D-97..D-100)
+- [x] 02-08-PLAN.md — Kiln.Stages.StageWorker + end-to-end + rehydration integration tests + CLAUDE.md/ARCHITECTURE.md/STACK.md spec upgrades (D-97..D-100) — **complete 2026-04-20 (0673781, d94e07d)**
 
 ### Phase 3: Agent Adapter, Sandbox, DTU & Safety
 **Goal**: A stage can invoke an LLM via a provider-agnostic adapter inside an ephemeral Docker container with network egress blocked except to DTU mocks, under per-call budget and typed-block-reason supervision, with secrets never materializing in the sandbox.

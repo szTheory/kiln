@@ -199,7 +199,7 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORCH-01 | Phase 2 | Pending |
+| ORCH-01 | Phase 2 | Complete |
 | ORCH-02 | Phase 2 | Complete |
 | ORCH-03 | Phase 2 | Complete |
 | ORCH-04 | Phase 2 | Complete |

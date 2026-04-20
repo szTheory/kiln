@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 02-07-PLAN.md (RunSupervisor + RunSubtree + RunDirector + Application 7→10 + BootChecks 13 contexts + workflow_schema_loads invariant + ORCH-02 integration test + check_bounded_contexts CI gate activation)
-last_updated: "2026-04-20T02:47:05.399Z"
+status: verifying
+stopped_at: Completed 02-08-PLAN.md — Phase 2 workflow-engine-core COMPLETE (9/9 plans). StageWorker + 50MB boundary test + end-to-end (queued→merged) + rehydration (ORCH-03/04 signature) + D-97..D-100 doc upgrades.
+last_updated: "2026-04-20T03:12:08.958Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 10
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 16
-  completed_plans: 15
-  percent: 94
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 Phase: 02 (workflow-engine-core) — EXECUTING
 Plan: 9 of 9
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-20
 
-Progress: [█████████░] 94%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [█████████░] 94%
 | Phase Phase 02 P03 P~8min | 2 | 11 tasks | - files |
 | Phase Phase 02 PP04 | ~5min | 2 tasks | 8 files |
 | Phase 02 P07 | 9min | 3 tasks | 11 files |
+| Phase Phase 02 PP08 | ~15min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Plan 02-03 decisions: (a) test-env CAS paths made STABLE (not per-invocation-unique) after System.unique_integer hit :validate_compile_env at boot — content-addressed dedup makes stable paths safe; (b) Kiln.CasTestHelper (Plan 02-00) not used by CAS tests since CAS uses Application.compile_env which ignores runtime put_env — helper retained for future non-CAS consumers; (c) append-only grant pattern applied second time (mirrors audit_events); (d) Repo.transact/2 (Ecto 3.13 new API) preferred over Repo.transaction/1 for put/4's CAS+row+audit atomicity — cleaner {:ok, val}/{:error, reason} contract; (e) audit-before-raise in read!/1 ensures integrity_violation forensic record survives caller rescue handler; (f) artifact_factory leaves stage_run_id + run_id nil by design (mirrors StageRun factory FK-visibility pattern)
 - Plan 02-04 decisions: (a) Raised pool_size in both config/runtime.exs (:prod) and config/dev.exs to 20 — plan text targeted runtime.exs only, but the D-68 budget math has to hold at dev runtime too since dev.exs carries the P1 pool_size:10 that runs the real solo-op local loop; (b) Placed check_oban_queue_budget!/0 4th in the BootChecks invariant chain (contexts→revoke→trigger→oban_queue_budget→secrets) — groups the audit-ledger invariants thematically; Plan 07 will insert workflow_schema_loads near this slot; (c) Did NOT extend BootChecks.@context_modules to 13 in this plan — Plan 07 Task 2 owns the paired SSOT update (BootChecks list + Mix task @expected) to keep them in lockstep; (d) Broke Mix task @expected to one-module-per-line so grep -c "Kiln\." returns 20 (>= 13 acceptance threshold); (e) Rewrote a 'do NOT pass atoms: true' comment to avoid the literal trigger string — future defense-in-depth grep gates (threat-model T3) depend on literal absence
 - Plan 02-07 decisions: (a) Kiln.Runs.RunSubtree ships with a Task.Supervisor lived-child in Phase 2 — the ORCH-02 integration test (checker issue #1 mandatory) needs a real killable pid; deferring would regress the checker fix; Phase 3's swap to Kiln.Agents.SessionSupervisor + Kiln.Sandboxes.Supervisor is a one-line init/1 child-list change with contract (strategy/restart/name/budget) preserved; (b) lived_child_pid/1 exposes via Registry lookup O(1) rather than Supervisor.which_children/1 scan; (c) RunDirector runs as live singleton across MIX_ENV=test (:permanent :one_for_one child of Kiln.Supervisor); tests interact with live singleton + per-test RunSupervisor cleanup via DynamicSupervisor.terminate_child/2 loop gives deterministic state; (d) D-94 treats missing workflow file identically to checksum mismatch — one typed :workflow_changed reason covers both; (e) handle_info/2 catch-all clause added (Rule 3 defensive) so :permanent director doesn't crash-loop on stray messages; (f) test/kiln_web/health_plug_test.exs auto-updated 12 -> 13 (Rule 1) — D-97 spec upgrade drifted /health probe payload; (g) deferred-activation CI gate pattern fully realised: Plan 02-04 shipped mix check_bounded_contexts source with deferred activation, Plan 02-07 extended BootChecks @context_modules 12 -> 13 in lockstep; canonical pattern for Wave-1 scaffolding gates paired with Wave-M SSOT
+- Plan 02-08 decisions: (a) Pass content_type to Artifacts.put/4 as atom :"text/markdown" not string — sidesteps String.to_existing_atom lookup when Kiln.Artifacts.Artifact module not pre-loaded (D-63 atom-exhaustion defence vs module load order); (b) Guard Kiln.Telemetry.unpack_ctx/1 on kiln_ctx map_size > 0 — empty ctx would clobber test-process Logger.metadata with :none atoms, breaking downstream Audit.append correlation_id cast; applies to every future Oban worker; (c) Wrap JSV.normalize_error/1 as [stringify_map(err)] for :stage_input_rejected audit payload — audit schema declares errors: array<object>, normalize_error returns single map; (d) Inline stage_run_id/reason into Logger.error message string — stays within 6 D-46 canonical metadata keys; (e) End-to-end test drives 4 non-merge stages via explicit for-loop — CONTEXT.md <deferred> moved auto-enqueue to Phase 3 per checker issue #8 option (a); (f) LOCKED StageWorker transition mapping encoded in 4 explicit function heads + :merge no-op catch-all — zero executor discretion per checker #3; (g) rehydration test uses Kiln.RehydrationCase.reset_run_director_for_test/0 + send(RunDirector, :boot_scan) + Process.sleep(300) as BEAM-kill simulation — mix test can't kill the VM cleanly; resending :boot_scan to the live singleton exercises the same rehydration path a cold boot would.
 
 ### Plan 01-01 decisions
 
@@ -160,8 +162,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-20T02:46:40.401Z
-Stopped at: Completed 02-07-PLAN.md (RunSupervisor + RunSubtree + RunDirector + Application 7→10 + BootChecks 13 contexts + workflow_schema_loads invariant + ORCH-02 integration test + check_bounded_contexts CI gate activation)
+Last session: 2026-04-20T03:12:08.950Z
+Stopped at: Completed 02-08-PLAN.md — Phase 2 workflow-engine-core COMPLETE (9/9 plans). StageWorker + 50MB boundary test + end-to-end (queued→merged) + rehydration (ORCH-03/04 signature) + D-97..D-100 doc upgrades.
 Resume file: None
 Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
 
