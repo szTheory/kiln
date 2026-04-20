@@ -36,6 +36,29 @@ Workflow YAML dialect, stage input contracts, artifacts CAS, run state machine, 
 - **D-107:** **Fallback policy in P3 = `:same_provider` only** (Opus → Sonnet → Haiku within Anthropic). `fallback_policy: :cross_provider` is declaratively present on every preset but never exercised in P3 because only Anthropic is live. Phase 5's OpenAI-live flip flips the policy field; **zero schema migration**.
 - **D-108:** **Deprecated model handling:** each preset role mapping carries optional `@deprecated_on: ~D[YYYY-MM-DD]` field. On resolve, deprecated models emit `model_deprecated_resolved` audit warning but still resolve (give operator runway); after the deprecation date, fall through to next in fallback chain and emit warning. `mix kiln.registry.show` highlights deprecated entries.
 - **D-109:** **Finch named pools per provider** at supervision-tree level: `Kiln.Finch.Anthropic`, `Kiln.Finch.OpenAI`, `Kiln.Finch.Google`, `Kiln.Finch.Ollama`. A 429-storm on one provider cannot starve another. Req uses these pools via `req: [finch: Kiln.Finch.<Provider>]`. Do NOT bypass Req to raw Finch in P3 (escape hatch reserved for pathological SSE streaming in later phases).
+
+### D-109 (amendment, 2026-04-20): Single Finch child with per-host pool routing
+
+Phase 3 implementation consolidates the four named Finch children into a single
+`Kiln.Finch` child configured with `:pools` keyed by host:
+  {"https://api.anthropic.com", size: 20, count: 1},
+  {"https://api.openai.com", size: 20, count: 1},
+  {"https://generativelanguage.googleapis.com", size: 20, count: 1},
+  {"http://localhost:11434", size: 20, count: 1}
+
+Rationale:
+- Finch's per-host pool sharding delivers the same provider isolation as separate
+  children (a 429 on Anthropic's host pool cannot starve OpenAI's pool).
+- Keeps D-142's 14-child supervision tree cap intact (a switch to 4 named Finch
+  children would raise it to 17).
+- Adapters pass `finch: Kiln.Finch` (not `finch: Kiln.Finch.Anthropic`) — provider
+  selection happens via the HTTP URL host, which Finch routes to the correct pool.
+
+Supersedes D-109's original "four named Finch children" wording while preserving
+the decision's INTENT: provider-pool isolation without cross-provider starvation.
+
+- **D-156 (resolution of Open Question #1 from 03-RESEARCH.md):** **Structured output for Anthropic in P3 = Anthropix `tool_use` path only.** Anthropix 0.6.2 does NOT expose the 2026 native `output_config.format.json_schema` endpoint; a direct-Req bypass is NOT justified in P3 when `tool_use + strict: true` already delivers provider-side enforcement (D-104). `Kiln.Agents.StructuredOutput.Anthropic` routes via `tool_use` through Anthropix; JSV Draft 2020-12 post-validation (defense in depth) remains unconditional. Consolidate to `output_config` in a future phase (likely Phase 5 or 9) when Anthropix 0.7.x exposes it natively. Plan 03-05's `StructuredOutput.request/2` native path is correct as-planned.
+
 - **D-110:** **Telemetry contract.** `[:kiln, :agent, :call, :start | :stop | :exception]` — measurements: `duration_native`, `tokens_in`, `tokens_out`, `cost_usd`; metadata: `requested_model`, `actual_model_used`, `provider`, `role`, `run_id`, `stage_id`, `fallback?`. `[:kiln, :agent, :stream, :chunk]` per D-103. `[:kiln, :agent, :call, :exception]` captures provider error taxonomy for fallback decision trees. `opentelemetry_process_propagator`'s `fetch_parent_ctx(1, :"$callers")` used inside StageWorker to link LLM spans to the enqueueing transition (PITFALLS P17 mitigation).
 
 ### Sandbox Image, Limits, Workspace & Docker Options (Gray Area 2)

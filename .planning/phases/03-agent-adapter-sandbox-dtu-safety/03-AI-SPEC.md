@@ -280,7 +280,7 @@ defmodule Kiln.Agents.Adapter.Anthropic do
   def complete(%Kiln.Agents.Prompt{} = prompt, opts) do
     # reveal!/1 is the ONLY unboxing site — raw string never crosses function boundary.
     api_key = Kiln.Secrets.reveal!(:anthropic_api_key)
-    client = Anthropix.init(api_key, receive_timeout: 120_000, finch: Kiln.Finch.Anthropic)
+    client = Anthropix.init(api_key, receive_timeout: 120_000, finch: Kiln.Finch)
 
     :telemetry.span(
       [:kiln, :agent, :call],
@@ -300,7 +300,7 @@ defmodule Kiln.Agents.Adapter.Anthropic do
   @impl true
   def stream(%Kiln.Agents.Prompt{} = prompt, opts) do
     api_key = Kiln.Secrets.reveal!(:anthropic_api_key)
-    client = Anthropix.init(api_key, receive_timeout: 120_000, finch: Kiln.Finch.Anthropic)
+    client = Anthropix.init(api_key, receive_timeout: 120_000, finch: Kiln.Finch)
 
     # Anthropix `stream: true` returns a lazy Enumerable (verified hexdocs.pm/anthropix).
     # D-103: Wrap in Stream.each to emit per-chunk telemetry; NO PubSub in P3.
@@ -334,7 +334,7 @@ defmodule Kiln.Agents.Adapter.Anthropic do
 
     Req.post(
       "https://api.anthropic.com/v1/messages/count_tokens",
-      finch: Kiln.Finch.Anthropic,
+      finch: Kiln.Finch,
       headers: [
         {"x-api-key", api_key},
         {"anthropic-version", "2023-06-01"},
@@ -567,7 +567,7 @@ Common request parameters (Anthropix `chat/2` keyword options):
 - `output_config:` — `%{format: %{type: "json_schema", schema: ...}}` when the role requires structured output (native mode — preferred over tool_use hijack per 2026 API)
 - `stream:` — `true` only for roles that P4+ designates as streaming; P3 defaults to `false`
 - `receive_timeout:` — `120_000` ms (2 min) passed to `Anthropix.init/2` which forwards to Req/Finch
-- `finch:` — ALWAYS `Kiln.Finch.Anthropic` (per-provider pool — D-109)
+- `finch:` — ALWAYS `Kiln.Finch` (single named Finch; provider-pool isolation via per-host `:pools` config per D-109 amendment 2026-04-20)
 
 **Core Pattern:**
 
@@ -843,7 +843,7 @@ In Elixir there is no `async/await` — every BEAM process IS concurrent by defa
 - **Await (`complete/2`)** — when you need structured output (JSV validation requires the full response) OR when the downstream consumer doesn't benefit from incremental updates (tester role evaluating a test suite).
 - **Stream (`stream/2`)** — when a human (Phase 7 LiveView) or a coarse consumer (Phase 4 work-unit event log) will observe progress. In P3, the only stream consumer is `[:kiln, :agent, :stream, :chunk]` telemetry. Streaming a structured-output response and validating chunk-by-chunk is an anti-pattern in P3 — `complete/2` the structured path, `stream/2` the prose path.
 
-**Finch pool backpressure:** each provider's named Finch pool (`Kiln.Finch.Anthropic` etc.) has a fixed size (default ~10 connections; tune during P3 planning per provider's documented rate-limit). When the pool is exhausted, `Req.post/2` blocks the caller — this IS the backpressure signal. Don't paper over it with `Task.async_stream/3` at the call site; instead, size the pool deliberately and let Oban queue depth absorb bursts.
+**Finch pool backpressure:** each provider's per-host pool (configured inside the single `Kiln.Finch` child — per D-109 amendment) has a fixed size (default ~10 connections; tune during P3 planning per provider's documented rate-limit). When the pool is exhausted, `Req.post/2` blocks the caller — this IS the backpressure signal. Don't paper over it with `Task.async_stream/3` at the call site; instead, size the pool deliberately and let Oban queue depth absorb bursts.
 
 ### Prompt Engineering Discipline
 

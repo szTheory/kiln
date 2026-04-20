@@ -176,7 +176,7 @@ Add to `mix.exs` deps:
 │  Adapter call path (inside container scope):                           │
 │    StageWorker ─► Adapter.Anthropic.complete/2                         │
 │                     │                                                  │
-│                     ├─► Req.post! + Finch pool Kiln.Finch.Anthropic    │
+│                     ├─► Req.post! + Finch pool Kiln.Finch (anthro host)│
 │                     │    Authorization: Bearer #{Secrets.reveal!(...)} │
 │                     │   (reveal! is the ONLY unboxing site; ~3 total)  │
 │                     │                                                  │
@@ -387,7 +387,7 @@ defmodule Kiln.Agents.Adapter.Anthropic do
 
     Req.post(
       "https://api.anthropic.com/v1/messages/count_tokens",
-      finch: Kiln.Finch.Anthropic,
+      finch: Kiln.Finch,
       headers: [
         {"x-api-key", api_key},
         {"anthropic-version", "2023-06-01"},
@@ -1243,7 +1243,7 @@ end
 # Source: platform.claude.com/docs/en/build-with-claude/structured-outputs (2026)
 # Adapter.Anthropic — new primary path
 Req.post("https://api.anthropic.com/v1/messages",
-  finch: Kiln.Finch.Anthropic,
+  finch: Kiln.Finch,
   headers: auth_headers(),
   json: %{
     model: "claude-sonnet-4-5",
@@ -1268,7 +1268,7 @@ Req.post("https://api.anthropic.com/v1/messages",
 ```elixir
 # Adapter.OpenAI — per OpenAI docs for response_format
 Req.post("https://api.openai.com/v1/chat/completions",
-  finch: Kiln.Finch.OpenAI,
+  finch: Kiln.Finch,
   json: %{
     model: "gpt-5",
     messages: messages,
@@ -1289,7 +1289,7 @@ Req.post("https://api.openai.com/v1/chat/completions",
 ```elixir
 # Adapter.Google — function_calling / responseSchema pattern
 Req.post("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent",
-  finch: Kiln.Finch.Google,
+  finch: Kiln.Finch,
   json: %{
     contents: contents,
     generationConfig: %{
@@ -1306,7 +1306,7 @@ Req.post("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:gen
 # Adapter.Ollama — capabilities().json_schema_mode == false for most models
 # → falls back to prompted JSON + JSV post-validation + 1 retry per D-104
 Req.post("#{ollama_url}/api/chat",
-  finch: Kiln.Finch.Ollama,
+  finch: Kiln.Finch,
   json: %{
     model: "llama3.1:8b",
     messages: messages,
@@ -1588,32 +1588,32 @@ Phase 3 is **greenfield** for its scope — it adds new contexts (`Kiln.Agents`,
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `output_config` (2026 native) or `tool_use` be the default in `Kiln.Agents.StructuredOutput` for Anthropic?**
    - What we know: Native `output_config` is preferred per 2026 Anthropic docs + industry sources; `tool_use` is what Anthropix 0.6.2 wraps today.
    - What's unclear: Whether Anthropix 0.6.2 exposes `output_config` passthrough or if Kiln needs a direct-Req bypass for structured output.
-   - Recommendation: Implement `StructuredOutput.Anthropic` as a direct-Req call (bypassing Anthropix for this one path) when `capabilities().json_schema_mode == true` and the model is known to support `output_config`; fall back to `tool_use` via Anthropix for older models. Verify Anthropix roadmap during Phase 3 execution — if 0.7.x exposes `output_config`, consolidate.
+   - **RESOLVED:** Use the Anthropix `tool_use` path (the current plan 03-05 approach). Anthropix 0.6.2 does NOT expose `output_config` passthrough, so a direct-Req bypass would be the only way to hit the 2026 native `output_config.format.json_schema` endpoint — that cost is not justified in P3 when `tool_use + strict: true` already delivers provider-side enforcement. Consolidate to `output_config` in a future phase when Anthropix 0.7.x exposes it natively. Recorded as `D-156` in 03-CONTEXT.md.
 
 2. **Do we ship `mix check_no_sandbox_env_secrets` in P3 or defer?**
    - What we know: D-26 pattern (grep-based static check) is established.
    - What's unclear: Whether the regex-based denylist in D-134 can be source-level verified with high signal (few false positives).
-   - Recommendation: Claude's discretion per CONTEXT.md; likely defer to Phase 9 hardening unless source-level signal is high.
+   - **RESOLVED:** Recommendation: Claude's discretion per CONTEXT.md; likely defer to Phase 9 hardening unless source-level signal is high.
 
 3. **Where does `Kiln.Pricing` fetch pricing tables from?**
    - What we know: `priv/pricing/v1/<provider>.exs` is the storage; `mix kiln.pricing.check` is WARN-only in P3.
    - What's unclear: Do we ship initial pricing data hand-curated from April 2026 provider pages, or do we scrape during planning?
-   - Recommendation: Hand-curate during Phase 3 planning (planner fetches prices from `https://www.anthropic.com/pricing`, `https://openai.com/api/pricing`, `https://ai.google.dev/pricing`, `https://ollama.com/library` — note Ollama is free, input/output `0.00`). These are the anchor values in `priv/pricing/v1/<provider>.exs`. `mix kiln.pricing.check` flags staleness.
+   - **RESOLVED:** Recommendation: Hand-curate during Phase 3 planning (planner fetches prices from `https://www.anthropic.com/pricing`, `https://openai.com/api/pricing`, `https://ai.google.dev/pricing`, `https://ollama.com/library` — note Ollama is free, input/output `0.00`). These are the anchor values in `priv/pricing/v1/<provider>.exs`. `mix kiln.pricing.check` flags staleness.
 
 4. **Do OpenAI/Google/Ollama scaffolds need to ship a Mox contract test proving the behaviour shape, even though they're not LIVE in P3?**
    - What we know: D-101 says scaffolded ~200 LOC each with Mox contract tests + `@tag :live_*` gates.
    - What's unclear: Whether "contract test" means (a) the compiled behaviour compiles, or (b) a Mox-backed functional test that exercises `complete/2` + `stream/2`.
-   - Recommendation: (b) — every adapter ships a Mox contract test in P3. `@tag :live_openai` etc. is the skip-by-default for real-wire tests; Mox versions run always.
+   - **RESOLVED:** Recommendation: (b) — every adapter ships a Mox contract test in P3. `@tag :live_openai` etc. is the skip-by-default for real-wire tests; Mox versions run always.
 
 5. **Should `Kiln.Notifications.desktop/2` use `MuonTrap.cmd` or raw `System.cmd`?**
    - What we know: D-140 says `System.cmd`; but CLAUDE.md P3 anti-pattern addition says "`System.cmd` for `docker` without `MuonTrap.cmd` crash-safety wrapper."
    - What's unclear: Whether the anti-pattern applies to `osascript`/`notify-send` (fast, <100ms calls) or only to long-running `docker run`.
-   - Recommendation: Use MuonTrap for consistency; the wrapper overhead is negligible. This keeps the "MuonTrap for all shell-outs" pattern clean.
+   - **RESOLVED:** Recommendation: Use MuonTrap for consistency; the wrapper overhead is negligible. This keeps the "MuonTrap for all shell-outs" pattern clean.
 
 ---
 
