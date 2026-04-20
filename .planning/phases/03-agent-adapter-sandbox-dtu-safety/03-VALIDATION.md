@@ -3,7 +3,7 @@ phase: 3
 slug: agent-adapter-sandbox-dtu-safety
 status: draft
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-20
 ---
 
@@ -38,9 +38,9 @@ created: 2026-04-20
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 03-00-01 | 00 | 0 | AGENT-01, SAND-01 | T-03-00-01 | New deps resolve reproducibly (`muontrap`, `bypass`, `ex_docker_engine_api`) | unit (compile) | `mix deps.get && mix compile --warnings-as-errors` | ❌ Wave 0 (mix.exs edit) | ⬜ |
-| 03-00-02 | 00 | 0 | AGENT-01, SAND-01, SAND-04 | T-03-00-03 | Mox defmocks + 5 ExUnit case templates compile + resolve | unit | `mix test test/support/mocks_test.exs --max-failures=1` | ❌ Wave 0 | ⬜ |
-| 03-00-03 | 00 | 0 | SEC-01, OPS-02 | T-03-00-02 | Fixture corpora seeded + parseable (Anthropic responses / pricing vectors / fake keys / isolation baselines) | unit | `elixir -e 'Code.eval_file("test/support/fixtures/secrets/fake_keys.exs")'` exit 0 | ❌ Wave 0 | ⬜ |
+| 03-00-01 | 00 | 0 | AGENT-01, SAND-01 | T-03-00-01 | New deps resolve reproducibly (`muontrap`, `bypass`, `ex_docker_engine_api`) | unit (compile) | `mix deps.get && mix compile --warnings-as-errors` | ✅ mix.exs | ✅ |
+| 03-00-02 | 00 | 0 | AGENT-01, SAND-01, SAND-04 | T-03-00-03 | Mox defmocks + 6 ExUnit case templates compile + resolve | unit | `mix test test/support/mocks_test.exs --max-failures=1` | ✅ test/support/mocks.ex + 6 case templates | ✅ |
+| 03-00-03 | 00 | 0 | SEC-01, OPS-02 | T-03-00-02 | Fixture corpora seeded + parseable (Anthropic responses / pricing vectors / fake keys / isolation baselines) | unit | `mix run --no-start -e 'Code.eval_file("test/support/fixtures/secrets/fake_keys.exs")'` exit 0 | ✅ 4 corpora (5 JSON + 3 .exs) | ✅ |
 | 03-01-01 | 01 | 1 | SEC-01 | T-03-01-01, T-03-01-02 | `Kiln.Secrets.Ref` inspect never leaks raw key; `reveal!/1` is sole raw-string boundary | unit | `mix test test/kiln/secrets_test.exs --max-failures=1` | ❌ Wave 1 (lib/kiln/secrets.ex) | ⬜ |
 | 03-01-02 | 01 | 1 | SEC-01 | T-03-01-03 | `Kiln.Logging.SecretRedactor` scrubs 5 key-name substrings + 5 value-prefix patterns | unit | `mix test test/kiln/logging/secret_redactor_test.exs --max-failures=1` | ❌ Wave 1 | ⬜ |
 | 03-02-01 | 02 | 1 | BLOCK-01 | T-03-02-01 | `Kiln.Blockers.Reason` closed 9-atom enum + `BlockedError` exception + playbook JSV schema | unit | `mix test test/kiln/blockers/reason_test.exs --max-failures=1` | ❌ Wave 1 | ⬜ |
@@ -80,18 +80,28 @@ created: 2026-04-20
 
 Wave 0 for Phase 3 establishes the behaviour seams, Mox mocks, and test harnesses needed before Wave 1 can begin. All items are new (no prior coverage).
 
-- [ ] `test/support/agent_adapter_case.ex` — shared ExUnit case for adapter contract tests
-- [ ] `test/support/anthropic_stub_server.ex` — Bypass/Plug-based Anthropic API stub (pinned HTTP fixtures, cassette-style replay)
-- [ ] `test/support/docker_fixture.ex` — helpers to spin up ephemeral sandbox containers with pinned Alpine digest
-- [ ] `test/support/dtu_mock_case.ex` — shared case with DTU mock network + egress assertions
-- [ ] `test/kiln/agents/adapter_contract_test.exs` — Mox-backed behaviour contract suite (AGENT-01)
-- [ ] `test/kiln/agents/model_registry_test.exs` — role resolution, presets, fallback chain (AGENT-02, AGENT-05)
-- [ ] `test/kiln/agents/budget_guard_test.exs` — per-call USD/token gate (AGENT-05)
-- [ ] `test/kiln/sandboxes/dtu_reachability_test.exs` — DTU mock reachable on `dtu_only` network (SAND-04)
-- [ ] `test/kiln/sandboxes/resource_limits_test.exs` — `--cap-drop=ALL`, `--pids-limit`, `--memory`, `--cpus`, `--ulimit nofile` (SAND-02, SAND-03)
-- [ ] `test/kiln/secrets/redaction_test.exs` — `@derive Inspect except: [:api_key]` + crash-dump + Logger line + changeset error proofs (SEC-01)
-- [ ] `test/kiln/blockers/playbook_test.exs` — typed reason enum mapped to remediation playbook (BLOCK-01, BLOCK-03)
-- [ ] Add `:bypass`, `:muontrap`, `:ex_docker_engine_api` to `mix.exs` if not already present from Phase 1
+- [x] `test/support/agent_adapter_case.ex` — shared ExUnit case for adapter contract tests (plan 03-00 Task 2)
+- [x] `test/support/anthropic_stub_server.ex` — Bypass-based Anthropic API stub (hand-authored fixtures; no ExVCR per D-122) (plan 03-00 Task 2)
+- [x] `test/support/docker_helper.ex` — helpers for live-docker integration tests (named `docker_helper.ex`, not `docker_fixture.ex`, per plan 03-00 Task 2 file list)
+- [x] `test/support/dtu_case.ex` — shared case for DTU sidecar tests (plan 03-00 Task 2; adversarial-egress negative-test suite ships in plan 03-08 Wave 4)
+- [ ] `test/kiln/agents/adapter_contract_test.exs` — Mox-backed behaviour contract suite (AGENT-01) — plan 03-05 Wave 2
+- [ ] `test/kiln/agents/model_registry_test.exs` — role resolution, presets, fallback chain (AGENT-02, AGENT-05) — plan 03-06 Wave 2
+- [ ] `test/kiln/agents/budget_guard_test.exs` — per-call USD/token gate (AGENT-05) — plan 03-06 Wave 2
+- [ ] `test/kiln/sandboxes/dtu_reachability_test.exs` — DTU mock reachable on `dtu_only` network (SAND-04) — plan 03-09 Wave 4
+- [ ] `test/kiln/sandboxes/resource_limits_test.exs` — `--cap-drop=ALL`, `--pids-limit`, `--memory`, `--cpus`, `--ulimit nofile` (SAND-02, SAND-03) — plan 03-07/08
+- [ ] `test/kiln/secrets/redaction_test.exs` — `@derive Inspect except: [:api_key]` + crash-dump + Logger line + changeset error proofs (SEC-01) — plan 03-01 Wave 1
+- [ ] `test/kiln/blockers/playbook_test.exs` — typed reason enum mapped to remediation playbook (BLOCK-01, BLOCK-03) — plan 03-02 Wave 1
+- [x] Add `:bypass`, `:muontrap`, `:ex_docker_engine_api` to `mix.exs` (plan 03-00 Task 1; `ex_docker_engine_api ~> 1.43` — Hex versions package against Docker Engine API revision, not abstract semver)
+
+**Additionally shipped in plan 03-00 Wave 0:**
+
+- [x] `test/support/mocks.ex` — Mox defmock registry for `Kiln.Agents.AdapterMock` + `Kiln.Sandboxes.DriverMock` with deferred-activation guard for Wave 0 (target behaviours land in Wave 2/4)
+- [x] `test/support/factory_circuit_breaker_case.ex` — mirrors `Kiln.StuckDetectorCase` for D-139 scaffold-now-fill-later pattern
+- [x] `test/support/sandbox_case.ex` — Docker-gated ExUnit case with container cleanup on_exit
+- [x] `test/support/fixtures/anthropic_responses/*.json` — 5 hand-authored response fixtures (success / 429 / 500 / context_length_exceeded / content_policy_violation)
+- [x] `test/support/fixtures/pricing/anthropic_vectors_seed.exs` — 3 seed pricing vectors (Wave 2 expands to 10)
+- [x] `test/support/fixtures/secrets/fake_keys.exs` — 5 DETERMINISTIC FAKE keys (every value contains `FAKE` marker; committed, not gitignored)
+- [x] `test/support/fixtures/network/isolation_baselines.exs` — 3 DNS/TCP negative-egress baselines for plan 03-08 Wave 4
 
 *If any item exists from Phase 1, mark ✅ existing and skip in Wave 0.*
 

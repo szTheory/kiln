@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered (all 4 gray areas researched + synthesized coherent design; all 16 sub-decisions locked)
-last_updated: "2026-04-20T16:41:44.446Z"
-last_activity: 2026-04-20 -- Phase 03 execution started
+stopped_at: Plan 03-00 (Wave 0 test infrastructure) complete; 03-01/02/03 unblocked to run in parallel
+last_updated: "2026-04-20T17:10:00.000Z"
+last_activity: 2026-04-20 -- Plan 03-00 executed (3 tasks, 3 commits, Wave 0 complete)
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 28
-  completed_plans: 16
-  percent: 57
+  completed_plans: 17
+  percent: 61
 ---
 
 # Project State
@@ -26,19 +26,19 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 03 (agent-adapter-sandbox-dtu-safety) — EXECUTING
-Plan: 1 of 12
+Plan: 2 of 12 (03-00 complete; 03-01/02/03 ready for Wave 1 parallel spawn)
 Status: Executing Phase 03
-Last activity: 2026-04-20 -- Phase 03 execution started
+Last activity: 2026-04-20 -- Plan 03-00 executed (3 tasks, 3 commits, Wave 0 complete)
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 61%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 16
-- Average duration: ~20 min
-- Total execution time: ~140 min
+- Total plans completed: 17
+- Average duration: ~19 min
+- Total execution time: ~155 min
 
 **By Phase:**
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase Phase 02 PP04 | ~5min | 2 tasks | 8 files |
 | Phase 02 P07 | 9min | 3 tasks | 11 files |
 | Phase Phase 02 PP08 | ~15min | 2 tasks | 8 files |
+| Phase 03 P00 | ~15min | 3 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,7 @@ Full decision log lives in PROJECT.md Key Decisions table. Roadmap-level decisio
 - Plan 02-04 decisions: (a) Raised pool_size in both config/runtime.exs (:prod) and config/dev.exs to 20 — plan text targeted runtime.exs only, but the D-68 budget math has to hold at dev runtime too since dev.exs carries the P1 pool_size:10 that runs the real solo-op local loop; (b) Placed check_oban_queue_budget!/0 4th in the BootChecks invariant chain (contexts→revoke→trigger→oban_queue_budget→secrets) — groups the audit-ledger invariants thematically; Plan 07 will insert workflow_schema_loads near this slot; (c) Did NOT extend BootChecks.@context_modules to 13 in this plan — Plan 07 Task 2 owns the paired SSOT update (BootChecks list + Mix task @expected) to keep them in lockstep; (d) Broke Mix task @expected to one-module-per-line so grep -c "Kiln\." returns 20 (>= 13 acceptance threshold); (e) Rewrote a 'do NOT pass atoms: true' comment to avoid the literal trigger string — future defense-in-depth grep gates (threat-model T3) depend on literal absence
 - Plan 02-07 decisions: (a) Kiln.Runs.RunSubtree ships with a Task.Supervisor lived-child in Phase 2 — the ORCH-02 integration test (checker issue #1 mandatory) needs a real killable pid; deferring would regress the checker fix; Phase 3's swap to Kiln.Agents.SessionSupervisor + Kiln.Sandboxes.Supervisor is a one-line init/1 child-list change with contract (strategy/restart/name/budget) preserved; (b) lived_child_pid/1 exposes via Registry lookup O(1) rather than Supervisor.which_children/1 scan; (c) RunDirector runs as live singleton across MIX_ENV=test (:permanent :one_for_one child of Kiln.Supervisor); tests interact with live singleton + per-test RunSupervisor cleanup via DynamicSupervisor.terminate_child/2 loop gives deterministic state; (d) D-94 treats missing workflow file identically to checksum mismatch — one typed :workflow_changed reason covers both; (e) handle_info/2 catch-all clause added (Rule 3 defensive) so :permanent director doesn't crash-loop on stray messages; (f) test/kiln_web/health_plug_test.exs auto-updated 12 -> 13 (Rule 1) — D-97 spec upgrade drifted /health probe payload; (g) deferred-activation CI gate pattern fully realised: Plan 02-04 shipped mix check_bounded_contexts source with deferred activation, Plan 02-07 extended BootChecks @context_modules 12 -> 13 in lockstep; canonical pattern for Wave-1 scaffolding gates paired with Wave-M SSOT
 - Plan 02-08 decisions: (a) Pass content_type to Artifacts.put/4 as atom :"text/markdown" not string — sidesteps String.to_existing_atom lookup when Kiln.Artifacts.Artifact module not pre-loaded (D-63 atom-exhaustion defence vs module load order); (b) Guard Kiln.Telemetry.unpack_ctx/1 on kiln_ctx map_size > 0 — empty ctx would clobber test-process Logger.metadata with :none atoms, breaking downstream Audit.append correlation_id cast; applies to every future Oban worker; (c) Wrap JSV.normalize_error/1 as [stringify_map(err)] for :stage_input_rejected audit payload — audit schema declares errors: array<object>, normalize_error returns single map; (d) Inline stage_run_id/reason into Logger.error message string — stays within 6 D-46 canonical metadata keys; (e) End-to-end test drives 4 non-merge stages via explicit for-loop — CONTEXT.md <deferred> moved auto-enqueue to Phase 3 per checker issue #8 option (a); (f) LOCKED StageWorker transition mapping encoded in 4 explicit function heads + :merge no-op catch-all — zero executor discretion per checker #3; (g) rehydration test uses Kiln.RehydrationCase.reset_run_director_for_test/0 + send(RunDirector, :boot_scan) + Process.sleep(300) as BEAM-kill simulation — mix test can't kill the VM cleanly; resending :boot_scan to the live singleton exercises the same rehydration path a cold boot would.
+- Plan 03-00 decisions: (a) `ex_docker_engine_api ~> 1.43` (not `~> 7.0` as plan text specified) — hex package is versioned against the Docker Engine API revision it targets (published as 1.43.x for Docker Engine 24+/25+), not abstract semver; Rule 1 deviation documented in commit `6abb048`; (b) Unlocked idna 7.1.0 → 6.1.1 (Rule 3 blocker): hackney transitive via ex_docker_engine_api requires `idna ~> 6.1.0`; jsv accepts `~> 6.0 or ~> 7.0`, so the 6.1.1 pick satisfies both; (c) Mox defmock deferred-activation pattern: plan assumed `Mox.defmock/2` tolerates absent target behaviours, Mox 1.2 actually calls `Code.ensure_compiled!/1` at defmock time — wrapped each defmock in `unless Code.ensure_loaded?(mock_name)` + `if Code.ensure_loaded?(target)` with placeholder-module fallback so Wave 0 compiles before Wave 2/4 ship the behaviours (Rule 1 deviation); (d) Idempotency guard around entire `test/support/mocks.ex` body: `test/support/` is an `elixirc_paths(:test)` entry, so the file's top-level code executes once at `mix compile` time + a second time when `test_helper.exs` does `Code.require_file` — wrapping the whole body in `unless Code.ensure_loaded?(Kiln.TestMocks)` makes the second load a no-op and satisfies the plan's `Code.require_file` acceptance criterion while staying warnings-clean under `--warnings-as-errors`; (e) Committed (not gitignored) `test/support/fixtures/secrets/fake_keys.exs` per plan Task 3 paragraph-ending "Decision: commit the fixture file; do NOT gitignore" — moduledoc comments make the "not real" nature explicit and every value contains the `FAKE` marker substring; (f) Placed mocks smoke test at `test/support/mocks_test.exs` (not `test/kiln/`) because the plan acceptance command specifies that literal path — `mix test <path>` accepts an explicit `.exs` file regardless of discovery root.
 
 ### Plan 01-01 decisions
 
@@ -163,9 +165,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 3 context gathered (all 4 gray areas researched + synthesized coherent design; all 16 sub-decisions locked)
-Resume file: --resume-file
-Next command: /gsd-discuss-phase 2 (gather context for Workflow Engine Core) then /gsd-plan-phase 2
+Last session: 2026-04-20 -- Plan 03-00 executed
+Stopped at: Plan 03-00 (Wave 0 test infrastructure) complete; 03-01/02/03 unblocked to run in parallel
+Resume file: .planning/phases/03-agent-adapter-sandbox-dtu-safety/03-00-SUMMARY.md
+Next command: /gsd-execute-phase 3 (spawns 03-01/02/03 wave-1 plans in parallel against the new HEAD)
 
 **Planned Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — 2026-04-20T16:34:38.407Z

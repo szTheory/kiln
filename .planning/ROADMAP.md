@@ -94,7 +94,20 @@ Plans:
   - Streaming SSE -> PubSub -> LiveView backpressure pattern (prototype required before commit)
   - Sandbox resource-limits policy values (`--memory`, `--cpus`, `--pids-limit`, `--ulimit nofile`)
   - Structured-output enforcement per provider
-**Plans**: TBD
+**Plans:** 12 plans
+Plans:
+- [x] 03-00-PLAN.md — Wave 0 test infrastructure: muontrap/bypass/ex_docker_engine_api deps + Mox defmocks (AdapterMock, DriverMock) + 6 ExUnit case templates + 4-corpus fixture seed — **complete 2026-04-20 (6abb048, fc25650, 4de8841)**
+- [ ] 03-01-PLAN.md — Kiln.Secrets + SecretRedactor (SEC-01)
+- [ ] 03-02-PLAN.md — Kiln.Blockers typed reasons + playbook registry (BLOCK-01)
+- [ ] 03-03-PLAN.md — 9 new audit event kinds + migration (OPS-02, SEC-01)
+- [ ] 03-04-PLAN.md — FactoryCircuitBreaker scaffold + Notifications (BLOCK-03)
+- [ ] 03-05-PLAN.md — Kiln.Agents.Adapter behaviour + Anthropic live + 3 scaffolded adapters (AGENT-01)
+- [ ] 03-06-PLAN.md — Pricing + ModelRegistry + BudgetGuard + TelemetryHandler (AGENT-02, AGENT-05)
+- [ ] 03-07-PLAN.md — Sandboxes pure modules: ContainerSpec/ImageResolver/Limits/EnvBuilder/Hydrator/Harvester (SAND-01, SAND-04)
+- [ ] 03-08-PLAN.md — DockerDriver + OrphanSweeper + adversarial negative-test suite (SAND-01, SAND-02)
+- [ ] 03-09-PLAN.md — DTU mini-mix-project + HealthPoll + ContractTest (SAND-03)
+- [ ] 03-10-PLAN.md — NextStageDispatcher + StageWorker integrated chain
+- [ ] 03-11-PLAN.md — 14-child supervision tree + BootChecks 8-invariants + RunDirector secret-presence gate
 
 ### Phase 4: Agent Tree & Shared Memory
 **Goal**: Specialized agents (Planner, Coder, Tester, Reviewer, UI/UX, QA/Verifier, Mayor) run as supervised OTP processes per-run and coordinate through a native Ecto work-unit store with PubSub — no shell-out to `bd`, no GenServer-per-unit.
@@ -254,8 +267,8 @@ Phases needing `/gsd-research-phase` before planning:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Durability Floor | 7/7 | Complete | 2026-04-19 |
-| 2. Workflow Engine Core | 5/9 | In progress | - |
-| 3. Agent Adapter, Sandbox, DTU & Safety | 0/TBD | Not started | - |
+| 2. Workflow Engine Core | 9/9 | Complete | 2026-04-20 |
+| 3. Agent Adapter, Sandbox, DTU & Safety | 1/12 | In progress | - |
 | 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |
 | 5. Spec, Verification & Bounded Loop | 0/TBD | Not started | - |
 | 6. GitHub Integration | 0/TBD | Not started | - |
