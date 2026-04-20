@@ -55,12 +55,14 @@
     {:no_signature_block, "mix check_no_signature_block"},
 
     # ---- Phase 2 D-97: 13 bounded contexts (was 12 in P1; Plan 02-03
-    #      admitted Kiln.Artifacts as the 13th). The task source ships
-    #      in Plan 02-04 so the gate is WIRED now; Plan 02-07 Task 2
-    #      extends Kiln.BootChecks.@context_modules from 12 to 13,
-    #      after which this gate asserts end-to-end. Plan 02-03 already
-    #      shipped Kiln.Artifacts so the expected-module list loads at
-    #      the end of Wave 1. ----
+    #      admitted Kiln.Artifacts as the 13th). Gate is ACTIVE as of
+    #      Plan 02-07 Task 2: Kiln.BootChecks.@context_modules was
+    #      extended from 12 → 13 in lockstep with the Mix task's
+    #      @expected list, so the two SSOTs are in sync and
+    #      `mix check_bounded_contexts` asserts the 13-context
+    #      invariant on every CI build (Plan 02-04 shipped the source
+    #      with deferred activation per checker issue #5 option (b);
+    #      Plan 02-07 is the paired activation). ----
     {:bounded_contexts, "mix check_bounded_contexts"},
 
     # ---- Plan 06 / D-34: boot-time invariants (REVOKE + trigger + contexts + secrets).

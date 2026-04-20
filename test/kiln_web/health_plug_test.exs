@@ -27,8 +27,8 @@ defmodule Kiln.HealthPlugTest do
       assert body["oban"] in ["up", "down"]
       assert is_integer(body["contexts"])
 
-      assert body["contexts"] == 12,
-             "D-42 locks the 12-context count (ARCHITECTURE.md §4); got #{body["contexts"]}"
+      assert body["contexts"] == 13,
+             "D-97 (Plan 02-07 spec upgrade) locks the 13-context count (ARCHITECTURE.md §4 + CLAUDE.md); got #{body["contexts"]}"
 
       assert is_binary(body["version"])
 
@@ -61,7 +61,7 @@ defmodule Kiln.HealthPlugTest do
     test "returns the same shape as the HTTP endpoint (Phase 7 UI-07 factory-header consumer)" do
       payload = Kiln.HealthPlug.status()
       assert is_map(payload)
-      assert payload["contexts"] == 12
+      assert payload["contexts"] == 13
       assert payload["status"] in ["ok", "degraded", "down"]
     end
   end

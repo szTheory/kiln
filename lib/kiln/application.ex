@@ -4,24 +4,43 @@ defmodule Kiln.Application do
 
   alias Kiln.Telemetry.ObanHandler
 
-  # D-42 locks the children list to EXACTLY 7 — no DNSCluster, no stub
-  # Phase 2+ children. Plan 06 re-topologises into a staged start
-  # (infra children → BootChecks.run! → Endpoint) so a violated
-  # invariant halts the BEAM BEFORE the endpoint binds a port — the
-  # probe URL simply refuses connection, which is the correct signal
-  # for "dead factory". Post-boot the supervisor still has EXACTLY
-  # the 7 D-42 children.
+  # D-42 (P1) / D-92..D-96 (Phase 2): the children list is EXACTLY 10
+  # post-boot. Phase 1 locked the 7-child shape (D-42 "no DNSCluster,
+  # no stub Phase 2+ children"); Plan 02-07 extends the tree to 10 per
+  # D-92..D-96 by adding:
+  #
+  #   * `Kiln.Runs.RunSupervisor`    — DynamicSupervisor hosting
+  #     per-run subtrees (D-95, max_children: 10).
+  #   * `{Kiln.Runs.RunDirector, []}` — :permanent GenServer that
+  #     owns boot-scan + periodic-scan + DOWN-reaction rehydration
+  #     (D-92..D-96). init/1 defers the scan via `send(self(), :boot_scan)`
+  #     so supervisor boot never blocks on a DB query.
+  #   * `Kiln.Policies.StuckDetector` — :permanent GenServer invoked
+  #     inside `Kiln.Runs.Transitions.transition/3` as a pre-state-
+  #     change hook (D-91; no-op body in Phase 2, sliding-window body
+  #     lands in Phase 5).
+  #
+  # Plan 02-06 shipped the staged-boot pattern (infra children →
+  # BootChecks.run! → Endpoint); this plan preserves it and makes
+  # `KilnWeb.Endpoint` the 10th child added dynamically AFTER the
+  # boot-check chain passes. Post-boot
+  # `Supervisor.which_children(Kiln.Supervisor)` returns EXACTLY 10
+  # entries (asserted by test/kiln/application_test.exs).
   @impl true
   def start(_type, _args) do
-    # Stage 1: start the 6 infra children BootChecks needs (Repo +
-    # Oban primarily; the others are cheap and also phase-1 required).
+    # Stage 1: start the 9 infra children BootChecks needs (Repo +
+    # Oban primarily; the 3 new Phase 2 children are cheap to start
+    # and are valid pre-Endpoint-bind targets).
     infra_children = [
       KilnWeb.Telemetry,
       Kiln.Repo,
       {Phoenix.PubSub, name: Kiln.PubSub},
       {Finch, name: Kiln.Finch},
       {Registry, keys: :unique, name: Kiln.RunRegistry},
-      {Oban, Application.fetch_env!(:kiln, Oban)}
+      {Oban, Application.fetch_env!(:kiln, Oban)},
+      Kiln.Runs.RunSupervisor,
+      {Kiln.Runs.RunDirector, []},
+      Kiln.Policies.StuckDetector
     ]
 
     opts = [strategy: :one_for_one, name: Kiln.Supervisor]
@@ -36,14 +55,14 @@ defmodule Kiln.Application do
 
         # Stage 3: attach the Oban telemetry handler (Plan 05). Telemetry
         # handlers are ETS-backed, not process-backed — they aren't
-        # supervisor children, so this doesn't affect the D-42 count.
+        # supervisor children, so this doesn't affect the 10-child count.
         # Idempotent: returns `{:error, :already_exists}` on re-attach
         # (tolerated so code-reload / iex restarts don't crash).
         _ = ObanHandler.attach()
 
-        # Stage 4: add `KilnWeb.Endpoint` as the 7th child. After this
+        # Stage 4: add `KilnWeb.Endpoint` as the 10th child. After this
         # call `Supervisor.which_children(Kiln.Supervisor)` returns
-        # EXACTLY 7 entries (asserted by test/kiln/application_test.exs).
+        # EXACTLY 10 entries (asserted by test/kiln/application_test.exs).
         {:ok, _endpoint_pid} = Supervisor.start_child(sup_pid, KilnWeb.Endpoint.child_spec([]))
 
         {:ok, sup_pid}

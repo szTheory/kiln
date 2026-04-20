@@ -10,23 +10,28 @@ defmodule Kiln.BootChecks do
 
   Invariants asserted (each has a dedicated `check_*!/0` private fn):
 
-    * `:contexts_compiled`    — all 12 `Kiln.*` context modules load
+    * `:contexts_compiled`      — all 13 `Kiln.*` context modules load
       via `Code.ensure_compiled?/1`. Catches a rename/typo that passed
       `mix compile` because a broken module was never referenced.
-      (Plan 02-07 will extend this list to 13 by admitting
-      `Kiln.Artifacts`; Plan 02-04 intentionally leaves the list at 12.)
-    * `:audit_revoke_active`  — `kiln_app` role cannot UPDATE
+      (Extended from 12 → 13 in Plan 02-07 per D-97 / CLAUDE.md spec
+      upgrade — `Kiln.Artifacts` is the 13th, shipped in Plan 02-03.)
+    * `:audit_revoke_active`    — `kiln_app` role cannot UPDATE
       `audit_events` (attempted UPDATE raises SQLSTATE 42501 —
       `:insufficient_privilege`). Proves Layer 1 of D-12.
-    * `:audit_trigger_active` — UPDATE `audit_events` as `kiln_owner`
+    * `:audit_trigger_active`   — UPDATE `audit_events` as `kiln_owner`
       raises with the literal message `"audit_events is append-only"`.
       Proves Layer 2 of D-12 (role-bypass-resistant).
-    * `:oban_queue_budget`    — Phase 2 D-68 budget: the aggregate of
+    * `:oban_queue_budget`      — Phase 2 D-68 budget: the aggregate of
       all `config :kiln, Oban, queues:` concurrency values must not
       exceed 16 (= pool_size 20 minus overhead/LiveView/ops/RunDirector/
       spike headroom). Guards against a future plan silently raising a
       queue and saturating the Postgres pool (checker issue #9).
-    * `:required_secrets`     — `SECRET_KEY_BASE` + `DATABASE_URL`
+    * `:workflow_schema_loads`  — `Kiln.Workflows.SchemaRegistry.fetch(:workflow)`
+      returns `{:ok, _}`. Phase 2 / Plan 02-07: a corrupted
+      `priv/workflow_schemas/v1/workflow.json` would cause the JSV
+      build to fail silently until the first workflow-load call;
+      catching it at boot keeps the "dead factory fails loud" ethos.
+    * `:required_secrets`       — `SECRET_KEY_BASE` + `DATABASE_URL`
       present in `:prod`; `DATABASE_URL` present in `:dev`. No-op in
       `:test` (sandboxed config provides stand-ins).
 
@@ -39,10 +44,14 @@ defmodule Kiln.BootChecks do
   alias Kiln.BootChecks.Error
   alias Kiln.Repo
 
-  # SSOT for the 12 bounded contexts (ARCHITECTURE.md §4). Must match the
-  # `:contexts` count in `Kiln.HealthPlug.status/0`. `ExternalOperations`
-  # is the 12th — a P1 artifact per CONTEXT.md `<domain>`; downstream
-  # phases will add `Scope` usage but not expand this list.
+  # SSOT for the 13 bounded contexts (ARCHITECTURE.md §4 + D-97
+  # spec upgrade — Phase 2 admitted `Kiln.Artifacts` as the 13th
+  # because content-addressed storage is genuinely orthogonal to stage
+  # execution). Must match the `:contexts` count in
+  # `Kiln.HealthPlug.status/0`. Plan 02-03 shipped `Kiln.Artifacts`;
+  # Plan 02-07 (this file) extends this list from 12 → 13 in lockstep
+  # with `mix check_bounded_contexts` (Plan 02-04 shipped that Mix
+  # task source with deferred activation — the two SSOTs align here).
   @context_modules [
     Kiln.Specs,
     Kiln.Intents,
@@ -55,19 +64,20 @@ defmodule Kiln.BootChecks do
     Kiln.Audit,
     Kiln.Telemetry,
     Kiln.Policies,
-    Kiln.ExternalOperations
+    Kiln.ExternalOperations,
+    Kiln.Artifacts
   ]
 
   @doc """
-  Returns the expected P1 count of bounded-context modules (12 per
-  ARCHITECTURE.md §4 / D-42). `Kiln.HealthPlug` calls this so
-  `/health`'s `"contexts"` field stays in sync with the invariant list
-  automatically.
+  Returns the expected count of bounded-context modules (13 per
+  ARCHITECTURE.md §4 + D-97 spec upgrade). `Kiln.HealthPlug` calls
+  this so `/health`'s `"contexts"` field stays in sync with the
+  invariant list automatically.
   """
   @spec context_count() :: non_neg_integer()
   def context_count, do: length(@context_modules)
 
-  @typedoc "The 12 bounded-context modules pinned by D-42."
+  @typedoc "The 13 bounded-context modules pinned by D-42 + D-97."
   @type context_module ::
           Kiln.Specs
           | Kiln.Intents
@@ -81,11 +91,13 @@ defmodule Kiln.BootChecks do
           | Kiln.Telemetry
           | Kiln.Policies
           | Kiln.ExternalOperations
+          | Kiln.Artifacts
 
   @doc """
-  Returns the P1 context module list. Exposed for
-  `test/kiln/boot_checks_test.exs` behavior-18 assertion; prefer
-  `context_count/0` in production code.
+  Returns the context module list. Exposed for
+  `test/kiln/boot_checks_test.exs` behavior-18 assertion and for
+  `mix check_bounded_contexts` to cross-check its `@expected` SSOT;
+  prefer `context_count/0` in production code.
   """
   @spec context_modules() :: [context_module(), ...]
   def context_modules, do: @context_modules
@@ -113,6 +125,7 @@ defmodule Kiln.BootChecks do
       check_audit_revoke_active!()
       check_audit_trigger_active!()
       check_oban_queue_budget!()
+      check_workflow_schema_loads!()
       check_required_secrets!()
       :ok
     end
@@ -365,6 +378,36 @@ defmodule Kiln.BootChecks do
     end
 
     :ok
+  end
+
+  # -----------------------------------------------------------------
+  # Invariant: :workflow_schema_loads (Phase 2 / Plan 02-07; D-97 / P2)
+  # -----------------------------------------------------------------
+  #
+  # Asserts `Kiln.Workflows.SchemaRegistry.fetch(:workflow)` returns
+  # `{:ok, _root}`. The SchemaRegistry performs a compile-time
+  # `JSV.build!/2` over `priv/workflow_schemas/v1/workflow.json`; a
+  # corrupted or syntactically-invalid JSON Schema 2020-12 document
+  # would fail to build and render every workflow load attempt broken
+  # until someone actually called `Kiln.Workflows.load/1`. Boot-time
+  # assertion means the operator sees the failure during startup with
+  # a diagnostic message instead of at first-run dispatch with a
+  # cryptic Oban error.
+  defp check_workflow_schema_loads! do
+    case Kiln.Workflows.SchemaRegistry.fetch(:workflow) do
+      {:ok, _root} ->
+        :ok
+
+      {:error, reason} ->
+        raise Error,
+          invariant: :workflow_schema_loads,
+          details: %{reason: reason},
+          remediation_hint:
+            "priv/workflow_schemas/v1/workflow.json failed JSV build. " <>
+              "Check file exists, is valid JSON, and is a valid JSON Schema 2020-12 " <>
+              "document. See lib/kiln/workflows/schema_registry.ex for compile-time " <>
+              "build pattern."
+    end
   end
 
   # -----------------------------------------------------------------

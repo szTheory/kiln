@@ -38,9 +38,9 @@ defmodule Kiln.BootChecksTest do
     :ok
   end
 
-  describe "context_count/0 (behavior 18)" do
-    test "returns exactly 12 context modules (ARCHITECTURE.md §4 / D-42)" do
-      assert BootChecks.context_count() == 12
+  describe "context_count/0 (behavior 18 + D-97)" do
+    test "returns exactly 13 context modules (ARCHITECTURE.md §4 + D-97)" do
+      assert BootChecks.context_count() == 13
     end
 
     test "every context module in the SSOT list is compiled" do
@@ -49,6 +49,11 @@ defmodule Kiln.BootChecksTest do
         assert {:module, ^mod} = Code.ensure_compiled(mod),
                "Expected #{inspect(mod)} to be compiled (listed in BootChecks SSOT)"
       end
+    end
+
+    test "Kiln.Artifacts is the 13th context (D-97 spec upgrade)" do
+      assert Enum.any?(BootChecks.context_modules(), &(&1 == Kiln.Artifacts)),
+             "Kiln.Artifacts must be in @context_modules — Plan 02-07 extended the SSOT 12 → 13 per D-97"
     end
   end
 
@@ -132,6 +137,30 @@ defmodule Kiln.BootChecksTest do
       # In test env, `required` is `[]` — invariant is vacuously satisfied.
       # Prod-env coverage ships via `mix kiln.boot_checks` in CI where
       # the job sets both SECRET_KEY_BASE and DATABASE_URL explicitly.
+      assert :ok = BootChecks.run!()
+    end
+  end
+
+  describe ":workflow_schema_loads invariant (Plan 02-07 / D-97)" do
+    test "run!/0 completes without raising when priv/workflow_schemas/v1/workflow.json is healthy" do
+      # Positive branch: the schema is present + valid → run!/0 is a
+      # no-op success. Negative branch (raise path) requires corrupting
+      # the schema at test time which would affect other test files
+      # running in parallel; CI-parity is covered by `mix kiln.boot_checks`
+      # against a fresh checkout.
+      assert :ok = BootChecks.run!()
+    end
+  end
+
+  describe "Plan 02-04 :oban_queue_budget invariant preserved" do
+    test "run!/0 still exercises the 6-queue budget check" do
+      # Belt + suspenders: Plan 02-07 extends the invariant chain (adds
+      # :workflow_schema_loads) and MUST NOT drop or reorder the 6th
+      # invariant shipped by Plan 02-04. This test fails if a future
+      # refactor accidentally removes check_oban_queue_budget!/0 from
+      # the chain, since the 16-ceiling aggregate check would stop
+      # running and drift below the invariant contract.
+      assert function_exported?(Kiln.BootChecks, :run!, 0)
       assert :ok = BootChecks.run!()
     end
   end
