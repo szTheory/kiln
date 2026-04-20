@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Plan 03-00 (Wave 0 test infrastructure) complete; 03-01/02/03 unblocked to run in parallel
-last_updated: "2026-04-20T17:10:00.000Z"
-last_activity: 2026-04-20 -- Plan 03-00 executed (3 tasks, 3 commits, Wave 0 complete)
+stopped_at: Wave 1 (03-00/01/02/03) complete; Wave 2 (03-04/05/06) ready to spawn
+last_updated: "2026-04-20T17:22:00.000Z"
+last_activity: 2026-04-20 -- Wave 1b merged (03-01 secrets, 03-02 blockers, 03-03 audit P3); post-merge tests 321/0
 progress:
   total_phases: 10
   completed_phases: 2
   total_plans: 28
-  completed_plans: 17
-  percent: 61
+  completed_plans: 20
+  percent: 71
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 03 (agent-adapter-sandbox-dtu-safety) — EXECUTING
-Plan: 2 of 12 (03-00 complete; 03-01/02/03 ready for Wave 1 parallel spawn)
+Plan: 5 of 12 (Wave 1 complete: 03-00/01/02/03 merged; Wave 2 ready for 03-04/05/06)
 Status: Executing Phase 03
-Last activity: 2026-04-20 -- Plan 03-00 executed (3 tasks, 3 commits, Wave 0 complete)
+Last activity: 2026-04-20 -- Wave 1b merged; post-merge tests 321/0
 
-Progress: [██████░░░░] 61%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 

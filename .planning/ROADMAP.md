@@ -97,9 +97,9 @@ Plans:
 **Plans:** 12 plans
 Plans:
 - [x] 03-00-PLAN.md — Wave 0 test infrastructure: muontrap/bypass/ex_docker_engine_api deps + Mox defmocks (AdapterMock, DriverMock) + 6 ExUnit case templates + 4-corpus fixture seed — **complete 2026-04-20 (6abb048, fc25650, 4de8841)**
-- [ ] 03-01-PLAN.md — Kiln.Secrets + SecretRedactor (SEC-01)
-- [ ] 03-02-PLAN.md — Kiln.Blockers typed reasons + playbook registry (BLOCK-01)
-- [ ] 03-03-PLAN.md — 9 new audit event kinds + migration (OPS-02, SEC-01)
+- [x] 03-01-PLAN.md — Kiln.Secrets + SecretRedactor (SEC-01) — **complete 2026-04-20 (b599134, f5d4e89, 5801685, 197919b)**
+- [x] 03-02-PLAN.md — Kiln.Blockers typed reasons + playbook registry (BLOCK-01) — **complete 2026-04-20 (01e3bf1, 23f20ba, 34c806f)**
+- [x] 03-03-PLAN.md — 9 new audit event kinds + migration (OPS-02, SEC-01) — **complete 2026-04-20 (143393f, 7919e7e)**
 - [ ] 03-04-PLAN.md — FactoryCircuitBreaker scaffold + Notifications (BLOCK-03)
 - [ ] 03-05-PLAN.md — Kiln.Agents.Adapter behaviour + Anthropic live + 3 scaffolded adapters (AGENT-01)
 - [ ] 03-06-PLAN.md — Pricing + ModelRegistry + BudgetGuard + TelemetryHandler (AGENT-02, AGENT-05)
