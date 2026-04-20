@@ -15,7 +15,10 @@ config :kiln, Kiln.Repo,
   database: "kiln_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  # pool_size: 20 — D-68 budget (matches :prod default in config/runtime.exs).
+  # See lib/kiln/boot_checks.ex check_oban_queue_budget!/0 for the paired
+  # aggregate-16 Oban invariant.
+  pool_size: 20
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -13,12 +13,19 @@ defmodule Kiln.BootChecks do
     * `:contexts_compiled`    — all 12 `Kiln.*` context modules load
       via `Code.ensure_compiled?/1`. Catches a rename/typo that passed
       `mix compile` because a broken module was never referenced.
+      (Plan 02-07 will extend this list to 13 by admitting
+      `Kiln.Artifacts`; Plan 02-04 intentionally leaves the list at 12.)
     * `:audit_revoke_active`  — `kiln_app` role cannot UPDATE
       `audit_events` (attempted UPDATE raises SQLSTATE 42501 —
       `:insufficient_privilege`). Proves Layer 1 of D-12.
     * `:audit_trigger_active` — UPDATE `audit_events` as `kiln_owner`
       raises with the literal message `"audit_events is append-only"`.
       Proves Layer 2 of D-12 (role-bypass-resistant).
+    * `:oban_queue_budget`    — Phase 2 D-68 budget: the aggregate of
+      all `config :kiln, Oban, queues:` concurrency values must not
+      exceed 16 (= pool_size 20 minus overhead/LiveView/ops/RunDirector/
+      spike headroom). Guards against a future plan silently raising a
+      queue and saturating the Postgres pool (checker issue #9).
     * `:required_secrets`     — `SECRET_KEY_BASE` + `DATABASE_URL`
       present in `:prod`; `DATABASE_URL` present in `:dev`. No-op in
       `:test` (sandboxed config provides stand-ins).
@@ -105,6 +112,7 @@ defmodule Kiln.BootChecks do
       check_contexts_compiled!()
       check_audit_revoke_active!()
       check_audit_trigger_active!()
+      check_oban_queue_budget!()
       check_required_secrets!()
       :ok
     end
@@ -322,6 +330,41 @@ defmodule Kiln.BootChecks do
     else
       {:unexpected_message, msg}
     end
+  end
+
+  # -----------------------------------------------------------------
+  # Invariant: :oban_queue_budget (Phase 2 / D-68; checker issue #9)
+  # -----------------------------------------------------------------
+  #
+  # Reads `Application.get_env(:kiln, Oban)[:queues]` and asserts that
+  # the sum of concurrency values is <= 16. The ceiling is the D-68
+  # Postgres-pool budget: pool_size 20 absorbs 16 Oban workers + ~2
+  # plugin overhead + ~2 LiveView/ops + ~1 RunDirector+StuckDetector +
+  # ~3 request-spike = ~24 peak pressure with 20 checkouts.
+  #
+  # Converts the "aggregate 16 via comment" D-68 documentation into a
+  # boot-time assertion: a future plan silently raising `:stages` from
+  # 4 to 8 will fail fast here instead of starving the pool at runtime.
+  # When Phase 3's provider-split queues activate (D-71), the invariant
+  # threshold should be raised in lockstep with pool_size 28.
+  defp check_oban_queue_budget! do
+    queues = Application.get_env(:kiln, Oban)[:queues] || []
+    total = queues |> Keyword.values() |> Enum.sum()
+
+    if total > 16 do
+      raise Error,
+        invariant: :oban_queue_budget,
+        details: %{total: total, queues: queues, ceiling: 16},
+        remediation_hint:
+          "Oban queue aggregate concurrency must be <= 16 (D-68 budget: " <>
+            "16 workers + overhead <= pool_size 20). Current sum: #{total}. " <>
+            "Either reduce a queue's concurrency in config/config.exs or (if " <>
+            "intentional) raise pool_size in config/runtime.exs AND update " <>
+            "this invariant's ceiling. See .planning/phases/" <>
+            "02-workflow-engine-core/02-CONTEXT.md D-67..D-69 / D-71."
+    end
+
+    :ok
   end
 
   # -----------------------------------------------------------------

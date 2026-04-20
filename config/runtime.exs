@@ -42,9 +42,17 @@ if config_env() == :prod do
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
+  # pool_size: 20 — D-68 budget calc: Oban aggregate 16 (D-67 six-queue
+  # taxonomy) + plugin overhead ~2 + LiveView/`/ops/*` queries ~2 +
+  # RunDirector + StuckDetector ~1 + request-spike headroom ~3 ≈ 24 peak
+  # pressure vs 20 checkouts. Defensible because `:stages` concurrency (4)
+  # is dominated by LLM-call wall-clock (minutes), not DB checkouts.
+  # Revisit to 28 when Phase 3's provider-split queues activate (D-71).
+  # Kiln.BootChecks.check_oban_queue_budget!/0 asserts the paired D-68
+  # invariant: `sum(queue-concurrency) <= 16`.
   config :kiln, Kiln.Repo,
     url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "20"),
     socket_options: maybe_ipv6
 
   # The secret key base is used to sign/encrypt cookies and other secrets.

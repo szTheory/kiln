@@ -50,27 +50,52 @@ config :tailwind,
     cd: Path.expand("..", __DIR__)
   ]
 
-# Oban configuration (D-44 — safer defaults; Kiln.Oban.BaseWorker lands in
-# Plan 04 and inherits `max_attempts: 3` + idempotency-key unique config).
-# Two queues:
-#   * `:default` (concurrency 10) — all run/stage workers
-#   * `:maintenance` (concurrency 1) — the external_operations 30-day TTL
-#     pruner (D-19), scheduled by the Cron plugin below.
+# Oban configuration (D-44 + D-67..D-69 — six per-concern queues per Phase 2
+# D-67; aggregate concurrency = 16; Kiln.BootChecks.check_oban_queue_budget!/0
+# asserts `sum(values) <= 16` at boot so any future plan silently raising a
+# queue cannot saturate the Postgres pool — see lib/kiln/boot_checks.ex.
+#
+# Queues (D-67):
+#   * `:default`     (2) — ad-hoc / one-offs / anything without an explicit
+#       queue. Deliberately small so a mis-routed `:stages` job shows up
+#       immediately as a `:default` backlog, not a silent slot-steal.
+#   * `:stages`      (4) — stage dispatch (Kiln.Stages.StageWorker arrives in
+#       Plan 05). 4 = 2 parallel runs × 2 parallel stages, solo-op ceiling.
+#   * `:github`      (2) — git / gh CLI shell-outs. Scaffolded here;
+#       activated in Phase 6.
+#   * `:audit_async` (4) — non-transactional audit appends.
+#   * `:dtu`         (2) — DTU mock contract tests + health polls.
+#       Scaffolded here; activated in Phase 3.
+#   * `:maintenance` (2) — cron destinations: 30-day external_operations
+#       pruner (P1), Phase 5 StuckDetector worker, Phase 3 DTU weekly
+#       contract test, Phase 5 Artifacts Gc/Scrub workers.
+#
 # Plugins:
 #   * `Oban.Plugins.Pruner` — deletes Oban's own completed/discarded job
 #     rows after 7 days (not Kiln.ExternalOperations.Pruner).
 #   * `Oban.Plugins.Cron` — triggers `Kiln.ExternalOperations.Pruner`
-#     daily at 03:00 UTC (D-19). Registering the pruner here keeps the
-#     7-child supervision tree invariant (D-42) — no new supervisor child.
+#     daily at 03:00 UTC (D-19). Four additional entries are commented
+#     out until their owning plans activate them.
 config :kiln, Oban,
   repo: Kiln.Repo,
   engine: Oban.Engines.Basic,
-  queues: [default: 10, maintenance: 1],
+  queues: [
+    default: 2,
+    stages: 4,
+    github: 2,
+    audit_async: 4,
+    dtu: 2,
+    maintenance: 2
+  ],
   plugins: [
     {Oban.Plugins.Pruner, max_age: 60 * 60 * 24 * 7},
     {Oban.Plugins.Cron,
      crontab: [
-       {"0 3 * * *", Kiln.ExternalOperations.Pruner}
+       {"0 3 * * *", Kiln.ExternalOperations.Pruner, queue: :maintenance}
+       # {"*/5 * * * *", Kiln.Policies.StuckDetectorWorker, queue: :maintenance},  # P5 activation
+       # {"0 4 * * 0", Kiln.Sandboxes.DTU.ContractTestWorker, queue: :maintenance}, # P3 activation
+       # {"15 2 * * *", Kiln.Artifacts.GcWorker, queue: :maintenance},              # P5 activation (Plan 02-03 shipped the worker stub)
+       # {"30 2 * * 0", Kiln.Artifacts.ScrubWorker, queue: :maintenance}            # P5 activation (Plan 02-03 shipped the worker stub)
      ]}
   ]
 
