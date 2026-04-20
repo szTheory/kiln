@@ -75,15 +75,23 @@ defmodule Kiln.ModelRegistry do
   The chain is the concatenation of `model :: fallback` across every
   role, deduplicated in declaration order.
   """
+  # Stable role iteration order for `next/3` so chain traversal is
+  # deterministic regardless of underlying map ordering.
+  @role_order ~w(planner coder tester reviewer ui_ux qa_verifier mayor)a
+
   @spec next(String.t(), atom(), atom()) :: {:ok, String.t()} | {:exhausted, String.t()}
   def next(current_model, _fault_class, preset_name)
       when is_binary(current_model) and is_atom(preset_name) do
     preset = Map.fetch!(@presets_data, preset_name)
 
     chain =
-      preset.roles
-      |> Map.values()
-      |> Enum.flat_map(fn %{model: m, fallback: f} -> [m | f] end)
+      @role_order
+      |> Enum.flat_map(fn role ->
+        case Map.get(preset.roles, role) do
+          %{model: m, fallback: f} -> [m | f]
+          _ -> []
+        end
+      end)
       |> Enum.uniq()
 
     case Enum.drop_while(chain, &(&1 != current_model)) do
