@@ -71,8 +71,8 @@ Plans:
 - [x] 02-02-PLAN.md — runs + stage_runs migrations + Ecto schemas + Kiln.Runs/Kiln.Stages context facades + live factories — **complete 2026-04-20 (7371684, 64abc7c)**
 - [x] 02-03-PLAN.md — Kiln.Artifacts 13th context (CAS + atomic rename + integrity-on-read + GcWorker/ScrubWorker stubs) — **complete 2026-04-20 (fc4c21d, cdc109c)**
 - [x] 02-04-PLAN.md — Oban 6-queue taxonomy + pool_size 10→20 + mix check_no_signature_block + mix check_bounded_contexts + BootChecks 6th invariant :oban_queue_budget — **complete 2026-04-20 (130f8f3, c738b52)**
-- [ ] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml
-- [ ] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError
+- [x] 02-05-PLAN.md — Kiln.Workflows.Loader + Graph (digraph) + Compiler (6 D-62 validators) + elixir_phoenix_feature.yaml — **complete 2026-04-20 (f5f689d, 0f7f7e6)**
+- [x] 02-06-PLAN.md — Kiln.Runs.Transitions command module (D-87 matrix) + StuckDetector no-op GenServer + IllegalTransitionError — **complete 2026-04-20 (945ba88, d113bc4)**
 - [ ] 02-07-PLAN.md — RunSupervisor + RunSubtree + RunDirector :permanent + Application 7→10 children + BootChecks 5th invariant + 13th context
 - [ ] 02-08-PLAN.md — Kiln.Stages.StageWorker + end-to-end + rehydration integration tests + CLAUDE.md/ARCHITECTURE.md/STACK.md spec upgrades (D-97..D-100)
 

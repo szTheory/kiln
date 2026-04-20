@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-04-PLAN.md (6-queue Oban taxonomy + pool_size 20 + BootChecks 6th invariant check_oban_queue_budget + 2 custom Mix CI gates)
-last_updated: "2026-04-20T02:11:23.471Z"
-last_activity: 2026-04-20
+stopped_at: Completed Wave 2 — 02-05 (Workflows loader/compiler pipeline + elixir_phoenix_feature.yaml) + 02-06 (Runs.Transitions + StuckDetector GenServer + IllegalTransitionError)
+last_updated: "2026-04-20T02:30:00.000Z"
+last_activity: 2026-04-20 -- Wave 2 merged; 236 tests green
 progress:
   total_phases: 10
   completed_phases: 1
   total_plans: 16
-  completed_plans: 12
-  percent: 75
+  completed_plans: 14
+  percent: 88
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 ## Current Position
 
 Phase: 02 (workflow-engine-core) — EXECUTING
-Plan: 6 of 9
-Status: Ready to execute
+Plan: 8 of 9
+Status: Ready to execute (Wave 3 next — 02-07 supervision tree)
 Last activity: 2026-04-20
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
