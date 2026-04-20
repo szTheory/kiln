@@ -31,7 +31,7 @@ defmodule Kiln.AuditTest do
       assert event.event_kind == :stage_started
     end
 
-    test "every one of the 22 kinds accepts its minimal payload" do
+    test "every one of the 25 kinds accepts its minimal payload" do
       for kind <- EventKind.values() do
         payload = minimal_payload_for(kind)
         cid = Ecto.UUID.generate()
@@ -135,7 +135,8 @@ defmodule Kiln.AuditTest do
     end
   end
 
-  # One minimal-valid payload per kind; mirrors the 22 JSON schemas.
+  # One minimal-valid payload per kind; mirrors the 25 JSON schemas
+  # (22 Phase 1 + 3 Phase 2 D-85 extensions).
   defp minimal_payload_for(:run_state_transitioned), do: %{"from" => "queued", "to" => "planning"}
 
   defp minimal_payload_for(:stage_started), do: %{"stage_kind" => "coding"}
@@ -199,4 +200,28 @@ defmodule Kiln.AuditTest do
     do: %{"reason" => "missing_api_key", "resolved_by" => "operator"}
 
   defp minimal_payload_for(:escalation_triggered), do: %{"reason" => "stuck_detector"}
+
+  # Phase 2 D-85 extensions.
+  defp minimal_payload_for(:stage_input_rejected),
+    do: %{
+      "stage_run_id" => Ecto.UUID.generate(),
+      "stage_kind" => "coding",
+      "errors" => []
+    }
+
+  defp minimal_payload_for(:artifact_written),
+    do: %{
+      "name" => "plan.md",
+      "sha256" => String.duplicate("a", 64),
+      "size_bytes" => 1024,
+      "content_type" => "text/markdown"
+    }
+
+  defp minimal_payload_for(:integrity_violation),
+    do: %{
+      "artifact_id" => Ecto.UUID.generate(),
+      "expected_sha" => String.duplicate("a", 64),
+      "actual_sha" => String.duplicate("b", 64),
+      "path" => "priv/artifacts/cas/aa/aa/aa..."
+    }
 end
