@@ -1,40 +1,64 @@
 defmodule Kiln.Factory.Artifact do
   @moduledoc """
-  SHELL module — placeholder for the Wave 1+ live `Kiln.Artifacts.Artifact`
-  factory.
+  ex_machina factory for `Kiln.Artifacts.Artifact` rows (Plan 02-03).
 
-  Plan 03 (artifacts schema + `Kiln.Artifacts.Artifact` Ecto module +
-  `Kiln.Artifacts` CAS context) REPLACES this file wholesale with a live
-  factory that pairs `ExMachina`'s Ecto integration with a
-  `Kiln.Artifacts.Artifact` factory function. Shape of the eventual body
-  (placeholder keys; real schema fields are decided in Plan 03):
+  Replaces the SHELL factory shipped in Plan 02-00. The Ecto-backed
+  variant supports `build(:artifact)` (in-memory struct) and
+  `insert(:artifact)` (persisted via `Kiln.Repo`).
 
-    * top-level: ex_machina + Kiln.Repo
-    * `artifact_factory/0` returns `%Kiln.Artifacts.Artifact{name: "plan.md", sha256: ..., content_type: "text/markdown", ...}`
+  Default attrs:
 
-  Until Plan 03 lands, this shell ships with a lone
-  `placeholder_artifact_attrs/0` marker so the file can be imported
-  without raising and its SHELL status is grep-verifiable. The shell
-  deliberately does NOT declare the ex_machina Ecto integration at
-  compile time — that would fail because `Kiln.Artifacts.Artifact` does
-  not yet exist.
+    * `stage_run_id` — `nil`; CALLER MUST SUPPLY. Every artifact has a
+      non-nullable FK to `stage_runs` with `on_delete: :restrict`. Build
+      a parent stage_run (and its parent run) first and pass both ids:
 
-  Grep markers (used by Plan 03's acceptance-criteria automation):
+          run = insert(:run)
+          stage_run = insert(:stage_run, run_id: run.id)
+          insert(:artifact, stage_run_id: stage_run.id, run_id: run.id)
 
-    * `SHELL` / `Plan 03` — shell-vs-live discriminator
-    * `placeholder_artifact_attrs` — function name
+      A default auto-insert of parent rows would hide the FK
+      dependency and produce surprise orphans when tests use
+      `build/1` without persisting.
+    * `run_id` — `nil`; CALLER MUST SUPPLY (see above).
+    * `name` — auto-sequenced (`artifact_0.md`, `artifact_1.md`, ...)
+      to satisfy the per-stage-attempt unique `(stage_run_id, name)`
+      index.
+    * `sha256` — 64-char lowercase hex placeholder (satisfies the DB
+      CHECK format). Tests that need a *real* hash should either
+      round-trip through `Kiln.Artifacts.put/4` or supply an override.
+    * `size_bytes` — 128 (well under the 50 MB D-75 cap).
+    * `content_type` — `:"text/markdown"` (one of the five Ecto.Enum
+      values in `Kiln.Artifacts.Artifact.content_types/0`).
+    * `schema_version` — 1.
+    * `producer_kind` — `"planning"`.
 
-  Part of Plan 02-00 Wave 0 infrastructure (see PLAN.md Task 2a).
+  Tests that need a specific field override pass it as the second arg
+  to `build/2` or `insert/2`:
+
+      insert(:artifact, stage_run_id: sr.id, run_id: r.id,
+                        name: "plan.md", content_type: :"text/x-elixir")
   """
+
+  use ExMachina.Ecto, repo: Kiln.Repo
 
   @doc """
-  Placeholder — returns an empty map.
-
-  This function exists SOLELY as a compile-time marker for the SHELL
-  status of this module. Plan 03 replaces this module wholesale with a
-  live ex_machina / Ecto-backed factory; at that point
-  `placeholder_artifact_attrs/0` disappears.
+  Build a `Kiln.Artifacts.Artifact` struct with sensible defaults. The
+  `stage_run_id` and `run_id` fields are intentionally `nil` —
+  callers MUST supply valid parent ids (see moduledoc).
   """
-  @spec placeholder_artifact_attrs() :: map()
-  def placeholder_artifact_attrs, do: %{}
+  @spec artifact_factory() :: Kiln.Artifacts.Artifact.t()
+  def artifact_factory do
+    %Kiln.Artifacts.Artifact{
+      # Caller MUST supply stage_run_id + run_id (FK on_delete: :restrict).
+      stage_run_id: nil,
+      run_id: nil,
+      name: sequence(:artifact_name, &"artifact_#{&1}.md"),
+      # 64-char lowercase hex satisfies the DB CHECK + changeset regex
+      sha256: String.duplicate("a", 64),
+      size_bytes: 128,
+      content_type: :"text/markdown",
+      schema_version: 1,
+      producer_kind: "planning"
+    }
+  end
 end
