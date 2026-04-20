@@ -22,9 +22,28 @@ services:
     networks:
       - kiln-sandbox
 
+  dtu:
+    build:
+      context: ./priv/dtu
+      dockerfile: Dockerfile
+    image: kiln/dtu:dev
+    networks:
+      kiln-sandbox:
+        ipv4_address: 172.28.0.10
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 networks:
   kiln-sandbox:
     internal: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.28.0.0/24"
 
 volumes:
   kiln_pgdata:

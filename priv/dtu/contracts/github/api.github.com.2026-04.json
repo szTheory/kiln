@@ -1,0 +1,12 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "GitHub REST API (Kiln DTU snapshot)",
+    "version": "2026-04",
+    "description": "Bundled-dereferenced subset of github/rest-api-description for DTU validation. Run `mix kiln.dtu.regen_contract` to refresh."
+  },
+  "paths": {},
+  "components": {
+    "schemas": {}
+  }
+}
