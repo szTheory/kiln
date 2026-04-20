@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://playbooks/v1/playbook.json",
+  "title": "Kiln Blocker Playbook Frontmatter",
+  "type": "object",
+  "required": [
+    "reason",
+    "severity",
+    "short_message",
+    "title",
+    "remediation_commands",
+    "next_action_on_resolve",
+    "owning_phase"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reason": {
+      "type": "string",
+      "enum": [
+        "missing_api_key",
+        "invalid_api_key",
+        "rate_limit_exhausted",
+        "quota_exceeded",
+        "budget_exceeded",
+        "policy_violation",
+        "gh_auth_expired",
+        "gh_permissions_insufficient",
+        "unrecoverable_stage_failure"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["halt", "warn", "escalate"]
+    },
+    "short_message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "required_context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "remediation_commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "command"],
+        "properties": {
+          "label": { "type": "string" },
+          "command": { "type": "string" }
+        }
+      }
+    },
+    "audit_kind_on_resolve": {
+      "type": "string",
+      "default": "block_resolved"
+    },
+    "next_action_on_resolve": {
+      "type": "string",
+      "enum": ["resume_run", "restart_run", "abort_run"]
+    },
+    "owning_phase": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9
+    },
+    "stub": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
