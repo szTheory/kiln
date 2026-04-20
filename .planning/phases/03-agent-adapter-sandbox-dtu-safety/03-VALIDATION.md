@@ -55,10 +55,11 @@ created: 2026-04-20
 | 03-05-03 | 05 | 2 | AGENT-01 | T-03-05-04 | Scaffolded `Adapter.{OpenAI,Google,Ollama}` (behaviour-compliant, `{:error, :scaffolded}` default) + `StructuredOutput` facade dispatches by capabilities + JSV post-validation | contract | `mix test test/kiln/agents/adapter/openai_test.exs test/kiln/agents/adapter/google_test.exs test/kiln/agents/adapter/ollama_test.exs test/kiln/agents/structured_output_test.exs --exclude live_openai --exclude live_google --exclude live_ollama --max-failures=1` | ❌ Wave 2 | ⬜ |
 | 03-06-01 | 06 | 2 | AGENT-02, OPS-03 | T-03-06-03 | `Kiln.Pricing` priv-loaded tables + 6 D-57 presets (`:same_provider` policy) + `ModelRegistry.adapter_for/1` routing + `mix kiln.registry.show` CLI | unit | `mix test test/kiln/pricing_test.exs test/kiln/model_registry_test.exs test/kiln/model_registry/presets_test.exs --max-failures=1 && mix kiln.registry.show elixir_lib` | ❌ Wave 2 | ⬜ |
 | 03-06-02 | 06 | 2 | AGENT-05, OPS-02 | T-03-06-01, T-03-06-02 | `BudgetGuard.check!/2` 7-step pre-flight (D-138 strict, no override) raises `BlockedError(:budget_exceeded)` + `TelemetryHandler` writes `model_routing_fallback` only on actual fallback | unit | `mix test test/kiln/agents/budget_guard_test.exs test/kiln/agents/telemetry_handler_test.exs --max-failures=1 && [ "$(grep -c BUDGET_OVERRIDE lib/kiln/agents/budget_guard.ex)" = "0" ]` | ❌ Wave 2 | ⬜ |
-| 03-07-01 | 07 | 3 | SAND-01, SAND-02, SAND-03 | T-03-07-01, T-03-07-02 | `Kiln.Sandboxes.ContainerSpec` + `ImageResolver` (priv-loaded digest) + `Limits` (`:persistent_term`) | unit | `mix test test/kiln/sandboxes/container_spec_test.exs test/kiln/sandboxes/image_resolver_test.exs test/kiln/sandboxes/limits_test.exs --max-failures=1` | ❌ Wave 3 | ⬜ |
+| 03-07-01 | 07 | 3 | SAND-01, SAND-02 | T-03-07-01, T-03-07-02 | `Kiln.Sandboxes.ContainerSpec` + `ImageResolver` (priv-loaded digest) + `Limits` (`:persistent_term`) | unit | `mix test test/kiln/sandboxes/container_spec_test.exs test/kiln/sandboxes/image_resolver_test.exs test/kiln/sandboxes/limits_test.exs --max-failures=1` | ❌ Wave 3 | ⬜ |
 | 03-07-02 | 07 | 3 | SAND-04, SEC-01 | T-03-07-03, T-03-07-04 | `EnvBuilder` (strict allowlist — secret-shaped names rejected) + `Hydrator`/`Harvester` (CAS IO) | unit | `mix test test/kiln/sandboxes/env_builder_test.exs test/kiln/sandboxes/hydrator_test.exs test/kiln/sandboxes/harvester_test.exs --max-failures=1` | ❌ Wave 3 | ⬜ |
 | 03-08-01 | 08 | 4 | SAND-01, SAND-02 | T-03-08-01, T-03-08-02 | `Kiln.Sandboxes.Driver` behaviour + `DockerDriver` MuonTrap-wrapped D-117 hardened argv (no `--privileged`, no `docker.sock`) + telemetry with full argv metadata + `--name kiln-stage-<uuid>` label | unit | `mix test test/kiln/sandboxes/docker_driver_test.exs --max-failures=1 && [ "$(grep -cE '(docker.sock|--privileged)' lib/kiln/sandboxes/docker_driver.ex)" = "0" ]` | ❌ Wave 4 | ⬜ |
 | 03-08-02 | 08 | 4 | SAND-01 | T-03-08-03 | `OrphanSweeper` GenServer boot+periodic scan + `Sandboxes.Supervisor` (OrphanSweeper FIRST per D-120, DedupCache hosted here) + rewritten `Kiln.Sandboxes` moduledoc (no "Phase 4") | unit | `mix test test/kiln/sandboxes/orphan_sweeper_test.exs --max-failures=1 && [ "$(grep -c 'Phase 4' lib/kiln/sandboxes.ex)" = "0" ]` | ❌ Wave 4 | ⬜ |
+| 03-08-03 | 08 | 4 | SAND-01, SEC-01 | T-03-08-01, T-03-08-03 | Adversarial egress negative-test suite + `docker inspect` secret-leak hunt + `mix kiln.sandbox.adversarial` explicit-include task | integration (docker) | `mix compile --warnings-as-errors && mix kiln.sandbox.adversarial --max-failures=1` | ❌ Wave 4 | ⬜ |
 | 03-09-01 | 09 | 4 | SAND-03 | T-03-09-01, T-03-09-04 | `priv/dtu/` mini-mix-project (Bandit + Plug.Router + 6 GitHub handlers + chaos closed-enum middleware + JSV stub + 501 fallback + pinned OpenAPI snapshot) | unit | `cd priv/dtu && mix deps.get && mix compile --warnings-as-errors && mix test` | ❌ Wave 4 | ⬜ |
 | 03-09-02 | 09 | 4 | SAND-03 | T-03-09-02, T-03-09-03 | `Kiln.Sandboxes.DTU.{Supervisor, HealthPoll, ContractTest, CallbackRouter}` — HealthPoll 3-miss-degrade + ContractTest Oban stub on `:dtu` queue | unit | `mix test test/kiln/sandboxes/dtu/health_poll_test.exs test/kiln/sandboxes/dtu/contract_test_test.exs --max-failures=1` | ❌ Wave 4 | ⬜ |
 | 03-10-01 | 10 | 5 | — | T-03-10-02 | `NextStageDispatcher` pure module (NOT a GenServer) with fan-out + fan-in barrier via `depends_on` + idempotency key `run:<id>:stage:<sid>` | unit | `mix test test/kiln/stages/next_stage_dispatcher_test.exs --exclude integration --max-failures=1` | ❌ Wave 5 | ⬜ |
@@ -71,7 +72,7 @@ created: 2026-04-20
 
 *File Exists column: `❌ Wave N` means the file does not exist yet and is created by the indicated wave; `✅ existing` would indicate reuse of a Phase 1/2 artifact.*
 
-**Populated by planner:** All 28 executor tasks across plans 03-00..03-11 have a Task ID row mapping `task_id → test command`. Nyquist Dimension 8 coverage proven. Sampling-continuity gate: no 3 consecutive tasks without automated verify — every row has an `Automated Command`.
+**Populated by planner:** All 30 executor tasks across plans 03-00..03-11 have a Task ID row mapping `task_id → test command`. Nyquist Dimension 8 coverage proven. Sampling-continuity gate: no 3 consecutive tasks without automated verify — every row has an `Automated Command`.
 
 ---
 
@@ -86,7 +87,6 @@ Wave 0 for Phase 3 establishes the behaviour seams, Mox mocks, and test harnesse
 - [ ] `test/kiln/agents/adapter_contract_test.exs` — Mox-backed behaviour contract suite (AGENT-01)
 - [ ] `test/kiln/agents/model_registry_test.exs` — role resolution, presets, fallback chain (AGENT-02, AGENT-05)
 - [ ] `test/kiln/agents/budget_guard_test.exs` — per-call USD/token gate (AGENT-05)
-- [ ] `test/kiln/sandboxes/egress_block_test.exs` — adversarial negative suite over TCP/UDP/DNS/ICMP/IPv6 (SAND-01)
 - [ ] `test/kiln/sandboxes/dtu_reachability_test.exs` — DTU mock reachable on `dtu_only` network (SAND-04)
 - [ ] `test/kiln/sandboxes/resource_limits_test.exs` — `--cap-drop=ALL`, `--pids-limit`, `--memory`, `--cpus`, `--ulimit nofile` (SAND-02, SAND-03)
 - [ ] `test/kiln/secrets/redaction_test.exs` — `@derive Inspect except: [:api_key]` + crash-dump + Logger line + changeset error proofs (SEC-01)
@@ -94,6 +94,8 @@ Wave 0 for Phase 3 establishes the behaviour seams, Mox mocks, and test harnesse
 - [ ] Add `:bypass`, `:muontrap`, `:ex_docker_engine_api` to `mix.exs` if not already present from Phase 1
 
 *If any item exists from Phase 1, mark ✅ existing and skip in Wave 0.*
+
+**Note:** `test/kiln/sandboxes/egress_blocking_test.exs` and `test/kiln/sandboxes/secrets_leak_test.exs` are adversarial integration suites created in Plan 03-08 Task 3 (Wave 4), not Wave 0.
 
 ---
 

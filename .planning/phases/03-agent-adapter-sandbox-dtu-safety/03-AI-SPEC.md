@@ -403,7 +403,7 @@ Each pitfall is structurally prevented by a specific D-decision; fixing one in i
 
 3. **Using `System.cmd("docker", ...)` without MuonTrap** — a BEAM crash mid-container leaves the Docker CLI subprocess tree orphaned on macOS (no cgroups). MuonTrap's C-binary parent-watch is the exact primitive. Banned per D-151 CLAUDE.md anti-pattern. **Mitigation:** D-115 mandates `MuonTrap.cmd/3` everywhere a long-running `docker run` is invoked; `docker run --rm --init --stop-timeout 10` + `OrphanSweeper` at boot provides defense-in-depth for the macOS cgroup gap (Pitfall 6 in RESEARCH.md).
 
-4. **Finch pool sharing across providers** — a 429 storm on Anthropic head-of-lines every other provider if they share the pool. D-109 mandates `Kiln.Finch.{Anthropic,OpenAI,Google,Ollama}` named pools. **Mitigation:** Each adapter specifies `finch: Kiln.Finch.<Provider>` on `Anthropix.init/2` or `Req.post/2`. Do NOT bypass Req to raw Finch in P3 (escape hatch reserved for pathological SSE in later phases).
+4. **Finch pool sharing across providers** — a 429 storm on Anthropic head-of-lines every other provider if they share the pool. D-109 (amended 2026-04-20) keeps ONE `Kiln.Finch` child with per-host `:pools` config. **Mitigation:** Each adapter specifies `finch: Kiln.Finch` on `Anthropix.init/2` or `Req.post/2`; Finch routes to the correct per-host pool via the HTTP URL host (a 429 on Anthropic's host pool cannot starve OpenAI's pool). Do NOT bypass Req to raw Finch in P3 (escape hatch reserved for pathological SSE in later phases).
 
 5. **Only recording `requested_model` (missing `actual_model_used`)** — fallback happens silently, operator thinks they're running Opus but the row shows Haiku's cost. D-106 mandates both fields written on every call + one `model_routing_fallback` audit event per fallback attempt with `tier_crossed: boolean`. **Mitigation:** `Response.t()` struct carries both fields; ModelRegistry.next/2 emits the audit event; fallback exhaustion → stage `:failed` with diagnostic artifact captured via `Kiln.Artifacts`, never silent loop.
 
@@ -520,7 +520,7 @@ priv/
 - [Anthropic Messages API — count_tokens endpoint](https://docs.anthropic.com/en/api/messages-count-tokens) — free endpoint used by BudgetGuard pre-flight; response shape `{"input_tokens": <int>}`
 - [Anthropic structured outputs (2026)](https://platform.claude.com/docs/en/build-with-claude/structured-outputs) — native `output_config.format.json_schema` (supersedes tool_use hijack)
 - [MuonTrap 1.7 hexdocs](https://hexdocs.pm/muontrap/MuonTrap.html) — `cmd/3` signature, `cgroup_controllers` option, `:timeout` exit status
-- [Req 0.5 hexdocs](https://hexdocs.pm/req) — step-plugin model, `finch: Kiln.Finch.<Provider>` option
+- [Req 0.5 hexdocs](https://hexdocs.pm/req) — step-plugin model, `finch: Kiln.Finch` option (single Finch with per-host `:pools` per D-109 amendment)
 - [Finch per-provider pools](https://hexdocs.pm/finch/Finch.html) — named supervisor pools; D-109
 - [JSV 0.18 hexdocs](https://hexdocs.pm/jsv) — Draft 2020-12 validator used at DTU send-time + structured-output defense-in-depth
 - [OpenTelemetry process propagator](https://hexdocs.pm/opentelemetry_process_propagator/OpentelemetryProcessPropagator.html) — `fetch_parent_ctx(1, :"$callers")` for Oban → LLM span linking (PITFALLS P17)
