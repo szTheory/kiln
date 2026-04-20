@@ -14,6 +14,23 @@ config :kiln, Kiln.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+# Kiln.Artifacts CAS + tmp roots (D-77). Point test writes at a
+# stable per-test-env directory under System.tmp_dir!() so unit tests
+# never pollute priv/artifacts (dev) or the prod CAS.
+#
+# The paths are stable (NOT per-invocation-unique) because
+# `Kiln.Artifacts.CAS` uses `Application.compile_env/3` to capture these
+# at module compile time — any drift between compile-time and runtime
+# values raises `:validate_compile_env` at boot. Content-addressed dedup
+# means test writes to the same bytes produce the same path, so
+# stability is safe: either the file already exists with correct bytes
+# (dedup hit) or this test is the first writer. Kiln.CasTestHelper is
+# retained for tests that want the env override semantics for other
+# `Application.get_env` readers (e.g. future GC workers).
+config :kiln, :artifacts,
+  cas_root: Path.join(System.tmp_dir!(), "kiln_test_cas"),
+  tmp_root: Path.join(System.tmp_dir!(), "kiln_test_tmp")
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :kiln, KilnWeb.Endpoint,
