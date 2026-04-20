@@ -88,6 +88,16 @@ defmodule Kiln.MixProject do
       {:finch, "~> 0.19"},
       {:anthropix, "~> 0.6"},
 
+      # Sandbox (Phase 3; D-115/D-120/D-154)
+      # - muontrap: crash-safe `docker run` wrapper (supervised Port/cgroup child)
+      # - ex_docker_engine_api: Docker Engine API client for OrphanSweeper LIST ops
+      #   (destroy path remains `System.cmd("docker", ...)` per D-120).
+      #   NOTE: package is versioned against the Docker Engine API revision it
+      #   targets (1.43.x → Docker Engine 24+ / 25+), not abstract semver. The
+      #   plan text "~> 7.0" was incorrect — Hex only publishes 1.43.x.
+      {:muontrap, "~> 1.7"},
+      {:ex_docker_engine_api, "~> 1.43"},
+
       # Workflow / audit
       {:yaml_elixir, "~> 2.12"},
       {:jsv, "~> 0.18"},
@@ -113,7 +123,8 @@ defmodule Kiln.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 1.1", only: [:dev, :test]},
       {:mox, "~> 1.2", only: :test},
-      {:ex_machina, "~> 2.8", only: :test}
+      {:ex_machina, "~> 2.8", only: :test},
+      {:bypass, "~> 2.1", only: :test}
     ]
   end
 
