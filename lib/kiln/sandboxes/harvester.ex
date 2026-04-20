@@ -14,7 +14,8 @@ defmodule Kiln.Sandboxes.Harvester do
           size_bytes: non_neg_integer()
         }
 
-  @spec harvest(String.t(), Ecto.UUID.t(), Ecto.UUID.t()) :: {:ok, [artifact_record()]} | {:error, term()}
+  @spec harvest(String.t(), Ecto.UUID.t(), Ecto.UUID.t()) ::
+          {:ok, [artifact_record()]} | {:error, term()}
   def harvest(workspace_dir, run_id, stage_run_id)
       when is_binary(workspace_dir) and is_binary(run_id) and is_binary(stage_run_id) do
     out_dir = Path.join(workspace_dir, "out")

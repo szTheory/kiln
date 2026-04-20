@@ -14,7 +14,9 @@ defmodule Kiln.Sandboxes.HarvesterTest do
 
     run = RunFactory.insert(:run)
     stage_run = StageRunFactory.insert(:stage_run, run_id: run.id)
-    workspace_dir = Path.join(System.tmp_dir!(), "kiln-harvester-#{System.unique_integer([:positive])}")
+
+    workspace_dir =
+      Path.join(System.tmp_dir!(), "kiln-harvester-#{System.unique_integer([:positive])}")
 
     File.mkdir_p!(Path.join(workspace_dir, "out"))
 
@@ -23,7 +25,8 @@ defmodule Kiln.Sandboxes.HarvesterTest do
       Logger.metadata(correlation_id: nil)
     end)
 
-    {:ok, run: run, stage_run: stage_run, workspace_dir: workspace_dir, correlation_id: correlation_id}
+    {:ok,
+     run: run, stage_run: stage_run, workspace_dir: workspace_dir, correlation_id: correlation_id}
   end
 
   test "harvests regular out files in sorted order and emits artifact_written events", %{
@@ -45,11 +48,19 @@ defmodule Kiln.Sandboxes.HarvesterTest do
     assert length(events) == 2
   end
 
-  test "returns ok with an empty list when out is empty", %{run: run, stage_run: stage_run, workspace_dir: workspace_dir} do
+  test "returns ok with an empty list when out is empty", %{
+    run: run,
+    stage_run: stage_run,
+    workspace_dir: workspace_dir
+  } do
     assert {:ok, []} = Harvester.harvest(workspace_dir, run.id, stage_run.id)
   end
 
-  test "skips nested directories under out", %{run: run, stage_run: stage_run, workspace_dir: workspace_dir} do
+  test "skips nested directories under out", %{
+    run: run,
+    stage_run: stage_run,
+    workspace_dir: workspace_dir
+  } do
     File.mkdir_p!(Path.join(workspace_dir, "out/nested"))
     File.write!(Path.join(workspace_dir, "out/nested/ignored.txt"), "ignored")
     File.write!(Path.join(workspace_dir, "out/top.txt"), "kept")

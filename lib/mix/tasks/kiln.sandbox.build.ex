@@ -1,4 +1,8 @@
 defmodule Mix.Tasks.Kiln.Sandbox.Build do
+  @moduledoc """
+  Build the Elixir sandbox image and refresh `priv/sandbox/images.lock`.
+  """
+
   use Mix.Task
 
   @shortdoc "Build the Kiln sandbox Docker image and update images.lock"

@@ -32,7 +32,10 @@ defmodule Kiln.Sandboxes.Limits do
 
     case Map.get(table, key) do
       nil ->
-        Logger.warning("Kiln.Sandboxes.Limits: unknown stage kind #{inspect(stage_kind)}, using default")
+        Logger.warning(
+          "Kiln.Sandboxes.Limits: unknown stage kind #{inspect(stage_kind)}, using default"
+        )
+
         Map.fetch!(table, "default")
 
       value ->

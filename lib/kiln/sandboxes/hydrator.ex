@@ -15,7 +15,8 @@ defmodule Kiln.Sandboxes.Hydrator do
         }
 
   @spec hydrate([artifact_ref()], String.t()) :: {:ok, [String.t()]} | {:error, term()}
-  def hydrate(artifact_refs, workspace_dir) when is_list(artifact_refs) and is_binary(workspace_dir) do
+  def hydrate(artifact_refs, workspace_dir)
+      when is_list(artifact_refs) and is_binary(workspace_dir) do
     File.mkdir_p!(workspace_dir)
 
     artifact_refs
