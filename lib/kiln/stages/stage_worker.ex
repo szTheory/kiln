@@ -126,19 +126,19 @@ defmodule Kiln.Stages.StageWorker do
         :ok
 
       {:error, :unknown_kind} = err ->
-        Logger.error("StageWorker unknown stage_kind",
+        Logger.error(
+          "StageWorker unknown stage_kind stage_run_id=#{stage_run_id} stage_kind=#{stage_kind}",
           run_id: run_id,
-          stage_run_id: stage_run_id,
-          stage_kind: stage_kind
+          stage_id: stage_run_id
         )
 
         {:cancel, err}
 
       {:error, reason} ->
-        Logger.error("StageWorker failure",
+        Logger.error(
+          "StageWorker failure stage_run_id=#{stage_run_id} reason=#{inspect(reason)}",
           run_id: run_id,
-          stage_run_id: stage_run_id,
-          reason: inspect(reason)
+          stage_id: stage_run_id
         )
 
         {:error, reason}
@@ -232,6 +232,9 @@ defmodule Kiln.Stages.StageWorker do
 
   defp stringify_value(v) when is_map(v), do: stringify_map(v)
   defp stringify_value(v) when is_list(v), do: Enum.map(v, &stringify_value/1)
-  defp stringify_value(v) when is_atom(v) and not is_boolean(v) and not is_nil(v), do: Atom.to_string(v)
+
+  defp stringify_value(v) when is_atom(v) and not is_boolean(v) and not is_nil(v),
+    do: Atom.to_string(v)
+
   defp stringify_value(v), do: v
 end

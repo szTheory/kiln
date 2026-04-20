@@ -26,10 +26,10 @@ defmodule Kiln.Stages.StageWorkerTest do
   require Logger
 
   alias Kiln.{Artifacts, Audit}
-  alias Kiln.Runs.Run
-  alias Kiln.Stages.StageWorker
   alias Kiln.Factory.Run, as: RunFactory
   alias Kiln.Factory.StageRun, as: StageRunFactory
+  alias Kiln.Runs.Run
+  alias Kiln.Stages.StageWorker
 
   setup do
     cid = Ecto.UUID.generate()

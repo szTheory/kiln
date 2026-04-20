@@ -43,7 +43,7 @@ See `.planning/research/STACK.md` for verified versions, alternatives, and insta
 - **Typed block reasons, not chat.** `BLOCK-01`: unblocks use structured remediation playbooks, not freeform chat — preserves determinism and audit clarity.
 - **Adaptive model routing.** Record both `requested_model` and `actual_model_used` on every stage to catch silent fallback. ModelRegistry falls back on 429/5xx with operator notification when a tier is crossed.
 - **Run state is an Ecto field + command module** (`Kiln.Runs.Transitions`), NOT `:gen_statem` (splits truth between DB and memory).
-- **No umbrella app.** Single Phoenix app with 12 strict bounded contexts; `mix xref graph --format cycles` in CI enforces boundaries.
+- **No umbrella app.** Single Phoenix app with 13 strict bounded contexts (D-97; `Kiln.Artifacts` is the 13th per D-77/D-79); `mix xref graph --format cycles` + `mix check_bounded_contexts` in CI enforce boundaries.
 - **No GenServer-per-work-unit.** Work units are Ecto rows + PubSub (beads-equivalent, Option A per BEADS.md); GenServers are for *behavior*, not *data organization*.
 - **Elixir-specific anti-patterns to avoid:** boolean obsession (use enums), GenServer overuse, `Process.put/2` for state, event sourcing everywhere, `Mix.env` at runtime, secrets in compile-time config, `apply/3` on hot paths.
 
@@ -62,11 +62,11 @@ See `.planning/PROJECT.md` Constraints + Key Decisions; `prompts/kiln-brand-book
 <!-- GSD:architecture-start source:ARCHITECTURE.md -->
 ## Architecture
 
-Kiln is a **four-layer system** (Intent → Workflow → Execution → Control) implemented as a **single Phoenix app** with 12 strict bounded contexts:
+Kiln is a **four-layer system** (Intent → Workflow → Execution → Control) implemented as a **single Phoenix app** with 13 strict bounded contexts (D-97 spec upgrade; `Kiln.Artifacts` is the 13th, admitted per D-77/D-79 because content-addressed storage is orthogonal to stage execution):
 
 - **Intent layer:** `Kiln.Specs`, `Kiln.Intents`
 - **Workflow layer:** `Kiln.Workflows` (YAML loader, JSV schema validation, topological graph compile)
-- **Execution layer:** `Kiln.Runs`, `Kiln.Stages`, `Kiln.Agents`, `Kiln.Sandboxes`, `Kiln.GitHub`
+- **Execution layer:** `Kiln.Runs`, `Kiln.Stages`, `Kiln.Agents`, `Kiln.Sandboxes`, `Kiln.Artifacts`, `Kiln.GitHub`
 - **Control layer:** `Kiln.Audit`, `Kiln.Telemetry`, `Kiln.Policies` (read-only leaves for everything else)
 
 **OTP supervision tree:** `Kiln.Application` → Repo + PubSub + Registries + Oban + `RunDirector` GenServer + `RunSupervisor` DynamicSupervisor + `DTU.Supervisor` + `StuckDetector` + Endpoint. Each run hangs a transient subtree under `RunSupervisor` with `Run.Server` + `Agents.SessionSupervisor` + `Sandboxes.Supervisor`. Agent sessions are `:temporary` + monitored (not linked) so misbehaving agents die without killing the run.

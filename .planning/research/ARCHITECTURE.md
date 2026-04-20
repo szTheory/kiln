@@ -79,7 +79,7 @@ Phoenix's official generators and the community case studies treat umbrellas as 
 
 ## 4. Context / Bounded-Context Layout
 
-Twelve contexts, grouped by the four-layer model. Each context: what it owns, public API surface, primary Ecto schemas, primary OTP processes.
+13 bounded contexts (Phase 2 D-97 spec upgrade admits `Kiln.Artifacts` as the 13th — content-addressed storage is orthogonal to stage execution per D-77/D-79), grouped by the four-layer model. Each context: what it owns, public API surface, primary Ecto schemas, primary OTP processes.
 
 ### Layer 1 — Intent
 
@@ -130,6 +130,12 @@ Twelve contexts, grouped by the four-layer model. Each context: what it owns, pu
 **Schemas:** `Kiln.Sandboxes.Sandbox` (id, run_id, stage_run_id, container_id, workspace_path, network_policy, state, created_at, destroyed_at)
 **Processes:** `Kiln.Sandboxes.Supervisor` (DynamicSupervisor), `Kiln.Sandboxes.Controller` (GenServer per sandbox; owns the container's lifecycle, writes events on state change), `Kiln.Sandboxes.DTU.Supervisor` (long-lived mock HTTP servers on known ports).
 
+#### `Kiln.Artifacts` (13th bounded context — D-79, D-97)
+**Owns:** Content-addressed storage for per-stage outputs (plans, diffs, logs, test outputs). Durability-floor invariants: immutability, integrity-on-read (re-hash on every open), CAS dedup across retries, refcount-based GC. Admitted as a distinct bounded context because storage is orthogonal to execution — folding CAS under `Kiln.Stages` would force unrelated invariants into the same surface.
+**Public API:** `put/4`, `get/2`, `read!/1`, `stream!/1`, `ref_for/1`, `by_sha/1`
+**Schemas:** `Kiln.Artifacts.Artifact` (id, stage_run_id, run_id, name, sha256, size_bytes, content_type, schema_version, producer_kind, inserted_at — D-81; NO `updated_at` since artifacts are semantically append-only)
+**Processes:** None. CAS writes stream through `:crypto.hash_init(:sha256)` into `priv/artifacts/tmp/` then `File.rename/2` atomically into `priv/artifacts/cas/<aa>/<bb>/<sha>` (D-77 two-level fan-out). Phase 5 adds `Kiln.Artifacts.GcWorker` (Oban `:maintenance` queue, daily) + `Kiln.Artifacts.ScrubWorker` (weekly integrity sweep).
+
 #### `Kiln.GitHub`
 **Owns:** `git` and `gh` shell invocations (commit, push, open PR, read/update Actions status). All idempotency-keyed.
 **Public API:** `commit/2`, `push/2`, `open_pr/2`, `get_pr_status/1`
@@ -162,9 +168,10 @@ Twelve contexts, grouped by the four-layer model. Each context: what it owns, pu
 Kiln.Intents  →  Kiln.Specs
 Kiln.Intents  →  Kiln.Workflows
 Kiln.Runs     →  Kiln.Workflows, Kiln.Intents, Kiln.Policies, Kiln.Audit, Kiln.Telemetry
-Kiln.Stages   →  Kiln.Runs, Kiln.Agents, Kiln.Sandboxes, Kiln.Policies, Kiln.Audit, Kiln.Telemetry
+Kiln.Stages   →  Kiln.Runs, Kiln.Agents, Kiln.Sandboxes, Kiln.Artifacts, Kiln.Policies, Kiln.Audit, Kiln.Telemetry
 Kiln.Agents   →  Kiln.Policies, Kiln.Audit, Kiln.Telemetry
 Kiln.Sandboxes→  Kiln.Audit, Kiln.Telemetry
+Kiln.Artifacts→  Kiln.Audit, Kiln.Telemetry
 Kiln.GitHub   →  Kiln.Sandboxes, Kiln.Audit, Kiln.Telemetry
 Kiln.Audit    →  (nothing — leaf)
 Kiln.Telemetry→  (nothing — leaf)
@@ -432,48 +439,80 @@ This pattern gives us: no drift between memory and DB, free replay safety (calli
 2. On `Kiln.Workflows.compile/1`: parse YAML → validate against `Kiln.Workflows.Schema` (ExJsonSchema) → topological sort → detect cycles → materialize a `CompiledGraph` struct (stages, edges, retry policies, per-stage timeouts, per-stage agent role, per-stage model preference).
 3. Cache in `Kiln.Workflows.RegistryCache` (ETS, bounded size, LRU eviction). Cache key: `{id, version}`. Cache miss = re-compile from DB row.
 
-### Example YAML Shape
+### Example YAML Shape (D-58 / D-59 canonical)
+
+Phase 2 D-98 spec upgrade — replaces the pre-D-54 example with the canonical dialect. The canonical example lives at `priv/workflows/elixir_phoenix_feature.yaml`; a trimmed form follows:
 
 ```yaml
-id: default-ship-spec
+apiVersion: kiln.dev/v1
+id: elixir_phoenix_feature
 version: 1
-description: "Standard spec → plan → code → test → verify → commit → push loop"
-caps:
-  max_retries: 3
-  max_tokens: 500000
-  max_seconds: 3600
-stages:
-  - id: plan
-    agent: planner
-    model_preference: opus-class
-    timeout_seconds: 300
-    retry_policy: {max_retries: 2, backoff: exponential}
+metadata:
+  description: "Standard Elixir/Phoenix feature workflow: plan -> code -> test -> verify -> merge."
+  author: "Kiln"
+  tags: [elixir, phoenix, feature]
+signature: null            # reserved for WFE-02 v2 per D-65; mix check_no_signature_block
+spec:
+  caps:                    # D-56
+    max_retries: 3
+    max_tokens_usd: 10.00
+    max_elapsed_seconds: 3600
+    max_stage_duration_seconds: 600
+  model_profile: phoenix_saas_feature   # D-57 enum
+  stages:
+    - id: plan
+      kind: planning       # D-58 — resolves to priv/stage_contracts/v1/planning.json
+      agent_role: planner  # D-58 enum
+      depends_on: []
+      timeout_seconds: 300
+      retry_policy: {max_attempts: 3, backoff: exponential, base_delay_seconds: 5}
+      sandbox: readonly
 
-  - id: code
-    agent: coder
-    depends_on: [plan]
-    model_preference: sonnet-class
-    timeout_seconds: 600
-    sandbox: required
+    - id: code
+      kind: coding
+      agent_role: coder
+      depends_on: [plan]
+      timeout_seconds: 600
+      retry_policy: {max_attempts: 3, backoff: exponential, base_delay_seconds: 5}
+      sandbox: readwrite
+      on_failure: {action: route, to: plan, attach: plan_ref}   # D-59 — no string expression language
 
-  - id: test
-    agent: tester
-    depends_on: [code]
-    timeout_seconds: 300
-    sandbox: required
+    - id: test
+      kind: testing
+      agent_role: tester
+      depends_on: [code]
+      timeout_seconds: 600
+      retry_policy: {max_attempts: 3, backoff: exponential, base_delay_seconds: 5}
+      sandbox: readwrite
 
-  - id: verify
-    agent: qa_verifier
-    depends_on: [test]
-    timeout_seconds: 300
-    sandbox: required
-    on_fail: {action: route, to: plan, attach: diagnostic}
+    - id: verify
+      kind: verifying
+      agent_role: qa_verifier
+      depends_on: [test]
+      timeout_seconds: 300
+      retry_policy: {max_attempts: 2, backoff: fixed, base_delay_seconds: 10}
+      sandbox: readonly
 
-  - id: commit_push
-    agent: coder
-    depends_on: [verify]
-    timeout_seconds: 120
+    - id: merge
+      kind: merge
+      agent_role: coder
+      depends_on: [verify]
+      timeout_seconds: 300
+      retry_policy: {max_attempts: 1, backoff: fixed, base_delay_seconds: 0}
+      sandbox: readwrite
+      on_failure: escalate
 ```
+
+**Key dialect rules (D-54..D-63):**
+- Top-level `apiVersion: kiln.dev/v1` — migration lever, const-checked.
+- `id` regex: `^[a-z][a-z0-9_]{2,63}$` (Postgres-identifier-safe).
+- `signature: null` reserved for v2 (D-65); `mix check_no_signature_block` CI gate blocks population.
+- `kind` (`{planning, coding, testing, verifying, merge}`) resolves to `priv/stage_contracts/v1/<kind>.json` — no separate `input_contract:` field (D-60).
+- `agent_role` (`{planner, coder, tester, reviewer, uiux, qa_verifier, mayor}`) and `kind` are separate axes (D-61): `merge` kind uses `coder` role.
+- `on_failure` is either `escalate` (string const) or a structured `{action: route, to: <ancestor-id>, attach: <artifact-key>}` — **never** a string expression language (D-59; GitHub-Actions `${{ }}` is the cautionary tale).
+- Forward edges and non-strict-ancestor `on_failure.to` are rejected at load time (D-62 validator 4).
+
+**NOTE on `Run.Server` (§5 above):** Phase 2 diverges from §5's `Run.Server` GenServer design — Phase 2 ships an Oban-driven `Kiln.Stages.StageWorker` reading run state from Postgres via `Kiln.Runs.Transitions`, not a per-run `Run.Server` coordinator. Per RESEARCH.md §"Project Constraints", the Postgres-is-source-of-truth convention supersedes the earlier `Run.Server` sketch; a per-run `Run.Server` GenServer would introduce a memory/DB split that violates the durability-floor contract. The per-run `Kiln.Runs.RunSubtree` (Plan 02-07) hosts agent / sandbox processes for the run, but the state machine lives in `runs.state` + `Kiln.Runs.Transitions`.
 
 ### Stage Dispatch: Oban Job OR Supervised Process — And When
 
@@ -997,17 +1036,32 @@ kiln/
 │   ├── repo/
 │   │   ├── migrations/
 │   │   └── seeds.exs
-│   ├── workflows/              # YAML/JSON workflow definitions
-│   │   ├── default_ship_spec.yaml
-│   │   ├── dogfood_kiln_self.yaml
-│   │   └── schema.json         # JSON-schema for validation
+│   ├── workflows/              # YAML workflow definitions (D-54..D-66)
+│   │   └── elixir_phoenix_feature.yaml  # canonical 5-stage workflow
+│   ├── workflow_schemas/v1/    # D-66 — workflow dialect JSON Schema
+│   │   └── workflow.json
+│   ├── stage_contracts/v1/     # D-73 — per-stage input contract schemas (5 kinds)
+│   │   ├── planning.json
+│   │   ├── coding.json
+│   │   ├── testing.json
+│   │   ├── verifying.json
+│   │   └── merge.json
+│   ├── audit_schemas/v1/       # P1 D-09 / Phase 2 D-85 — per-kind audit payload schemas
+│   │   ├── stage_started.json
+│   │   ├── run_state_transitioned.json
+│   │   ├── stage_input_rejected.json    # D-85 Phase-2 extension
+│   │   ├── artifact_written.json        # D-85 Phase-2 extension
+│   │   ├── integrity_violation.json     # D-85 Phase-2 extension
+│   │   └── ... (25 kinds total)
 │   ├── mocks/                  # DTU (Digital Twin Universe) fixtures
 │   │   ├── github/
 │   │   │   ├── openapi.json
 │   │   │   └── fixtures/
 │   │   └── npm_registry/
-│   ├── artifacts/              # Per-run stage artifacts (gitignored)
-│   │   └── .gitkeep
+│   ├── artifacts/              # Per-run stage artifacts (gitignored beyond .gitkeep)
+│   │   ├── .gitkeep
+│   │   ├── cas/                # D-77 — content-addressed storage <aa>/<bb>/<sha> fan-out
+│   │   └── tmp/                # D-77 — streaming hash + rename(2) staging area
 │   └── brand/                  # Brand book assets (Kiln coal palette, Inter, IBM Plex Mono)
 ├── lib/
 │   ├── kiln.ex                 # App facade (rarely used; contexts preferred)
@@ -1076,6 +1130,14 @@ kiln/
 │   │   │       ├── github_mock.ex
 │   │   │       └── network_policy.ex
 │   │   ├── sandboxes.ex
+│   │   │
+│   │   ├── artifacts/           # lib/kiln/artifacts/ — 13th bounded context (D-79, D-97 spec upgrade)
+│   │   │   ├── artifact.ex      # Ecto schema (D-81)
+│   │   │   ├── cas.ex           # Content-addressed store primitive (D-77)
+│   │   │   ├── corruption_error.ex
+│   │   │   ├── gc_worker.ex     # Phase 5 activates; P2 scaffolds
+│   │   │   └── scrub_worker.ex  # Phase 5 activates; P2 scaffolds (D-84)
+│   │   ├── artifacts.ex         # lib/kiln/artifacts.ex — Kiln.Artifacts public API (put/4, get/2, read!/1, stream!/1, ref_for/1, by_sha/1)
 │   │   │
 │   │   ├── github/
 │   │   │   ├── operation.ex

@@ -100,6 +100,8 @@ end
 
 **Do NOT use `ex_json_schema`** (the common `jonasschmidt/ex_json_schema`). It only supports Draft 4 and has not kept up. JSV is the modern answer.
 
+**Kiln default (D-100 — Phase 2 spec upgrade):** Use `JSV.build!(raw, default_meta: "https://json-schema.org/draft/2020-12/schema", formats: true)` on every compile-time schema registry (Phase 2's `Kiln.Stages.ContractRegistry` + `Kiln.Workflows.SchemaRegistry`). Verified against `deps/jsv/lib/jsv.ex:116-151`: the option is `:formats` (not `:assert_formats`). Phase 1's `Kiln.Audit.SchemaRegistry` used the default (no format enforcement) because its payloads don't rely on `"format"` assertions; Phase 2+ schemas opt in so `"format": "uuid"` on `run_id` / `stage_run_id` is actually enforced at the boundary rather than silently accepting non-UUID strings.
+
 ### Sandbox (Docker)
 
 **Decision: `System.cmd("docker", [...])` wrapping, with `docker_engine_api` for introspection/stream cases.**
