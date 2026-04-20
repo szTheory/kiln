@@ -275,6 +275,7 @@ Phase 1 shipped the durability floor. Phase 2's integration points are all live 
 - **Oban Pro features** (`DynamicPruner`, `Oban.Workflow` for DAG enforcement) — we're OSS-only; hand-rolled join-barrier check at job start per ARCHITECTURE.md §7.
 - **Workflow-version migration framework** (`Kiln.Workflows.Migrator`) — stub in P2 (empty module), fill when first breaking `apiVersion` change ships.
 - **`stages.*.hooks` (pre/post stage hooks)** — revisit if operators need stage-boundary custom logic (P5+); Oban's `perform/1` wrapping already covers most cases.
+- **Auto-enqueue of next stage's Oban job on stage completion (StageWorker → next-stage dispatch)** — Phase 3 (per revision iteration 1 checker issue #8, option (a)). Phase 2 ships StageWorker in a stub mode: completing a stage transitions the run state but does NOT enqueue the next stage's Oban job. The Phase 2 end-to-end test drives stage dispatch with an explicit test-level for-loop (simulating the future dispatcher). In Phase 3, a new `Kiln.Stages.NextStageDispatcher` (or StageWorker post-complete hook) reads `CompiledGraph.stages_by_id` + current run state to enqueue the next-stage's `StageWorker` job. Rationale: Phase 2 demonstrates rehydration and per-stage idempotency under externally-driven stage dispatch; auto-dispatch depends on stage-output → next-stage-input wiring (diff_ref, test_output_ref) that Phase 3's real agents produce.
 
 ### Reviewed Todos (not folded)
 None — `todo.match-phase 2` returned 0 matches. Pending SEEDs (`SEED-001..005`) are v1.5+/v2 scope and correctly excluded.
