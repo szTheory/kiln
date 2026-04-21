@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 Phase: 9
 Plan: Not started
 Status: Ready to plan (discuss → plan before execute)
-Last activity: 2026-04-21 -- Phase 8 closed (intake, ops, unblock, onboarding, factory chrome)
+Last activity: 2026-04-21 -- Phase 9 discuss complete (context + research synthesis committed)
 
 Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
 
@@ -181,13 +181,11 @@ None yet.
 
 ## Session Continuity
 
-Last session: --stopped-at
+Last session: Phase 9 discuss-phase (subagent research + `09-CONTEXT.md`)
 Stopped at: Phase 9 context gathered
-Resume file: --resume-file
-Next command: Triage uncommitted planning files, then `/gsd-research-phase 4` (or `/gsd-plan-phase 4` if research already done)
+Resume file: `.planning/phases/09-dogfood-release-v0-1-0/09-CONTEXT.md`
+Next command: `/clear` then `/gsd-plan-phase 9` (ROADMAP research flag for Phase 9 is **standard**; add `/gsd-research-phase 9` only if planner finds gaps)
 
-**Completed Phase:** 3 (Agent Adapter, Sandbox, DTU & Safety) — 12 plans — completed 2026-04-20
+**Completed Phase:** 8 (Operator UX) — 10 plans — completed 2026-04-21
 
-**Note:** Phase 5 discuss output is on `main` (`.planning/phases/05-spec-verification-bounded-loop/05-CONTEXT.md`); execution order remains Phase 4 before Phase 5 unless explicitly reprioritized.
-
-**Planned Phase:** 8 (operator-ux-intake-ops-unblock-onboarding) — 10 plans — 2026-04-21T22:20:22.549Z
+**Planned Phase:** 9 (Dogfood & Release v0.1.0) — context locked 2026-04-21
