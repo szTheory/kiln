@@ -118,16 +118,17 @@ config :logger, :default_formatter,
   metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id]
 
 config :logger, :default_handler,
-  formatter:
-    {LoggerJSON.Formatters.Basic,
-     metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id],
-     # D-133 Layer 4: scrub secret-shaped keys + values from structured
-     # log metadata BEFORE serialisation. The tuple form is required in
-     # compile-time config (`Kiln.Logging.SecretRedactor.new/1` isn't
-     # defined — the `@optional_callbacks new: 1` behaviour contract
-     # lets redactors ship without one, and LoggerJSON resolves the
-     # tuple per log line).
-     redactors: [{Kiln.Logging.SecretRedactor, []}]},
+  formatter: {
+    LoggerJSON.Formatters.Basic,
+    # D-133 Layer 4: scrub secret-shaped keys + values from structured
+    # log metadata BEFORE serialisation. The tuple form is required in
+    # compile-time config (`Kiln.Logging.SecretRedactor.new/1` isn't
+    # defined — the `@optional_callbacks new: 1` behaviour contract
+    # lets redactors ship without one, and LoggerJSON resolves the
+    # tuple per log line).
+    metadata: [:correlation_id, :causation_id, :actor, :actor_role, :run_id, :stage_id],
+    redactors: [{Kiln.Logging.SecretRedactor, []}]
+  },
   filters: [
     kiln_metadata_defaults: {&Kiln.Logger.Metadata.default_filter/2, []}
   ],

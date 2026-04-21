@@ -33,9 +33,14 @@ defmodule Kiln.Sandboxes.DockerDriverTest do
       )
 
     system_cmd_fun = fn
-      "docker", ["wait", "container-123"], _opts -> {"17\n", 0}
-      "docker", ["inspect", "--format", _format, "container-123"], _opts -> {"true|17|2026-04-20T01:00:00Z|2026-04-20T01:01:00Z", 0}
-      "docker", ["rm", "-f", id], _opts -> {"#{id}\n", 0}
+      "docker", ["wait", "container-123"], _opts ->
+        {"17\n", 0}
+
+      "docker", ["inspect", "--format", _format, "container-123"], _opts ->
+        {"true|17|2026-04-20T01:00:00Z|2026-04-20T01:01:00Z", 0}
+
+      "docker", ["rm", "-f", id], _opts ->
+        {"#{id}\n", 0}
     end
 
     Application.put_env(:kiln, DockerDriver,
@@ -189,11 +194,15 @@ defmodule Kiln.Sandboxes.DockerDriverTest do
                 finished_at: "2026-04-20T01:01:00Z"
               }} = DockerDriver.run_stage(spec)
 
-      assert_received {:telemetry_event, [:kiln, :sandbox, :docker, :run, :start], _measurements, start_meta}
+      assert_received {:telemetry_event, [:kiln, :sandbox, :docker, :run, :start], _measurements,
+                       start_meta}
+
       assert is_list(start_meta.docker_argv)
       assert "kiln-stage-#{stage_run_id}" in start_meta.docker_argv
 
-      assert_received {:telemetry_event, [:kiln, :sandbox, :docker, :run, :stop], _measurements, stop_meta}
+      assert_received {:telemetry_event, [:kiln, :sandbox, :docker, :run, :stop], _measurements,
+                       stop_meta}
+
       assert stop_meta.container_id == "container-123"
       assert stop_meta.exit_code == 17
       assert stop_meta.oom_killed

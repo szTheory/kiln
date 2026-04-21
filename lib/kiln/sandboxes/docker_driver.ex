@@ -197,7 +197,9 @@ defmodule Kiln.Sandboxes.DockerDriver do
   defp inspect_container(container_id) do
     format = "{{.State.OOMKilled}}|{{.State.ExitCode}}|{{.State.StartedAt}}|{{.State.FinishedAt}}"
 
-    case system_cmd().("docker", ["inspect", "--format", format, container_id], stderr_to_stdout: true) do
+    case system_cmd().("docker", ["inspect", "--format", format, container_id],
+           stderr_to_stdout: true
+         ) do
       {output, 0} ->
         case String.split(String.trim(output), "|", parts: 4) do
           [oom_killed, exit_code, started_at, finished_at] ->

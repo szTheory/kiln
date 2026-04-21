@@ -43,9 +43,7 @@ defmodule Kiln.DtuCase do
         {:skip, "docker CLI not available"}
 
       true ->
-        case System.cmd("docker", ["compose", "up", "-d", "dtu"],
-               stderr_to_stdout: true
-             ) do
+        case System.cmd("docker", ["compose", "up", "-d", "dtu"], stderr_to_stdout: true) do
           {_output, 0} ->
             :ok
 

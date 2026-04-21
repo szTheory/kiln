@@ -22,9 +22,14 @@ defmodule Kiln.Sandboxes.DTU.HealthPollTest do
   test "after three consecutive misses it emits audit and PubSub signals" do
     state = %HealthPoll{url: "http://127.0.0.1:9/healthz", req_options: [retry: false]}
 
-    assert {:noreply, state1, {:continue, :schedule_next_poll}} = HealthPoll.handle_info(:poll, state)
-    assert {:noreply, state2, {:continue, :schedule_next_poll}} = HealthPoll.handle_info(:poll, state1)
-    assert {:noreply, state3, {:continue, :schedule_next_poll}} = HealthPoll.handle_info(:poll, state2)
+    assert {:noreply, state1, {:continue, :schedule_next_poll}} =
+             HealthPoll.handle_info(:poll, state)
+
+    assert {:noreply, state2, {:continue, :schedule_next_poll}} =
+             HealthPoll.handle_info(:poll, state1)
+
+    assert {:noreply, state3, {:continue, :schedule_next_poll}} =
+             HealthPoll.handle_info(:poll, state2)
 
     assert state3.misses == 3
     assert_receive {:dtu_unhealthy, :consecutive_misses}

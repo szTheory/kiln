@@ -27,7 +27,7 @@ defmodule Kiln.Agents.AdapterContractTest do
     assert Code.ensure_loaded?(Kiln.Agents.AdapterMock)
   end
 
-  test "Kiln.Agents.SessionSupervisor starts empty as DynamicSupervisor" do
+  test "Kiln.Agents.SessionSupervisor legacy scaffold boots as empty Supervisor" do
     {pid, started_here?} =
       case Kiln.Agents.SessionSupervisor.start_link([]) do
         {:ok, pid} -> {pid, true}
@@ -36,7 +36,7 @@ defmodule Kiln.Agents.AdapterContractTest do
 
     assert Process.alive?(pid)
 
-    assert DynamicSupervisor.count_children(Kiln.Agents.SessionSupervisor) == %{
+    assert Supervisor.count_children(pid) == %{
              active: 0,
              specs: 0,
              supervisors: 0,

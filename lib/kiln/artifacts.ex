@@ -97,8 +97,7 @@ defmodule Kiln.Artifacts do
                  event_kind: :artifact_written,
                  run_id: artifact.run_id,
                  stage_id: artifact.stage_run_id,
-                 correlation_id:
-                   Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
+                 correlation_id: Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
                  payload: %{
                    "name" => name,
                    "sha256" => sha,
@@ -158,8 +157,7 @@ defmodule Kiln.Artifacts do
       _ =
         Audit.append(%{
           event_kind: :integrity_violation,
-          correlation_id:
-            Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
+          correlation_id: Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
           payload: %{
             "artifact_id" => artifact.id,
             "expected_sha" => expected,

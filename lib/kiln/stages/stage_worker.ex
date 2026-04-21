@@ -109,7 +109,8 @@ defmodule Kiln.Stages.StageWorker do
       :ok
     else
       {:error, {:stage_input_rejected, err}} ->
-        _ = update_stage_run(stage_run_id, %{state: :failed, error_summary: "invalid_stage_input"})
+        _ =
+          update_stage_run(stage_run_id, %{state: :failed, error_summary: "invalid_stage_input"})
 
         _ =
           Kiln.Audit.append(%{

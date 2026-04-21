@@ -1,15 +1,13 @@
 defmodule Kiln.ApplicationTest do
   @moduledoc """
-  Supervision-tree shape assertions. Phase 3 extends the staged-boot
-  application tree from 10 children to 14 by adding
-  `Kiln.Sandboxes.Supervisor`, `Kiln.Sandboxes.DTU.Supervisor`,
-  `Kiln.Agents.SessionSupervisor`, and
-  `Kiln.Policies.FactoryCircuitBreaker` before `RunDirector`.
+  Supervision-tree shape assertions. Phase 4 removes the global
+  `Kiln.Agents.SessionSupervisor` scaffold; agent sessions live only under
+  per-run `Kiln.Runs.RunSubtree`.
 
   Tests cover:
 
-    * Exactly 14 children post-boot.
-    * All 14 module-ids present in `Supervisor.which_children/1`.
+    * Exactly 13 children post-boot.
+    * All expected module-ids present in `Supervisor.which_children/1`.
     * The named pools (`Kiln.Finch`, `Kiln.RunRegistry`,
       `Kiln.Runs.RunDirector`, `Kiln.Runs.RunSupervisor`,
       `Kiln.Policies.StuckDetector`) are alive.
@@ -17,18 +15,18 @@ defmodule Kiln.ApplicationTest do
   """
   use ExUnit.Case, async: false
 
-  describe "supervision tree (Phase 3, 14 children)" do
-    test "exactly 14 children running under Kiln.Supervisor" do
+  describe "supervision tree (Phase 4, 13 children)" do
+    test "exactly 13 children running under Kiln.Supervisor" do
       child_ids =
         Kiln.Supervisor
         |> Supervisor.which_children()
         |> Enum.map(fn {id, _pid, _type, _mods} -> id end)
 
-      assert length(child_ids) == 14,
-             "Phase 3 requires EXACTLY 14 children, got #{length(child_ids)}: #{inspect(child_ids)}"
+      assert length(child_ids) == 13,
+             "Phase 4 requires EXACTLY 13 children, got #{length(child_ids)}: #{inspect(child_ids)}"
     end
 
-    test "locked child set includes the 4 Phase 3 runtime additions" do
+    test "locked child set includes Phase 3 runtime additions (minus global session sup)" do
       child_ids =
         Kiln.Supervisor
         |> Supervisor.which_children()
@@ -49,7 +47,6 @@ defmodule Kiln.ApplicationTest do
         {"Oban", &(&1 == Oban)},
         {"Kiln.Sandboxes.Supervisor", &(&1 == Kiln.Sandboxes.Supervisor)},
         {"Kiln.Sandboxes.DTU.Supervisor", &(&1 == Kiln.Sandboxes.DTU.Supervisor)},
-        {"Kiln.Agents.SessionSupervisor", &(&1 == Kiln.Agents.SessionSupervisor)},
         {"Kiln.Policies.FactoryCircuitBreaker", &(&1 == Kiln.Policies.FactoryCircuitBreaker)},
         {"Kiln.Runs.RunSupervisor", &(&1 == Kiln.Runs.RunSupervisor)},
         {"Kiln.Runs.RunDirector", &(&1 == Kiln.Runs.RunDirector)},
@@ -122,7 +119,6 @@ defmodule Kiln.ApplicationTest do
       for name <- [
             Kiln.Sandboxes.Supervisor,
             Kiln.Sandboxes.DTU.Supervisor,
-            Kiln.Agents.SessionSupervisor,
             Kiln.Policies.FactoryCircuitBreaker
           ] do
         pid = Process.whereis(name)

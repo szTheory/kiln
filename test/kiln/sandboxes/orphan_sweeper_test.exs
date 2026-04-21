@@ -54,10 +54,21 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
       boot_epoch_fun: fn -> 12345 end
     )
 
-    assert {:noreply, %{boot_epoch: 12345}} = OrphanSweeper.handle_info(:boot_scan, %{boot_epoch: 12345})
+    assert {:noreply, %{boot_epoch: 12345}} =
+             OrphanSweeper.handle_info(:boot_scan, %{boot_epoch: 12345})
 
-    assert_received {:audit_append, %{event_kind: :orphan_container_swept, payload: %{"container_id" => "dead-1"}}}
-    assert_received {:audit_append, %{event_kind: :orphan_container_swept, payload: %{"container_id" => "dead-2"}}}
+    assert_received {:audit_append,
+                     %{
+                       event_kind: :orphan_container_swept,
+                       payload: %{"container_id" => "dead-1"}
+                     }}
+
+    assert_received {:audit_append,
+                     %{
+                       event_kind: :orphan_container_swept,
+                       payload: %{"container_id" => "dead-2"}
+                     }}
+
     assert_received {:docker_rm, "dead-1"}
     assert_received {:docker_rm, "dead-2"}
     assert_received :periodic_scan

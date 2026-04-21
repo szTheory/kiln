@@ -3,62 +3,27 @@ defmodule Kiln.Runs.RunSubtree do
   Per-run `Supervisor` (`:one_for_all`, `:transient`) hosted under
   `Kiln.Runs.RunSupervisor` (D-95).
 
-  ## Phase 2 shape (this plan)
-
-  Phase 2 ships the subtree with a minimal lived child — a
-  `Task.Supervisor` registered by a per-run tuple in
-  `Kiln.RunRegistry`. The lived-child exists so that
-  `test/integration/run_subtree_crash_test.exs` can kill a real pid
-  under the subtree and exercise the `:one_for_all` restart semantics
-  (addresses checker issue #1 — ORCH-02 was previously only covered
-  by an `@tag :skip` stub). Phase 3 replaces the `Task.Supervisor`
-  child with the real `Kiln.Agents.SessionSupervisor` +
-  `Kiln.Sandboxes.Supervisor` pair.
-
   ## Strategy — `:one_for_all`
 
-  A coder crash restarts tester + planner alongside it — consistent
-  with CLAUDE.md's "if an agent crashes, the run recovers or
-  escalates." Agent state is not trusted to survive a crash in the
-  sibling; forcing the whole subtree down + up preserves invariants.
+  A failure in the per-run agent session or other lived children forces
+  a coordinated restart — consistent with CLAUDE.md's crash contract.
 
-  ## Restart — `:transient`
+  ## Phase 4 shape
 
-  A clean shutdown (`:normal` exit) does NOT restart the subtree.
-  Abnormal termination restarts within the `max_restarts: 3` /
-  `max_seconds: 5` budget. Once the budget is tripped the subtree
-  itself terminates; `RunDirector`'s monitor observes the DOWN,
-  logs the failure, and the next periodic scan re-spawns the
-  subtree (or escalates the run per D-94 if the workflow file
-  changed underfoot).
+  The subtree hosts `Kiln.Agents.SessionSupervisor` in per-run mode (seven
+  fixed role workers). `lived_child_pid/1` resolves the session supervisor
+  for ORCH-02 crash tests.
 
   ## Registry naming
 
-  Both the subtree supervisor itself and its lived-child
-  `Task.Supervisor` register via `{:via, Registry, {Kiln.RunRegistry,
-  ...}}` — `Kiln.RunRegistry` is a P1 infra child (already in the
-  supervision tree). The per-run tuples are:
-
-    * `{__MODULE__, run_id}` — the subtree supervisor pid
-    * `{Kiln.Runs.RunSubtree.Tasks, run_id}` — the lived-child
-      `Task.Supervisor` pid (exposed via `lived_child_pid/1`)
-
-  ## Phase 3 migration plan
-
-  When Phase 3 adds real agent + sandbox supervisors, the `children`
-  list in `init/1` replaces the `Task.Supervisor` entry with:
-
-      children = [
-        {Kiln.Agents.SessionSupervisor, run_id: run_id},
-        {Kiln.Sandboxes.Supervisor, run_id: run_id}
-      ]
-
-  The `lived_child_pid/1` helper + `:one_for_all` strategy + the
-  integration test both remain unchanged — the only delta is the
-  child list itself.
+  * `{__MODULE__, run_id}` — the subtree supervisor pid
+  * `{Kiln.Agents.SessionSupervisor, run_id}` — the session supervisor
+  * `{Kiln.Agents.Role, run_id, role}` — each role worker
   """
 
   use Supervisor
+
+  alias Kiln.Agents.SessionSupervisor
 
   @spec child_spec(keyword()) :: Supervisor.child_spec()
   def child_spec(opts) do
@@ -83,36 +48,31 @@ defmodule Kiln.Runs.RunSubtree do
   def init(opts) do
     run_id = Keyword.fetch!(opts, :run_id)
 
-    # Phase 2 minimal lived-child: a `Task.Supervisor` named via the
-    # run registry. Its only role is to exist as a real pid that can
-    # be killed so `test/integration/run_subtree_crash_test.exs` can
-    # exercise the `:one_for_all` restart semantics. Phase 3 replaces
-    # this with `Kiln.Agents.SessionSupervisor` +
-    # `Kiln.Sandboxes.Supervisor`.
     children = [
-      {Task.Supervisor,
-       name: {:via, Registry, {Kiln.RunRegistry, {__MODULE__.Tasks, run_id}}}}
+      {SessionSupervisor, run_id: run_id}
     ]
 
     Supervisor.init(children, strategy: :one_for_all, max_restarts: 3, max_seconds: 5)
   end
 
   @doc """
-  Returns the pid of the lived-child `Task.Supervisor` for a given
-  `run_id`, or `nil` if no subtree is alive for that run.
+  Returns the per-run session supervisor pid, or `nil` if the subtree is
+  not running.
 
-  Used by `test/integration/run_subtree_crash_test.exs` to find a
-  killable process under the per-run subtree. Phase 3 will generalise
-  this helper (or replace it with a `children/1` query returning all
-  per-run child pids) once the lived-child set grows beyond one.
+  Used by integration tests as the killable process under the subtree.
   """
   @spec lived_child_pid(Ecto.UUID.t()) :: pid() | nil
   def lived_child_pid(run_id) do
-    case Registry.lookup(Kiln.RunRegistry, {__MODULE__.Tasks, run_id}) do
-      [{pid, _}] when is_pid(pid) -> pid
-      _ -> nil
-    end
+    SessionSupervisor.whereis(run_id)
   end
+
+  @doc "See `Kiln.Agents.SessionSupervisor.whereis/1`."
+  @spec session_supervisor_pid(Ecto.UUID.t()) :: pid() | nil
+  def session_supervisor_pid(run_id), do: SessionSupervisor.whereis(run_id)
+
+  @doc "See `Kiln.Agents.SessionSupervisor.role_pid/2`."
+  @spec role_pid(Ecto.UUID.t(), atom()) :: pid() | nil
+  def role_pid(run_id, role), do: SessionSupervisor.role_pid(run_id, role)
 
   defp via(run_id) do
     {:via, Registry, {Kiln.RunRegistry, {__MODULE__, run_id}}}

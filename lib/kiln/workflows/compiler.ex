@@ -203,8 +203,7 @@ defmodule Kiln.Workflows.Compiler do
         :ok
 
       s ->
-        {:error,
-         {:graph_invalid, {:unknown_kind, s.kind}, %{stage_id: s.id, kind: s.kind}}}
+        {:error, {:graph_invalid, {:unknown_kind, s.kind}, %{stage_id: s.id, kind: s.kind}}}
     end
   end
 
@@ -242,9 +241,7 @@ defmodule Kiln.Workflows.Compiler do
         :ok
 
       s ->
-        {:error,
-         {:graph_invalid, :on_failure_forward_edge,
-          %{from: s.id, to: s.on_failure.to}}}
+        {:error, {:graph_invalid, :on_failure_forward_edge, %{from: s.id, to: s.on_failure.to}}}
     end
   end
 
@@ -268,8 +265,8 @@ defmodule Kiln.Workflows.Compiler do
 
   defp normalize_stages_for_hash(stages) do
     Enum.map(stages, fn s ->
-      {s.id, s.kind, s.agent_role, s.depends_on, s.timeout_seconds, s.retry_policy,
-       s.sandbox, s.model_preference, s.on_failure}
+      {s.id, s.kind, s.agent_role, s.depends_on, s.timeout_seconds, s.retry_policy, s.sandbox,
+       s.model_preference, s.on_failure}
     end)
   end
 end

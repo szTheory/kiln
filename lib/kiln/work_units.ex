@@ -180,9 +180,7 @@ defmodule Kiln.WorkUnits do
              {:ok, completed} <- Repo.update(WorkUnit.changeset(wu, %{state: :completed})),
              {:ok, _} <- append_event(completed.id, :completed, %{actor_role: role}),
              {:ok, closed} <-
-               Repo.update(
-                 WorkUnit.changeset(completed, %{state: :closed, closed_at: now})
-               ),
+               Repo.update(WorkUnit.changeset(completed, %{state: :closed, closed_at: now})),
              {:ok, _} <- append_event(closed.id, :closed, %{actor_role: role}),
              {:ok, succ} <- insert_successors(closed.run_id, successors) do
           {:ok, {closed, succ}}
@@ -237,7 +235,9 @@ defmodule Kiln.WorkUnits do
                  {:ok, _} <- insert_dependency_row(blocked_work_unit_id, blocker_work_unit_id),
                  {:ok, bumped} <- bump_blockers(blocked, 1),
                  {:ok, _} <-
-                   append_event(bumped.id, :blocked, %{payload: %{blocker_work_unit_id: blocker_work_unit_id}}) do
+                   append_event(bumped.id, :blocked, %{
+                     payload: %{blocker_work_unit_id: blocker_work_unit_id}
+                   }) do
               {:ok, bumped}
             end
         end

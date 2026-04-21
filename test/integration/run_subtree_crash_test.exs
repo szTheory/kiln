@@ -15,9 +15,10 @@ defmodule Kiln.Integration.RunSubtreeCrashTest do
 
   A killed child under a per-run subtree triggers the `:one_for_all`
   restart strategy. The subtree's `max_restarts: 3, max_seconds: 5`
-  budget absorbs the crash; the lived child is replaced with a fresh
-  pid. Meanwhile `RunDirector` is untouched, and unrelated runs'
-  subtrees keep running without interruption.
+  budget absorbs the crash; the per-run session supervisor (or its
+  prior lived-child stand-in) is replaced with a fresh pid. Meanwhile
+  `RunDirector` is untouched, and unrelated runs' subtrees keep running
+  without interruption.
 
   ## Scenario 2 — budget-trip escalation
 
@@ -78,8 +79,12 @@ defmodule Kiln.Integration.RunSubtreeCrashTest do
     send(RunDirector, :boot_scan)
     Process.sleep(300)
 
-    # Find the Task.Supervisor lived-child under run_a's subtree.
+    allow_session_roles_for_run(run_a.id)
+    allow_session_roles_for_run(run_b.id)
+
+    # Find the per-run session supervisor under run_a's subtree.
     lived_child_a = RunSubtree.lived_child_pid(run_a.id)
+
     assert is_pid(lived_child_a),
            "expected lived child pid for run_a; got #{inspect(lived_child_a)}"
 
@@ -100,7 +105,7 @@ defmodule Kiln.Integration.RunSubtreeCrashTest do
            "RunDirector must survive a child crash in an unrelated subtree"
 
     # Assert (peer-subtree isolation) — run_b's lived child is
-    # untouched; the :one_for_one strategy on RunSupervisor contains
+    # untouched; the `DynamicSupervisor` strategy on RunSupervisor contains
     # the crash to run_a's subtree alone.
     assert RunSubtree.lived_child_pid(run_b.id) == lived_child_b_before,
            "run_b's lived child must be untouched"
@@ -131,6 +136,8 @@ defmodule Kiln.Integration.RunSubtreeCrashTest do
 
     send(RunDirector, :boot_scan)
     Process.sleep(300)
+
+    allow_session_roles_for_run(run.id)
 
     # Hammer the subtree: kill the lived-child 4 times in a burst.
     # Budget is max_restarts: 3 in max_seconds: 5; the 4th kill trips

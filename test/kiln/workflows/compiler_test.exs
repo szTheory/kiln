@@ -183,7 +183,14 @@ defmodule Kiln.Workflows.CompilerTest do
       m =
         update_in(base_map(), ["spec", "stages"], fn [s] ->
           b = build_stage("stage_b", "coding", "coder", ["stage_a"], "readwrite")
-          b = Map.put(b, "on_failure", %{"action" => "route", "to" => "stage_a", "attach" => "plan_ref"})
+
+          b =
+            Map.put(b, "on_failure", %{
+              "action" => "route",
+              "to" => "stage_a",
+              "attach" => "plan_ref"
+            })
+
           [s, b]
         end)
 
@@ -196,7 +203,11 @@ defmodule Kiln.Workflows.CompilerTest do
       m =
         update_in(base_map(), ["spec", "stages"], fn [s] ->
           [
-            Map.put(s, "on_failure", %{"action" => "route", "to" => "stage_c", "attach" => "test_ref"}),
+            Map.put(s, "on_failure", %{
+              "action" => "route",
+              "to" => "stage_c",
+              "attach" => "test_ref"
+            }),
             build_stage("stage_b", "coding", "coder", ["stage_a"], "readwrite"),
             build_stage("stage_c", "testing", "tester", ["stage_b"], "readonly")
           ]
@@ -214,7 +225,11 @@ defmodule Kiln.Workflows.CompilerTest do
       m =
         update_in(base_map(), ["spec", "stages"], fn [s] ->
           [
-            Map.put(s, "on_failure", %{"action" => "route", "to" => "stage_a", "attach" => "self_ref"})
+            Map.put(s, "on_failure", %{
+              "action" => "route",
+              "to" => "stage_a",
+              "attach" => "self_ref"
+            })
           ]
         end)
 
@@ -225,9 +240,10 @@ defmodule Kiln.Workflows.CompilerTest do
   describe "D-62 validator 5 — every kind has a contract" do
     test "accepts all 5 registered kinds" do
       for kind <- ~w(planning coding testing verifying merge) do
-        m = put_in(base_map(), ["spec", "stages"], [
-              build_stage("only_stage", kind, compatible_agent_role_for(kind), [], "readonly")
-            ])
+        m =
+          put_in(base_map(), ["spec", "stages"], [
+            build_stage("only_stage", kind, compatible_agent_role_for(kind), [], "readonly")
+          ])
 
         assert {:ok, _} = Compiler.compile(m), "kind=#{kind} must compile"
       end

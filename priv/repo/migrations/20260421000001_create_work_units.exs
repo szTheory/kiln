@@ -94,16 +94,11 @@ defmodule Kiln.Repo.Migrations.CreateWorkUnits do
 
     create(index(:work_units, [:run_id], name: :work_units_run_id_idx))
 
-    create(
-      index(:work_units, [:run_id, :inserted_at],
-        name: :work_units_run_id_inserted_at_idx
-      )
-    )
+    create(index(:work_units, [:run_id, :inserted_at], name: :work_units_run_id_inserted_at_idx))
 
     create(
       index(:work_units, [:state, :blockers_open_count, :priority, :inserted_at],
-        where:
-          "state IN ('open','blocked','in_progress') AND blockers_open_count = 0",
+        where: "state IN ('open','blocked','in_progress') AND blockers_open_count = 0",
         name: :work_units_ready_partial_idx
       )
     )
@@ -115,12 +110,14 @@ defmodule Kiln.Repo.Migrations.CreateWorkUnits do
         null: false
       )
 
-      add(:blocked_work_unit_id,
+      add(
+        :blocked_work_unit_id,
         references(:work_units, type: :binary_id, on_delete: :restrict),
         null: false
       )
 
-      add(:blocker_work_unit_id,
+      add(
+        :blocker_work_unit_id,
         references(:work_units, type: :binary_id, on_delete: :restrict),
         null: false
       )

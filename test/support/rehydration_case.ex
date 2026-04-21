@@ -1,4 +1,6 @@
 defmodule Kiln.RehydrationCase do
+  alias Kiln.Agents.SessionSupervisor
+
   @moduledoc """
   ExUnit case template for BEAM-kill + reboot scenarios (the signature
   ORCH-03 / ORCH-04 test pattern described in 02-CONTEXT.md Specifics
@@ -55,6 +57,26 @@ defmodule Kiln.RehydrationCase do
       import Ecto
       import Ecto.Query
     end
+  end
+
+  @doc """
+  Allows the test sandbox owner to use DB connections from every role
+  worker under the per-run `SessionSupervisor` for `run_id`.
+
+  Call after a `RunSubtree` is running so `claim_next_ready/2` inside
+  role `GenServer`s does not race sandbox ownership.
+  """
+  @spec allow_session_roles_for_run(Ecto.UUID.t()) :: :ok
+  def allow_session_roles_for_run(run_id) when is_binary(run_id) do
+    for role <- [:mayor, :planner, :coder, :tester, :reviewer, :uiux, :qa_verifier] do
+      pid = SessionSupervisor.role_pid(run_id, role)
+
+      if is_pid(pid) do
+        Ecto.Adapters.SQL.Sandbox.allow(Kiln.Repo, self(), pid)
+      end
+    end
+
+    :ok
   end
 
   setup _tags do

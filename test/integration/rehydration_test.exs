@@ -102,6 +102,8 @@ defmodule Kiln.Integration.RehydrationTest do
       Process.sleep(300)
     end
 
+    allow_session_roles_for_run(run.id)
+
     # --- ASSERT EXACTLY-ONCE on idempotency retry ---
     # A retry of the same key returns :found_existing (never a second
     # INSERT). This is the D-14 two-phase intent contract: the row is

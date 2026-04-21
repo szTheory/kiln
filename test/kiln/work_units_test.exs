@@ -141,6 +141,7 @@ defmodule Kiln.WorkUnitsTest do
   test "complete_and_handoff/3 closes current unit and creates successors" do
     run = run!()
     assert {:ok, wu} = WorkUnits.create_work_unit(%{run_id: run.id, agent_role: :planner})
+
     assert {:ok, {closed, succ}} =
              WorkUnits.complete_and_handoff(wu.id, :planner, [
                %{agent_role: :coder},

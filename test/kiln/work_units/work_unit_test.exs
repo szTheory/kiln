@@ -124,17 +124,15 @@ defmodule Kiln.WorkUnits.WorkUnitTest do
 
     test "ready-queue partial index exists for open/blocked/in_progress with zero blockers" do
       assert %Postgrex.Result{rows: [[true]]} =
-               Repo.query!(
-                 """
-                 SELECT EXISTS (
-                   SELECT 1
-                   FROM pg_indexes
-                   WHERE schemaname = 'public'
-                     AND tablename = 'work_units'
-                     AND indexname = 'work_units_ready_partial_idx'
-                 )
-                 """
+               Repo.query!("""
+               SELECT EXISTS (
+                 SELECT 1
+                 FROM pg_indexes
+                 WHERE schemaname = 'public'
+                   AND tablename = 'work_units'
+                   AND indexname = 'work_units_ready_partial_idx'
                )
+               """)
     end
   end
 end

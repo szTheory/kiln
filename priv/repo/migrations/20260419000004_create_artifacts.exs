@@ -106,19 +106,11 @@ defmodule Kiln.Repo.Migrations.CreateArtifacts do
     )
 
     # Business identity: one name per stage attempt.
-    create(
-      unique_index(:artifacts, [:stage_run_id, :name],
-        name: :artifacts_stage_run_name_idx
-      )
-    )
+    create(unique_index(:artifacts, [:stage_run_id, :name], name: :artifacts_stage_run_name_idx))
 
     # Per-run time-ordered lookup (drives "show all artifacts for this
     # run" UI + Phase 5 retention scans).
-    create(
-      index(:artifacts, [:run_id, :inserted_at],
-        name: :artifacts_run_inserted_idx
-      )
-    )
+    create(index(:artifacts, [:run_id, :inserted_at], name: :artifacts_run_inserted_idx))
 
     # Dedup / refcount lookup (drives D-83 GC refcount-based deletion).
     create(index(:artifacts, [:sha256], name: :artifacts_sha256_idx))

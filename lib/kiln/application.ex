@@ -6,10 +6,10 @@ defmodule Kiln.Application do
   alias Kiln.Sandboxes.Limits
   alias Kiln.Telemetry.ObanHandler
 
-  # D-42 (P1) / D-92..D-96 (Phase 2): the children list is EXACTLY 10
-  # post-boot. Phase 1 locked the 7-child shape (D-42 "no DNSCluster,
-  # no stub Phase 2+ children"); Plan 02-07 extends the tree to 10 per
-  # D-92..D-96 by adding:
+  # D-42 (P1) / D-92..D-96 (Phase 2) + Phase 3/4 infra: the children list
+  # is EXACTLY 13 post-boot (infra children + `KilnWeb.Endpoint`). Phase 1
+  # locked the 7-child shape (D-42 "no DNSCluster, no stub Phase 2+
+  # children"); Plan 02-07 extends the tree per D-92..D-96 by adding:
   #
   #   * `Kiln.Runs.RunSupervisor`    — DynamicSupervisor hosting
   #     per-run subtrees (D-95, max_children: 10).
@@ -23,11 +23,10 @@ defmodule Kiln.Application do
   #     lands in Phase 5).
   #
   # Plan 02-06 shipped the staged-boot pattern (infra children →
-  # BootChecks.run! → Endpoint); this plan preserves it and makes
-  # `KilnWeb.Endpoint` the 10th child added dynamically AFTER the
-  # boot-check chain passes. Post-boot
-  # `Supervisor.which_children(Kiln.Supervisor)` returns EXACTLY 10
-  # entries (asserted by test/kiln/application_test.exs).
+  # BootChecks.run! → Endpoint); Phase 4 removes the global
+  # `Kiln.Agents.SessionSupervisor` scaffold (per-run sessions only).
+  # Post-boot `Supervisor.which_children(Kiln.Supervisor)` returns
+  # EXACTLY 13 entries (asserted by test/kiln/application_test.exs).
   @impl true
   def start(_type, _args) do
     :ok = Limits.load!()
@@ -50,9 +49,9 @@ defmodule Kiln.Application do
         _ = ObanHandler.attach()
         _ = TelemetryHandler.attach()
 
-        # Stage 4: add `KilnWeb.Endpoint` as the 10th child. After this
+        # Stage 4: add `KilnWeb.Endpoint` as the final child. After this
         # call `Supervisor.which_children(Kiln.Supervisor)` returns
-        # EXACTLY 10 entries (asserted by test/kiln/application_test.exs).
+        # EXACTLY 13 entries (asserted by test/kiln/application_test.exs).
         {:ok, _endpoint_pid} = Supervisor.start_child(sup_pid, KilnWeb.Endpoint.child_spec([]))
 
         {:ok, sup_pid}
@@ -86,7 +85,6 @@ defmodule Kiln.Application do
       {Oban, Application.fetch_env!(:kiln, Oban)},
       Kiln.Sandboxes.Supervisor,
       Kiln.Sandboxes.DTU.Supervisor,
-      Kiln.Agents.SessionSupervisor,
       Kiln.Policies.FactoryCircuitBreaker,
       Kiln.Runs.RunSupervisor,
       {Kiln.Runs.RunDirector, []},

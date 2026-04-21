@@ -7,6 +7,7 @@ defmodule Kiln.WorkUnits.ReadyQueryTest do
   alias Kiln.Repo
   alias Kiln.WorkUnits
   alias Kiln.WorkUnits.ReadyQuery
+
   test "ready_for_run/2 filters by role when provided" do
     run = RunFactory.insert(:run)
     assert {:ok, _} = WorkUnits.create_work_unit(%{run_id: run.id, agent_role: :planner})

@@ -19,7 +19,8 @@ defmodule Kiln.Repo.Migrations.CreateWorkUnitEvents do
         null: false
       )
 
-      add(:work_unit_id,
+      add(
+        :work_unit_id,
         references(:work_units, type: :binary_id, on_delete: :restrict),
         null: false
       )

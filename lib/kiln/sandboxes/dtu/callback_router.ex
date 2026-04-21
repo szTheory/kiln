@@ -20,11 +20,7 @@ defmodule Kiln.Sandboxes.DTU.CallbackRouter do
     port = Keyword.get(opts, :port, callback_port())
 
     Supervisor.child_spec(
-      {Bandit,
-       plug: __MODULE__,
-       scheme: :http,
-       ip: {127, 0, 0, 1},
-       port: port},
+      {Bandit, plug: __MODULE__, scheme: :http, ip: {127, 0, 0, 1}, port: port},
       id: __MODULE__
     )
   end

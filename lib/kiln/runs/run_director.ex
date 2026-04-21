@@ -259,6 +259,7 @@ defmodule Kiln.Runs.RunDirector do
   defp provider_key_for_model("claude-" <> _), do: :anthropic_api_key
   defp provider_key_for_model("gpt-" <> _), do: :openai_api_key
   defp provider_key_for_model("gemini-" <> _), do: :google_api_key
+
   defp provider_key_for_model(model) when is_binary(model) do
     cond do
       String.contains?(model, "sonnet") or String.contains?(model, "haiku") or

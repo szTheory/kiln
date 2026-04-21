@@ -60,7 +60,7 @@ defmodule Kiln.Runs.RunDirectorTest do
       # assert_workflow_unchanged/1 passes.
       {:ok, cg} = Kiln.Workflows.load("priv/workflows/elixir_phoenix_feature.yaml")
 
-      _run =
+      run =
         RunFactory.insert(:run,
           state: :coding,
           workflow_id: cg.id,
@@ -71,8 +71,10 @@ defmodule Kiln.Runs.RunDirectorTest do
       # do_scan/1 end-to-end.
       send(RunDirector, :boot_scan)
       Process.sleep(200)
+      allow_session_roles_for_run(run.id)
 
       children = DynamicSupervisor.which_children(RunSupervisor)
+
       assert Enum.any?(children, fn {_id, pid, _type, _mods} -> is_pid(pid) end),
              "expected at least one per-run subtree spawned under RunSupervisor; got #{inspect(children)}"
     end
@@ -103,7 +105,7 @@ defmodule Kiln.Runs.RunDirectorTest do
     test "re-scan does not double-spawn an already-monitored run" do
       {:ok, cg} = Kiln.Workflows.load("priv/workflows/elixir_phoenix_feature.yaml")
 
-      _run =
+      run =
         RunFactory.insert(:run,
           state: :coding,
           workflow_id: cg.id,
@@ -112,6 +114,7 @@ defmodule Kiln.Runs.RunDirectorTest do
 
       send(RunDirector, :boot_scan)
       Process.sleep(200)
+      allow_session_roles_for_run(run.id)
 
       children_after_first = length(DynamicSupervisor.which_children(RunSupervisor))
 

@@ -444,7 +444,7 @@ defmodule Kiln.BootChecks do
         raise Error,
           invariant: :required_secrets,
           details: %{missing_env_vars: vars, env: env},
-        remediation_hint:
+          remediation_hint:
             "Set #{Enum.join(vars, ", ")} before booting " <>
               "(cp .env.sample .env and edit; direnv allow; re-run mix phx.server)."
     end
