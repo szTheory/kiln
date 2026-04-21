@@ -78,6 +78,28 @@ defmodule Kiln.Runs do
   end
 
   @doc """
+  All runs (active + terminal) for the operator board (UI-01).
+
+  Rows are ordered by the canonical `Run.states/0` progression, then by
+  `updated_at` descending within each state so cards stay stable when
+  PubSub refreshes arrive.
+  """
+  @spec list_for_board() :: [Run.t()]
+  def list_for_board do
+    all =
+      from(r in Run, where: r.state in ^Run.states())
+      |> Repo.all()
+
+    grouped = Enum.group_by(all, & &1.state)
+
+    Enum.flat_map(Run.states(), fn state ->
+      grouped
+      |> Map.get(state, [])
+      |> Enum.sort_by(& &1.updated_at, {:desc, DateTime})
+    end)
+  end
+
+  @doc """
   Fetch just the `workflow_checksum` for a run. Called by
   `Kiln.Runs.RunDirector` (Plan 07) on rehydration to assert D-94: the
   current on-disk workflow YAML's compiled checksum must match the

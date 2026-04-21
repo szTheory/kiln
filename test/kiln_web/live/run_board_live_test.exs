@@ -3,6 +3,8 @@ defmodule KilnWeb.RunBoardLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Kiln.Factory.Run, as: RunFactory
+
   describe "GET /" do
     test "renders run board shell and empty state", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/")
@@ -10,6 +12,27 @@ defmodule KilnWeb.RunBoardLiveTest do
       assert has_element?(view, "#run-board")
       assert render(view) =~ "No runs in flight"
       assert render(view) =~ "Start a run from the workflow registry when you are ready"
+    end
+
+    test "renders kanban cards and updates on runs:board PubSub", %{conn: conn} do
+      run =
+        RunFactory.insert(:run,
+          state: :coding,
+          workflow_id: "wf-pubsub-board"
+        )
+
+      {:ok, view, _html} = live(conn, ~p"/")
+      html = render(view)
+      assert html =~ "wf-pubsub-board"
+      assert html =~ "data-state=\"coding\""
+
+      updated = %{run | state: :testing, updated_at: DateTime.utc_now(:microsecond)}
+      Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, updated})
+      _ = render(view)
+
+      html2 = render(view)
+      assert html2 =~ "wf-pubsub-board"
+      assert html2 =~ "data-state=\"testing\""
     end
   end
 end
