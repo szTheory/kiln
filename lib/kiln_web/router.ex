@@ -21,7 +21,11 @@ defmodule KilnWeb.Router do
     pipe_through :browser
 
     live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
-      get "/", PageController, :redirect_to_ops
+      live "/", RunBoardLive, :index
+      live "/workflows", WorkflowLive, :index
+      live "/workflows/:workflow_id", WorkflowLive, :show
+      live "/costs", CostLive, :index
+      live "/audit", AuditLive, :index
       live "/specs/:id/edit", SpecEditorLive, :edit
     end
   end

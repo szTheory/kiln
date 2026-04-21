@@ -3,6 +3,10 @@ defmodule KilnWeb.Layouts do
   HEEx layouts (root + inner) + shared layout components (`app`,
   `flash_group`, `theme_toggle`) embedded from `layouts/*.html.heex`
   and rendered from every Phoenix view.
+
+  **Fonts (Phase 07):** Inter + IBM Plex Mono load from Google Fonts via
+  `@import` in `assets/css/app.css` (CSP-friendly `fonts.googleapis.com` /
+  `fonts.gstatic.com` only — no inline script in the font path).
   """
   use KilnWeb, :html
 
@@ -36,35 +40,51 @@ defmodule KilnWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
-            <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
+    <header class="border-b border-ash bg-char px-4 sm:px-6 lg:px-8">
+      <div class="navbar mx-auto max-w-7xl text-bone">
+        <div class="flex-1">
+          <.link navigate={~p"/"} class="flex w-fit items-center gap-2">
+            <img src={~p"/images/logo.svg"} width="36" alt="Kiln" />
+            <span class="font-sans text-sm font-semibold tracking-tight">Kiln</span>
+          </.link>
+        </div>
+        <nav class="flex-none" aria-label="Operator">
+          <ul class="flex flex-wrap items-center gap-1 px-1 sm:gap-3">
+            <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/workflows"}>
+                Workflows
+              </.link>
+            </li>
+            <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/costs"}>
+                Costs
+              </.link>
+            </li>
+            <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/audit"}>
+                Audit
+              </.link>
+            </li>
+            <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/ops/dashboard"}>
+                LiveDashboard
+              </.link>
+            </li>
+            <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/ops/oban"}>
+                Oban
+              </.link>
+            </li>
+            <li>
+              <.theme_toggle />
+            </li>
+          </ul>
+        </nav>
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <main class="bg-coal px-4 py-8 font-sans text-bone sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl space-y-4">
         {render_slot(@inner_block)}
       </div>
     </main>
