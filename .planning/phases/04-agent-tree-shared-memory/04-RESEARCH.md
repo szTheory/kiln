@@ -1,15 +1,15 @@
 # Phase 4: Agent Tree & Shared Memory - Research
 
-**Researched:** 2026-04-20
+**Researched:** 2026-04-20 (deep-dive + ecosystem pass 2026-04-21)
 **Domain:** OTP-supervised multi-agent runtime + Ecto-backed shared work ledger for Phoenix/Elixir
-**Confidence:** HIGH
+**Confidence:** HIGH — inner session role supervisor uses `:one_for_one` (locked decision 2026-04-21).
 
 ## User Constraints
 
 No phase-specific `CONTEXT.md` exists for Phase 4, so planning is constrained by `ROADMAP.md`, `REQUIREMENTS.md`, `STATE.md`, and `CLAUDE.md`. [VERIFIED: gsd init.phase-op] [VERIFIED: codebase grep]
 
 - Locked phase goal: specialized agents run as supervised OTP processes per-run and coordinate through a native Ecto work-unit store with PubSub; no shell-out to `bd`, and no GenServer-per-work-unit. [VERIFIED: codebase grep]
-- Locked success criteria: per-run `Kiln.Agents.SessionSupervisor`, seven role processes, append-only `work_unit_events`, three-tier PubSub topics, `blockers_open_count` ready-queue cache, and no destructive-by-default CLI surface. [VERIFIED: codebase grep]
+- Locked success criteria: per-run `Kiln.Agents.SessionSupervisor` (`:one_for_one` over seven roles), append-only `work_unit_events`, three-tier PubSub topics, `blockers_open_count` ready-queue cache, and no destructive-by-default CLI surface. [VERIFIED: codebase grep]
 - Existing runtime shape to preserve: per-run subtrees already hang under `Kiln.Runs.RunSupervisor`, and `Kiln.Agents.SessionSupervisor` already exists as a Phase 3 scaffold in the application tree. [VERIFIED: codebase grep]
 
 <phase_requirements>
@@ -17,7 +17,7 @@ No phase-specific `CONTEXT.md` exists for Phase 4, so planning is constrained by
 
 | ID | Description | Research Support |
 |----|-------------|------------------|
-| AGENT-03 | Specialized agent roles as OTP processes under per-run `Agents.SessionSupervisor`; agent crash does not kill the run. [VERIFIED: codebase grep] | Use a per-run static `Supervisor` with `:one_for_all` semantics under the existing `RunSubtree`, plus role modules that share a common behaviour and persist all durable coordination state outside process memory. [CITED: https://hexdocs.pm/elixir/Supervisor.html] [CITED: https://hexdocs.pm/elixir/DynamicSupervisor.html] [VERIFIED: codebase grep] |
+| AGENT-03 | Specialized agent roles as OTP processes under per-run `Agents.SessionSupervisor`; agent crash does not kill the run. [VERIFIED: codebase grep] | Use a per-run static `Supervisor` with **`:one_for_one`** for the seven role children (Postgres is truth; restart only the crashed actor). Parent `RunSubtree` stays `:one_for_all` over its children for coordinated session reset when the session supervisor itself fails. [CITED: https://hexdocs.pm/elixir/Supervisor.html] [VERIFIED: codebase grep] |
 | AGENT-04 | Agent-shared memory via native Ecto `work_units` + append-only `work_unit_events` + Phoenix.PubSub. [VERIFIED: codebase grep] | Use `Repo.transact/2`, `Ecto.Multi`, row locks, and PubSub after commit; keep current state in `work_units`, history in `work_unit_events`, and readiness in a denormalized `blockers_open_count` column. [CITED: https://hexdocs.pm/ecto/Ecto.Repo.html] [CITED: https://hexdocs.pm/ecto/Ecto.Multi.html] [CITED: https://hexdocs.pm/ecto/Ecto.Query.html] [CITED: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html] |
 </phase_requirements>
 
@@ -30,6 +30,66 @@ The standard implementation pattern is: `RunDirector` hydrates a per-run subtree
 The main unknowns are not library choice. They are queue semantics, handoff protocol, and where to denormalize for speed. The safest answer is to make `work_units` the mutable read model, keep `work_unit_events` immutable, treat blockers as explicit dependency rows reflected into `blockers_open_count`, and make claim/handoff operations database-serialized rather than process-coordinated. [CITED: https://www.postgresql.org/docs/15/sql-select.html] [CITED: https://hexdocs.pm/ecto/Ecto.Query.html] [ASSUMED]
 
 **Primary recommendation:** Build Phase 4 as `RunSubtree -> per-run SessionSupervisor -> seven role workers`, backed by `Kiln.WorkUnits` using `Repo.transact/2` + row locking + after-commit PubSub, with no process-per-unit state. [CITED: https://hexdocs.pm/elixir/Supervisor.html] [CITED: https://hexdocs.pm/ecto/Ecto.Repo.html] [VERIFIED: codebase grep]
+
+## Deep Dive: Tradeoffs, Idioms, Ecosystem Lessons, Cohesive Recommendations
+
+**Added:** 2026-04-21 — synthesizes subagent research + project constraints. **Intent:** one place to decide *how* to build Phase 4 without re-litigating basics; all bullets align with Postgres-as-truth, append-only audit, bounded autonomy, operator clarity, and solo local-first DX.
+
+### 1. Where durable truth lives (non-negotiable fork)
+
+| Approach | Example | Pros | Cons | Kiln stance |
+|----------|---------|------|------|-------------|
+| **RDBMS row + event ledger** | `work_units` + `work_unit_events`, PubSub after commit | ACID claims, replay, SQL for “ready”, matches `Kiln.Runs.Transitions` pattern | Schema + migrations to maintain | **Use** — matches AGENT-04 and durability floor |
+| **External issue DB + CLI** | beads `bd` + Dolt | Federation, git-adjacent workflows | Second transactional plane, toolchain weight, historical data-loss class around destructive tooling | **Do not** shell out; optional JSONL adapter only |
+| **Job queue as memory** | Large Sidekiq/Celery payloads as canonical state | Easy to hack v0 | Retries duplicate side effects; ordering myths; poison pills | **Oban = transport / reconciliation**, not shared agent memory |
+| **Workflow engine as primary board** | Temporal history as work graph | Forensic replay, durable timers | Ops weight for local-first v1; second distributed system | **Borrow ideas** (history, timeouts), **do not** host core work board there |
+| **Process heap as truth** | GenServer-per-unit with ETS | Fast in-memory | Dies with VM; fights query/audit; roadmap forbids | **Reject** |
+
+**Idiomatic Elixir/Phoenix/Ecto:** Context module (`Kiln.WorkUnits`) owns writes; `Ecto.Multi` + `Repo.transact/2`; `lock: "FOR UPDATE"` on hot rows; `Phoenix.PubSub.broadcast/4` **after** successful commit (same lesson as run transitions). **Plug** is largely irrelevant here except: no hidden body-stealing middleware for “agent RPC”; keep HTTP boundaries for operator/API, not for per-tick agent chatter.
+
+### 2. OTP supervision: `:one_for_all` vs `:one_for_one` for seven roles
+
+**Locked decision (2026-04-21):** `Kiln.Agents.SessionSupervisor` uses **`:one_for_one`** for the seven role children in per-run mode. [VERIFIED: codebase grep]
+
+| Strategy | Pros | Cons | Example |
+|----------|------|------|---------|
+| `:one_for_all` | Single “epoch” reset — no mix of old/new role processes; strong if roles shared fragile in-process caches | Any one abnormal exit **restarts all seven**; more restart churn; duplicate wake-ups unless idempotent | Coder crashes; Mayor/Planner/… all terminate and restart together |
+| `:one_for_one` | **BEAM-idiomatic** when durable state is in Postgres: one bad actor restarts, siblings keep running | In-memory caches across roles can diverge until next read | Tester crashes; only Tester restarts and hydrates from DB |
+| `:rest_for_one` | Models ordered pipelines | Order of `children/0` becomes a correctness surface; surprising mass restarts if mis-ordered | Only use if startup order encodes real dependencies |
+
+**Nested tree today:** `RunSubtree` is `:one_for_all` with a single child `SessionSupervisor`; inner `SessionSupervisor` uses **`:one_for_one`** over seven roles — a role crash restarts **only that role**; `SessionSupervisor` stays alive, so `RunSubtree` usually does not restart. The **run** stays up unless restart intensity is exceeded at either supervisor layer. [VERIFIED: codebase grep]
+
+**Applied policy:**
+
+1. **`:one_for_one` for the seven role workers** — shipped; matches Postgres-as-truth and least surprise (one sick agent does not bounce six healthy ones).
+2. **`RunSubtree` remains `:one_for_all`** over its (currently single) session child — a session-supervisor-level failure still replaces the whole session process subtree in one step; that is a different layer from per-role churn.
+3. **`:max_restarts` / `:max_seconds` is a control-plane signal:** repeated failures should **escalate the run** with typed reason + audit (per bounded autonomy), not spin forever.
+
+### 3. Cross-ecosystem lessons (condensed)
+
+**Issue trackers / boards (Jira, GitHub, Linear):** Right: stable IDs, explicit states/gates, webhooks for automation. Wrong: taxonomy explosion, comments-as-truth, ACL/API friction for solo loops. **Takeaway:** small typed state machine + append-only events; one obvious “ready” query beats many dashboard views.
+
+**Job queues (Sidekiq, Celery, BullMQ):** Right: retries, visibility, dead letters, idempotency culture. Wrong: queue payload as DB, FIFO confused with workflow, infinite retries on bad input. **Takeaway:** queue is **transport**; truth stays in Postgres with intent rows + audit.
+
+**Workflow engines (Temporal, Cadence, Step Functions):** Right: durable timers, compensation, replay mindset. Wrong: operational weight, DSL complexity, vendor limits. **Takeaway:** steal **history and timeout discipline**, not a second cluster for v1.
+
+**beads + Dolt:** Right: data model shape (issues + dependencies), local/git mental model for *artifacts*. Wrong: merge conflicts on live execution truth, extra datastore, destructive-tool footguns. **Takeaway:** keep beads’ **relational model** in Ecto; keep **git semantics** for specs/repos, not for mutable run coordination head.
+
+**Explicitly do not copy:** chat-as-coordination plane; GenServer-per-unit; external orchestration cluster for core board; enterprise workflow taxonomy; “job payload is canonical state” without transactional intent.
+
+### 4. Developer experience (DX) — concrete product decisions
+
+- **Single public API surface:** `Kiln.WorkUnits` for all mutations; role modules call context functions, never `Repo` directly on work-unit schemas — grep-friendly, testable, least surprise for future contributors.
+- **Stable event vocabulary:** small set of `kind` atoms (`:created`, `:claimed`, `:blocked`, …) documented in one module; avoids stringly-typed chaos and powers both audit and LiveView copy.
+- **Topic helpers:** one module for `work_units`, `work_units:<id>`, `work_units:run:<run_id>` — prevents subscription typos and duplicate-subscribe bugs (PubSub delivers duplicates if the same pid subscribes twice).
+- **Testing:** `start_supervised!/1`; assert via monitors / `:sys.get_state` instead of sleep; property-test or concurrency-test **claim races** with real repo sandbox.
+- **Operator UI:** streams for work-unit lists; loading/empty/error states per brand contract; microcopy from `CLAUDE.md` (“Blocked”, “Waiting on upstream”) tied to real `status` / blocker data — no decorative “AI magic.”
+
+### 5. One coherent architecture story (read this before coding)
+
+Per-run `RunSubtree` holds `SessionSupervisor` (`:one_for_one` over roles). Seven **thin** role processes: each on init/continue loads what it needs from Postgres, subscribes only if necessary, and drives work by calling **`Kiln.WorkUnits`** which performs **lock → mutate row → insert event → commit → broadcast**. Ready work is an **indexed query** on `blockers_open_count` (and priority), not a graph walk per tick. Oban handles **scheduled / cross-cutting** jobs, not the hot coordination loop. When the subtree cannot stabilize, **halt or escalate** with typed reason — never silent infinite retry.
+
+**Confidence:** HIGH for DB-centric + PubSub-after-commit + context API + inner `:one_for_one` role supervision.
 
 ## Architectural Responsibility Map
 
@@ -69,7 +129,7 @@ The main unknowns are not library choice. They are queue semantics, handoff prot
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | `DynamicSupervisor` | stdlib in Elixir `1.19.5` [CITED: https://hexdocs.pm/elixir/DynamicSupervisor.html] | Spawn per-run session supervisors or run-owned supervisors dynamically | Use at the run boundary, not for every work unit. [CITED: https://hexdocs.pm/elixir/DynamicSupervisor.html] |
-| `Supervisor` | stdlib in Elixir `1.19.5` [CITED: https://hexdocs.pm/elixir/Supervisor.html] | Own the seven fixed role workers under `:one_for_all` | Use for the static per-run role set where sibling restart semantics matter. [CITED: https://hexdocs.pm/elixir/Supervisor.html] |
+| `Supervisor` | stdlib in Elixir `1.19.5` [CITED: https://hexdocs.pm/elixir/Supervisor.html] | Own the seven fixed role workers under **`:one_for_one`** | Use for the static per-run role set; independent restarts match DB-hydrated actors. [CITED: https://hexdocs.pm/elixir/Supervisor.html] |
 | `Registry` | stdlib in Elixir `1.19.5` [VERIFIED: codebase grep] | Per-run name registration and lookup | Use for addressing per-run supervisors or roles by `{role, run_id}` without scanning supervisors. [VERIFIED: codebase grep] [ASSUMED] |
 | `oban` | `2.21.1` [VERIFIED: hex.pm registry] | Bootstrap, escalation, or eventual background reconciliation jobs | Keep Oban for durable jobs around runs; do not use it as the primary shared-memory mechanism. [VERIFIED: codebase grep] [ASSUMED] |
 
@@ -110,7 +170,7 @@ Kiln.Runs.RunDirector
         v
 Kiln.Runs.RunSubtree (per run, :one_for_all)
         |
-        +--> Kiln.Agents.SessionSupervisor (per-run owner)
+        +--> Kiln.Agents.SessionSupervisor (per-run, :one_for_one over 7 roles)
                 |
                 +--> Mayor
                 +--> Planner
@@ -166,11 +226,11 @@ docs/
 └── pubsub-topics-phase-04.md
 ```
 
-### Pattern 1: Fixed Per-Run Role Tree Under `:one_for_all`
+### Pattern 1: Fixed Per-Run Role Tree Under `:one_for_one`
 
-**What:** A per-run `Supervisor` owns the seven role workers as a fixed child set; the subtree uses `:one_for_all` so abnormal child exit restarts sibling state together. [CITED: https://hexdocs.pm/elixir/Supervisor.html] [VERIFIED: codebase grep]
+**What:** `SessionSupervisor` owns the seven role workers with **`:one_for_one`**: one abnormal role exit restarts only that child. Parent `RunSubtree` may still use `:one_for_all` across *its* children for a coordinated session reset when the session layer fails. [CITED: https://hexdocs.pm/elixir/Supervisor.html] [VERIFIED: codebase grep]
 
-**When to use:** Use this for the specialized role set because the roles are fixed, stateful, and semantically coupled within a run. [ASSUMED]
+**When to use:** Use for fixed role sets when durable coordination lives outside process memory (Postgres + `Kiln.WorkUnits`). [VERIFIED: codebase grep]
 
 **Example:**
 
@@ -198,7 +258,7 @@ defmodule Kiln.Agents.RunSession do
       {Kiln.Agents.Roles.QAVerifier, run_id: run_id}
     ]
 
-    Supervisor.init(children, strategy: :one_for_all, max_restarts: 3, max_seconds: 5)
+    Supervisor.init(children, strategy: :one_for_one, max_restarts: 3, max_seconds: 5)
   end
 
   defp via(run_id), do: {:via, Registry, {Kiln.RunRegistry, {__MODULE__, run_id}}}
@@ -411,12 +471,13 @@ Phoenix.PubSub.broadcast(
 
 - `Repo.transaction/2` is deprecated in the current Ecto docs; use `Repo.transact/2`. [CITED: https://hexdocs.pm/ecto/Ecto.Repo.html]
 - A global-only `Kiln.Agents.SessionSupervisor` is Phase 3 scaffolding, not the final Phase 4 per-run agent tree. [VERIFIED: codebase grep]
+- `:one_for_all` over the **seven role siblings** was an earlier option; **`:one_for_one`** is locked — do not revert without a written coupling argument (shared in-process coordinator). [VERIFIED: codebase grep]
 
 ## Assumptions Log
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | The seven role workers should live under a static per-run `Supervisor` while `SessionSupervisor` remains the per-run owner entrypoint. | Architecture Patterns | Low to medium; implementation may need one extra wrapper module if the current scaffold is reused differently. |
+| A1 | The seven role workers live under `SessionSupervisor` with `:one_for_one` while `SessionSupervisor` remains the per-run owner entrypoint under `RunSubtree`. | Architecture Patterns | Low; if a future design needs coordinated role reset, use an explicit epoch event in `work_unit_events`, not blanket `:one_for_all`. |
 | A2 | `blockers_open_count` should be maintained from explicit dependency rows instead of computed recursively on every ready query. | Architecture Patterns | Medium; if the data model changes, ready-query performance work shifts into SQL/materialized-view design. |
 | A3 | Phase 4 should ship with no automatic event compaction and only additive summary events later. | Common Pitfalls | Low; affects retention and storage strategy more than correctness. |
 | A4 | Use `SKIP LOCKED` only for worker-side claim picking, not for operator-visible ready reads. | Common Pitfalls | Low; alternative locking choices exist, but using `SKIP LOCKED` broadly would make semantics harder to explain. |
@@ -514,7 +575,7 @@ Phoenix.PubSub.broadcast(
 
 ### Primary (HIGH confidence)
 
-- `https://hexdocs.pm/elixir/Supervisor.html` - restart values, `:one_for_all` strategy, shutdown guidance
+- `https://hexdocs.pm/elixir/Supervisor.html` - restart values, `:one_for_one` / `:one_for_all` strategies, shutdown guidance
 - `https://hexdocs.pm/elixir/DynamicSupervisor.html` - dynamic child start semantics and `:max_children`
 - `https://hexdocs.pm/ecto/Ecto.Repo.html` - `Repo.transact/2`, aborted transaction behavior, process/transaction scope
 - `https://hexdocs.pm/ecto/Ecto.Multi.html` - `Multi.run/3` behavior and transactional composition
@@ -541,5 +602,5 @@ Phoenix.PubSub.broadcast(
 - Architecture: HIGH - recommendation aligns with existing Kiln runtime scaffolding and official OTP/Ecto/PubSub semantics. [VERIFIED: codebase grep] [CITED: https://hexdocs.pm/elixir/Supervisor.html] [CITED: https://hexdocs.pm/ecto/Ecto.Repo.html]
 - Pitfalls: MEDIUM - the transactional and PubSub hazards are directly documented; compaction and handoff specifics remain design judgment until Phase 4 implementation proves them. [CITED: https://hexdocs.pm/ecto/Ecto.Repo.html] [CITED: https://hexdocs.pm/phoenix_pubsub/Phoenix.PubSub.html] [ASSUMED]
 
-**Research date:** 2026-04-20
-**Valid until:** 2026-05-20
+**Research date:** 2026-04-20 (deep-dive refresh 2026-04-21)
+**Valid until:** 2026-05-21

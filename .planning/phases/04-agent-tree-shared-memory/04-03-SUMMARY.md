@@ -42,7 +42,7 @@ key-decisions:
   - "Role workers poll + subscribe to run-scoped PubSub; Mayor seeds planner unit in init."
 
 patterns-established:
-  - "Fixed seven-role set under :one_for_all session supervisor; coordination only via WorkUnits."
+  - "Fixed seven-role set under :one_for_one session supervisor; coordination only via WorkUnits."
 
 requirements-completed: [AGENT-03]
 

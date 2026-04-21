@@ -6,8 +6,14 @@ defmodule Kiln.Agents.SessionSupervisor do
   Phase 3 application tree keeps a stable boot slot until Phase 4
   removes it.
 
-  **Per-run mode** — `:one_for_all` `Supervisor` with exactly seven role
+  **Per-run mode** — `:one_for_one` `Supervisor` with exactly seven role
   workers, registered in `Kiln.RunRegistry` at `{__MODULE__, run_id}`.
+
+  Strategy rationale: coordination state lives in Postgres (`Kiln.WorkUnits`);
+  role processes hydrate from the DB and do not require coordinated sibling
+  death on a single-role crash — BEAM-idiomatic isolation with minimal churn.
+  Parent `Kiln.Runs.RunSubtree` remains `:one_for_all` over its children so a
+  session-level failure still resets the per-run session subtree as a unit.
   """
 
   use Supervisor
@@ -72,7 +78,7 @@ defmodule Kiln.Agents.SessionSupervisor do
       {QAVerifier, run_id: run_id}
     ]
 
-    Supervisor.init(children, strategy: :one_for_all, max_restarts: 3, max_seconds: 5)
+    Supervisor.init(children, strategy: :one_for_one, max_restarts: 3, max_seconds: 5)
   end
 
   @doc false

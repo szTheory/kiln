@@ -19,6 +19,9 @@ erl_crash.dump
 .vscode/
 .idea/
 
+# Local Claude / agent tooling (not part of Kiln source)
+.claude/
+
 # Secrets / runtime config
 /config/*.secret.exs
 .env

@@ -46,19 +46,23 @@ defmodule Kiln.Agents.RoleTest do
       assert hd(units).state in [:open, :in_progress]
     end
 
-    test "killing one role restarts the full role set under :one_for_all", %{run: run} do
+    test "killing one role restarts only that role; siblings keep their pids (:one_for_one)", %{
+      run: run
+    } do
       Process.sleep(200)
-      before = SessionSupervisor.role_pid(run.id, :coder)
-      assert is_pid(before)
+      coder_before = SessionSupervisor.role_pid(run.id, :coder)
+      mayor_before = SessionSupervisor.role_pid(run.id, :mayor)
+      assert is_pid(coder_before)
+      assert is_pid(mayor_before)
 
-      Process.exit(before, :kill)
+      Process.exit(coder_before, :kill)
       Process.sleep(500)
 
-      after_pid = SessionSupervisor.role_pid(run.id, :coder)
-      assert is_pid(after_pid)
-      refute after_pid == before
+      coder_after = SessionSupervisor.role_pid(run.id, :coder)
+      assert is_pid(coder_after)
+      refute coder_after == coder_before
 
-      assert is_pid(SessionSupervisor.role_pid(run.id, :mayor))
+      assert SessionSupervisor.role_pid(run.id, :mayor) == mayor_before
     end
   end
 

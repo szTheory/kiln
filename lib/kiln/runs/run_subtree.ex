@@ -11,8 +11,10 @@ defmodule Kiln.Runs.RunSubtree do
   ## Phase 4 shape
 
   The subtree hosts `Kiln.Agents.SessionSupervisor` in per-run mode (seven
-  fixed role workers). `lived_child_pid/1` resolves the session supervisor
-  for ORCH-02 crash tests.
+  fixed role workers under **`:one_for_one`** inside the session supervisor).
+  This subtree stays `:one_for_all` so a failure that tears down the session
+  layer replaces that child as a unit. `lived_child_pid/1` resolves the
+  session supervisor for ORCH-02 crash tests.
 
   ## Registry naming
 
