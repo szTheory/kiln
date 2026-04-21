@@ -20,6 +20,8 @@ defmodule KilnWeb.Router do
   scope "/", KilnWeb do
     pipe_through :browser
 
+    get "/runs/:run_id/diagnostics/bundle.zip", DiagnosticsZipController, :bundle
+
     live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
       live "/", RunBoardLive, :index
       live "/inbox", InboxLive, :index

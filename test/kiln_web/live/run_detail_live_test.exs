@@ -24,6 +24,15 @@ defmodule KilnWeb.RunDetailLiveTest do
     assert render(view) =~ "Stage not found"
   end
 
+  test "run detail exposes diagnostics bundle control", %{conn: conn} do
+    run = RunFactory.insert(:run, workflow_id: "wf_diag_btn")
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#bundle-diagnostics-btn")
+    assert render(view) =~ "Bundle last 60 minutes"
+  end
+
   test "merged run shows File as follow-up and creates inbox draft", %{conn: conn} do
     run = RunFactory.insert(:run, state: :merged, workflow_id: "wf_follow_up_lv")
 

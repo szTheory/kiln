@@ -114,6 +114,19 @@ defmodule KilnWeb.RunDetailLive do
     end
   end
 
+  def handle_event("bundle_diagnostics", _params, socket) do
+    if allow?(socket) do
+      run = socket.assigns.run
+
+      {:noreply,
+       socket
+       |> put_flash(:info, "Diagnostic bundle ready")
+       |> push_navigate(to: ~p"/runs/#{run.id}/diagnostics/bundle.zip")}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_event("follow_up", _params, socket) do
     if allow?(socket) do
       run = socket.assigns.run
@@ -166,6 +179,14 @@ defmodule KilnWeb.RunDetailLive do
               </button>
               <.link class="text-sm text-ember underline" navigate={~p"/inbox"}>Inbox</.link>
             <% end %>
+            <button
+              type="button"
+              id="bundle-diagnostics-btn"
+              phx-click="bundle_diagnostics"
+              class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
+            >
+              Bundle last 60 minutes
+            </button>
             <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
