@@ -1,6 +1,9 @@
 defmodule KilnWeb.CostLive do
   @moduledoc """
   UI-04 — operator cost dashboard (`/costs`).
+
+  UI-08 / OPS-04 — **Intel** segment at `?tab=intel` with `period=` and `pivot=`
+  query toggles (same LiveView, D-802).
   """
 
   use KilnWeb, :live_view
@@ -12,15 +15,26 @@ defmodule KilnWeb.CostLive do
     {:ok,
      socket
      |> assign(:page_title, "Costs")
-     |> assign(:tabs, [:run, :workflow, :agent_role, :provider])
+     |> assign(:pivot_tabs, [:run, :workflow, :agent_role, :provider])
      |> assign(:last_updated_at, DateTime.utc_now(:microsecond))}
   end
 
   @impl true
   def handle_params(params, _uri, socket) do
     _ = allow?(socket)
-    tab = parse_tab(params["tab"])
-    rows = load_rows(tab)
+    {surface, pivot, period} = parse_surface_pivot_period(params)
+
+    rows =
+      case surface do
+        :summary -> load_rows_for_pivot(pivot)
+        :intel -> load_rows_for_pivot(pivot, window_for_period(period))
+      end
+
+    intel_advisory =
+      case surface do
+        :intel -> build_intel_advisory(rows, pivot, period)
+        :summary -> nil
+      end
 
     projection =
       case CostRollups.by_run(%{}) do
@@ -30,23 +44,126 @@ defmodule KilnWeb.CostLive do
 
     {:noreply,
      socket
-     |> assign(:tab, tab)
+     |> assign(:surface, surface)
+     |> assign(:pivot, pivot)
+     |> assign(:period, period)
      |> assign(:rows, rows)
+     |> assign(:intel_advisory, intel_advisory)
      |> assign(:projection_note, projection)
      |> assign(:last_updated_at, DateTime.utc_now(:microsecond))}
   end
 
-  defp parse_tab(nil), do: :run
-  defp parse_tab("run"), do: :run
-  defp parse_tab("workflow"), do: :workflow
-  defp parse_tab("agent_role"), do: :agent_role
-  defp parse_tab("provider"), do: :provider
-  defp parse_tab(_), do: :run
+  defp parse_surface_pivot_period(params) do
+    t = params["tab"]
 
-  defp load_rows(:run), do: CostRollups.by_run(%{})
-  defp load_rows(:workflow), do: CostRollups.by_workflow(%{})
-  defp load_rows(:agent_role), do: CostRollups.by_agent_role(%{})
-  defp load_rows(:provider), do: CostRollups.by_provider(%{})
+    cond do
+      t == "intel" ->
+        {:intel, parse_pivot(params["pivot"], :provider), parse_period(params["period"], :week)}
+
+      t in ["run", "workflow", "agent_role", "provider"] ->
+        {:summary, String.to_existing_atom(t), :week}
+
+      t == "summary" or is_nil(t) ->
+        {:summary, parse_pivot(params["pivot"], :run), :week}
+
+      true ->
+        {:summary, :run, :week}
+    end
+  end
+
+  defp parse_pivot(nil, default), do: default
+
+  defp parse_pivot(name, _default) when name in ["run", "workflow", "agent_role", "provider"],
+    do: String.to_existing_atom(name)
+
+  defp parse_pivot(_, default), do: default
+
+  defp parse_period(nil, default), do: default
+
+  defp parse_period(name, _default) when name in ["day", "week", "month"],
+    do: String.to_existing_atom(name)
+
+  defp parse_period(_, default), do: default
+
+  defp load_rows_for_pivot(pivot), do: load_rows_for_pivot(pivot, nil)
+
+  defp load_rows_for_pivot(:run, nil), do: CostRollups.by_run(%{})
+  defp load_rows_for_pivot(:workflow, nil), do: CostRollups.by_workflow(%{})
+  defp load_rows_for_pivot(:agent_role, nil), do: CostRollups.by_agent_role(%{})
+  defp load_rows_for_pivot(:provider, nil), do: CostRollups.by_provider(%{})
+
+  defp load_rows_for_pivot(:run, %{from: f, to: t}), do: CostRollups.by_run(%{from: f, to: t})
+  defp load_rows_for_pivot(:workflow, %{from: f, to: t}), do: CostRollups.by_workflow(%{from: f, to: t})
+
+  defp load_rows_for_pivot(:agent_role, %{from: f, to: t}),
+    do: CostRollups.by_agent_role(%{from: f, to: t})
+
+  defp load_rows_for_pivot(:provider, %{from: f, to: t}), do: CostRollups.by_provider(%{from: f, to: t})
+
+  defp window_for_period(period) do
+    to = DateTime.utc_now(:microsecond)
+
+    from =
+      case period do
+        :day -> utc_start_of_day(to)
+        :week -> week_start_monday_utc(to)
+        :month -> month_start_utc(to)
+      end
+
+    %{from: from, to: to}
+  end
+
+  defp utc_start_of_day(%DateTime{} = dt) do
+    DateTime.new!(DateTime.to_date(dt), ~T[00:00:00.000000], "Etc/UTC")
+  end
+
+  defp week_start_monday_utc(%DateTime{} = to) do
+    d = DateTime.to_date(to)
+    mon = Date.beginning_of_week(d, :monday)
+    DateTime.new!(mon, ~T[00:00:00.000000], "Etc/UTC")
+  end
+
+  defp month_start_utc(%DateTime{} = to) do
+    d = DateTime.to_date(to)
+    DateTime.new!(Date.new!(d.year, d.month, 1), ~T[00:00:00.000000], "Etc/UTC")
+  end
+
+  defp build_intel_advisory(rows, pivot, period) do
+    total = Enum.reduce(rows, Decimal.new(0), fn %{usd: u}, acc -> Decimal.add(acc, u) end)
+    calls = Enum.reduce(rows, 0, fn %{calls: c}, acc -> acc + c end)
+
+    cond do
+      rows == [] ->
+        nil
+
+      Decimal.compare(total, Decimal.new(0)) != :gt ->
+        nil
+
+      true ->
+        [first | rest] = rows
+
+        top =
+          Enum.reduce(rest, first, fn row, best ->
+            case Decimal.compare(row.usd, best.usd) do
+              :gt -> row
+              _ -> best
+            end
+          end)
+
+        top_label = format_key(top.key)
+
+        "You're spending $#{format_usd(total)} this #{period_copy(period)} across #{calls} calls — top #{pivot_copy(pivot)} profile: #{top_label}."
+    end
+  end
+
+  defp period_copy(:day), do: "day"
+  defp period_copy(:week), do: "week"
+  defp period_copy(:month), do: "month"
+
+  defp pivot_copy(:run), do: "run"
+  defp pivot_copy(:workflow), do: "workflow"
+  defp pivot_copy(:agent_role), do: "agent role"
+  defp pivot_copy(:provider), do: "provider"
 
   defp allow?(_socket), do: true
 
@@ -84,9 +201,40 @@ defmodule KilnWeb.CostLive do
           </div>
         </section>
 
-        <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm">
-          <%= for t <- @tabs do %>
-            <.link patch={~p"/costs?tab=#{t |> to_string()}"} class={tab_class(@tab, t)}>
+        <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Cost views">
+          <.link patch={~p"/costs?#{[tab: "summary", pivot: to_string(@pivot)]}"} class={surface_class(@surface, :summary)}>
+            Summary
+          </.link>
+          <.link patch={~p"/costs?#{[tab: "intel", pivot: to_string(@pivot), period: to_string(@period)]}"} class={surface_class(@surface, :intel)}>
+            Intel
+          </.link>
+        </nav>
+
+        <%= if @surface == :intel do %>
+          <section class="rounded border border-ash bg-char/80 p-4 text-sm text-bone">
+            <h2 class="text-xs font-semibold uppercase text-[var(--color-smoke)]">Advisory</h2>
+            <%= if @intel_advisory do %>
+              <p class="mt-2 leading-relaxed text-bone">{@intel_advisory}</p>
+            <% else %>
+              <p class="mt-2 text-[var(--color-smoke)]">Not enough history for an advisory yet</p>
+            <% end %>
+          </section>
+
+          <nav class="flex flex-wrap gap-2 text-xs text-[var(--color-smoke)]" aria-label="Intel period">
+            <%= for p <- [:day, :week, :month] do %>
+              <.link
+                patch={~p"/costs?#{[tab: "intel", pivot: to_string(@pivot), period: to_string(p)]}"}
+                class={period_class(@period, p)}
+              >
+                {String.capitalize(to_string(p))}
+              </.link>
+            <% end %>
+          </nav>
+        <% end %>
+
+        <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Pivot">
+          <%= for t <- @pivot_tabs do %>
+            <.link patch={~p"/costs?#{pivot_query_attrs(@surface, @period, t)}"} class={tab_class(@pivot, t)}>
               {tab_label(t)}
             </.link>
           <% end %>
@@ -128,6 +276,29 @@ defmodule KilnWeb.CostLive do
       </div>
     </Layouts.app>
     """
+  end
+
+  defp pivot_query_attrs(:summary, _period, pivot), do: [tab: "summary", pivot: to_string(pivot)]
+  defp pivot_query_attrs(:intel, period, pivot), do: [tab: "intel", pivot: to_string(pivot), period: to_string(period)]
+
+  defp surface_class(current, tab) do
+    base = "rounded border px-3 py-1 font-sans transition-colors"
+
+    if current == tab do
+      [base, "border-ember text-ember"]
+    else
+      [base, "border-ash text-bone hover:border-ash"]
+    end
+  end
+
+  defp period_class(current, p) do
+    base = "rounded border px-2 py-0.5 font-mono transition-colors"
+
+    if current == p do
+      [base, "border-ember text-ember"]
+    else
+      [base, "border-ash text-bone hover:border-ash"]
+    end
   end
 
   defp tab_label(:run), do: "Run"
