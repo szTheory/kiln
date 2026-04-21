@@ -114,4 +114,133 @@ defmodule Kiln.ModelRegistry do
   def adapter_for("gpt-" <> _), do: Kiln.Agents.Adapter.OpenAI
   def adapter_for("gemini-" <> _), do: Kiln.Agents.Adapter.Google
   def adapter_for(_), do: Kiln.Agents.Adapter.Ollama
+
+  @typedoc """
+  Operator-facing provider card row for `ProviderHealthLive` (OPS-01).
+
+  Raw API keys never appear — only booleans and aggregates.
+  """
+  @type provider_health_snapshot :: %{
+          id: :anthropic | :openai | :google | :ollama,
+          key_configured?: boolean(),
+          last_ok_at: DateTime.t() | nil,
+          recent_error_rate: float(),
+          rate_limit_remaining: integer() | nil,
+          token_budget_remaining_today: Decimal.t() | nil,
+          spend_usd_today: Decimal.t()
+        }
+
+  @provider_ids ~w(anthropic openai google ollama)a
+  @health_ets :kiln_provider_health_counters
+
+  @doc """
+  Returns one snapshot map per configured LLM provider for health cards.
+
+  Spend is derived from today's `CostRollups.by_provider/1` rows bucketed
+  by model-id prefix. Error counters and `last_ok_at` are backed by a public
+  named ETS table so tests (and future adapter telemetry) can move cards
+  between polls without exposing secrets.
+  """
+  @spec provider_health_snapshots() :: [provider_health_snapshot()]
+  def provider_health_snapshots do
+    ensure_health_ets!()
+    spend = today_spend_usd_by_provider_id()
+
+    for id <- @provider_ids do
+      ctr = health_counters(id)
+      calls = ctr.oks + ctr.errors
+      err_rate = if(calls > 0, do: ctr.errors / calls, else: 0.0)
+
+      %{
+        id: id,
+        key_configured?: provider_key_configured?(id),
+        last_ok_at: ctr.last_ok_at,
+        recent_error_rate: err_rate,
+        rate_limit_remaining: ctr.rate_limit_remaining,
+        token_budget_remaining_today: nil,
+        spend_usd_today: Map.get(spend, id, Decimal.new(0))
+      }
+    end
+  end
+
+  @doc false
+  @spec provider_health_record_ok(atom()) :: :ok
+  def provider_health_record_ok(id) when id in @provider_ids do
+    ensure_health_ets!()
+    c = health_counters(id)
+    now = DateTime.utc_now(:microsecond)
+
+    :ets.insert(@health_ets, {
+      id,
+      %{c | oks: c.oks + 1, last_ok_at: now}
+    })
+
+    :ok
+  end
+
+  @doc false
+  @spec provider_health_record_error(atom()) :: :ok
+  def provider_health_record_error(id) when id in @provider_ids do
+    ensure_health_ets!()
+    c = health_counters(id)
+    :ets.insert(@health_ets, {id, %{c | errors: c.errors + 1}})
+    :ok
+  end
+
+  defp ensure_health_ets! do
+    case :ets.whereis(@health_ets) do
+      :undefined ->
+        :ets.new(@health_ets, [:named_table, :public, :set])
+
+      _tid ->
+        :ok
+    end
+
+    for id <- @provider_ids do
+      case :ets.lookup(@health_ets, id) do
+        [] ->
+          :ets.insert(@health_ets, {id, %{oks: 0, errors: 0, last_ok_at: nil, rate_limit_remaining: nil}})
+
+        _ ->
+          :ok
+      end
+    end
+
+    :ok
+  end
+
+  defp health_counters(id) do
+    case :ets.lookup(@health_ets, id) do
+      [{^id, m}] when is_map(m) -> m
+      _ -> %{oks: 0, errors: 0, last_ok_at: nil, rate_limit_remaining: nil}
+    end
+  end
+
+  defp provider_key_configured?(:ollama), do: true
+
+  defp provider_key_configured?(:anthropic), do: Kiln.Secrets.present?(:anthropic_api_key)
+  defp provider_key_configured?(:openai), do: Kiln.Secrets.present?(:openai_api_key)
+  defp provider_key_configured?(:google), do: Kiln.Secrets.present?(:google_api_key)
+
+  defp today_spend_usd_by_provider_id do
+    Kiln.CostRollups.by_provider(%{})
+    |> Enum.reduce(%{}, fn %{key: model_key, usd: usd}, acc ->
+      case provider_id_for_model_key(model_key) do
+        nil -> acc
+        id -> Map.update(acc, id, usd, &Decimal.add(&1, usd))
+      end
+    end)
+  end
+
+  defp provider_id_for_model_key(key) when is_binary(key) do
+    cond do
+      String.starts_with?(key, "claude-") -> :anthropic
+      String.starts_with?(key, "gpt-") -> :openai
+      String.starts_with?(key, "gemini-") -> :google
+      key in ["unpriced", nil] -> nil
+      true -> :ollama
+    end
+  end
+
+  defp provider_id_for_model_key(_), do: nil
 end
