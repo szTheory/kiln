@@ -11,6 +11,7 @@ defmodule KilnWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug KilnWeb.Plugs.Scope
+    plug KilnWeb.Plugs.OnboardingGate
   end
 
   pipeline :api do
@@ -23,6 +24,7 @@ defmodule KilnWeb.Router do
     get "/runs/:run_id/diagnostics/bundle.zip", DiagnosticsZipController, :bundle
 
     live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
+      live "/onboarding", OnboardingLive, :index
       live "/", RunBoardLive, :index
       live "/inbox", InboxLive, :index
       live "/runs/:run_id", RunDetailLive, :show

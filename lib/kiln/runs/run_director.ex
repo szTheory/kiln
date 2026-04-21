@@ -71,6 +71,7 @@ defmodule Kiln.Runs.RunDirector do
   use GenServer
   require Logger
 
+  alias Kiln.OperatorReadiness
   alias Kiln.Runs
   alias Kiln.Runs.{RunSubtree, RunSupervisor}
 
@@ -79,8 +80,17 @@ defmodule Kiln.Runs.RunDirector do
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: __MODULE__)
 
-  @spec start_run(Ecto.UUID.t()) :: {:ok, Kiln.Runs.Run.t()} | no_return()
+  @spec start_run(Ecto.UUID.t()) ::
+          {:ok, Kiln.Runs.Run.t()} | {:error, :factory_not_ready} | no_return()
   def start_run(run_id) when is_binary(run_id) do
+    if not OperatorReadiness.ready?() do
+      {:error, :factory_not_ready}
+    else
+      start_run_when_ready(run_id)
+    end
+  end
+
+  defp start_run_when_ready(run_id) do
     run = Runs.get!(run_id)
 
     case missing_provider_keys(run) do
