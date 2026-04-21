@@ -135,6 +135,52 @@ defmodule Kiln.AuditTest do
     end
   end
 
+  describe "replay/1 — filters (UI-05)" do
+    alias Kiln.Factory.Run, as: RunFactory
+
+    test "filters by stage_id + occurred bounds" do
+      run = RunFactory.insert(:run)
+      cid = Ecto.UUID.generate()
+
+      t0 = ~U[2026-01-01 12:00:00.000000Z]
+      t1 = ~U[2026-01-02 12:00:00.000000Z]
+
+      stage_a = Ecto.UUID.generate()
+      stage_b = Ecto.UUID.generate()
+
+      assert {:ok, _} =
+               Audit.append(%{
+                 event_kind: :run_state_transitioned,
+                 correlation_id: cid,
+                 run_id: run.id,
+                 stage_id: stage_a,
+                 occurred_at: t0,
+                 payload: minimal_payload_for(:run_state_transitioned)
+               })
+
+      assert {:ok, _} =
+               Audit.append(%{
+                 event_kind: :run_state_transitioned,
+                 correlation_id: cid,
+                 run_id: run.id,
+                 stage_id: stage_b,
+                 occurred_at: t1,
+                 payload: minimal_payload_for(:run_state_transitioned)
+               })
+
+      out =
+        Audit.replay(
+          run_id: run.id,
+          stage_id: stage_a,
+          occurred_after: ~U[2026-01-01 00:00:00.000000Z],
+          occurred_before: ~U[2026-01-01 23:59:59.000000Z]
+        )
+
+      assert length(out) == 1
+      assert hd(out).stage_id == stage_a
+    end
+  end
+
   # One minimal-valid payload per kind; mirrors the 25 JSON schemas
   # (22 Phase 1 + 3 Phase 2 D-85 extensions).
   defp minimal_payload_for(:run_state_transitioned), do: %{"from" => "queued", "to" => "planning"}

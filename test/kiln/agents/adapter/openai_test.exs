@@ -9,6 +9,11 @@ defmodule Kiln.Agents.Adapter.OpenAITest do
 
   alias Kiln.Agents.{Adapter.OpenAI, Prompt}
 
+  setup_all do
+    Code.ensure_loaded!(Kiln.Agents.Adapter.OpenAI)
+    :ok
+  end
+
   test "implements the 4 Adapter callbacks" do
     assert function_exported?(OpenAI, :complete, 2)
     assert function_exported?(OpenAI, :stream, 2)

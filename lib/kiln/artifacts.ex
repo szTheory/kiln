@@ -112,6 +112,19 @@ defmodule Kiln.Artifacts do
   end
 
   @doc """
+  List artifact names for a stage run (read-only metadata for UI pickers).
+  """
+  @spec list_for_stage_run(Ecto.UUID.t()) :: [%{name: String.t(), content_type: atom()}]
+  def list_for_stage_run(stage_run_id) do
+    from(a in Artifact,
+      where: a.stage_run_id == ^stage_run_id,
+      order_by: [asc: a.name],
+      select: %{name: a.name, content_type: a.content_type}
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   Look up an artifact by `(stage_run_id, name)`. Returns
   `{:ok, %Artifact{}}` when found, `{:error, :not_found}` otherwise.
   """

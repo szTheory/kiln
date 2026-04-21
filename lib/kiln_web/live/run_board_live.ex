@@ -106,7 +106,10 @@ defmodule KilnWeb.RunBoardLive do
           </section>
         <% else %>
           <div class="grid gap-4 overflow-x-auto pb-4 lg:grid-cols-9">
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="queued">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="queued"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Queued
               </h2>
@@ -124,7 +127,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="planning">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="planning"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Planning
               </h2>
@@ -142,7 +148,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="coding">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="coding"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Coding
               </h2>
@@ -160,7 +169,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="testing">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="testing"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Testing
               </h2>
@@ -178,7 +190,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="verifying">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="verifying"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Verifying
               </h2>
@@ -196,7 +211,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="blocked">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="blocked"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Blocked
               </h2>
@@ -214,7 +232,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="merged">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="merged"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Merged
               </h2>
@@ -232,7 +253,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="failed">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="failed"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Failed
               </h2>
@@ -250,7 +274,10 @@ defmodule KilnWeb.RunBoardLive do
               </div>
             </section>
 
-            <section class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2" data-state="escalated">
+            <section
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              data-state="escalated"
+            >
               <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
                 Escalated
               </h2>

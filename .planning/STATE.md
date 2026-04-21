@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 7 context gathered
-last_updated: "2026-04-21T21:13:05.964Z"
-last_activity: 2026-04-21
+status: idle
+stopped_at: Phase 7 complete — ready for Phase 8
+last_updated: "2026-04-21T21:50:00.000Z"
+last_activity: 2026-04-21 -- Phase 7 executed (plans 07-01..07-06) + verification
 progress:
   total_phases: 10
-  completed_phases: 6
-  total_plans: 42
-  completed_plans: 42
+  completed_phases: 7
+  total_plans: 48
+  completed_plans: 48
   percent: 100
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase 06 — github-integration
+**Current focus:** Phase 8 — operator-ux (intake, ops, unblock, onboarding)
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-21
+Phase: 8 (operator-ux) — NEXT
+Plan: —
+Status: Phase 7 complete; roadmap Phase 7 checkbox updated
+Last activity: 2026-04-21 -- Phase 7 closed (UI board, detail, workflows, costs, audit)
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
 
 ## Performance Metrics
 
@@ -189,4 +189,4 @@ Next command: Triage uncommitted planning files, then `/gsd-research-phase 4` (o
 
 **Note:** Phase 5 discuss output is on `main` (`.planning/phases/05-spec-verification-bounded-loop/05-CONTEXT.md`); execution order remains Phase 4 before Phase 5 unless explicitly reprioritized.
 
-**Planned Phase:** 06 (GitHub Integration) — 4 plans — 2026-04-21T20:36:05.083Z
+**Planned Phase:** 7 (Core Run UI (LiveView)) — 6 plans — 2026-04-21T21:23:22.535Z

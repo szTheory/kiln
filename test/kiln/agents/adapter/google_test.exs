@@ -7,6 +7,11 @@ defmodule Kiln.Agents.Adapter.GoogleTest do
 
   alias Kiln.Agents.{Adapter.Google, Prompt}
 
+  setup_all do
+    Code.ensure_loaded!(Kiln.Agents.Adapter.Google)
+    :ok
+  end
+
   test "implements the 4 Adapter callbacks" do
     assert function_exported?(Google, :complete, 2)
     assert function_exported?(Google, :stream, 2)

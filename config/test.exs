@@ -1,5 +1,9 @@
 import Config
 
+# Phase 07 — `Kiln.Workflows.load/1` snapshot hook skips Repo writes in tests
+# that invoke the loader without a SQL Sandbox checkout (see LoaderTest).
+config :kiln, :skip_workflow_snapshot_persist, true
+
 # Configure your database.
 #
 # Matches compose.yaml credentials (kiln / kiln_dev). The base database

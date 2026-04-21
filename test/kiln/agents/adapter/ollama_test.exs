@@ -7,6 +7,11 @@ defmodule Kiln.Agents.Adapter.OllamaTest do
 
   alias Kiln.Agents.{Adapter.Ollama, Prompt}
 
+  setup_all do
+    Code.ensure_loaded!(Kiln.Agents.Adapter.Ollama)
+    :ok
+  end
+
   test "implements the 4 Adapter callbacks" do
     assert function_exported?(Ollama, :complete, 2)
     assert function_exported?(Ollama, :stream, 2)

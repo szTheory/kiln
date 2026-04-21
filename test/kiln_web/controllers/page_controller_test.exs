@@ -1,8 +1,8 @@
 defmodule KilnWeb.PageControllerTest do
   use KilnWeb.ConnCase
 
-  test "GET / redirects to /ops/dashboard (D-04)", %{conn: conn} do
+  test "GET / serves RunBoardLive (Phase 07)", %{conn: conn} do
     conn = get(conn, ~p"/")
-    assert redirected_to(conn) == "/ops/dashboard"
+    assert html_response(conn, 200) =~ "run-board"
   end
 end

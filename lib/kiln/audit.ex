@@ -70,10 +70,13 @@ defmodule Kiln.Audit do
   """
   @spec replay(keyword()) :: [Event.t()]
   def replay(opts \\ []) do
+    {limit, filters} = Keyword.pop(opts, :limit, 500)
+
     Event
     |> from(as: :e)
     |> order_by([e: e], asc: e.occurred_at)
-    |> apply_replay_filters(opts)
+    |> apply_replay_filters(filters)
+    |> limit(^limit)
     |> Repo.all()
   end
 
@@ -84,6 +87,11 @@ defmodule Kiln.Audit do
       {:run_id, rid}, acc -> where(acc, [e: e], e.run_id == ^rid)
       {:event_kind, k}, acc -> where(acc, [e: e], e.event_kind == ^k)
       {:correlation_id, c}, acc -> where(acc, [e: e], e.correlation_id == ^c)
+      {:stage_id, id}, acc -> where(acc, [e: e], e.stage_id == ^id)
+      {:actor_role, role}, acc when role in [nil, ""] -> acc
+      {:actor_role, role}, acc -> where(acc, [e: e], e.actor_role == ^role)
+      {:occurred_after, %DateTime{} = dt}, acc -> where(acc, [e: e], e.occurred_at >= ^dt)
+      {:occurred_before, %DateTime{} = dt}, acc -> where(acc, [e: e], e.occurred_at <= ^dt)
       _other, acc -> acc
     end)
   end
