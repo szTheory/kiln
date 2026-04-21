@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
 status: ready_to_plan
-stopped_at: Phase 8 context gathered
-last_updated: "2026-04-21T22:32:46.705Z"
-last_activity: 2026-04-21 -- Phase --phase execution started
+stopped_at: Phase 8 complete
+last_updated: "2026-04-21T23:20:00.000Z"
+last_activity: 2026-04-21 -- Phase 8 execution and verification complete
 progress:
   total_phases: 10
   completed_phases: 8
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase --phase — 08
+**Current focus:** Phase 9 — Dogfood & Release (v0.1.0)
 
 ## Current Position
 
-Phase: 999.1
+Phase: 9
 Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-21
+Status: Ready to plan (discuss → plan before execute)
+Last activity: 2026-04-21 -- Phase 8 closed (intake, ops, unblock, onboarding, factory chrome)
 
 Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
 

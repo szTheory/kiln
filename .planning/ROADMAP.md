@@ -23,7 +23,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [ ] **Phase 5: Spec, Verification & Bounded Loop** - Spec editor + executable BDD scenarios + deterministic verifier + holdout scenarios + loop-until-spec-met + bounded autonomy caps + stuck detector + zero-human-QA enforcement
 - [ ] **Phase 6: GitHub Integration** - Idempotent git commit/push, PR creation via `gh`, GitHub Actions status read/write
 - [x] **Phase 7: Core Run UI (LiveView)** - Run board, run detail with stage graph + diff + logs + agent chatter, workflow registry, cost dashboard, audit ledger view, brand book applied — **complete 2026-04-21**
-- [ ] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker
+- [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
 - [ ] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged
 
 ## Phase Details
@@ -273,7 +273,7 @@ Phases needing `/gsd-research-phase` before planning:
 | 5. Spec, Verification & Bounded Loop | 0/TBD | Not started | - |
 | 6. GitHub Integration | 0/TBD | Not started | - |
 | 7. Core Run UI (LiveView) | 0/TBD | Not started | - |
-| 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 0/TBD | Not started | - |
+| 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 10/10 | Complete | 2026-04-21 |
 | 9. Dogfood & Release (v0.1.0) | 0/TBD | Not started | - |
 
 ## Backlog
