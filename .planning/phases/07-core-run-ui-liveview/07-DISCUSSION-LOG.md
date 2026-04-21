@@ -79,8 +79,7 @@
 
 | Option | Description | Selected |
 |--------|-------------|----------|
-| Silent only | Streams, no chrome | Partial |
-| Silent + neutral per-card highlight | Char/Iron/Ash ~250ms, reduced-motion safe | ✓ |
+| Silent + neutral per-card highlight | Streams + Char/Iron/Ash ~250ms cue, reduced-motion safe | ✓ |
 | Toasts / column Ember pulse | High salience | ✗ |
 
 **User's choice:** Linear-quiet baseline + **neutral** per-card border/background pulse; **no Ember** for refresh; debounce anti-strobe.
