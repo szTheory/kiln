@@ -31,7 +31,7 @@ defmodule Kiln.AuditTest do
       assert event.event_kind == :stage_started
     end
 
-    test "every one of the 33 kinds accepts its minimal payload" do
+    test "every one of the 34 kinds accepts its minimal payload" do
       for kind <- EventKind.values() do
         payload = minimal_payload_for(kind)
         cid = Ecto.UUID.generate()
@@ -320,4 +320,11 @@ defmodule Kiln.AuditTest do
 
   defp minimal_payload_for(:notification_suppressed),
     do: %{"reason" => "missing_api_key", "dedup_key" => "run:abc:missing_api_key"}
+
+  defp minimal_payload_for(:spec_draft_promoted),
+    do: %{
+      "draft_id" => Ecto.UUID.generate(),
+      "spec_id" => Ecto.UUID.generate(),
+      "spec_revision_id" => Ecto.UUID.generate()
+    }
 end

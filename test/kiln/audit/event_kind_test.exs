@@ -18,8 +18,8 @@ defmodule Kiln.Audit.EventKindTest do
   ]
 
   describe "values/0" do
-    test "contains exactly 33 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145)" do
-      assert length(EventKind.values()) == 33
+    test "contains exactly 34 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 1 P8)" do
+      assert length(EventKind.values()) == 34
     end
 
     test "every element is an atom" do
@@ -38,19 +38,18 @@ defmodule Kiln.Audit.EventKindTest do
       end
     end
 
-    test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms" do
-      # After Phase 3: the last 8 kinds MUST be the D-145 additions, in
-      # declaration order. The 3 D-85 atoms must be immediately before them
-      # (positions -11..-9 from the tail). Reordering breaks the CHECK
-      # constraint migration contract (each phase's `down/0` hard-codes the
-      # prior list and assumes this ordering).
+    test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms; P8 appends last" do
+      # After Phase 3: the last 8 kinds before any Phase-8 tail MUST be the D-145
+      # additions. Phase 8 appends exactly one atom after P3.
       values = EventKind.values()
-      last_eight = Enum.take(values, -8)
-      assert last_eight == @p3_new_kinds
+      assert List.last(values) == :spec_draft_promoted
 
-      three_before_last_eight = values |> Enum.drop(-8) |> Enum.take(-3)
+      last_p3_block = values |> Enum.drop(-1) |> Enum.take(-8)
+      assert last_p3_block == @p3_new_kinds
 
-      assert three_before_last_eight == [
+      three_before_p3_block = values |> Enum.take(-12) |> Enum.take(3)
+
+      assert three_before_p3_block == [
                :stage_input_rejected,
                :artifact_written,
                :integrity_violation

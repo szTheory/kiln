@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/spec_draft_promoted.json",
+  "title": "spec_draft_promoted",
+  "type": "object",
+  "required": ["draft_id", "spec_id", "spec_revision_id"],
+  "properties": {
+    "draft_id": { "type": "string", "format": "uuid" },
+    "spec_id": { "type": "string", "format": "uuid" },
+    "spec_revision_id": { "type": "string", "format": "uuid" }
+  },
+  "additionalProperties": false
+}
