@@ -18,8 +18,8 @@ defmodule Kiln.Audit.EventKindTest do
   ]
 
   describe "values/0" do
-    test "contains exactly 34 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 1 P8)" do
-      assert length(EventKind.values()) == 34
+    test "contains exactly 35 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 2 P8)" do
+      assert length(EventKind.values()) == 35
     end
 
     test "every element is an atom" do
@@ -40,14 +40,14 @@ defmodule Kiln.Audit.EventKindTest do
 
     test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms; P8 appends last" do
       # After Phase 3: the last 8 kinds before any Phase-8 tail MUST be the D-145
-      # additions. Phase 8 appends exactly one atom after P3.
+      # additions. Phase 8 appends `:spec_draft_promoted` then `:follow_up_drafted`.
       values = EventKind.values()
-      assert List.last(values) == :spec_draft_promoted
+      assert List.last(values) == :follow_up_drafted
 
-      last_p3_block = values |> Enum.drop(-1) |> Enum.take(-8)
+      last_p3_block = values |> Enum.drop(-2) |> Enum.take(-8)
       assert last_p3_block == @p3_new_kinds
 
-      three_before_p3_block = values |> Enum.take(-12) |> Enum.take(3)
+      three_before_p3_block = values |> Enum.take(-13) |> Enum.take(3)
 
       assert three_before_p3_block == [
                :stage_input_rejected,

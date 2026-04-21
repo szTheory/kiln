@@ -7,7 +7,7 @@ defmodule Kiln.Application do
   alias Kiln.Telemetry.ObanHandler
 
   # D-42 (P1) / D-92..D-96 (Phase 2) + Phase 3/4 infra: the children list
-  # is EXACTLY 13 post-boot (infra children + `KilnWeb.Endpoint`). Phase 1
+  # is EXACTLY 14 post-boot (infra children + `KilnWeb.Endpoint`). Phase 1
   # locked the 7-child shape (D-42 "no DNSCluster, no stub Phase 2+
   # children"); Plan 02-07 extends the tree per D-92..D-96 by adding:
   #
@@ -26,10 +26,11 @@ defmodule Kiln.Application do
   # BootChecks.run! → Endpoint); Phase 4 removes the global
   # `Kiln.Agents.SessionSupervisor` scaffold (per-run sessions only).
   # Post-boot `Supervisor.which_children(Kiln.Supervisor)` returns
-  # EXACTLY 13 entries (asserted by test/kiln/application_test.exs).
+  # EXACTLY 14 entries (asserted by test/kiln/application_test.exs).
   @impl true
   def start(_type, _args) do
     :ok = Limits.load!()
+    :ok = Kiln.AgentTickerRateLimiter.ensure_table()
 
     opts = [strategy: :one_for_one, name: Kiln.Supervisor]
 
@@ -51,7 +52,7 @@ defmodule Kiln.Application do
 
         # Stage 4: add `KilnWeb.Endpoint` as the final child. After this
         # call `Supervisor.which_children(Kiln.Supervisor)` returns
-        # EXACTLY 13 entries (asserted by test/kiln/application_test.exs).
+        # EXACTLY 14 entries (asserted by test/kiln/application_test.exs).
         {:ok, _endpoint_pid} = Supervisor.start_child(sup_pid, KilnWeb.Endpoint.child_spec([]))
 
         {:ok, sup_pid}
@@ -80,6 +81,7 @@ defmodule Kiln.Application do
       KilnWeb.Telemetry,
       Kiln.Repo,
       {Phoenix.PubSub, name: Kiln.PubSub},
+      {Kiln.FactorySummaryPublisher, []},
       {Finch, name: Kiln.Finch, pools: finch_pools()},
       {Registry, keys: :unique, name: Kiln.RunRegistry},
       {Oban, Application.fetch_env!(:kiln, Oban)},

@@ -38,7 +38,7 @@ defmodule Kiln.Runs.Transitions do
 
   import Ecto.Query
   require Logger
-  alias Kiln.{Audit, Repo}
+  alias Kiln.{AgentTickerRateLimiter, Audit, Repo}
   alias Kiln.ExternalOperations
   alias Kiln.Runs.Run
   alias Kiln.Policies.StuckDetector
@@ -121,6 +121,7 @@ defmodule Kiln.Runs.Transitions do
         maybe_abandon_ops(run)
         Phoenix.PubSub.broadcast(Kiln.PubSub, "run:#{run.id}", {:run_state, run})
         Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, run})
+        maybe_broadcast_agent_ticker(run, meta)
         {:ok, run}
 
       other ->
@@ -365,6 +366,28 @@ defmodule Kiln.Runs.Transitions do
     do: Map.put(payload, "reason", Atom.to_string(r))
 
   defp maybe_add_reason(payload, _), do: payload
+
+  defp maybe_broadcast_agent_ticker(%Run{} = run, meta) do
+    stage_id = Map.get(meta, :stage_id, Atom.to_string(run.state))
+
+    line =
+      [
+        String.slice(to_string(run.id), 0, 8),
+        Atom.to_string(run.state),
+        run.workflow_id
+      ]
+      |> Enum.join(" · ")
+
+    if AgentTickerRateLimiter.allow?(run.id) do
+      Phoenix.PubSub.broadcast(
+        Kiln.PubSub,
+        "agent_ticker",
+        {:agent_ticker_line, %{run_id: run.id, stage_id: stage_id, line: line}}
+      )
+    end
+
+    :ok
+  end
 
   # @any_state is referenced in the moduledoc narrative — keep the
   # module attribute resident so dialyxir doesn't flag it, and future

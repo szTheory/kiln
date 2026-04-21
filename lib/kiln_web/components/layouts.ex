@@ -36,6 +36,10 @@ defmodule KilnWeb.Layouts do
     default: nil,
     doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
 
+  attr :factory_summary, :map,
+    default: %{active: 0, blocked: 0},
+    doc: "UI-07 counts from `factory:summary` (see `KilnWeb.FactorySummaryHook`)"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -90,6 +94,10 @@ defmodule KilnWeb.Layouts do
             </li>
           </ul>
         </nav>
+      </div>
+      <div class="mx-auto max-w-7xl pb-3">
+        <%!-- FactoryHeader (UI-07) — `KilnWeb.Components.FactoryHeader` --%>
+        <.factory_header summary={@factory_summary} />
       </div>
     </header>
 

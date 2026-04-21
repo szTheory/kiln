@@ -202,9 +202,18 @@ defmodule KilnWeb.RunDetailLive do
     <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
       <div id="run-detail" class="space-y-6 text-bone">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-ash pb-4">
-          <div>
-            <p class="font-mono text-xs text-[var(--color-smoke)]">{@run.id}</p>
-            <h1 class="text-xl font-semibold">Run {@run.workflow_id}</h1>
+          <div class="flex flex-wrap items-end gap-4">
+            <div>
+              <p class="font-mono text-xs text-[var(--color-smoke)]">{@run.id}</p>
+              <h1 class="text-xl font-semibold">Run {@run.workflow_id}</h1>
+            </div>
+            <%!-- RunProgress (UI-08) --%>
+            <.run_progress
+              run={@run}
+              stages_done={run_stage_slot(@run.state)}
+              stages_total={length(Run.states())}
+              last_activity_at={@run.updated_at}
+            />
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <%= if @run.state == :merged && @follow_up_correlation_id do %>
@@ -433,4 +442,11 @@ defmodule KilnWeb.RunDetailLive do
   end
 
   defp short(uuid), do: uuid |> to_string() |> String.slice(0, 8)
+
+  defp run_stage_slot(state) do
+    case Enum.find_index(Run.states(), &(&1 == state)) do
+      nil -> 0
+      i -> i + 1
+    end
+  end
 end

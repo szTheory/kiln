@@ -6,7 +6,7 @@ defmodule Kiln.ApplicationTest do
 
   Tests cover:
 
-    * Exactly 13 children post-boot.
+    * Exactly 14 children post-boot.
     * All expected module-ids present in `Supervisor.which_children/1`.
     * The named pools (`Kiln.Finch`, `Kiln.RunRegistry`,
       `Kiln.Runs.RunDirector`, `Kiln.Runs.RunSupervisor`,
@@ -15,15 +15,15 @@ defmodule Kiln.ApplicationTest do
   """
   use ExUnit.Case, async: false
 
-  describe "supervision tree (Phase 4, 13 children)" do
-    test "exactly 13 children running under Kiln.Supervisor" do
+  describe "supervision tree (Phase 4, 14 children)" do
+    test "exactly 14 children running under Kiln.Supervisor" do
       child_ids =
         Kiln.Supervisor
         |> Supervisor.which_children()
         |> Enum.map(fn {id, _pid, _type, _mods} -> id end)
 
-      assert length(child_ids) == 13,
-             "Phase 4 requires EXACTLY 13 children, got #{length(child_ids)}: #{inspect(child_ids)}"
+      assert length(child_ids) == 14,
+             "Phase 4 requires EXACTLY 14 children, got #{length(child_ids)}: #{inspect(child_ids)}"
     end
 
     test "locked child set includes Phase 3 runtime additions (minus global session sup)" do
@@ -42,6 +42,7 @@ defmodule Kiln.ApplicationTest do
         {"Kiln.Repo", &(&1 == Kiln.Repo)},
         {"Phoenix.PubSub (via supervisor)",
          fn id -> is_atom(id) and to_string(id) =~ "PubSub" end},
+        {"Kiln.FactorySummaryPublisher", &(&1 == Kiln.FactorySummaryPublisher)},
         {"Finch (Kiln.Finch)", &(&1 == Kiln.Finch)},
         {"Registry (Kiln.RunRegistry)", &(&1 == Kiln.RunRegistry)},
         {"Oban", &(&1 == Oban)},

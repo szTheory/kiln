@@ -32,6 +32,7 @@ defmodule KilnWeb.RunBoardLive do
   @impl true
   def mount(_params, _session, socket) do
     _ = Phoenix.PubSub.subscribe(Kiln.PubSub, "runs:board")
+    _ = Phoenix.PubSub.subscribe(Kiln.PubSub, "agent_ticker")
 
     runs = Runs.list_for_board()
     run_states = Map.new(runs, &{&1.id, &1.state})
@@ -41,6 +42,8 @@ defmodule KilnWeb.RunBoardLive do
       |> assign(:page_title, "Runs")
       |> assign(:run_states, run_states)
       |> assign(:runs_empty?, runs == [])
+      |> assign(:ticker_ids, [])
+      |> stream(:ticker_lines, [], reset: true)
 
     socket =
       Enum.reduce(Run.states(), socket, fn state, acc ->
@@ -52,6 +55,26 @@ defmodule KilnWeb.RunBoardLive do
   end
 
   @impl true
+  def handle_info({:agent_ticker_line, %{line: line}}, socket) do
+    id = "ticker-" <> Integer.to_string(:erlang.unique_integer([:positive]))
+    row = %{id: id, line: line}
+
+    ids = [id | socket.assigns.ticker_ids]
+
+    {socket, ids} =
+      if length(ids) > 75 do
+        {dropped, rest} = List.pop_at(ids, -1)
+        {stream_delete(socket, :ticker_lines, %{id: dropped, line: ""}), rest}
+      else
+        {socket, ids}
+      end
+
+    {:noreply,
+     socket
+     |> assign(:ticker_ids, ids)
+     |> stream_insert(:ticker_lines, row, at: 0)}
+  end
+
   def handle_info({:run_state, %Run{} = run}, socket) do
     old = Map.get(socket.assigns.run_states, run.id)
 
@@ -119,10 +142,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -140,10 +160,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -161,10 +178,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -182,10 +196,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -203,10 +214,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -224,10 +232,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -245,10 +250,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -266,10 +268,7 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
@@ -287,18 +286,62 @@ defmodule KilnWeb.RunBoardLive do
                   id={dom_id}
                   class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
                 >
-                  <div class="truncate font-semibold text-ember" title={run.id}>
-                    {short_id(run.id)}
-                  </div>
-                  <div class="mt-1 truncate text-[var(--color-smoke)]">{run.workflow_id}</div>
+                  <.board_run_card run={run} />
                 </div>
               </div>
             </section>
           </div>
         <% end %>
+
+        <.agent_ticker>
+          <div
+            id="agent-ticker"
+            phx-update="stream"
+            class="max-h-64 space-y-1 overflow-y-auto font-mono text-[11px] text-bone"
+          >
+            <div :for={{tid, row} <- @streams.ticker_lines} id={tid}>
+              {row.line}
+            </div>
+          </div>
+        </.agent_ticker>
       </div>
     </Layouts.app>
     """
+  end
+
+  attr :run, Run, required: true
+
+  def board_run_card(assigns) do
+    stages_done = run_stage_slot(assigns.run.state)
+    stages_total = length(Run.states())
+
+    assigns =
+      assigns
+      |> assign(:stages_done, stages_done)
+      |> assign(:stages_total, stages_total)
+
+    ~H"""
+    <div class="truncate font-semibold text-ember" title={@run.id}>
+      {short_id(@run.id)}
+    </div>
+    <div class="mt-1 truncate text-[var(--color-smoke)]">{@run.workflow_id}</div>
+    <div class="mt-2">
+      <%!-- RunProgress (UI-08) --%>
+      <.run_progress
+        run={@run}
+        stages_done={@stages_done}
+        stages_total={@stages_total}
+        last_activity_at={@run.updated_at}
+      />
+    </div>
+    """
+  end
+
+  defp run_stage_slot(state) do
+    case Enum.find_index(Run.states(), &(&1 == state)) do
+      nil -> 0
+      i -> i + 1
+    end
   end
 
   defp short_id(id) do

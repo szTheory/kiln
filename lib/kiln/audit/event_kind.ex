@@ -3,7 +3,7 @@ defmodule Kiln.Audit.EventKind do
   Single source of truth for the `audit_events.event_kind` taxonomy
   (D-07, D-08, D-85, D-145, D-106).
 
-  The list declared here is the authoritative 34-value enum (22 shipped in
+  The list declared here is the authoritative 35-value enum (22 shipped in
   Phase 1; 3 added in Phase 2 per D-85: `:stage_input_rejected`,
   `:artifact_written`, `:integrity_violation`; 8 added in Phase 3 per D-145:
   `:orphan_container_swept`, `:dtu_contract_drift_detected`,

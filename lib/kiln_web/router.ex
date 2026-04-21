@@ -23,7 +23,11 @@ defmodule KilnWeb.Router do
 
     get "/runs/:run_id/diagnostics/bundle.zip", DiagnosticsZipController, :bundle
 
-    live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
+    live_session :default,
+      on_mount: [
+        {KilnWeb.LiveScope, :default},
+        {KilnWeb.FactorySummaryHook, :default}
+      ] do
       live "/onboarding", OnboardingLive, :index
       live "/", RunBoardLive, :index
       live "/inbox", InboxLive, :index

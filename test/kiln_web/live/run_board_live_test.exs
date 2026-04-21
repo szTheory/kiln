@@ -14,6 +14,30 @@ defmodule KilnWeb.RunBoardLiveTest do
       assert render(view) =~ "Start a run from the workflow registry when you are ready"
     end
 
+    test "renders factory chrome: header, run progress, agent ticker stream", %{conn: conn} do
+      _ =
+        RunFactory.insert(:run,
+          state: :coding,
+          workflow_id: "wf-chrome"
+        )
+
+      {:ok, view, _html} = live(conn, ~p"/")
+      html = render(view)
+
+      assert html =~ ~s(id="factory-header")
+      assert html =~ ~s(id="agent-ticker")
+      assert html =~ "wf-chrome"
+      assert html =~ "Stages"
+
+      Phoenix.PubSub.broadcast(
+        Kiln.PubSub,
+        "agent_ticker",
+        {:agent_ticker_line, %{run_id: "x", stage_id: "coding", line: "hello ticker"}}
+      )
+
+      assert render(view) =~ "hello ticker"
+    end
+
     test "renders kanban cards and updates on runs:board PubSub", %{conn: conn} do
       run =
         RunFactory.insert(:run,
