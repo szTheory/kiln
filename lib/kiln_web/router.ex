@@ -22,6 +22,7 @@ defmodule KilnWeb.Router do
 
     live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
       live "/", RunBoardLive, :index
+      live "/inbox", InboxLive, :index
       live "/runs/:run_id", RunDetailLive, :show
       live "/workflows", WorkflowLive, :index
       live "/workflows/:workflow_id", WorkflowLive, :show

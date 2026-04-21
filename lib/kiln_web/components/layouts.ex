@@ -56,6 +56,11 @@ defmodule KilnWeb.Layouts do
               </.link>
             </li>
             <li>
+              <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/inbox"}>
+                Inbox
+              </.link>
+            </li>
+            <li>
               <.link class="btn btn-ghost btn-sm font-sans text-bone" navigate={~p"/costs"}>
                 Costs
               </.link>

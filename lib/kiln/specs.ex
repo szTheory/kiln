@@ -226,6 +226,26 @@ defmodule Kiln.Specs do
   def refresh_github_issue_draft(%SpecDraft{} = draft, opts \\ []),
     do: GitHubIssueImporter.refresh(draft, opts)
 
+  @doc """
+  Updates an **open** draft's title/body (operator edit from inbox).
+  """
+  @spec update_open_draft(Ecto.UUID.t(), map()) ::
+          {:ok, SpecDraft.t()} | {:error, :not_found | :invalid_state | Ecto.Changeset.t()}
+  def update_open_draft(draft_id, attrs) when is_binary(draft_id) and is_map(attrs) do
+    case Repo.get(SpecDraft, draft_id) do
+      nil ->
+        {:error, :not_found}
+
+      %SpecDraft{inbox_state: :open} = draft ->
+        draft
+        |> SpecDraft.changeset(attrs)
+        |> Repo.update()
+
+      %SpecDraft{} ->
+        {:error, :invalid_state}
+    end
+  end
+
   defp uuid_string!(id) when is_binary(id) do
     cond do
       byte_size(id) == 16 ->
