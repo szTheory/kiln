@@ -39,6 +39,7 @@ defmodule Kiln.Runs.Transitions do
   import Ecto.Query
   require Logger
   alias Kiln.{Audit, Repo}
+  alias Kiln.ExternalOperations
   alias Kiln.Runs.Run
   alias Kiln.Policies.StuckDetector
 
@@ -94,11 +95,20 @@ defmodule Kiln.Runs.Transitions do
     result =
       Repo.transact(fn ->
         with {:ok, run} <- lock_run(run_id),
-             :ok <- assert_allowed(run.state, to),
-             :ok <- StuckDetector.check(%{run: run, to: to, meta: meta}),
-             {:ok, updated} <- update_state(run, to, meta),
-             {:ok, _event} <- append_audit(updated, run.state, to, meta) do
-          {:ok, updated}
+             :ok <- assert_allowed(run.state, to) do
+          case maybe_escalate_caps(run, to, meta) do
+            {:escalate, reason} ->
+              escalate_in_tx(run, reason, meta)
+
+            :ok ->
+              case StuckDetector.check(%{run: run, to: to, meta: meta}) do
+                {:halt, :stuck, halt} ->
+                  escalate_stuck_in_tx(run, halt, meta)
+
+                {:ok, new_window} ->
+                  transition_ok(run, to, meta, new_window)
+              end
+          end
         end
       end)
 
@@ -108,6 +118,7 @@ defmodule Kiln.Runs.Transitions do
     # RESEARCH.md; D-90).
     case result do
       {:ok, run} ->
+        maybe_abandon_ops(run)
         Phoenix.PubSub.broadcast(Kiln.PubSub, "run:#{run.id}", {:run_state, run})
         Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, run})
         {:ok, run}
@@ -194,10 +205,139 @@ defmodule Kiln.Runs.Transitions do
           attrs
       end
 
+    attrs =
+      case meta do
+        %{stuck_signal_window: w} when is_list(w) ->
+          Map.put(attrs, :stuck_signal_window, w)
+
+        _ ->
+          attrs
+      end
+
+    attrs =
+      if meta[:skip_governed_increment] == true do
+        attrs
+      else
+        Map.put(attrs, :governed_attempt_count, next_governed_count(run, to))
+      end
+
     run
     |> Run.transition_changeset(attrs, meta)
     |> Repo.update()
   end
+
+  defp next_governed_count(run, to) do
+    if to == :planning and run.state in [:coding, :testing, :verifying] do
+      run.governed_attempt_count + 1
+    else
+      run.governed_attempt_count
+    end
+  end
+
+  defp maybe_escalate_caps(_run, _to, %{skip_cap_checks: true}), do: :ok
+
+  defp maybe_escalate_caps(run, to, _meta) do
+    cond do
+      wall_clock_exceeded?(run) ->
+        {:escalate, :wall_clock_exceeded}
+
+      governed_cap_exceeded?(run, to) ->
+        {:escalate, :governed_attempt_cap}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp wall_clock_exceeded?(run) do
+    max_s = caps_get(run.caps_snapshot, "max_elapsed_seconds")
+
+    if is_integer(max_s) and max_s >= 0 do
+      DateTime.diff(DateTime.utc_now(), run.inserted_at, :second) > max_s
+    else
+      false
+    end
+  end
+
+  defp governed_cap_exceeded?(run, to) do
+    max_g = caps_get(run.caps_snapshot, "max_governed_attempts")
+
+    bump? = to == :planning and run.state in [:coding, :testing, :verifying]
+
+    if is_integer(max_g) and bump? and run.governed_attempt_count + 1 > max_g do
+      true
+    else
+      false
+    end
+  end
+
+  defp caps_get(snapshot, key) when is_map(snapshot) do
+    Map.get(snapshot, key) || Map.get(snapshot, String.to_atom(key))
+  end
+
+  defp caps_get(_, _), do: nil
+
+  defp escalate_in_tx(run, reason, meta) do
+    meta =
+      meta
+      |> Map.put(:reason, reason)
+      |> Map.put(:skip_governed_increment, true)
+
+    with :ok <- assert_allowed(run.state, :escalated),
+         {:ok, updated} <- update_state(run, :escalated, meta),
+         {:ok, _} <- append_audit(updated, run.state, :escalated, meta) do
+      {:ok, updated}
+    end
+  end
+
+  defp escalate_stuck_in_tx(run, halt, meta) do
+    halt = Map.new(halt)
+
+    meta =
+      meta
+      |> Map.put(:reason, :stuck)
+      |> Map.put(:skip_governed_increment, true)
+      |> Map.put(:stuck_signal_window, Map.fetch!(halt, :stuck_signal_window))
+      |> Map.put(:stuck_detail, Map.drop(halt, [:stuck_signal_window]))
+
+    with :ok <- assert_allowed(run.state, :escalated),
+         {:ok, updated} <- update_state(run, :escalated, meta),
+         {:ok, _} <- append_audit(updated, run.state, :escalated, meta),
+         {:ok, _} <- append_stuck_alarm(updated, halt) do
+      {:ok, updated}
+    end
+  end
+
+  defp transition_ok(run, to, meta, new_window) do
+    meta = Map.put(meta, :stuck_signal_window, new_window)
+
+    with {:ok, updated} <- update_state(run, to, meta),
+         {:ok, _} <- append_audit(updated, run.state, to, meta) do
+      {:ok, updated}
+    end
+  end
+
+  defp append_stuck_alarm(run, halt) do
+    halt = Map.new(halt)
+    fc = halt |> Map.fetch!(:failure_class) |> to_string()
+
+    Audit.append(%{
+      event_kind: :stuck_detector_alarmed,
+      run_id: run.id,
+      correlation_id: Logger.metadata()[:correlation_id] || Ecto.UUID.generate(),
+      payload: %{
+        "failure_class" => fc,
+        "count" => Map.fetch!(halt, :occurrences)
+      }
+    })
+  end
+
+  defp maybe_abandon_ops(%Run{state: s} = run) when s in [:failed, :escalated] do
+    _ = ExternalOperations.abandon_open_for_run(run.id, Atom.to_string(s))
+    :ok
+  end
+
+  defp maybe_abandon_ops(_), do: :ok
 
   defp append_audit(run, from, to, meta) do
     payload =

@@ -24,7 +24,14 @@ defmodule Kiln.Specs.ScenarioCompilerTest do
     assert src =~ "@moduletag :kiln_scenario"
     assert src =~ "revision_id: #{uuid}"
 
-    {out, code} = System.cmd("mix", ["test", rel, "--max-failures", "1"], cd: File.cwd!(), stderr_to_stdout: true)
+    {out, code} =
+      System.cmd(
+        "mix",
+        ["test", rel, "--include", "kiln_scenario", "--max-failures", "1"],
+        cd: File.cwd!(),
+        stderr_to_stdout: true
+      )
+
     assert code == 0, out
   end
 
@@ -48,15 +55,30 @@ defmodule Kiln.Specs.ScenarioCompilerTest do
     uuid = Ecto.UUID.cast!(rev.id)
     rel = Path.join(["test", "generated", "kiln_scenarios", uuid, "scenarios_test.exs"])
 
-    {out, code} = System.cmd("mix", ["test", rel, "--max-failures", "1"], cd: File.cwd!(), stderr_to_stdout: true)
+    {out, code} =
+      System.cmd(
+        "mix",
+        ["test", rel, "--include", "kiln_scenario", "--max-failures", "1"],
+        cd: File.cwd!(),
+        stderr_to_stdout: true
+      )
+
     assert code != 0, out
   end
 
   test "manifest_sha256 is stable for sorted scenario ids" do
     ir = %{
       "scenarios" => [
-        %{"id" => "b", "description" => "", "steps" => [%{"kind" => "assert", "expect" => "true"}]},
-        %{"id" => "a", "description" => "", "steps" => [%{"kind" => "assert", "expect" => "true"}]}
+        %{
+          "id" => "b",
+          "description" => "",
+          "steps" => [%{"kind" => "assert", "expect" => "true"}]
+        },
+        %{
+          "id" => "a",
+          "description" => "",
+          "steps" => [%{"kind" => "assert", "expect" => "true"}]
+        }
       ]
     }
 

@@ -1,0 +1,2 @@
+# One glob or substring per line (matched against relative file path from repo root).
+# Empty file = no allowlist entries (UAT-02).

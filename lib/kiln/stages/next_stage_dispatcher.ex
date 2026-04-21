@@ -13,6 +13,29 @@ defmodule Kiln.Stages.NextStageDispatcher do
   alias Kiln.{ModelRegistry, Repo, Runs, Stages, Telemetry, Workflows}
   alias Kiln.Stages.{StageRun, StageWorker}
 
+  @doc """
+  Filters artifact refs for sandbox hydration when `holdout_excluded` is true
+  (D-S02c / SPEC-04). Removes refs whose `sha256` is tagged as a holdout digest
+  (`"holdout_"` prefix — synthetic marker in tests and internal tooling).
+
+  Pure function: safe to call from tests without Docker or a full run graph.
+  """
+  @spec artifact_allowlist(list(map()), map()) :: list(map())
+  def artifact_allowlist(artifact_refs, %{holdout_excluded: true})
+      when is_list(artifact_refs) do
+    Enum.reject(artifact_refs, &holdout_artifact_ref?/1)
+  end
+
+  def artifact_allowlist(artifact_refs, _ctx) when is_list(artifact_refs),
+    do: artifact_refs
+
+  defp holdout_artifact_ref?(ref) when is_map(ref) do
+    dig = Map.get(ref, "sha256") || Map.get(ref, :sha256)
+    is_binary(dig) and String.starts_with?(dig, "holdout_")
+  end
+
+  defp holdout_artifact_ref?(_), do: false
+
   @spec enqueue_next!(Ecto.UUID.t(), String.t()) :: :ok
   def enqueue_next!(run_id, completed_workflow_stage_id)
       when is_binary(run_id) and is_binary(completed_workflow_stage_id) do
@@ -106,6 +129,8 @@ defmodule Kiln.Stages.NextStageDispatcher do
       "model_profile_snapshot" => role_snapshot
     }
 
+    # holdout_excluded: true — non-verifier stages must never receive holdout
+    # bodies or digests (SPEC-04); see `artifact_allowlist/2` for manifest CAS.
     case stage.kind do
       :planning ->
         Map.merge(base, %{"holdout_excluded" => true, "last_diagnostic_ref" => nil})

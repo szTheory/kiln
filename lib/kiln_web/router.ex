@@ -20,7 +20,10 @@ defmodule KilnWeb.Router do
   scope "/", KilnWeb do
     pipe_through :browser
 
-    get "/", PageController, :redirect_to_ops
+    live_session :default, on_mount: [{KilnWeb.LiveScope, :default}] do
+      get "/", PageController, :redirect_to_ops
+      live "/specs/:id/edit", SpecEditorLive, :edit
+    end
   end
 
   # NOTE (Plan 06 / D-31): `/health` is handled by `Kiln.HealthPlug`,

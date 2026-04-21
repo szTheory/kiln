@@ -29,7 +29,20 @@ config :kiln, KilnWeb.Endpoint, http: [port: String.to_integer(System.get_env("P
 # MIX_TEST_PARTITION support (parallel CI DBs) — lives here to keep compile-time
 # config free of env-var reads per T-02 mitigation.
 if config_env() == :test do
-  config :kiln, Kiln.Repo, database: "kiln_test#{System.get_env("MIX_TEST_PARTITION")}"
+  db = "kiln_test#{System.get_env("MIX_TEST_PARTITION")}"
+  config :kiln, Kiln.Repo, database: db
+  config :kiln, Kiln.Repo.VerifierReadRepo, database: db
+end
+
+# SPEC-04 (holdouts): optional verifier-only DB URL in production.
+if config_env() == :prod do
+  case System.get_env("DATABASE_VERIFIER_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo.VerifierReadRepo, url: url
+
+    _ ->
+      :ok
+  end
 end
 
 if config_env() == :prod do

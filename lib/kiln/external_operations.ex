@@ -212,6 +212,27 @@ defmodule Kiln.ExternalOperations do
   end
 
   @doc """
+  Abandon every still-open op for a run (`:intent_recorded` / `:action_in_flight`).
+  Best-effort: failures on individual rows are logged and ignored so terminal
+  run transitions still complete.
+  """
+  @spec abandon_open_for_run(Ecto.UUID.t(), String.t()) :: :ok
+  def abandon_open_for_run(run_id, reason) when is_binary(reason) do
+    from(o in Operation,
+      where: o.run_id == ^run_id and o.state in [:intent_recorded, :action_in_flight]
+    )
+    |> Repo.all()
+    |> Enum.each(fn op ->
+      case abandon_op(op, reason) do
+        {:ok, _} -> :ok
+        {:error, err} -> Logger.warning("abandon_open_for_run: #{inspect(err)}")
+      end
+    end)
+
+    :ok
+  end
+
+  @doc """
   Mark an op as `:abandoned` (intent without completion, found orphaned
   by Phase 5's `StuckDetector`). Uses the `external_op_failed` audit
   kind with an `"abandoned: <reason>"` prefix in the error field because

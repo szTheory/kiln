@@ -23,6 +23,11 @@
     # ---- Full ExUnit suite ----
     {:ex_unit, "mix test"},
 
+    # ---- Generated spec scenarios (UAT-01 / SPEC-02): `@moduletag :kiln_scenario`
+    #     tests are excluded by default in test_helper — run them explicitly here
+    #     so CI exercises holdouts + compiled scenario modules.
+    {:ex_unit_kiln_scenarios, "mix test --include kiln_scenario"},
+
     # ---- Credo strict (includes Kiln.Credo.NoProcessPut +
     #      Kiln.Credo.NoMixEnvAtRuntime + credo_envvar + ex_slop) ----
     {:credo, "mix credo --strict"},

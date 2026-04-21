@@ -1,0 +1,76 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div
+    id="spec-editor-root"
+    class="max-w-4xl space-y-4 rounded border border-zinc-700 bg-zinc-900 p-6 text-zinc-100"
+  >
+    <header class="space-y-1">
+      <h1 class="text-lg font-semibold tracking-tight text-zinc-50">{@spec.title}</h1>
+      <p class="text-sm text-zinc-400">
+        Autosave debounce: 3s on body changes. Cmd/Ctrl+S saves immediately.
+      </p>
+      <p class="text-sm" id="spec-save-status" data-state={@save_state}>
+        <%= case @save_state do %>
+          <% :saved -> %>
+            <span class="text-emerald-400">Saved</span>
+          <% :saving -> %>
+            <span class="text-amber-300">Saving…</span>
+          <% :unsaved -> %>
+            <span class="text-zinc-300">Unsaved changes</span>
+          <% :error -> %>
+            <span class="text-red-400">Save blocked — fix parse errors</span>
+        <% end %>
+        <%= if @last_saved_at do %>
+          <span class="text-zinc-500">
+            — {DateTime.to_iso8601(@last_saved_at)}
+          </span>
+        <% end %>
+      </p>
+    </header>
+
+    <%= if @parse_error do %>
+      <div
+        id="spec-parse-error"
+        class="rounded border border-red-900/60 bg-red-950/40 p-3 text-sm text-red-100"
+        role="alert"
+      >
+        {@parse_error}
+      </div>
+    <% end %>
+
+    <form id="spec-editor-form" phx-change="body_changed" phx-submit="save" class="space-y-4">
+      <label class="block text-sm font-medium text-zinc-300" for="spec-body">
+        Spec body
+      </label>
+      <textarea
+        id="spec-body"
+        name="spec[body]"
+        phx-debounce="3000"
+        phx-hook=".SpecSaveShortcut"
+        rows="24"
+        class="w-full rounded border border-zinc-700 bg-zinc-950 p-3 font-mono text-sm text-zinc-100 focus:border-amber-600 focus:outline-none"
+      ><%= @body %></textarea>
+
+      <div class="flex gap-3">
+        <button
+          type="submit"
+          class="rounded bg-amber-600 px-4 py-2 text-sm font-medium text-zinc-950 hover:bg-amber-500"
+        >
+          Save revision
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script :type={Phoenix.LiveView.ColocatedHook} name=".SpecSaveShortcut">
+    export default {
+      mounted() {
+        this.el.addEventListener("keydown", (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+            e.preventDefault();
+            this.pushEvent("save_shortcut", { body: this.el.value });
+          }
+        });
+      }
+    }
+  </script>
+</Layouts.app>

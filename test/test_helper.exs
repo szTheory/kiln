@@ -13,6 +13,9 @@ Code.require_file("support/mocks.ex", __DIR__)
 
 ExUnit.start(
   exclude: [
+    # Generated spec scenarios (`@moduletag :kiln_scenario`) — opt-in via
+    # `mix test --include kiln_scenario` (SPEC-02 / UAT-01).
+    :kiln_scenario,
     # Docker-gated integration suites (SandboxCase / DtuCase) — require a
     # Docker daemon on PATH.
     :docker,

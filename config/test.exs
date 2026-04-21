@@ -14,6 +14,16 @@ config :kiln, Kiln.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+# SPEC-04: verifier role credentials (migration `HoldoutPrivileges`); DB name
+# patched for MIX_TEST_PARTITION in `config/runtime.exs` (T-02).
+config :kiln, Kiln.Repo.VerifierReadRepo,
+  username: "kiln_verifier",
+  password: "kiln_dev_verifier",
+  hostname: "localhost",
+  database: "kiln_test",
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: System.schedulers_online() * 2
+
 # Kiln.Artifacts CAS + tmp roots (D-77). Point test writes at a
 # stable per-test-env directory under System.tmp_dir!() so unit tests
 # never pollute priv/artifacts (dev) or the prod CAS.

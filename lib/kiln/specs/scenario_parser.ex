@@ -7,20 +7,18 @@ defmodule Kiln.Specs.ScenarioParser do
   @schema_path Path.expand("../../../priv/jsv/scenario_ir_v1.json", __DIR__)
   @external_resource @schema_path
 
-  @root (
-    case File.read(@schema_path) do
-      {:ok, json} ->
-        raw = Jason.decode!(json)
+  @root (case File.read(@schema_path) do
+           {:ok, json} ->
+             raw = Jason.decode!(json)
 
-        JSV.build!(raw,
-          default_meta: "https://json-schema.org/draft/2020-12/schema",
-          formats: true
-        )
+             JSV.build!(raw,
+               default_meta: "https://json-schema.org/draft/2020-12/schema",
+               formats: true
+             )
 
-      {:error, reason} ->
-        raise "scenario_ir_v1 schema missing at #{@schema_path}: #{inspect(reason)}"
-    end
-  )
+           {:error, reason} ->
+             raise "scenario_ir_v1 schema missing at #{@schema_path}: #{inspect(reason)}"
+         end)
 
   @fence_re ~r/```kiln-scenario\s*\n(.*?)```/us
 
@@ -59,9 +57,14 @@ defmodule Kiln.Specs.ScenarioParser do
   defp decode_yaml_blocks(bodies) do
     Enum.reduce_while(bodies, {:ok, []}, fn body, {:ok, acc} ->
       case YamlElixir.read_from_string(body) do
-        {:ok, map} when is_map(map) -> {:cont, {:ok, [map | acc]}}
-        {:error, %YamlElixir.ParsingError{} = err} -> {:halt, {:error, {:yaml_invalid, format_yaml_error(err)}}}
-        {:error, other} -> {:halt, {:error, {:yaml_invalid, other}}}
+        {:ok, map} when is_map(map) ->
+          {:cont, {:ok, [map | acc]}}
+
+        {:error, %YamlElixir.ParsingError{} = err} ->
+          {:halt, {:error, {:yaml_invalid, format_yaml_error(err)}}}
+
+        {:error, other} ->
+          {:halt, {:error, {:yaml_invalid, other}}}
       end
     end)
     |> case do

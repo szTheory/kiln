@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kiln.local/schemas/verifier_result_v1.json",
+  "title": "Verifier result v1",
+  "type": "object",
+  "required": ["verdict", "machine", "llm", "llm_disagreement", "allow_override"],
+  "additionalProperties": false,
+  "properties": {
+    "verdict": { "type": "string", "enum": ["pass", "fail"] },
+    "machine": {
+      "type": "object",
+      "required": ["exit_code", "verdict", "refs"],
+      "additionalProperties": false,
+      "properties": {
+        "exit_code": { "type": "integer" },
+        "verdict": { "type": "string", "enum": ["pass", "fail"] },
+        "refs": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 256 }
+        }
+      }
+    },
+    "llm": {
+      "type": "object",
+      "required": ["structured", "narrative"],
+      "additionalProperties": false,
+      "properties": {
+        "structured": { "type": "object", "additionalProperties": true },
+        "narrative": { "type": "string", "maxLength": 20000 }
+      }
+    },
+    "llm_disagreement": { "type": "boolean" },
+    "allow_override": { "type": "boolean", "const": false }
+  }
+}

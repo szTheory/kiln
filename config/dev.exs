@@ -20,6 +20,16 @@ config :kiln, Kiln.Repo,
   # aggregate-16 Oban invariant.
   pool_size: 20
 
+# SPEC-04: narrow role for holdout reads (same host/DB as `Kiln.Repo`).
+config :kiln, Kiln.Repo.VerifierReadRepo,
+  username: "kiln_verifier",
+  password: "kiln_dev_verifier",
+  hostname: "localhost",
+  database: "kiln_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 2
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

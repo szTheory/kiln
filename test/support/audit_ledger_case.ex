@@ -49,7 +49,7 @@ defmodule Kiln.AuditLedgerCase do
   test end even if `fun` raises.
   """
   @spec with_role(String.t(), (-> term())) :: term()
-  def with_role(role, fun) when role in ["kiln_app", "kiln_owner"] do
+  def with_role(role, fun) when role in ["kiln_app", "kiln_owner", "kiln_verifier"] do
     Repo.query!("SET LOCAL ROLE #{role}")
 
     try do

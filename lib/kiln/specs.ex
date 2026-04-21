@@ -5,8 +5,23 @@ defmodule Kiln.Specs do
   CRUD here is limited to what Plans 05-02+ need before LiveView ships in 05-06.
   """
 
+  import Ecto.Query
+
   alias Kiln.Repo
   alias Kiln.Specs.{ScenarioCompiler, ScenarioParser, Spec, SpecRevision}
+
+  @doc """
+  Latest revision for a spec by `inserted_at` (append-only bodies; newest wins).
+  """
+  @spec latest_revision_for_spec(Ecto.UUID.t()) :: SpecRevision.t() | nil
+  def latest_revision_for_spec(spec_id) do
+    from(r in SpecRevision,
+      where: r.spec_id == ^spec_id,
+      order_by: [desc: r.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
 
   @spec create_spec(map()) :: {:ok, Spec.t()} | {:error, Ecto.Changeset.t()}
   def create_spec(attrs) do

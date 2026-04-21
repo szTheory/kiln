@@ -30,7 +30,11 @@ defmodule Kiln.Specs.SpecRevisionTest do
 
     assert {:ok, _} =
              %SpecRevision{}
-             |> SpecRevision.changeset(%{spec_id: spec.id, body: "x", scenario_manifest_sha256: hex})
+             |> SpecRevision.changeset(%{
+               spec_id: spec.id,
+               body: "x",
+               scenario_manifest_sha256: hex
+             })
              |> Kiln.Repo.insert()
   end
 end

@@ -6,9 +6,9 @@ defmodule Kiln.Policies.StuckDetectorTest do
   use Kiln.StuckDetectorCase, async: false
   alias Kiln.Policies.StuckDetector
 
-  test "check/1 returns :ok for any map (no-op body P2)" do
-    assert :ok == StuckDetector.check(%{run: :fake, to: :planning, meta: %{}})
-    assert :ok == StuckDetector.check(%{})
+  test "check/1 returns {:ok, []} for degenerate contexts (legacy no-op)" do
+    assert {:ok, []} == StuckDetector.check(%{run: :fake, to: :planning, meta: %{}})
+    assert {:ok, []} == StuckDetector.check(%{})
   end
 
   test "check/1 accepts a full transition context shape without raising" do
@@ -18,6 +18,6 @@ defmodule Kiln.Policies.StuckDetectorTest do
       meta: %{reason: :planner_done}
     }
 
-    assert :ok == StuckDetector.check(ctx)
+    assert {:ok, _} = StuckDetector.check(ctx)
   end
 end
