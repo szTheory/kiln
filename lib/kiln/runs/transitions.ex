@@ -215,6 +215,15 @@ defmodule Kiln.Runs.Transitions do
       end
 
     attrs =
+      case meta do
+        %{diagnostic: d} when is_map(d) ->
+          Map.put(attrs, :escalation_detail, d)
+
+        _ ->
+          attrs
+      end
+
+    attrs =
       if meta[:skip_governed_increment] == true do
         attrs
       else

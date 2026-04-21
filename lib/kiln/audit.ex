@@ -10,8 +10,9 @@ defmodule Kiln.Audit do
   INSERT, so malformed events are rejected at the app boundary without a
   DB round-trip.
 
-  Callers must pass `event_kind` (one of the 22 values in
-  `Kiln.Audit.EventKind.values/0`) and either pass `correlation_id`
+  Callers must pass `event_kind` (one of the values in
+  `Kiln.Audit.EventKind.values/0`, including `:ci_status_observed` for
+  Phase 6 GitHub delivery) and either pass `correlation_id`
   explicitly or have one set in `Logger.metadata` — an `ArgumentError`
   is raised otherwise so the causal chain is never silently dropped.
   """

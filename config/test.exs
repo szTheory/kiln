@@ -57,6 +57,9 @@ config :logger, level: :warning
 # and manual drain is deterministic).
 config :kiln, Oban, testing: :manual
 
+# Phase 6 — constrain GitHub worker `workspace_dir` to temp roots in tests.
+config :kiln, :github_workspace_root, System.tmp_dir!()
+
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 

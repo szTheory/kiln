@@ -5,7 +5,9 @@
   "type": "object",
   "required": ["status"],
   "properties": {
-    "status": { "type": "string", "enum": ["pending", "success", "failure"] }
+    "status": { "type": "string", "enum": ["pending", "success", "failure"] },
+    "predicate_pass": { "type": "boolean" },
+    "head_sha": { "type": "string", "maxLength": 64 }
   },
   "additionalProperties": false
 }

@@ -17,6 +17,7 @@ defmodule Kiln.Runs do
   """
 
   import Ecto.Query
+  import Ecto.Changeset, only: [change: 2]
 
   alias Kiln.Repo
   alias Kiln.Runs.Run
@@ -90,6 +91,28 @@ defmodule Kiln.Runs do
     case Repo.one(from(r in Run, where: r.id == ^run_id, select: r.workflow_checksum)) do
       nil -> {:error, :not_found}
       sha -> {:ok, sha}
+    end
+  end
+
+  @doc """
+  Merges `fragment` into `runs.github_delivery_snapshot` (internal caller — Promoter).
+
+  Snapshot keys are string maps suitable for JSONB (`"pr"`, `"checks"`,
+  `"predicate_pass"`, `"updated_at"`).
+  """
+  @spec promote_github_snapshot(Ecto.UUID.t(), map()) ::
+          {:ok, Run.t()} | {:error, Ecto.Changeset.t() | :not_found}
+  def promote_github_snapshot(run_id, fragment) when is_map(fragment) do
+    case Repo.get(Run, run_id) do
+      nil ->
+        {:error, :not_found}
+
+      run ->
+        merged = Map.merge(run.github_delivery_snapshot || %{}, fragment)
+
+        run
+        |> change(github_delivery_snapshot: merged)
+        |> Repo.update()
     end
   end
 end

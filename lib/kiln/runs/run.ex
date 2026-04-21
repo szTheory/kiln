@@ -95,6 +95,9 @@ defmodule Kiln.Runs.Run do
     field(:escalation_reason, :string)
     field(:escalation_detail, :map)
 
+    # Phase 6 — last GitHub delivery snapshot (PR refs + checks summary) for GIT-03.
+    field(:github_delivery_snapshot, :map, default: %{})
+
     timestamps(type: :utc_datetime_usec)
   end
 
@@ -108,7 +111,8 @@ defmodule Kiln.Runs.Run do
     :governed_attempt_count,
     :stuck_signal_window,
     :escalation_reason,
-    :escalation_detail
+    :escalation_detail,
+    :github_delivery_snapshot
   ]
 
   @doc """
@@ -149,7 +153,8 @@ defmodule Kiln.Runs.Run do
       :tokens_used_usd,
       :elapsed_seconds,
       :governed_attempt_count,
-      :stuck_signal_window
+      :stuck_signal_window,
+      :github_delivery_snapshot
     ])
     |> validate_required([:state])
     |> validate_inclusion(:state, @states)
