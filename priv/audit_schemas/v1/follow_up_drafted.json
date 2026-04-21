@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/follow_up_drafted.json",
+  "title": "follow_up_drafted",
+  "type": "object",
+  "required": ["draft_id", "source_run_id", "idempotency_key"],
+  "properties": {
+    "draft_id": { "type": "string", "format": "uuid" },
+    "source_run_id": { "type": "string", "format": "uuid" },
+    "idempotency_key": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

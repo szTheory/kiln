@@ -9,7 +9,7 @@ defmodule Kiln.Specs.SpecDraft do
   import Ecto.Changeset
 
   @type inbox_state :: :open | :archived | :promoted
-  @type source :: :freeform | :markdown_import | :github_issue
+  @type source :: :freeform | :markdown_import | :github_issue | :run_follow_up
 
   @type t :: %__MODULE__{}
 
@@ -19,7 +19,7 @@ defmodule Kiln.Specs.SpecDraft do
   schema "spec_drafts" do
     field(:title, :string)
     field(:body, :string)
-    field(:source, Ecto.Enum, values: [:freeform, :markdown_import, :github_issue])
+    field(:source, Ecto.Enum, values: [:freeform, :markdown_import, :github_issue, :run_follow_up])
     field(:inbox_state, Ecto.Enum, values: [:open, :archived, :promoted])
 
     field(:archived_at, :utc_datetime_usec)
@@ -32,6 +32,10 @@ defmodule Kiln.Specs.SpecDraft do
 
     field(:etag, :string)
     field(:last_synced_at, :utc_datetime_usec)
+
+    field(:source_run_id, :binary_id)
+    field(:artifact_refs, {:array, :map}, default: [])
+    field(:operator_summary, :string)
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -51,7 +55,10 @@ defmodule Kiln.Specs.SpecDraft do
       :github_repo,
       :github_issue_number,
       :etag,
-      :last_synced_at
+      :last_synced_at,
+      :source_run_id,
+      :artifact_refs,
+      :operator_summary
     ])
     |> validate_required([:title, :body, :source])
     |> validate_number(:github_issue_number, greater_than: 0)

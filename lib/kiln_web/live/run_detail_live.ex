@@ -7,6 +7,9 @@ defmodule KilnWeb.RunDetailLive do
     matches the run; otherwise a linear v1 fallback from persisted `stage_runs`.
   * **Diff pane:** first artifact on the latest stage attempt whose `name` ends with
     `.diff` or `.patch`, loaded via `Artifacts.read!/1`, capped at 512 KiB (D-713).
+
+  * **File as follow-up** (INTAKE-03): shown only when `run.state == :merged` — creates
+    an inbox draft idempotently keyed per LiveView mount (`correlation_id`).
   """
 
   use KilnWeb, :live_view
@@ -14,6 +17,7 @@ defmodule KilnWeb.RunDetailLive do
   alias Kiln.Artifacts
   alias Kiln.Audit
   alias Kiln.Runs
+  alias Kiln.Specs
   alias Kiln.Stages
   alias Kiln.Stages.StageRun
   alias Kiln.Workflows
@@ -43,10 +47,14 @@ defmodule KilnWeb.RunDetailLive do
             graph_ids = Workflows.graph_for_run(run)
             latest = Workflows.latest_stage_runs_for(run.id)
 
+            follow_cor =
+              if run.state == :merged, do: Ecto.UUID.generate(), else: nil
+
             {:ok,
              socket
              |> assign(:page_title, "Run #{short(uuid)}")
              |> assign(:run, run)
+             |> assign(:follow_up_correlation_id, follow_cor)
              |> assign(:graph_ids, graph_ids)
              |> assign(:latest_by_stage, latest)
              |> assign(:stages, stages)
@@ -106,6 +114,32 @@ defmodule KilnWeb.RunDetailLive do
     end
   end
 
+  def handle_event("follow_up", _params, socket) do
+    if allow?(socket) do
+      run = socket.assigns.run
+      cid = socket.assigns.follow_up_correlation_id
+
+      cond do
+        run.state != :merged or is_nil(cid) ->
+          {:noreply, put_flash(socket, :error, "Follow-up is not available for this run.")}
+
+        true ->
+          case Specs.file_follow_up_from_run(run, correlation_id: cid) do
+            {:ok, _draft} ->
+              {:noreply,
+               socket
+               |> put_flash(:info, "Draft created — open the Inbox to edit.")}
+
+            {:error, reason} ->
+              {:noreply,
+               put_flash(socket, :error, "Could not create draft: #{inspect(reason)}")}
+          end
+      end
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_event(_other, _params, socket), do: {:noreply, socket}
 
   defp allow?(_socket), do: true
@@ -120,7 +154,20 @@ defmodule KilnWeb.RunDetailLive do
             <p class="font-mono text-xs text-[var(--color-smoke)]">{@run.id}</p>
             <h1 class="text-xl font-semibold">Run {@run.workflow_id}</h1>
           </div>
-          <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
+          <div class="flex flex-wrap items-center gap-3">
+            <%= if @run.state == :merged && @follow_up_correlation_id do %>
+              <button
+                type="button"
+                id="follow-up-btn"
+                phx-click="follow_up"
+                class="rounded border border-clay px-3 py-1.5 text-sm font-semibold text-bone transition-colors hover:bg-clay/20"
+              >
+                File as follow-up
+              </button>
+              <.link class="text-sm text-ember underline" navigate={~p"/inbox"}>Inbox</.link>
+            <% end %>
+            <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
+          </div>
         </div>
 
         <section class="rounded border border-ash bg-char/80 p-4">

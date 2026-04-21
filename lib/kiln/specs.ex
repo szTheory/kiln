@@ -9,8 +9,11 @@ defmodule Kiln.Specs do
 
   import Ecto.Query
 
+  alias Kiln.Artifacts
   alias Kiln.Audit
+  alias Kiln.ExternalOperations.Operation
   alias Kiln.Repo
+  alias Kiln.Runs.Run
 
   alias Kiln.Specs.{
     GitHubIssueImporter,
@@ -244,6 +247,168 @@ defmodule Kiln.Specs do
       %SpecDraft{} ->
         {:error, :invalid_state}
     end
+  end
+
+  @doc """
+  Creates an inbox **follow-up** draft from a **merged** terminal run (INTAKE-03).
+
+  Idempotency: `external_operations` row keyed
+  `follow_up_draft:<run_id>:<correlation_id>`. The LiveView should reuse one
+  `correlation_id` per mount so double-clicks dedupe.
+
+  Same Postgres transaction: intent row (when new), draft insert,
+  `:follow_up_drafted` audit, op completion + `:external_op_completed` audit.
+  """
+  @spec file_follow_up_from_run(Run.t(), keyword()) ::
+          {:ok, SpecDraft.t()} | {:error, term()}
+  def file_follow_up_from_run(%Run{} = run, opts \\ []) do
+    correlation_id = Keyword.get(opts, :correlation_id, Ecto.UUID.generate())
+    audit_cid = Keyword.get(opts, :audit_correlation_id, correlation_id)
+    idempotency_key = "follow_up_draft:" <> run.id <> ":" <> correlation_id
+
+    Repo.transaction(fn ->
+      op = follow_up_fetch_or_insert_intent!(idempotency_key, run, audit_cid)
+
+      case op.state do
+        :completed ->
+          case draft_id_from_op_result(op.result_payload) do
+            nil ->
+              Repo.rollback({:missing_result_payload, op.id})
+
+            draft_id ->
+              case Repo.get(SpecDraft, draft_id) do
+                %SpecDraft{} = d -> d
+                nil -> Repo.rollback({:draft_not_found, draft_id})
+              end
+          end
+
+        :intent_recorded ->
+          artifact_refs = Artifacts.list_refs_for_run(run.id)
+          summary = follow_up_operator_summary(run)
+
+          draft_attrs = %{
+            title: "Follow-up: #{run.workflow_id}",
+            body: follow_up_lazy_body(),
+            source: :run_follow_up,
+            inbox_state: :open,
+            source_run_id: run.id,
+            artifact_refs: artifact_refs,
+            operator_summary: summary
+          }
+
+          with {:ok, draft} <- insert_follow_up_draft(draft_attrs),
+               {:ok, _} <-
+                 Audit.append(%{
+                   event_kind: :follow_up_drafted,
+                   run_id: run.id,
+                   correlation_id: audit_cid,
+                   payload: %{
+                     "draft_id" => uuid_string!(draft.id),
+                     "source_run_id" => uuid_string!(run.id),
+                     "idempotency_key" => idempotency_key
+                   }
+                 }),
+               {:ok, op_done} <-
+                 Repo.update(
+                   Operation.changeset(op, %{
+                     state: :completed,
+                     result_payload: %{"draft_id" => uuid_string!(draft.id)},
+                     completed_at: DateTime.utc_now() |> DateTime.truncate(:microsecond)
+                   })
+                 ),
+               {:ok, _} <-
+                 Audit.append(%{
+                   event_kind: :external_op_completed,
+                   run_id: op_done.run_id,
+                   correlation_id: audit_cid,
+                   payload: %{
+                     "op_kind" => op_done.op_kind,
+                     "idempotency_key" => op_done.idempotency_key,
+                     "result_summary" => summarize_follow_up_result(op_done.result_payload)
+                   }
+                 }) do
+            draft
+          else
+            {:error, reason} -> Repo.rollback(reason)
+          end
+
+        _other ->
+          Repo.rollback({:unexpected_op_state, op.state})
+      end
+    end)
+    |> case do
+      {:ok, draft} -> {:ok, draft}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp follow_up_fetch_or_insert_intent!(idempotency_key, %Run{} = run, audit_cid) do
+    now = DateTime.utc_now() |> DateTime.truncate(:microsecond)
+
+    insert_attrs = %{
+      op_kind: "follow_up_draft",
+      idempotency_key: idempotency_key,
+      state: :intent_recorded,
+      intent_recorded_at: now,
+      run_id: run.id,
+      intent_payload: %{"correlation_id" => idempotency_key}
+    }
+
+    cs = Operation.changeset(%Operation{}, insert_attrs)
+
+    case Repo.insert(cs, on_conflict: :nothing, conflict_target: :idempotency_key) do
+      {:ok, %Operation{id: nil}} ->
+        Repo.one!(
+          from(o in Operation,
+            where: o.idempotency_key == ^idempotency_key,
+            lock: "FOR UPDATE"
+          )
+        )
+
+      {:ok, %Operation{} = op} ->
+        {:ok, _} =
+          Audit.append(%{
+            event_kind: :external_op_intent_recorded,
+            run_id: run.id,
+            correlation_id: audit_cid,
+            payload: %{
+              "op_kind" => op.op_kind,
+              "idempotency_key" => op.idempotency_key
+            }
+          })
+
+        op
+
+      {:error, changeset} ->
+        Repo.rollback(changeset)
+    end
+  end
+
+  defp insert_follow_up_draft(attrs) do
+    %SpecDraft{}
+    |> SpecDraft.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  defp draft_id_from_op_result(nil), do: nil
+
+  defp draft_id_from_op_result(payload) when is_map(payload) do
+    Map.get(payload, "draft_id") || Map.get(payload, :draft_id)
+  end
+
+  defp follow_up_operator_summary(%Run{} = run) do
+    short = run.id |> uuid_string!() |> String.slice(0, 8)
+    "Follow-up filed from merged run #{short} (#{run.workflow_id})"
+  end
+
+  defp follow_up_lazy_body do
+    "[lazy-resolve]\nOpen the inbox to edit the full follow-up spec. Body loads from artifacts on demand."
+  end
+
+  defp summarize_follow_up_result(result) when is_map(result) do
+    result
+    |> inspect(limit: 120)
+    |> String.slice(0, 400)
   end
 
   defp uuid_string!(id) when is_binary(id) do

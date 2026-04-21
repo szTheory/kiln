@@ -56,6 +56,9 @@ defmodule Kiln.Audit.EventKind do
   The 8 new atoms are APPENDED at the end of `@kinds` so the Phase 1/2
   ordering is preserved (migration 20260420000001 drops the old CHECK and
   re-adds a 33-entry CHECK generated from `values_as_strings/0`).
+
+  Phase 8 INTAKE-03 — `:follow_up_drafted` pairs with `spec_drafts` rows
+  created from merged runs via `external_operations` idempotency keys.
   """
 
   @kinds [
@@ -99,7 +102,8 @@ defmodule Kiln.Audit.EventKind do
     :notification_fired,
     :notification_suppressed,
     # Phase 8 D-820 — append only, never reorder.
-    :spec_draft_promoted
+    :spec_draft_promoted,
+    :follow_up_drafted
   ]
 
   @doc """

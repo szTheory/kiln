@@ -24,6 +24,19 @@ defmodule KilnWeb.RunDetailLiveTest do
     assert render(view) =~ "Stage not found"
   end
 
+  test "merged run shows File as follow-up and creates inbox draft", %{conn: conn} do
+    run = RunFactory.insert(:run, state: :merged, workflow_id: "wf_follow_up_lv")
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#follow-up-btn")
+    assert render(view) =~ "File as follow-up"
+
+    view |> element("#follow-up-btn") |> render_click()
+
+    assert render(view) =~ "Draft created"
+  end
+
   test "diff pane shows truncated marker for oversized artifact", %{conn: conn} do
     run =
       RunFactory.insert(:run,

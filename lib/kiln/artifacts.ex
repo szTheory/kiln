@@ -112,6 +112,25 @@ defmodule Kiln.Artifacts do
   end
 
   @doc """
+  CAS refs for all artifacts tied to a run (metadata only — D-816, SEC-01).
+  """
+  @spec list_refs_for_run(Ecto.UUID.t()) :: [map()]
+  def list_refs_for_run(run_id) when is_binary(run_id) do
+    from(a in Artifact,
+      where: a.run_id == ^run_id,
+      order_by: [desc: a.inserted_at],
+      limit: 100
+    )
+    |> Repo.all()
+    |> Enum.map(fn %Artifact{} = art ->
+      art
+      |> ref_for()
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
+      |> Map.put("name", art.name)
+    end)
+  end
+
+  @doc """
   List artifact names for a stage run (read-only metadata for UI pickers).
   """
   @spec list_for_stage_run(Ecto.UUID.t()) :: [%{name: String.t(), content_type: atom()}]
