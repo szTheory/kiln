@@ -81,6 +81,7 @@ defmodule KilnWeb do
       import Phoenix.HTML
       # Core UI components
       import KilnWeb.CoreComponents
+      import KilnWeb.Components.UnblockPanel
 
       # Common modules used in templates
       alias KilnWeb.Layouts

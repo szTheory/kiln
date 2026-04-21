@@ -16,7 +16,10 @@ defmodule KilnWeb.RunDetailLive do
 
   alias Kiln.Artifacts
   alias Kiln.Audit
+  alias Kiln.Blockers.Reason
   alias Kiln.Runs
+  alias Kiln.Runs.Run
+  alias Kiln.Runs.Transitions
   alias Kiln.Specs
   alias Kiln.Stages
   alias Kiln.Stages.StageRun
@@ -50,10 +53,13 @@ defmodule KilnWeb.RunDetailLive do
             follow_cor =
               if run.state == :merged, do: Ecto.UUID.generate(), else: nil
 
+            block_reason = infer_block_reason(run)
+
             {:ok,
              socket
              |> assign(:page_title, "Run #{short(uuid)}")
              |> assign(:run, run)
+             |> assign(:block_reason, block_reason)
              |> assign(:follow_up_correlation_id, follow_cor)
              |> assign(:graph_ids, graph_ids)
              |> assign(:latest_by_stage, latest)
@@ -109,6 +115,39 @@ defmodule KilnWeb.RunDetailLive do
          to:
            ~p"/runs/#{socket.assigns.run.id}?#{%{stage: wid, pane: socket.assigns.pane} |> URI.encode_query()}"
        )}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("unblock_retry", %{"to" => to}, socket) do
+    if allow?(socket) do
+      allowed = %{
+        "planning" => :planning,
+        "coding" => :coding,
+        "testing" => :testing,
+        "verifying" => :verifying
+      }
+
+      run = socket.assigns.run
+
+      case Map.get(allowed, to) do
+        nil ->
+          {:noreply, put_flash(socket, :error, "Invalid resume target")}
+
+        target ->
+          case Transitions.transition(run.id, target, %{reason: :operator_unblock}) do
+            {:ok, updated} ->
+              {:noreply,
+               socket
+               |> assign(:run, updated)
+               |> assign(:block_reason, infer_block_reason(updated))
+               |> put_flash(:info, "Resumed run at #{target}")}
+
+            {:error, reason} ->
+              {:noreply, put_flash(socket, :error, "Resume failed: #{inspect(reason)}")}
+          end
+      end
     else
       {:noreply, socket}
     end
@@ -190,6 +229,10 @@ defmodule KilnWeb.RunDetailLive do
             <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
+
+        <%= if @run.state == :blocked && @block_reason do %>
+          <.unblock_panel run={@run} block_reason={@block_reason} />
+        <% end %>
 
         <section class="rounded border border-ash bg-char/80 p-4">
           <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Stages</h2>
@@ -364,6 +407,30 @@ defmodule KilnWeb.RunDetailLive do
   end
 
   defp diff_for_selected(%StageRun{}, _), do: ""
+
+  defp infer_block_reason(%Run{state: :blocked, id: rid}) do
+    Audit.replay(run_id: rid, limit: 200)
+    |> Enum.reverse()
+    |> Enum.find_value(fn
+      %{event_kind: :run_state_transitioned, payload: %{"to" => "blocked", "reason" => r}}
+      when is_binary(r) ->
+        blocked_reason_from_audit_string(r)
+
+      _ ->
+        nil
+    end) || :missing_api_key
+  end
+
+  defp infer_block_reason(_), do: nil
+
+  defp blocked_reason_from_audit_string(s) do
+    Reason.all()
+    |> Enum.find(fn a -> Atom.to_string(a) == s end)
+    |> case do
+      nil -> :missing_api_key
+      a -> a
+    end
+  end
 
   defp short(uuid), do: uuid |> to_string() |> String.slice(0, 8)
 end

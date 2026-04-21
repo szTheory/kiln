@@ -6,6 +6,7 @@ defmodule KilnWeb.RunDetailLiveTest do
   alias Kiln.Artifacts
   alias Kiln.Factory.Run, as: RunFactory
   alias Kiln.Factory.StageRun, as: StageRunFactory
+  alias Kiln.Runs.Transitions
 
   test "shows run detail shell and select-stage copy without stage param", %{conn: conn} do
     run = RunFactory.insert(:run, workflow_id: "wf_detail_shell")
@@ -22,6 +23,20 @@ defmodule KilnWeb.RunDetailLiveTest do
     {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}?stage=bogus")
 
     assert render(view) =~ "Stage not found"
+  end
+
+  test "blocked run shows unblock panel and can resume to planning", %{conn: conn} do
+    run = RunFactory.insert(:run, state: :planning, workflow_id: "wf_blocked_lv")
+    assert {:ok, _} = Transitions.transition(run.id, :blocked, %{reason: :budget_exceeded})
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#unblock-panel")
+    assert render(view) =~ "Run blocked"
+
+    view |> element("#unblock-retry-btn") |> render_click()
+
+    assert render(view) =~ "Resumed run at planning"
   end
 
   test "run detail exposes diagnostics bundle control", %{conn: conn} do
