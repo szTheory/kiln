@@ -40,5 +40,8 @@ tmp/
 priv/artifacts/*
 !priv/artifacts/.gitkeep
 
+# Phase 5 — generated scenario ExUnit modules (SPEC-02)
+/test/generated/
+
 # Dialyzer PLTs (D-27) — rebuilt on CI via cache-keyed restore; never committed.
 /priv/plts/

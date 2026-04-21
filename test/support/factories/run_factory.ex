@@ -54,7 +54,9 @@ defmodule Kiln.Factory.Run do
       },
       correlation_id: Ecto.UUID.generate(),
       tokens_used_usd: Decimal.new("0.0"),
-      elapsed_seconds: 0
+      elapsed_seconds: 0,
+      governed_attempt_count: 0,
+      stuck_signal_window: []
     }
   end
 end

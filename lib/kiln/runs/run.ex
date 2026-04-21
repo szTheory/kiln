@@ -20,6 +20,14 @@ defmodule Kiln.Runs.Run do
   (Plan 06) — this schema only exposes the state domain and a
   transition-specific changeset for use by that command module.
 
+  ## Phase 5 — bounded autonomy + stuck detector (ORCH-06 / OBS-04)
+
+  * `governed_attempt_count` — durable counter for governed attempts; only
+    `Transitions` (inside a `FOR UPDATE` transaction) may increment it.
+  * `stuck_signal_window` — jsonb array of recent failure signals
+    (`%{...}` maps) consumed by `Kiln.Policies.StuckWindow`; same write discipline
+    as the counter.
+
   The PK is Postgres-generated via `uuid_generate_v7()` (migration
   20260419000002); Ecto needs `read_after_writes: true` so it issues
   `RETURNING id` on INSERT. This is the same pattern as
@@ -54,6 +62,8 @@ defmodule Kiln.Runs.Run do
              :correlation_id,
              :tokens_used_usd,
              :elapsed_seconds,
+             :governed_attempt_count,
+             :stuck_signal_window,
              :escalation_reason,
              :escalation_detail,
              :inserted_at,
@@ -78,6 +88,9 @@ defmodule Kiln.Runs.Run do
     field(:tokens_used_usd, :decimal, default: Decimal.new("0.0"))
     field(:elapsed_seconds, :integer, default: 0)
 
+    field(:governed_attempt_count, :integer, default: 0)
+    field(:stuck_signal_window, {:array, :map}, default: [])
+
     # Populated only when state = :escalated
     field(:escalation_reason, :string)
     field(:escalation_detail, :map)
@@ -92,6 +105,8 @@ defmodule Kiln.Runs.Run do
     :caps_snapshot,
     :tokens_used_usd,
     :elapsed_seconds,
+    :governed_attempt_count,
+    :stuck_signal_window,
     :escalation_reason,
     :escalation_detail
   ]
@@ -132,7 +147,9 @@ defmodule Kiln.Runs.Run do
       :escalation_reason,
       :escalation_detail,
       :tokens_used_usd,
-      :elapsed_seconds
+      :elapsed_seconds,
+      :governed_attempt_count,
+      :stuck_signal_window
     ])
     |> validate_required([:state])
     |> validate_inclusion(:state, @states)
