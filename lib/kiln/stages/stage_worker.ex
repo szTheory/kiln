@@ -63,6 +63,7 @@ defmodule Kiln.Stages.StageWorker do
   use Kiln.Oban.BaseWorker, queue: :stages
 
   alias Kiln.Artifacts
+  alias Kiln.BudgetAlerts
   alias Kiln.Repo
   alias Kiln.Runs.Transitions
   alias Kiln.Stages.{ContractRegistry, NextStageDispatcher, StageRun}
@@ -103,6 +104,7 @@ defmodule Kiln.Stages.StageWorker do
          {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :running}),
          {:ok, _artifact} <- stub_dispatch(run_id, stage_run_id, stage_kind),
          {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :succeeded}),
+         :ok <- budget_alerts_after_stage_success(run_id),
          :ok <- maybe_transition_after_stage(run_id, stage_kind),
          :ok <- enqueue_next_stage(run_id, stage_run_id) do
       _ = complete_op(op, %{"result" => "stub_ok", "stage_kind" => args["stage_kind"]})
@@ -155,6 +157,11 @@ defmodule Kiln.Stages.StageWorker do
   end
 
   # -- private helpers ----------------------------------------------------
+
+  defp budget_alerts_after_stage_success(run_id) do
+    _ = BudgetAlerts.notify_run_if_needed(run_id)
+    :ok
+  end
 
   defp validate_input(input, root) do
     case JSV.validate(input, root) do

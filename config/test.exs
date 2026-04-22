@@ -4,6 +4,10 @@ import Config
 # that invoke the loader without a SQL Sandbox checkout (see LoaderTest).
 config :kiln, :skip_workflow_snapshot_persist, true
 
+# Phase 18 — avoid `osascript` / `notify-send` from `BudgetAlerts.notify_run_if_needed/1`
+# in unit tests; LiveView + audit paths still exercise real code.
+config :kiln, Kiln.BudgetAlerts, skip_desktop_dispatch: true
+
 # Configure your database.
 #
 # Matches compose.yaml credentials (kiln / kiln_dev). The base database

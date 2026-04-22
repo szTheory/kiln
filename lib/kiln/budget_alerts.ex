@@ -11,8 +11,11 @@ defmodule Kiln.BudgetAlerts do
   `:budget_threshold_crossed` audit rows for the run.
   """
 
+  require Logger
+
   alias Kiln.Agents.BudgetGuard
   alias Kiln.Audit
+  alias Kiln.Repo
   alias Kiln.Runs
 
   @default_soft_thresholds_pct [50, 80]
@@ -69,6 +72,126 @@ defmodule Kiln.BudgetAlerts do
           ]
       end
     end)
+  end
+
+  @doc """
+  Evaluates soft thresholds for `run_id`, appends `budget_threshold_crossed`
+  audits for each **new** crossing, optionally dispatches desktop notifications
+  (when the notifications stack is up — see `Kiln.Agents.BudgetGuard`
+  parity), then broadcasts `{:budget_alert, payload}` on `run:<id>` for
+  LiveView refresh.
+
+  Returns `:ok`. Audit failures are logged and suppress downstream steps.
+  """
+  @spec notify_run_if_needed(Ecto.UUID.t()) :: :ok
+  def notify_run_if_needed(run_id) do
+    crossings = evaluate_crossings(run_id)
+
+    if crossings == [] do
+      :ok
+    else
+      correlation_id = Logger.metadata()[:correlation_id] || Ecto.UUID.generate()
+
+      case append_crossing_events(run_id, crossings, correlation_id) do
+        :ok ->
+          maybe_desktop_notify(run_id, crossings)
+          broadcast_budget_alert(run_id, crossings)
+          :ok
+
+        {:error, reason} ->
+          Logger.error(
+            "Kiln.BudgetAlerts.notify_run_if_needed/1 audit append failed run_id=#{inspect(run_id)} reason=#{inspect(reason)}"
+          )
+
+          :ok
+      end
+    end
+  end
+
+  defp append_crossing_events(run_id, crossings, correlation_id) do
+    result =
+      Repo.transaction(fn ->
+        Enum.each(crossings, fn c ->
+          payload = %{
+            "pct" => Integer.to_string(c.pct),
+            "cap_usd" => Decimal.to_string(c.cap_usd),
+            "spent_usd" => Decimal.to_string(c.spent_usd),
+            "threshold_name" => c.threshold_name,
+            "band" => c.band
+          }
+
+          {:ok, _} =
+            Audit.append(%{
+              event_kind: :budget_threshold_crossed,
+              run_id: run_id,
+              stage_id: nil,
+              correlation_id: correlation_id,
+              payload: payload
+            })
+        end)
+      end)
+
+    case result do
+      {:ok, _} -> :ok
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp maybe_desktop_notify(run_id, crossings) do
+    skip? =
+      Application.get_env(:kiln, __MODULE__, [])
+      |> Keyword.get(:skip_desktop_dispatch, false)
+
+    if skip? or not desktop_ready?() do
+      :ok
+    else
+      Enum.each(crossings, fn c ->
+        reason = reason_atom(c.pct)
+        severity = desktop_severity(c.pct)
+
+        ctx = %{
+          run_id: run_id,
+          severity: severity,
+          spent_usd: Decimal.to_string(c.spent_usd),
+          cap_usd: Decimal.to_string(c.cap_usd),
+          pct: Integer.to_string(c.pct)
+        }
+
+        _ = Kiln.Notifications.desktop(reason, ctx)
+      end)
+    end
+  end
+
+  defp desktop_ready? do
+    Code.ensure_loaded?(Kiln.Notifications) and
+      function_exported?(Kiln.Notifications, :desktop, 2) and
+      :ets.whereis(Kiln.Notifications.DedupCache) != :undefined
+  end
+
+  defp reason_atom(pct) when pct >= 80, do: :budget_threshold_80
+  defp reason_atom(_), do: :budget_threshold_50
+
+  defp desktop_severity(pct) when pct >= 80, do: "warning"
+  defp desktop_severity(_), do: "info"
+
+  defp broadcast_budget_alert(run_id, crossings) do
+    Phoenix.PubSub.broadcast(
+      Kiln.PubSub,
+      "run:#{run_id}",
+      {:budget_alert,
+       %{
+         run_id: run_id,
+         crossings:
+           Enum.map(crossings, fn c ->
+             %{
+               pct: c.pct,
+               band: c.band,
+               threshold_name: c.threshold_name,
+               severity: desktop_severity(c.pct)
+             }
+           end)
+       }}
+    )
   end
 
   defp crossing_pcts_for_run(run_id) do

@@ -7,6 +7,9 @@ defmodule Kiln.NotificationsTest do
   require Logger
 
   alias Kiln.Audit
+  alias Kiln.BudgetAlerts
+  alias Kiln.Factory.Run, as: RunFactory
+  alias Kiln.Factory.StageRun, as: StageRunFactory
   alias Kiln.Notifications
   alias Kiln.Notifications.DedupCache
 
@@ -103,6 +106,45 @@ defmodule Kiln.NotificationsTest do
       :ets.insert(DedupCache, {{nil, reason}, System.monotonic_time(:millisecond)})
 
       assert :ok = Notifications.desktop(reason, %{})
+    end
+  end
+
+  describe "BudgetAlerts.notify_run_if_needed/1" do
+    test "writes budget_threshold_crossed audit and broadcasts {:budget_alert, _}" do
+      run =
+        RunFactory.insert(:run,
+          caps_snapshot: %{
+            "max_retries" => 3,
+            "max_tokens_usd" => "100",
+            "max_elapsed_seconds" => 600,
+            "max_stage_duration_seconds" => 300
+          }
+        )
+
+      _ =
+        StageRunFactory.insert(:stage_run,
+          run_id: run.id,
+          kind: :coding,
+          agent_role: :coder,
+          state: :succeeded,
+          cost_usd: "60",
+          timeout_seconds: 300,
+          sandbox: :readonly
+        )
+
+      :ok = Phoenix.PubSub.subscribe(Kiln.PubSub, "run:#{run.id}")
+
+      assert :ok = BudgetAlerts.notify_run_if_needed(run.id)
+
+      crossed =
+        Audit.replay(run_id: run.id, event_kind: :budget_threshold_crossed)
+
+      assert length(crossed) == 1
+      assert hd(crossed).payload["pct"] == "50"
+
+      assert_receive {:budget_alert, %{crossings: [c]}}, 200
+      assert c.pct == 50
+      assert c.severity == "info"
     end
   end
 
