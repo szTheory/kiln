@@ -29,14 +29,14 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **DOCS-ALIGN-01** — `PROJECT.md` **Validated**, `REQUIREMENTS.md` § v1 checkboxes, and `ROADMAP.md` stay mutually consistent at milestone boundaries — Phase 13 (`13-01-PLAN.md`).
 - [x] **LOCAL-DX-01** — Optional **`justfile`** task-runner layer (host Phoenix + Compose data plane; no second official quick-start; no Phoenix-in-Compose / devcontainer). README optional subsection + `LOCAL-DX-AUDIT.md` pointer — **Validated in Phase 12: local-docker-dx** (2026-04-22).
 - [x] **DOGFOOD-01** — Kiln-side **external-repo vertical slice** for the Game Boy emulator path: spec + workflow + BDD + bounded caps scaffolding (`rust_gb_dogfood_v1`, scenario argv-only shell oracle, `priv/dogfood/gb_vertical_slice_spec.md`, tests) — **Phase 11** (2026-04-22). Full ROM-backed `cargo test` on a disposable clone remains **operator-owned** per `GB-SPIKE.md`.
+- [x] **WFE-01** — Workflow + spec template library with instantiate action — **Validated in Phase 17: template-library-onboarding-specs** (2026-04-22).
+- [x] **ONB-01** — ≥3 vetted onboarding templates incl. fast happy path — **Validated in Phase 17: template-library-onboarding-specs** (2026-04-22).
 
 ### Active (v0.3.0 — in flight)
 
 - [ ] **PARA-01** — Fair parallel run scheduling (Phase 14).
 - [ ] **PARA-02** — Run comparison view (Phase 15).
 - [ ] **REPL-01** — Read-only run timeline / replay MVP (Phase 16).
-- [ ] **WFE-01** — Workflow + spec template library with instantiate action (Phase 17).
-- [ ] **ONB-01** — ≥3 vetted onboarding templates incl. fast happy path (Phase 17).
 - [ ] **COST-01** — Advisory cost / model-tier hints (Phase 18).
 - [ ] **COST-02** — Budget threshold alerts (Phase 18).
 - [ ] **SELF-01** — Structured post-mortem artifact on merge (Phase 19).
@@ -140,4 +140,4 @@ This document evolves at phase transitions and milestone boundaries.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-22 — Phase 999.2 operator chrome shipped*
+*Last updated: 2026-04-22 — Phase 17 template library + onboarding specs shipped; WFE-01 / ONB-01 validated*
