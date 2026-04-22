@@ -33,26 +33,62 @@ defmodule Kiln.Specs.ScenarioParser do
       |> Regex.scan(markdown, capture: :all_but_first)
       |> Enum.map(&hd/1)
 
-    cond do
-      bodies == [] ->
-        {:error, {:no_kiln_scenario_blocks, "no ```kiln-scenario fences found"}}
-
-      true ->
-        with {:ok, maps} <- decode_yaml_blocks(bodies),
-             merged <- merge_scenarios(maps) do
-          case merged["scenarios"] do
-            [] ->
-              {:error, {:no_scenarios, "merged IR has zero scenarios"}}
-
-            _scenarios ->
-              case JSV.validate(merged, @root) do
-                {:ok, validated} -> {:ok, validated}
-                {:error, err} -> {:error, {:schema_invalid, JSV.normalize_error(err)}}
-              end
-          end
-        end
+    if bodies == [] do
+      {:error, {:no_kiln_scenario_blocks, "no ```kiln-scenario fences found"}}
+    else
+      with {:ok, maps} <- decode_yaml_blocks(bodies),
+           merged <- merge_scenarios(maps) do
+        validate_merged_ir(merged)
+      end
     end
   end
+
+  defp validate_merged_ir(%{"scenarios" => []}) do
+    {:error, {:no_scenarios, "merged IR has zero scenarios"}}
+  end
+
+  defp validate_merged_ir(merged) do
+    with {:ok, validated} <- jsv_validate(merged),
+         :ok <- validate_shell_steps(validated) do
+      {:ok, validated}
+    end
+  end
+
+  defp jsv_validate(merged) do
+    case JSV.validate(merged, @root) do
+      {:ok, validated} -> {:ok, validated}
+      {:error, err} -> {:error, {:schema_invalid, JSV.normalize_error(err)}}
+    end
+  end
+
+  defp validate_shell_steps(%{"scenarios" => scenarios}) when is_list(scenarios) do
+    unsafe =
+      scenarios
+      |> Enum.flat_map(&List.wrap(Map.get(&1, "steps") || Map.get(&1, :steps)))
+      |> Enum.find(&unsafe_shell_argv?/1)
+
+    if unsafe do
+      {:error, {:schema_invalid, %{message: "shell argv must not contain ';' or newlines"}}}
+    else
+      :ok
+    end
+  end
+
+  defp validate_shell_steps(_), do: :ok
+
+  defp unsafe_shell_argv?(step) do
+    kind = Map.get(step, "kind") || Map.get(step, :kind)
+    argv = Map.get(step, "argv") || Map.get(step, :argv)
+
+    kind == "shell" && is_list(argv) && not Enum.all?(argv, &shell_arg_safe?/1)
+  end
+
+  defp shell_arg_safe?(s) when is_binary(s) do
+    not String.contains?(s, ";") and not String.contains?(s, "\n") and
+      not String.contains?(s, "\r")
+  end
+
+  defp shell_arg_safe?(_), do: false
 
   defp decode_yaml_blocks(bodies) do
     Enum.reduce_while(bodies, {:ok, []}, fn body, {:ok, acc} ->

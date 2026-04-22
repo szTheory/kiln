@@ -46,4 +46,39 @@ defmodule Kiln.Specs.ScenarioParserTest do
 
     assert {:error, {:schema_invalid, _}} = ScenarioParser.parse_document(bad)
   end
+
+  test "parses shell step with argv and cwd" do
+    md = """
+    ```kiln-scenario
+    scenarios:
+      - id: shell_smoke
+        description: mix version
+        steps:
+          - kind: shell
+            argv: ["mix", "--version"]
+            cwd: "."
+    ```
+    """
+
+    assert {:ok, %{"scenarios" => [scenario]}} = ScenarioParser.parse_document(md)
+    assert scenario["id"] == "shell_smoke"
+
+    assert [%{"kind" => "shell", "argv" => ["mix", "--version"], "cwd" => "."}] =
+             scenario["steps"]
+  end
+
+  test "rejects shell step with empty argv" do
+    bad = """
+    ```kiln-scenario
+    scenarios:
+      - id: bad_shell
+        description: x
+        steps:
+          - kind: shell
+            argv: []
+    ```
+    """
+
+    assert {:error, {:schema_invalid, _}} = ScenarioParser.parse_document(bad)
+  end
 end

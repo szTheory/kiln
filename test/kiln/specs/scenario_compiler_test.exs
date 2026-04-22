@@ -86,4 +86,57 @@ defmodule Kiln.Specs.ScenarioCompilerTest do
     h2 = ScenarioCompiler.manifest_sha256(%{ir | "scenarios" => Enum.reverse(ir["scenarios"])})
     assert h1 == h2
   end
+
+  test "compile shell step and mix test passes on generated module" do
+    {:ok, spec} = Specs.create_spec(%{title: "shell-compile-target"})
+
+    body = """
+    ```kiln-scenario
+    scenarios:
+      - id: shell_mix_version
+        description: argv-only oracle
+        steps:
+          - kind: shell
+            argv: ["mix", "--version"]
+            cwd: "."
+    ```
+    """
+
+    {:ok, rev} = Specs.create_revision(spec, %{body: body})
+    updated = Specs.compile_revision!(rev)
+    assert byte_size(updated.scenario_manifest_sha256) == 64
+
+    uuid = Ecto.UUID.cast!(rev.id)
+    rel = Path.join(["test", "generated", "kiln_scenarios", uuid, "scenarios_test.exs"])
+
+    {out, code} =
+      System.cmd(
+        "mix",
+        ["test", rel, "--include", "kiln_scenario", "--max-failures", "1"],
+        cd: File.cwd!(),
+        stderr_to_stdout: true
+      )
+
+    assert code == 0, out
+  end
+
+  test "manifest_sha256 changes when shell argv changes" do
+    base = %{
+      "id" => "x",
+      "description" => "",
+      "steps" => [%{"kind" => "shell", "argv" => ["mix", "--version"], "cwd" => "."}]
+    }
+
+    ir1 = %{"scenarios" => [base]}
+    [s0] = ir1["scenarios"]
+    [step0] = s0["steps"]
+
+    ir2 = %{
+      "scenarios" => [
+        %{s0 | "steps" => [%{step0 | "argv" => ["mix", "help"]}]}
+      ]
+    }
+
+    refute ScenarioCompiler.manifest_sha256(ir1) == ScenarioCompiler.manifest_sha256(ir2)
+  end
 end
