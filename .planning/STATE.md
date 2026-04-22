@@ -5,11 +5,11 @@ milestone_name: operator-dogfood
 status: planning
 stopped_at: null
 last_updated: "2026-04-22T12:00:00.000Z"
-last_activity: 2026-04-22 — v0.2 planning seeded (backlog 999.2–999.4; phases 10–11 plans)
+last_activity: 2026-04-22 — v0.2 Phases 10–13 sequenced (999.x reclassified into roadmap)
 progress:
-  total_phases: 2
+  total_phases: 4
   completed_phases: 0
-  total_plans: 2
+  total_plans: 4
   completed_plans: 0
   percent: 0
 ---
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-22)
 
 ## Current Position
 
-Phase: (none active — promote backlog **999.2** / **999.3** / **999.4** or start **Phase 10** via `/gsd-review-backlog` / `/gsd-execute-phase`)
-Plan: —
+Phase: **10** — local operator readiness (first unexecuted plan in v0.2 sequence)
+Plan: 10-01 (drafted — no SUMMARY yet)
 Status: planning (v0.2.0)
 Last activity: 2026-04-22
 
-Progress: [░░░░░░░░░░] 0% (two planned phases: **10** local operator readiness, **11** GB dogfood vertical slice — see `.planning/phases/10-*` and `11-*`)
+Progress: [░░░░░░░░░░] 0% (v0.2: **10 → 11 → 12 → 13** — see `.planning/ROADMAP.md` § Milestone v0.2.0)
 
 ## Performance Metrics
 
@@ -186,8 +186,8 @@ None yet.
 Last session: v0.1.0 closed; v0.2.0 planning artifacts written
 Stopped at: —
 Resume file: —
-Next command: `/gsd-discuss-phase 10` (or `/gsd-review-backlog` to sequence **999.2** → integer phases), then `/gsd-execute-phase 10`
+Next command: `/gsd-discuss-phase 10` (optional) then `/gsd-execute-phase 10`
 
 **Completed milestone:** v0.1.0 — Phases 1–9 + backlog slot 999.1 (docs site work) — 2026-04-22
 
-**Active planning:** v0.2.0 — Phase **10** (local operator readiness), Phase **11** (Game Boy emulator dogfood); backlogs **999.2–999.4** for parking-lot detail
+**Active planning:** v0.2.0 — Phases **10–13** in order (see ROADMAP); **999.1** remains a shipped **parking-slot reference** only

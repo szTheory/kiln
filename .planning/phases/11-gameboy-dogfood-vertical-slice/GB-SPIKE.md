@@ -1,6 +1,6 @@
 # Spike: Game Boy emulator as first external dogfood spec
 
-**Phase slot:** Backlog **999.2** (feeds **Phase 11**).  
+**Phase:** **11** — scope spike (same directory as `11-01-PLAN.md`).  
 **Date:** 2026-04-22
 
 ## Why Game Boy (not Star Fox / SNES)

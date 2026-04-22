@@ -13,8 +13,9 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
+- Integer phases (1, 2, 3…): Planned milestone work (v0.2 continues as **10–13**).
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED) — none at creation
+- **999.x** slots: optional parking; **999.1** shipped and kept as a **reference directory** only (see § Parking slot).
 
 - [x] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline — **complete 2026-04-19**
 - [x] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper — **complete 2026-04-20**
@@ -26,7 +27,9 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
 - [ ] **Phase 10: Local operator readiness (v0.2.0)** — Runbook + env checklist + onboarding dry-run; closes README/compose/PROJECT drift for local use — **planning** ([10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md))
-- [ ] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **planning** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md))
+- [ ] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **planning** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md))
+- [ ] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional devcontainer, Compose `app` service, or task-runner wrapper — **planning** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md))
+- [ ] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **planning** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md))
 
 ## Phase Details
 
@@ -256,9 +259,42 @@ Plans:
 - [x] 09-04-PLAN.md — **complete 2026-04-22**
 - [x] 09-05-PLAN.md — **complete 2026-04-22**
 
+### Phase 10: Local operator readiness (v0.2.0)
+**Goal:** Documented clone-to-run path, env checklist, onboarding dry-run, and optional Jaeger path aligned with Compose + host Phoenix (`LOCAL-DX-AUDIT.md`).
+**Depends on:** Phase 9 (v0.1.0 shipped)
+**Requirements:** LOCAL-01, LOCAL-03, BLOCK-04 (operator path)
+**Plans:** 1 plan
+Plans:
+- [ ] 10-01-PLAN.md — drafted
+
+### Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)
+**Goal:** First external repo run with spec + workflow + BDD; open test ROMs only; bounded caps (`DOGFOOD-01`).
+**Depends on:** Phase 10
+**Requirements:** DOGFOOD-01, UAT-01, UAT-02
+**Plans:** 1 plan + spike
+Plans:
+- [ ] 11-01-PLAN.md — drafted
+- Spike: [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md)
+
+### Phase 12: Local Docker / dev environment DX (v0.2.0)
+**Goal:** Pick and optionally ship **one** DX strategy (devcontainer vs Compose `app` vs `make`/`just`) so new operators have a single documented entry point if they need it.
+**Depends on:** Phase 10 (runbook proves baseline; Phase 12 does not block Phase 11 execution)
+**Requirements:** LOCAL-DX-01
+**Plans:** 1 plan
+Plans:
+- [ ] 12-01-PLAN.md — drafted
+
+### Phase 13: Requirements & roadmap hygiene (v0.2.0)
+**Goal:** Bulk-reconcile `REQUIREMENTS.md` v1 checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated**; optional CI drift guard (`DOCS-ALIGN-01`).
+**Depends on:** Phase 11 (dogfood narrative stable before locking REQ text to “shipped”)
+**Requirements:** DOCS-ALIGN-01
+**Plans:** 1 plan
+Plans:
+- [ ] 13-01-PLAN.md — drafted
+
 ## Coverage
 
-All 55 v1 requirements mapped to exactly one phase. No orphans, no duplicates.
+All 55 v1 requirements mapped to exactly one phase for **v0.1.0** (Phases 1–9). No orphans, no duplicates. **Phases 10–13** extend the roadmap for **v0.2.0** without remapping the original 55 IDs here (see Phase 13 plan).
 
 | Phase | Requirement Count | Requirements |
 |-------|-------------------|--------------|
@@ -307,7 +343,8 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 
 ## Progress
 
-**Execution Order:** 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
+**Execution Order (v0.1.0):** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9  
+**Execution Order (v0.2.0):** 10 → 11 → 12 → 13
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -322,67 +359,28 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | 9. Dogfood & Release (v0.1.0) | 5/5 | Complete | 2026-04-22 |
 | 10. Local operator readiness (v0.2.0) | 0/1 | Planning | — |
 | 11. Game Boy emulator dogfood (v0.2.0) | 0/1 | Planning | — |
+| 12. Local Docker / dev DX (v0.2.0) | 0/1 | Planning | — |
+| 13. Requirements & roadmap hygiene (v0.2.0) | 0/1 | Planning | — |
 
 ## Milestone v0.2.0 — operator dogfood (active planning)
 
-**Goal:** Run Kiln locally as the solo operator, complete at least one **external** bounded run (Game Boy emulator vertical slice), and optionally improve one-shot dev bring-up.
+**Goal:** Run Kiln locally as the solo operator, complete at least one **external** bounded run (Game Boy emulator vertical slice), optionally improve one-shot dev bring-up (**Phase 12**), then lock planning artifacts to shipped truth (**Phase 13**).
 
-**Execution order:** 10 → 11 (after `/gsd-discuss-phase` / `/gsd-plan-phase` refinements).
+**Execution order:** **10 → 11 → 12 → 13** (GSD: `/gsd-execute-phase 10` first; Phase 12 may overlap engineering discussion after 10 but should not skip the runbook work in 10).
 
 | Phase | Plans | Status | Notes |
 |-------|-------|--------|--------|
-| 10. Local operator readiness | 1 plan drafted | Planning | Runbook, env checklist, onboarding dry-run — [10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md) |
-| 11. Game Boy emulator dogfood vertical slice | 1 plan drafted | Planning | Spec + workflow + BDD + throwaway remote — [11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md) |
+| 10. Local operator readiness | 1 plan drafted | Planning | [10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md) |
+| 11. Game Boy emulator dogfood vertical slice | 1 plan drafted | Planning | [11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md) |
+| 12. Local Docker / dev environment DX | 1 plan drafted | Planning | [12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md) |
+| 13. Requirements & roadmap hygiene | 1 plan drafted | Planning | [13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md) |
 
-Spike (scope input for Phase 11): [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md).
+## Parking slot (reference — shipped)
 
-## Backlog
-
-Ideas captured for future planning but unsequenced. These live outside the 1–9 active sequence. Promote to the active milestone via `/gsd-review-backlog` when ready.
-
-### Phase 999.1: Docs & Landing Site (BACKLOG)
-
-**Goal:** [Captured for future planning — see `.planning/phases/999.1-docs-landing-site/` for detail]
-**Requirements:** `DOCS-01..DOCS-07` (see REQUIREMENTS.md § Docs & Release (v1.0+))
-**Slot decision:** Deferred to late Phase 8 / early Phase 9. Two defensible slots: **Phase 10 inside v0.1.0 milestone** (tighter product binding, better first-tag impression) OR **v1.1 milestone post-v0.1.0** (keeps v0.1.0 focused on runtime). Decide once v0.1.0 scope is locked.
-**Plans:** 5 plans (executed on backlog slot — **complete 2026-04-22**)
-
-Plans:
-- [x] 999.1-01-PLAN.md — **complete 2026-04-22**
-- [x] 999.1-02-PLAN.md — **complete 2026-04-22**
-- [x] 999.1-03-PLAN.md — **complete 2026-04-22**
-- [x] 999.1-04-PLAN.md — **complete 2026-04-22**
-- [x] 999.1-05-PLAN.md — **complete 2026-04-22**
-
-### Phase 999.2: Game Boy emulator operator dogfood (BACKLOG)
-
-**Goal:** First external vertical slice — spec + workflow + executable BDD against a **throwaway** git repo; **open test ROMs only** (no retail ROMs). Feeds **Phase 11** when promoted.
-**Requirements:** `DOGFOOD-01` (see `.planning/PROJECT.md` **Active**); spike [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md)
-**Plans:** 0 plans (promote with `/gsd-review-backlog` when ready)
-
-Plans:
-- [ ] TBD (promote with `/gsd-review-backlog` when ready)
-
-### Phase 999.3: Local Docker / dev environment DX (BACKLOG)
-
-**Goal:** Optional single-command or containerized operator environment (Compose `app` service vs **devcontainer** vs `make`/`just` wrapper — **decide in Phase 10**). See `.planning/research/LOCAL-DX-AUDIT.md`.
-**Requirements:** `LOCAL-DX-01`
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with `/gsd-review-backlog` when ready)
-
-### Phase 999.4: REQUIREMENTS.md ↔ PROJECT.md reconciliation (BACKLOG)
-
-**Goal:** Bulk-check v1 requirement checkboxes in `REQUIREMENTS.md` against shipped Phases 1–9; remove ambiguity with `PROJECT.md` **Validated** (or automate a drift check in CI). **Do not** use unchecked lines in `REQUIREMENTS.md` alone as shipping signal until this closes.
-**Requirements:** `DOCS-ALIGN-01`
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+**999.1 — Docs & landing site** was executed as a **parking-lot** slot (not an integer roadmap phase). All plans **complete 2026-04-22**. Artifacts live under [`.planning/phases/999.1-docs-landing-site/`](phases/999.1-docs-landing-site/) (CONTEXT, RESEARCH, five PLAN/SUMMARY, verification). New ad-hoc ideas may use **`/gsd-add-backlog`** again starting at **999.5** if needed.
 
 ---
 *Roadmap created: 2026-04-18*
 *Phases derived from 55 v1 requirements + research convergence (FEATURES dependency graph + ARCHITECTURE context DAG + PITFALLS recovery-cost ordering)*
 *Backlog 999.1 added: 2026-04-18*
-*v0.2.0 milestone + backlogs 999.2–999.4 added: 2026-04-22*
+*v0.2.0 Phases 10–13 + reclassified former 999.2–999.4: 2026-04-22*

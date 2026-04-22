@@ -3,7 +3,7 @@
 **Defined:** 2026-04-18
 **Core Value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
-**Sync note (2026-04-22):** v0.1.0 shipped scope is reflected in `.planning/PROJECT.md` (**Validated**) and `.planning/ROADMAP.md` (Phases 1–9). Checkboxes in **§ v1 Requirements** below may still read `[ ]` from the 2026-04-18 baseline; **do not infer shipping status from this file alone** until backlog **999.4** (DOCS-ALIGN) reconciles them. **v0.2 active goals:** `DOGFOOD-01`, `LOCAL-DX-01`, `DOCS-ALIGN-01` in `PROJECT.md`.
+**Sync note (2026-04-22):** v0.1.0 shipped scope is reflected in `.planning/PROJECT.md` (**Validated**) and `.planning/ROADMAP.md` (Phases 1–9). Checkboxes in **§ v1 Requirements** below may still read `[ ]` from the 2026-04-18 baseline; **do not infer shipping status from this file alone** until **Phase 13** (`13-01-PLAN.md`) reconciles them. **v0.2 active goals:** `DOGFOOD-01`, `LOCAL-DX-01`, `DOCS-ALIGN-01` in `PROJECT.md`.
 
 ## v1 Requirements
 
@@ -75,7 +75,7 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 ### Local Dev & Distribution
 
-- [x] **LOCAL-01**: `docker compose` runs **Postgres** + **DTU** + internal sandbox network (and optional OTel/Jaeger); **Phoenix runs on the host** (`mix phx.server`). See `README.md` and `.planning/research/LOCAL-DX-AUDIT.md`. Optional “app in Compose” / devcontainer = v0.2 backlog **999.3**.
+- [x] **LOCAL-01**: `docker compose` runs **Postgres** + **DTU** + internal sandbox network (and optional OTel/Jaeger); **Phoenix runs on the host** (`mix phx.server`). See `README.md` and `.planning/research/LOCAL-DX-AUDIT.md`. Optional “app in Compose” / devcontainer = **Phase 12** (v0.2.0).
 - [x] **LOCAL-02**: `.tool-versions` pins Elixir 1.19.5 / Erlang 28.1+ for `asdf`; Phoenix 1.8.5 + LiveView 1.1.28 pinned in `mix.exs`
 - [x] **LOCAL-03**: README with zero-to-first-run walkthrough — Phase 9 / LOCAL-03
 

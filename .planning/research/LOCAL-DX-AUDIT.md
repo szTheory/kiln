@@ -14,15 +14,15 @@
 ## Doc-only vs product gaps
 
 - **Doc-only:** Stale `PROJECT.md` **Active** checklist duplicated **Validated** and implied unshipped work. **Mitigation:** Move shipped items to **Validated**; keep **Active** for v0.2 only.
-- **Product gap (optional v0.2):** No single command starts **DB + app** for operators without a local Elixir install. **Mitigation:** Backlog **999.3** — choose devcontainer vs `compose` `app` service vs `make`/`just` wrapper after spike.
+- **Product gap (optional v0.2):** No single command starts **DB + app** for operators without a local Elixir install. **Mitigation:** **Phase 12** — choose devcontainer vs `compose` `app` service vs `make`/`just` wrapper after Phase 10 runbook.
 
 ## Decision (v0.1.0)
 
 - **Shipped truth:** LOCAL-01 = Compose for **data plane + DTU + optional observability**; **Kiln = host process**.  
-- **v0.2:** Evaluate one DX strategy under backlog **999.3**; do not block dogfood on full containerized app.
+- **v0.2:** Evaluate one DX strategy in **Phase 12**; do not block dogfood on full containerized app.
 
 ## References
 
 - [`compose.yaml`](../../compose.yaml)  
 - [`README.md`](../../README.md)  
-- [`.planning/ROADMAP.md`](../ROADMAP.md) Backlog **999.3**
+- [`.planning/ROADMAP.md`](../ROADMAP.md) **Phase 12**
