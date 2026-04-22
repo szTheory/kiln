@@ -80,6 +80,37 @@ defmodule Kiln.Audit do
     |> Repo.all()
   end
 
+  @doc """
+  Keyset page through audit events for a single run in canonical order
+  (`ORDER BY occurred_at ASC, id ASC`).
+
+  Options:
+
+    * `:run_id` — required run UUID
+    * `:limit` — positive page size
+    * `:after` — `nil` (default) or `{DateTime.t(), id}` cursor; the next
+      page starts strictly after this `(occurred_at, id)` pair
+    * `:anchor` — `:head` (default) walks forward from the earliest row;
+      `:tail` returns the latest `limit` rows (still ascending in the result)
+
+  `truncated` is true when at least one more row exists after the returned
+  page in forward chronological order.
+  """
+  @spec replay_page(keyword()) :: %{events: [Event.t()], truncated: boolean()}
+  def replay_page(opts) do
+    run_id = Keyword.fetch!(opts, :run_id)
+    limit = Keyword.fetch!(opts, :limit)
+
+    unless is_integer(limit) and limit > 0 do
+      raise ArgumentError, "replay_page :limit must be a positive integer"
+    end
+
+    case Keyword.get(opts, :anchor, :head) do
+      :tail -> replay_page_tail(run_id, limit)
+      :head -> replay_page_forward(run_id, limit, Keyword.get(opts, :after, nil))
+    end
+  end
+
   # -- private -------------------------------------------------------------
 
   defp apply_replay_filters(query, opts) do
@@ -121,21 +152,88 @@ defmodule Kiln.Audit do
       |> Map.put_new(:schema_version, 1)
       |> Map.put_new(:occurred_at, DateTime.utc_now())
 
-    %Event{}
-    |> Ecto.Changeset.cast(attrs, [
-      :event_kind,
-      :actor_id,
-      :actor_role,
-      :run_id,
-      :stage_id,
-      :correlation_id,
-      :causation_id,
-      :schema_version,
-      :payload,
-      :occurred_at
-    ])
-    |> Ecto.Changeset.validate_required([:event_kind, :correlation_id])
-    |> Repo.insert()
+    changeset =
+      %Event{}
+      |> Ecto.Changeset.cast(attrs, [
+        :event_kind,
+        :actor_id,
+        :actor_role,
+        :run_id,
+        :stage_id,
+        :correlation_id,
+        :causation_id,
+        :schema_version,
+        :payload,
+        :occurred_at
+      ])
+      |> Ecto.Changeset.validate_required([:event_kind, :correlation_id])
+
+    case Repo.insert(changeset) do
+      {:ok, %Event{run_id: rid} = event} when not is_nil(rid) ->
+        _ = Phoenix.PubSub.broadcast(Kiln.PubSub, "audit:run:#{rid}", {:audit_event, event})
+
+        {:ok, event}
+
+      other ->
+        other
+    end
+  end
+
+  defp replay_page_forward(run_id, limit, after_cursor) do
+    base =
+      from e in Event,
+        where: e.run_id == ^run_id,
+        order_by: [asc: e.occurred_at, asc: e.id]
+
+    filtered =
+      case after_cursor do
+        nil ->
+          base
+
+        {%DateTime{} = dt, id} ->
+          from e in base,
+            where:
+              e.occurred_at > ^dt or
+                (e.occurred_at == ^dt and e.id > ^id)
+      end
+
+    take = limit + 1
+
+    rows =
+      filtered
+      |> limit(^take)
+      |> Repo.all()
+
+    if length(rows) > limit do
+      %{events: Enum.take(rows, limit), truncated: true}
+    else
+      %{events: rows, truncated: false}
+    end
+  end
+
+  defp replay_page_tail(run_id, limit) do
+    rows_desc =
+      from(e in Event,
+        where: e.run_id == ^run_id,
+        order_by: [desc: e.occurred_at, desc: e.id],
+        limit: ^limit
+      )
+      |> Repo.all()
+
+    events = Enum.reverse(rows_desc)
+    oldest = List.first(events)
+
+    truncated =
+      oldest &&
+        Repo.exists?(
+          from e in Event,
+            where: e.run_id == ^run_id,
+            where:
+              e.occurred_at < ^oldest.occurred_at or
+                (e.occurred_at == ^oldest.occurred_at and e.id < ^oldest.id)
+        )
+
+    %{events: events, truncated: truncated || false}
   end
 
   defp correlation_id_from_logger do
