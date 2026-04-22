@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/budget_threshold_crossed.json",
+  "title": "audit_events budget_threshold_crossed payload",
+  "type": "object",
+  "required": ["pct", "cap_usd", "spent_usd", "threshold_name"],
+  "additionalProperties": true,
+  "properties": {
+    "pct": { "type": "string" },
+    "cap_usd": { "type": "string" },
+    "spent_usd": { "type": "string" },
+    "threshold_name": { "type": "string" },
+    "band": { "type": "string" }
+  }
+}
