@@ -26,7 +26,8 @@ defmodule KilnWeb.Router do
     live_session :default,
       on_mount: [
         {KilnWeb.LiveScope, :default},
-        {KilnWeb.FactorySummaryHook, :default}
+        {KilnWeb.FactorySummaryHook, :default},
+        {KilnWeb.OperatorChromeHook, :default}
       ] do
       live "/onboarding", OnboardingLive, :index
       live "/", RunBoardLive, :index
