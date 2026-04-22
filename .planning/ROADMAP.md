@@ -373,7 +373,7 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | 10. Local operator readiness | 1/1 complete | Complete | [10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md), [10-01-SUMMARY.md](phases/10-local-operator-readiness/10-01-SUMMARY.md) |
 | 11. Game Boy emulator dogfood vertical slice | 1/1 complete | Complete | [11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md) |
 | 12. Local Docker / dev environment DX | 1 plan drafted | Planning | [12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md) |
-| 13. Requirements & roadmap hygiene | 1 plan drafted | Planning | [13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md) |
+| 13. Requirements & roadmap hygiene | 1/1 complete | Complete | [13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md), [13-01-SUMMARY.md](phases/13-docs-requirements-reconciliation/13-01-SUMMARY.md) |
 
 ## Parking slot (reference — shipped)
 

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: — operator dogfood
-status: milestone_complete
-stopped_at: Phase 12 context gathered
+status: executing
+stopped_at: Phase 13 plan 01 complete (Phase 12 still open on ROADMAP)
 last_updated: "2026-04-22T12:14:36.035Z"
-last_activity: 2026-04-22 -- Phase --phase execution started
+last_activity: 2026-04-22 — Phase 13 (13-01) complete; REQUIREMENTS.md reconciled to v0.1.0 shipped scope
 progress:
-  total_phases: 10
-  completed_phases: 11
-  total_plans: 64
-  completed_plans: 64
-  percent: 110
+  total_phases: 4
+  completed_phases: 3
+  total_plans: 65
+  completed_plans: 65
+  percent: 75
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase --phase — 13
+**Current focus:** Phase 12 — local-docker-dx (optional DX; Phase 13 docs hygiene is complete)
 
 ## Current Position
 
-Phase: 13
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-04-22
+Phase: 12 (next on v0.2.0 roadmap)
+Plan: 12-01 drafted — not executed in this session
+Status: Phase 13 complete; milestone v0.2.0 still has Phase 12 open
+Last activity: 2026-04-22 — Phase 13 (13-01) shipped
 
-Progress: [████░░░░░░] 50% (v0.2: **10 ✓ → 11 ✓ → 12 → 13** — see `.planning/ROADMAP.md` § Milestone v0.2.0)
+Progress: [███████░░░] 75% (v0.2: **10 ✓ → 11 ✓ → 12 → 13 ✓** — see `.planning/ROADMAP.md` § Milestone v0.2.0)
 
 ## Performance Metrics
 
