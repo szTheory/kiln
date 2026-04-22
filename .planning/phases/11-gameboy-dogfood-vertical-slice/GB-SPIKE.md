@@ -53,6 +53,16 @@ Ship a repo that:
 2. Which **workflow YAML** is the template fork (name + path in Kiln repo)?
 3. DTU / egress: does the emulator build need **crates.io** during the stage? If yes, sandbox egress policy must allow only that path (DTU mock vs real registry) per product policy.
 
+## Operator checklist: real dogfood run (Kiln + external repo)
+
+Phase **11** ships **Kiln-side** wiring (`rust_gb_dogfood_v1`, `priv/dogfood/gb_vertical_slice_spec.md`, argv-only scenario bridge, tests in this repo). A **full** run where agents edit an external Game Boy slice and you see ROM-backed progress is **operator-owned** — use this checklist so local bring-up matches **D-1104** and paid provider policy.
+
+1. **External repo** — Create or clone a **throwaway** repository (see [Git and GitHub policy](#git-and-github-policy)); point Kiln’s workspace / spec at that remote, not `szTheory/kiln`.
+2. **ROMs** — Only **open / test ROMs** or in-repo generated binaries (see [Test ROMs and legal](#test-roms-and-legal)). Never rely on retail ROMs.
+3. **Rust toolchain in sandbox (D-1104)** — Prefer **host-trusted prefetch** (`cargo fetch`, **`cargo vendor`**, or populated `CARGO_HOME`) then **`cargo test --locked`** / **`--offline`** inside the stage when vendor/cache is present in the mounted workspace. See **D-1104** in [11-CONTEXT.md](11-CONTEXT.md) for caps, DTU, and “no silent stuck” semantics.
+4. **LLM providers (live mode)** — Planning/coding/verifying stages that call real APIs need **runtime configuration** (12-factor: env vars or your secret manager). Follow **SEC-01** in `CLAUDE.md`: **secret names / refs**, never persist key material to workspace or UI. Stubs used in Kiln CI **do not** replace your keys for a true paid run (OpenAI, Anthropic, etc.).
+5. **Kiln operator UX (future)** — A global **demo vs live** indicator and richer “provider not reachable” copy is tracked as backlog **999.2** in `.planning/ROADMAP.md` (composes with **`/providers`** — `ProviderHealthLive`). Until that ships, use **`/providers`** to see presence/outcomes (keys never shown).
+
 ## References
 
 - `.planning/research/LOCAL-DX-AUDIT.md` — host vs Compose layout  
