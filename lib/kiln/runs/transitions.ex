@@ -40,7 +40,7 @@ defmodule Kiln.Runs.Transitions do
   require Logger
   alias Kiln.{AgentTickerRateLimiter, Audit, Repo}
   alias Kiln.ExternalOperations
-  alias Kiln.Runs.Run
+  alias Kiln.Runs.{Run, SchedulingTelemetry}
   alias Kiln.Policies.StuckDetector
   alias Kiln.Telemetry.Spans
 
@@ -331,6 +331,7 @@ defmodule Kiln.Runs.Transitions do
 
     with {:ok, updated} <- update_state(run, to, meta),
          {:ok, _} <- append_audit(updated, run.state, to, meta) do
+      _ = SchedulingTelemetry.emit_queued_dwell_stop(run, to)
       {:ok, updated}
     end
   end

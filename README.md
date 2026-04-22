@@ -6,6 +6,39 @@ Software dark factory written in Elixir/Phoenix LiveView. Given a spec, Kiln shi
 
 See `.planning/PROJECT.md` for the full vision and constraints.
 
+## Fair scheduling
+
+Kiln’s **parallelism grain** for factory work is **per active run** at the
+`Kiln.Runs.RunDirector` scan: runs are ordered with **round-robin** among the
+current active set, with a stable tie-break on **`inserted_at`** then
+**`run_id`** (lexicographic on the UUID string). A **`fair_cursor`** in the
+director remembers the last successfully spawned run so the next scan starts
+after it — this is **admission order**, not a global multi-node scheduler.
+
+**Telemetry — run queued dwell**
+
+When a run **successfully** leaves `:queued`, the app emits a single Telemetry
+measurement on **`[:kiln, :run, :scheduling, :queued, :stop]`** (the
+**`run_queued`** dwell signal) with
+**`duration`** in **integer milliseconds** of wall-clock time since
+**`inserted_at`** (v1 uses `inserted_at` as the queued-start proxy). Metadata is
+whitelisted (`run_id`, `next_state`, `correlation_id`). Do **not** attach
+**`run_id`** as a Prometheus / `Telemetry.Metrics` tag in `KilnWeb.Telemetry`
+— that would explode cardinality; keep this signal **event-first** for
+operators and tests.
+
+**Three different “waits” (D-16)**
+
+- **Run queued dwell** — time the row spends in `:queued` before a successful
+  transition out (signal above).
+- **Oban queue time** — time a job waits between insert and execution (Oban’s
+  own telemetry / job timestamps).
+- **Ecto pool queue time** — time a caller waits to **checkout** a DB
+  connection from the pool (repo query telemetry).
+
+Weighted fair-share and **cross-node** scheduling charts are **out of scope**
+for v1 (deferred to later milestones).
+
 ## Documentation
 
 Operator docs and landing page (Astro + Starlight) are built from **`site/`** and published to **`https://szTheory.github.io/kiln/`** when GitHub Pages is enabled. See **`CONTRIBUTING.md`** for how to edit the site and optional `DOCS=1 mix docs.verify` checks.
@@ -77,6 +110,9 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `just setup` | `KILN_DB_ROLE=kiln_owner mix setup` |
 | `just smoke` | `bash test/integration/first_run.sh` (same SSOT as **Integration smoke**) |
 | `just dev-deps` | `db-up`, then prints a one-line reminder to start **`mix phx.server`** in another shell |
+| `just planning-gates` | `script/planning_gates.sh` — CI-parity **`mix check`** only (defaults match `.github/workflows/ci.yml`; Postgres must be reachable) |
+| `just shift-left` | `script/shift_left_verify.sh` — **`mix check`** then **`test/integration/first_run.sh`** (Docker + `/health`; full shift-left in one shot) |
+| `just before-plan-phase 12` | Runs **`shift-left`**, then prints **`/gsd-plan-phase 12 --gaps`** for GSD gap closure |
 
 ## Environment
 

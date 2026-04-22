@@ -73,7 +73,7 @@ defmodule Kiln.Runs.RunDirector do
 
   alias Kiln.OperatorReadiness
   alias Kiln.Runs
-  alias Kiln.Runs.{RunSubtree, RunSupervisor}
+  alias Kiln.Runs.{FairRoundRobin, RunSubtree, RunSupervisor}
 
   @periodic_scan_ms 30_000
 
@@ -112,7 +112,7 @@ defmodule Kiln.Runs.RunDirector do
     # self-message so `Kiln.Application.start/2` returns promptly.
     send(self(), :boot_scan)
     # state.monitors is %{pid => {monitor_ref, run_id}}
-    {:ok, %{monitors: %{}}}
+    {:ok, %{monitors: %{}, fair_cursor: nil}}
   end
 
   @impl true
@@ -135,9 +135,9 @@ defmodule Kiln.Runs.RunDirector do
         {:noreply, state}
 
       {{_ref, run_id}, remaining} ->
-        Logger.warning("run subtree died; will rehydrate on next scan",
-          run_id: run_id,
-          reason: inspect(reason)
+        Logger.warning(
+          "run subtree died; reason=#{inspect(reason)}; will rehydrate on next scan",
+          run_id: run_id
         )
 
         {:noreply, %{state | monitors: remaining}}
@@ -151,7 +151,9 @@ defmodule Kiln.Runs.RunDirector do
   # -- private helpers ----------------------------------------------------
 
   defp do_scan(state) do
-    active = Runs.list_active()
+    active =
+      Runs.list_active()
+      |> FairRoundRobin.order(Map.get(state, :fair_cursor))
 
     already =
       state.monitors
@@ -166,7 +168,12 @@ defmodule Kiln.Runs.RunDirector do
         case spawn_subtree(run) do
           {:ok, pid} ->
             ref = Process.monitor(pid)
-            %{acc | monitors: Map.put(acc.monitors, pid, {ref, run.id})}
+
+            %{
+              acc
+              | monitors: Map.put(acc.monitors, pid, {ref, run.id}),
+                fair_cursor: run.id
+            }
 
           {:error, :workflow_changed} ->
             # Run already escalated with reason :workflow_changed by
@@ -174,10 +181,7 @@ defmodule Kiln.Runs.RunDirector do
             acc
 
           {:error, reason} ->
-            Logger.error("failed to spawn run subtree",
-              run_id: run.id,
-              reason: inspect(reason)
-            )
+            Logger.error("failed to spawn run subtree: #{inspect(reason)}", run_id: run.id)
 
             acc
         end
@@ -205,10 +209,7 @@ defmodule Kiln.Runs.RunDirector do
 
     case File.exists?(path) do
       false ->
-        Logger.error("workflow file missing for rehydration",
-          run_id: run.id,
-          path: path
-        )
+        Logger.error("workflow file missing for rehydration at #{path}", run_id: run.id)
 
         # Treat missing as changed — force escalation. Operator sees a
         # typed, audit-visible signal rather than the subtree silently

@@ -16,7 +16,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 ## Phases (v0.3.0)
 
-- [ ] **Phase 14: Fair parallel runs** — PARA-01 — fair scheduling / queueing when multiple runs are active; respects caps and idempotency.
+- [x] **Phase 14: Fair parallel runs** — PARA-01 — fair scheduling / queueing when multiple runs are active; respects caps and idempotency. (completed 2026-04-22)
 - [ ] **Phase 15: Run comparison** — PARA-02 — side-by-side operator view for two runs.
 - [ ] **Phase 16: Read-only run replay** — REPL-01 — timeline scrub over persisted audit/checkpoint data (MVP).
 - [ ] **Phase 17: Template library & onboarding specs** — WFE-01, ONB-01 — `priv` (or agreed) template packs + UI to start from template.

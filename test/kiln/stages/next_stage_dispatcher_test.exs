@@ -44,6 +44,10 @@ defmodule Kiln.Stages.NextStageDispatcherTest do
         "stage_kind" => "coding"
       }
     )
+
+    assert [%Oban.Job{meta: meta}] = all_enqueued(worker: StageWorker)
+    assert meta["run_id"] == run.id
+    assert Map.has_key?(meta, "kiln_ctx")
   end
 
   test "returns :ok without enqueueing when the completed stage is a leaf" do

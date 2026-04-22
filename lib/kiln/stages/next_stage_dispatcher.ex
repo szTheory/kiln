@@ -51,6 +51,7 @@ defmodule Kiln.Stages.NextStageDispatcher do
     end)
     |> Enum.each(fn stage ->
       stage_run = create_or_fetch_stage_run(run, stage)
+      meta = Map.merge(Telemetry.pack_meta(), %{"run_id" => run_id})
 
       %{
         "idempotency_key" => "run:#{run_id}:stage:#{stage.id}",
@@ -59,7 +60,7 @@ defmodule Kiln.Stages.NextStageDispatcher do
         "stage_kind" => Atom.to_string(stage.kind),
         "stage_input" => build_stage_input(run, stage_run, stage)
       }
-      |> StageWorker.new(meta: Telemetry.pack_meta())
+      |> StageWorker.new(meta: meta)
       |> Oban.insert()
     end)
 
