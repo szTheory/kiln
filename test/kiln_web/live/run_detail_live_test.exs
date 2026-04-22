@@ -61,6 +61,68 @@ defmodule KilnWeb.RunDetailLiveTest do
     assert render(view) =~ "Draft created"
   end
 
+  test "cost hint panel shows disclaimer chips for succeeded stage", %{conn: conn} do
+    run =
+      RunFactory.insert(:run,
+        workflow_id: "wf_cost_hint",
+        caps_snapshot: %{
+          "max_retries" => 3,
+          "max_tokens_usd" => "10",
+          "max_elapsed_seconds" => 600,
+          "max_stage_duration_seconds" => 300
+        }
+      )
+
+    _ =
+      StageRunFactory.insert(:stage_run,
+        run_id: run.id,
+        workflow_stage_id: "stage_cost_hint",
+        state: :succeeded,
+        cost_usd: "0.12",
+        requested_model: "sonnet-class",
+        actual_model_used: "haiku-class"
+      )
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}?stage=stage_cost_hint")
+
+    html = render(view)
+    assert html =~ "Advisory — does not change run caps"
+    assert html =~ "Spend follows routed model"
+    assert html =~ "Cap headroom"
+  end
+
+  test "budget_alert pubsub shows banner until dismissed", %{conn: conn} do
+    run = RunFactory.insert(:run, workflow_id: "wf_budget_banner")
+
+    _ =
+      StageRunFactory.insert(:stage_run,
+        run_id: run.id,
+        workflow_stage_id: "stage_bb",
+        state: :succeeded
+      )
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}?stage=stage_bb")
+
+    Phoenix.PubSub.broadcast(
+      Kiln.PubSub,
+      "run:#{run.id}",
+      {:budget_alert,
+       %{
+         crossings: [
+           %{pct: 50, band: "50", threshold_name: "50% of cap", severity: "info"}
+         ]
+       }}
+    )
+
+    html = render(view)
+    assert html =~ "Budget notice: half of run cap reached"
+    assert has_element?(view, "#run-detail-budget-banner-dismiss")
+
+    view |> element("#run-detail-budget-banner-dismiss") |> render_click()
+
+    refute render(view) =~ "Budget notice: half of run cap reached"
+  end
+
   test "diff pane shows truncated marker for oversized artifact", %{conn: conn} do
     run =
       RunFactory.insert(:run,

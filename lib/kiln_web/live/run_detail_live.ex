@@ -14,6 +14,7 @@ defmodule KilnWeb.RunDetailLive do
 
   use KilnWeb, :live_view
 
+  alias Kiln.Agents.BudgetGuard
   alias Kiln.Artifacts
   alias Kiln.Audit
   alias Kiln.Blockers.Reason
@@ -55,20 +56,34 @@ defmodule KilnWeb.RunDetailLive do
 
             block_reason = infer_block_reason(run)
 
-            {:ok,
-             socket
-             |> assign(:page_title, "Run #{short(uuid)}")
-             |> assign(:run, run)
-             |> assign(:block_reason, block_reason)
-             |> assign(:follow_up_correlation_id, follow_cor)
-             |> assign(:graph_ids, graph_ids)
-             |> assign(:latest_by_stage, latest)
-             |> assign(:stages, stages)
-             |> assign(:compare_picker_open, false)
-             |> assign(:compare_pick_list, [])
-             |> stream(:logs, [], reset: true)
-             |> stream(:events, [], reset: true)
-             |> stream(:chatter, [], reset: true)}
+            socket =
+              socket
+              |> assign(:page_title, "Run #{short(uuid)}")
+              |> assign(:run, run)
+              |> assign(:block_reason, block_reason)
+              |> assign(:follow_up_correlation_id, follow_cor)
+              |> assign(:graph_ids, graph_ids)
+              |> assign(:latest_by_stage, latest)
+              |> assign(:stages, stages)
+              |> assign(:compare_picker_open, false)
+              |> assign(:compare_pick_list, [])
+              |> assign(:stage_query, nil)
+              |> assign(:pane, "diff")
+              |> assign(:budget_alert, nil)
+              |> assign(:budget_banner_dismissed?, false)
+              |> stream(:logs, [], reset: true)
+              |> stream(:events, [], reset: true)
+              |> stream(:chatter, [], reset: true)
+
+            socket =
+              if connected?(socket) do
+                _ = Phoenix.PubSub.subscribe(Kiln.PubSub, "run:#{run.id}")
+                socket
+              else
+                socket
+              end
+
+            {:ok, socket}
         end
     end
   end
@@ -78,36 +93,57 @@ defmodule KilnWeb.RunDetailLive do
     pane = parse_pane(params["pane"])
     stage_param = params["stage"]
     run = socket.assigns.run
-    latest = Workflows.latest_stage_runs_for(run.id)
-
-    {selected, stage_missing?} = resolve_selection(stage_param, latest)
-
-    diff_text = diff_for_selected(selected, run.id)
-
-    events =
-      case selected do
-        %StageRun{id: sid} ->
-          Audit.replay(run_id: run.id)
-          |> Enum.filter(&(&1.stage_id == sid))
-
-        _ ->
-          []
-      end
-
-    logs = log_rows(selected)
 
     socket =
       socket
-      |> assign(:pane, pane)
-      |> assign(:selected_stage_run, selected)
-      |> assign(:stage_missing?, stage_missing?)
-      |> assign(:diff_text, diff_text)
-      |> stream(:logs, logs, reset: true)
-      |> stream(:events, events, reset: true)
-      |> stream(:chatter, placeholder_chatter(), reset: true)
+      |> assign(:stage_query, stage_param)
+      |> assign_stage_pane(run, stage_param, pane)
 
     {:noreply, socket}
   end
+
+  @impl true
+  def handle_info({:run_state, _}, socket) do
+    run = Runs.get!(socket.assigns.run.id)
+    stages = Stages.list_for_run(run.id)
+    graph_ids = Workflows.graph_for_run(run)
+    latest = Workflows.latest_stage_runs_for(run.id)
+
+    socket =
+      socket
+      |> assign(:run, run)
+      |> assign(:stages, stages)
+      |> assign(:graph_ids, graph_ids)
+      |> assign(:latest_by_stage, latest)
+      |> assign(:block_reason, infer_block_reason(run))
+      |> assign_stage_pane(run, socket.assigns.stage_query, socket.assigns.pane)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:budget_alert, payload}, socket) do
+    run = Runs.get!(socket.assigns.run.id)
+    stages = Stages.list_for_run(run.id)
+    graph_ids = Workflows.graph_for_run(run)
+    latest = Workflows.latest_stage_runs_for(run.id)
+
+    alert = pick_budget_alert(payload)
+
+    socket =
+      socket
+      |> assign(:run, run)
+      |> assign(:stages, stages)
+      |> assign(:graph_ids, graph_ids)
+      |> assign(:latest_by_stage, latest)
+      |> assign(:block_reason, infer_block_reason(run))
+      |> assign(:budget_alert, alert)
+      |> assign(:budget_banner_dismissed?, false)
+      |> assign_stage_pane(run, socket.assigns.stage_query, socket.assigns.pane)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(_other, socket), do: {:noreply, socket}
 
   @impl true
   def handle_event("pick_stage", %{"wid" => wid}, socket) do
@@ -145,6 +181,10 @@ defmodule KilnWeb.RunDetailLive do
             {:noreply, put_flash(socket, :error, "Resume failed: #{inspect(reason)}")}
         end
     end
+  end
+
+  def handle_event("dismiss_budget_banner", _params, socket) do
+    {:noreply, assign(socket, :budget_banner_dismissed?, true)}
   end
 
   def handle_event("bundle_diagnostics", _params, socket) do
@@ -285,6 +325,26 @@ defmodule KilnWeb.RunDetailLive do
           <.unblock_panel run={@run} block_reason={@block_reason} />
         <% end %>
 
+        <%= if @budget_alert && !@budget_banner_dismissed? do %>
+          <div
+            id="run-detail-budget-banner"
+            role="status"
+            aria-live="polite"
+            class="flex flex-wrap items-start justify-between gap-3 rounded border border-ash bg-iron/40 p-3 text-sm text-bone"
+          >
+            <p class="text-bone">{budget_banner_title(@budget_alert)}</p>
+            <button
+              type="button"
+              id="run-detail-budget-banner-dismiss"
+              phx-click="dismiss_budget_banner"
+              aria-label="Dismiss budget notice"
+              class="shrink-0 rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)] transition-colors hover:border-ember hover:text-ember"
+            >
+              Dismiss
+            </button>
+          </div>
+        <% end %>
+
         <section class="rounded border border-ash bg-char/80 p-4">
           <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Stages</h2>
           <ol class="mt-3 flex flex-wrap gap-2">
@@ -319,6 +379,43 @@ defmodule KilnWeb.RunDetailLive do
             </section>
           <% true -> %>
             <.pane_toolbar run={@run} selected={@selected_stage_run} pane={@pane} />
+
+            <%= if match?(%StageRun{state: :succeeded}, @selected_stage_run) do %>
+              <section
+                id="run-detail-cost-hint-panel"
+                class="mt-3 rounded border border-ash bg-char/80 p-4 text-sm text-bone"
+              >
+                <h3 class="text-xs font-semibold uppercase text-[var(--color-smoke)]">
+                  Stage cost (advisory)
+                </h3>
+                <dl class="mt-3 grid gap-2 font-mono text-xs sm:grid-cols-2">
+                  <div>
+                    <dt class="text-[var(--color-smoke)]">Stage spend (USD)</dt>
+                    <dd>{format_stage_money(@selected_stage_run.cost_usd)}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-[var(--color-smoke)]">Cap headroom (USD)</dt>
+                    <dd>{format_stage_money(cap_headroom_usd(@run, @selected_stage_run))}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-[var(--color-smoke)]">Requested model</dt>
+                    <dd>{model_label(@selected_stage_run.requested_model)}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-[var(--color-smoke)]">Routed model</dt>
+                    <dd>{model_label(@selected_stage_run.actual_model_used)}</dd>
+                  </div>
+                </dl>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <span class="rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)]">
+                    Advisory — does not change run caps
+                  </span>
+                  <span class="rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)]">
+                    Spend follows routed model
+                  </span>
+                </div>
+              </section>
+            <% end %>
 
             <%= case @pane do %>
               <% "diff" -> %>
@@ -449,6 +546,65 @@ defmodule KilnWeb.RunDetailLive do
   defp parse_pane(p) when p in @panes, do: p
   defp parse_pane(_), do: "diff"
 
+  defp assign_stage_pane(socket, run, stage_param, pane) do
+    latest = Workflows.latest_stage_runs_for(run.id)
+    {selected, stage_missing?} = resolve_selection(stage_param, latest)
+    diff_text = diff_for_selected(selected, run.id)
+
+    events =
+      case selected do
+        %StageRun{id: sid} ->
+          Audit.replay(run_id: run.id)
+          |> Enum.filter(&(&1.stage_id == sid))
+
+        _ ->
+          []
+      end
+
+    logs = log_rows(selected)
+
+    socket
+    |> assign(:pane, pane)
+    |> assign(:selected_stage_run, selected)
+    |> assign(:stage_missing?, stage_missing?)
+    |> assign(:diff_text, diff_text)
+    |> stream(:logs, logs, reset: true)
+    |> stream(:events, events, reset: true)
+    |> stream(:chatter, placeholder_chatter(), reset: true)
+  end
+
+  defp pick_budget_alert(%{crossings: list}) when is_list(list) and list != [] do
+    Enum.max_by(list, & &1.pct)
+  end
+
+  defp pick_budget_alert(_), do: nil
+
+  defp budget_banner_title(%{pct: pct}) when pct >= 80, do: "Budget notice: most of run cap used."
+
+  defp budget_banner_title(%{pct: _}), do: "Budget notice: half of run cap reached."
+
+  defp format_stage_money(nil), do: "—"
+
+  defp format_stage_money(%Decimal{} = d),
+    do: d |> Decimal.round(4) |> Decimal.to_string(:normal)
+
+  defp format_stage_money(other), do: other |> decimalize_money() |> format_stage_money()
+
+  defp decimalize_money(%Decimal{} = d), do: d
+  defp decimalize_money(s) when is_binary(s), do: Decimal.new(s)
+  defp decimalize_money(n) when is_integer(n), do: Decimal.new(n)
+  defp decimalize_money(n) when is_float(n), do: Decimal.from_float(n)
+
+  defp cap_headroom_usd(%Run{id: rid} = run, _sr) do
+    cap = decimalize_money(get_in(run.caps_snapshot, ["max_tokens_usd"]) || 0)
+    spent = BudgetGuard.sum_completed_stage_spend(rid)
+    Decimal.sub(cap, spent)
+  end
+
+  defp model_label(nil), do: "—"
+  defp model_label(s) when is_binary(s), do: s
+  defp model_label(_), do: "—"
+
   defp resolve_selection(wid, _latest) when wid in [nil, ""], do: {nil, false}
 
   defp resolve_selection(wid, latest) do
@@ -513,6 +669,7 @@ defmodule KilnWeb.RunDetailLive do
 
   defp blocked_reason_from_audit_string(s) do
     Reason.all()
+    |> Enum.filter(&Reason.blocking?/1)
     |> Enum.find(fn a -> Atom.to_string(a) == s end)
     |> case do
       nil -> :missing_api_key

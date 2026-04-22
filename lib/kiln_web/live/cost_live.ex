@@ -288,8 +288,11 @@ defmodule KilnWeb.CostLive do
           </div>
         <% end %>
 
-        <footer class="text-xs text-[var(--color-smoke)]">
-          Last updated: {DateTime.to_iso8601(@last_updated_at)}
+        <footer class="space-y-1 text-xs text-[var(--color-smoke)]">
+          <p class="text-sm opacity-70">
+            Advisory: rollups here are indicative and do not change per-run caps. Open a run on the board for per-stage truth and the full disclaimer chips.
+          </p>
+          <p>Last updated: {DateTime.to_iso8601(@last_updated_at)}</p>
         </footer>
       </div>
     </Layouts.app>
