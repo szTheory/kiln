@@ -14,7 +14,7 @@
 ## Doc-only vs product gaps
 
 - **Doc-only:** Stale `PROJECT.md` **Active** checklist duplicated **Validated** and implied unshipped work. **Mitigation:** Move shipped items to **Validated**; keep **Active** for v0.2 only.
-- **Product gap (optional v0.2):** No single command starts **DB + app** for operators without a local Elixir install. **Mitigation:** **Phase 12** — choose devcontainer vs `compose` `app` service vs `make`/`just` wrapper after Phase 10 runbook.
+- **Product gap (optional v0.2):** Operators without a scripted habit still repeat the same **Compose + `mix`** steps by hand. **Mitigation (shipped Phase 12):** optional **`justfile`** at repo root — see **[README — Optional: Just recipes](../../README.md#optional-just-recipes-local-orchestration)** for named targets (`just db-up`, `just setup`, `just smoke`, …). **No** Compose-hosted Phoenix and **no** `.devcontainer/` as the v0.2.0 strategy; Phoenix remains on the host.
 
 ## Decision (v0.1.0)
 
@@ -25,7 +25,7 @@
 
 **Canonical quick path:** follow **[`README.md`](../../README.md)** end-to-end — quick start, **Operator checklist**, **Digital Twin (DTU)** subsection, and **Human-required vs automated**. That file is what a fresh `git clone` should use first. Machine smoke is **`bash test/integration/first_run.sh`** or the one-line delegate **`mix integration.first_run`** (same script; see README **Integration smoke**).
 
-**This audit file** is for **rationale**, **drift history** (findings table), and **edge cases** (e.g. why there is no `app` service, Phase 12 pointer). Do not fork a second competing quick-start here; patch README + compose when reality changes, then summarize the “why” here if needed.
+**This audit file** is for **rationale**, **drift history** (findings table), and **edge cases** (e.g. why there is no `app` service). **Optional orchestration** is documented only in **README** (pointer: [Optional: Just recipes](../../README.md#optional-just-recipes-local-orchestration)); the **`justfile`** wraps **`compose.yaml`**, **`KILN_DB_ROLE=kiln_owner mix setup`**, and **`test/integration/first_run.sh`** — not a second command matrix here. Do not fork a competing quick-start; patch README + compose when reality changes, then summarize the “why” here if needed.
 
 ## References
 
