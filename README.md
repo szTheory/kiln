@@ -75,6 +75,12 @@ Use this as a **cold-clone** sanity pass (order matches the happy path above):
 - Optional observability: `OTEL_EXPORTER_OTLP_ENDPOINT` (see **Traces (local)**)
 - `KILN_DB_ROLE` — leave unset for day-to-day app runs (`kiln_app`). Set to `kiln_owner` only for migrations / DDL (`KILN_DB_ROLE=kiln_owner mix ecto.migrate`).
 
+### Dogfood / Phase 11 (GB slice)
+
+- **Workspace:** export `KILN_DOGFOOD_WORKSPACE=/absolute/path/to/your/clone` before running shell scenarios whose `cwd` targets the external Rust repo (not required while scenarios still use `mix` against this tree).
+- **Workflow on disk:** `priv/workflows/rust_gb_dogfood_v1.yaml` — id **`rust_gb_dogfood_v1`** (load via `Kiln.Workflows.load/1`; the `/workflows` LiveView lists workflows discovered from disk when that path is wired in your deploy).
+- **Spec:** `priv/dogfood/gb_vertical_slice_spec.md` — three `kiln-scenario` entries with **argv-only** `mix` steps today; swap `argv` to **`cargo test --workspace --locked`** (and `cwd` under `KILN_DOGFOOD_WORKSPACE`) once the throwaway repo exists so CI matches the operator clone (**D-1105**).
+
 ## Human-required vs automated
 
 | Step | Human | Automated in CI / scripts |
