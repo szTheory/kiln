@@ -135,6 +135,7 @@ This document evolves at phase transitions and milestone boundaries.
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
 - **v0.3.0 (Phases 14–19)** — **In planning / execution:** see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md`.
+- **Backlog:** **999.2** — Operator **demo vs live** mode indicator, provider readiness / connection UX, and config-status strip (composes with **`/providers`**, **SEC-01**). See `.planning/ROADMAP.md` § Backlog and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/`.
 - **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 

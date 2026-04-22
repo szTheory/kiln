@@ -75,5 +75,21 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 **999.1 — Docs & landing site** — shipped 2026-04-22; artifacts under [.planning/phases/999.1-docs-landing-site/](phases/999.1-docs-landing-site/).
 
+## Backlog
+
+### Phase 999.2: Operator demo vs live mode and provider readiness UX (BACKLOG)
+
+**Goal:** Global **demo** (fixtures / stub providers / no paid API calls) vs **live** (runtime env / secret refs per **SEC-01**) mode is obvious in the operator shell (e.g. `Layouts` strip or chip). In **live** mode, unreachable or misconfigured providers show **calm** inline status and links to **`/providers`** — never silent failure. In **demo** mode, copy states that outcomes are **mock or seed-driven**. One surface for **config presence** (which providers are configured — names only, never key values) to improve local and production bring-up. Composes with existing **`ProviderHealthLive`** (`/providers`) and `ModelRegistry` health snapshots.
+
+**Requirements:** TBD (promote with `/gsd-review-backlog`).
+
+**Canonical refs (seed):** `CLAUDE.md` (SEC-01), `lib/kiln_web/live/provider_health_live.ex`, `.cursor/plans/GB dogfood note backlog-6d919cbd.plan.md` (intent note; do not treat as executable spec).
+
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ---
 *Milestone v0.3.0 opened: 2026-04-22*
