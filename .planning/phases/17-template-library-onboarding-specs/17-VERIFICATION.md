@@ -27,6 +27,4 @@ updated: 2026-04-22
 
 None required for this phase — operator flows covered by LiveView + context tests.
 
-## Self-Check
-
 ## Self-Check: PASSED
