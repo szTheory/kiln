@@ -40,6 +40,8 @@ Prior milestone velocity and decision log: see **Accumulated Context** history i
 
 ## Session Continuity
 
+Phase 18 discuss complete (auto-recs + research): [.planning/phases/18-cost-hints-budget-alerts/18-CONTEXT.md](phases/18-cost-hints-budget-alerts/18-CONTEXT.md).
+
 Phase 17 discuss complete: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md) (parallel research synthesis → locked decisions).
 
 Phase 16 (REPL-01) executed: summaries and `16-VERIFICATION.md` under [.planning/phases/16-read-only-run-replay/](phases/16-read-only-run-replay/).
@@ -50,7 +52,7 @@ Phase 15 context: [.planning/phases/15-run-comparison/15-CONTEXT.md](phases/15-r
 
 Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md](phases/14-fair-parallel-runs/14-CONTEXT.md)
 
-Next: **`/gsd-plan-phase 17`** — Template library and onboarding specs (research + tasks; context is ready).
+Next: **`/gsd-plan-phase 18`** — Cost hints & budget alerts (research + tasks; `18-CONTEXT.md` ready).
 
 **Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
 
