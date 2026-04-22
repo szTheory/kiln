@@ -28,12 +28,11 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **Phases 2–9 (v0.1.0 capability bundle)** — ORCH-05/06; AGENT-01..05; SAND-01..04; SPEC-01..04; GIT-01..04; UI-01..09; OBS-02, OBS-04 (OBS-01/OBS-03 were Phase 1); UAT-01/02; BLOCK-01..04; INTAKE-01..03; OPS-01..05 — shipped per `.planning/ROADMAP.md` Phases 2–9 (2026-04-20–22). REQ IDs remain the stable vocabulary for audits and future milestones.
 - [x] **DOCS-ALIGN-01** — `PROJECT.md` **Validated**, `REQUIREMENTS.md` § v1 checkboxes, and `ROADMAP.md` stay mutually consistent at milestone boundaries — Phase 13 (`13-01-PLAN.md`).
 - [x] **LOCAL-DX-01** — Optional **`justfile`** task-runner layer (host Phoenix + Compose data plane; no second official quick-start; no Phoenix-in-Compose / devcontainer). README optional subsection + `LOCAL-DX-AUDIT.md` pointer — **Validated in Phase 12: local-docker-dx** (2026-04-22).
+- [x] **DOGFOOD-01** — Kiln-side **external-repo vertical slice** for the Game Boy emulator path: spec + workflow + BDD + bounded caps scaffolding (`rust_gb_dogfood_v1`, scenario argv-only shell oracle, `priv/dogfood/gb_vertical_slice_spec.md`, tests) — **Phase 11** (2026-04-22). Full ROM-backed `cargo test` on a disposable clone remains **operator-owned** per `GB-SPIKE.md`.
 
 ### Active
 
-<!-- v0.2 — operator dogfood + DX. Promoted from backlog / phase plans when execution starts. -->
-
-- [ ] **DOGFOOD-01** — First **external** repo run from local Kiln (Game Boy emulator **vertical slice**: spec + workflow + BDD + bounded caps; open test ROMs only). Context: `.planning/phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md`, Phase **11** plan.
+<!-- Populated by `/gsd-new-milestone` after the next planning cycle. No Active requirement IDs until then. -->
 
 ### Out of Scope
 
@@ -111,19 +110,18 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current State (as of 2026-04-22)
+## Current State (as of 2026-04-22 — after v0.2.0 milestone close)
 
-- **Milestone v0.1.0 (Phases 1–9)** — Shipped per `.planning/ROADMAP.md`. Runtime: Postgres + DTU + optional OTel via Compose; Phoenix on host; LiveView operator UI; sandbox + agents + GitHub path; dogfood CI on Kiln itself.
-- **Next milestone v0.2** — Operator dogfood (Phases **10–13**); plans under `.planning/phases/10-*` … `13-*`. **Phase 12 (2026-04-22):** complete — optional `justfile` + README subsection per `12-01`. **Phase 11 plan 11-01 (2026-04-22):** Kiln-side scenario **shell** oracle bridge, `rust_gb_dogfood_v1` workflow YAML, `priv/dogfood/gb_vertical_slice_spec.md`, and README **D-1105** wiring — external Rust clone + `cargo test` argv swap still operator-owned per GB-SPIKE.
-- **Validated requirements:** See **Validated** section above (Phase 1 items + Phases 2–9 bundle line).
+- **v0.1.0 (Phases 1–9)** — Shipped: dark-factory runtime, operator UI, sandbox + agents, GitHub + CI, dogfood on Kiln. See `.planning/milestones/v0.1.0.md`.
+- **v0.2.0 (Phases 10–13)** — **Shipped:** local operator readiness (`first_run.sh` / README parity); Game Boy dogfood **Kiln-side** slice (workflow + spec stub + scenario compiler path); optional **`justfile`** + README DX; `REQUIREMENTS.md` / `ROADMAP.md` / `PROJECT.md` reconciliation (`DOCS-ALIGN-01`). Archives: `.planning/milestones/v0.2.0-ROADMAP.md`, `v0.2.0-REQUIREMENTS.md`. Git tag: **`v0.2.0`**.
+- **Tech debt at close:** `12-01-SUMMARY.md` records **Self-Check: PARTIAL** — full `mix check` was not green in that execution environment; **CI and a workstation with Postgres** remain the merge authority.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances — change host port in Compose or stop the other service.
 - **New seeds planted:** SEED-002, SEED-003, SEED-004 — dormant until their trigger conditions fire.
 
-## Next milestone goals (v0.2)
+## Next milestone goals
 
-1. Run Kiln locally against a **throwaway git remote** and complete at least one bounded run for an external spec (Game Boy emulator vertical slice).
-2. ~~Decide and optionally implement **one** local DX improvement in **Phase 12** after Phase **10**.~~ **Done** — Phase 12 (`justfile` + docs).
-3. Milestone-close hygiene: `DOCS-ALIGN-01` re-runs implicitly whenever planning docs change; last explicit reconciliation was **Phase 13** (2026-04-22).
+1. Run **`/gsd-new-milestone`** to define the next version, fresh `.planning/REQUIREMENTS.md`, and new phase rows in `.planning/ROADMAP.md`.
+2. After planning: pick the next highest-risk slice (multi-run fairness, replay UI, team primitives, etc. — see `REQUIREMENTS.md` **v2** section in the v0.2.0 archive for parked IDs).
 
 ---
-*Last updated: 2026-04-22 — Phase 12 closed (local-docker-dx); Phase 13: requirements reconciliation + `DOCS-ALIGN-01` validated*
+*Last updated: 2026-04-22 — `/gsd-complete-milestone` v0.2.0 (operator dogfood, Phases 10–13)*

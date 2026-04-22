@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: — operator dogfood
-status: milestone_complete
-stopped_at: Phase 13 plan 01 complete (Phase 12 still open on ROADMAP)
-last_updated: "2026-04-22T12:14:36.035Z"
-last_activity: 2026-04-22 — Phase 13 (13-01) complete; REQUIREMENTS.md reconciled to v0.1.0 shipped scope
+status: shipped
+stopped_at: Milestone closed — archives + tag v0.2.0; root REQUIREMENTS.md removed pending /gsd-new-milestone
+last_updated: "2026-04-22T23:59:59.000Z"
+last_activity: 2026-04-22 — /gsd-complete-milestone v0.2.0 (manual archive; gsd-sdk milestone.complete broken)
 progress:
   total_phases: 4
   completed_phases: 4
-  total_plans: 65
-  completed_plans: 65
+  total_plans: 4
+  completed_plans: 4
   percent: 100
 ---
 
@@ -18,19 +18,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-22)
+See: .planning/PROJECT.md (updated 2026-04-22 — post v0.2.0 close)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase 12 — local-docker-dx (optional DX; Phase 13 docs hygiene is complete)
+**Current focus:** **`/gsd-new-milestone`** — define next version, fresh REQUIREMENTS.md, and new ROADMAP phases.
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Milestone complete
+Phase: _(next milestone TBD)_
+Plan: _(none)_
+Status: v0.2.0 shipped; planning idle until new milestone
 Last activity: 2026-04-22
 
-Progress: [███████░░░] 75% (v0.2: **10 ✓ → 11 ✓ → 12 → 13 ✓** — see `.planning/ROADMAP.md` § Milestone v0.2.0)
+Progress: v0.2.0 Phases **10 ✓ → 11 ✓ → 12 ✓ → 13 ✓** — see `.planning/MILESTONES.md` and `.planning/milestones/v0.2.0-ROADMAP.md`.
 
 ## Performance Metrics
 
@@ -187,13 +187,10 @@ None yet.
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 12 context gathered
-Resume file: --resume-file
-Next command: `/gsd-discuss-phase 12` (optional) then `/gsd-plan-phase 12` or `/gsd-execute-phase 12`
+Stopped at: **v0.2.0 milestone closed** (archives, ROADMAP rewrite, `PROJECT.md` / `STATE.md`, root `REQUIREMENTS.md` removed).
 
-**Completed milestone:** v0.1.0 — Phases 1–9 + backlog slot 999.1 (docs site work) — 2026-04-22
+Next command: **`/gsd-new-milestone`** (then `/clear` if you use that pattern between milestones).
 
-**Active planning:** v0.2.0 — Phases **10–13** in order (see ROADMAP); **999.1** remains a shipped **parking-slot reference** only
+**Shipped:** v0.1.0 (Phases 1–9 + 999.1) · v0.2.0 (Phases 10–13) — 2026-04-22
 
-**Planned Phase:** 12 (Local Docker / dev environment DX) — 1 plans — 2026-04-22T03:29:00.109Z
+**999.1** remains a shipped **parking-slot reference** only (see `ROADMAP.md`).
