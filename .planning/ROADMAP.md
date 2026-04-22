@@ -28,8 +28,8 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
 - [x] **Phase 10: Local operator readiness (v0.2.0)** — Runbook + env checklist + onboarding dry-run; closes README/compose/PROJECT drift for local use — **complete 2026-04-21** ([10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md))
 - [x] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **complete 2026-04-22** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md))
-- [ ] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional devcontainer, Compose `app` service, or task-runner wrapper — **planning** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md))
-- [ ] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **planning** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md))
+- [ ] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional **`just`/`make`** wrappers (Compose for data plane; Phoenix on host) — **planning** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md))
+- [x] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **planning** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md)) (completed 2026-04-22)
 
 ## Phase Details
 
@@ -277,7 +277,7 @@ Plans:
 - Spike: [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md)
 
 ### Phase 12: Local Docker / dev environment DX (v0.2.0)
-**Goal:** Pick and optionally ship **one** DX strategy (devcontainer vs Compose `app` vs `make`/`just`) so new operators have a single documented entry point if they need it.
+**Goal:** Ship **one** optional **task-runner + host Phoenix** path (`just` / `make` + `docker compose` for `db`/DTU/OTel) with README + audit alignment — **not** devcontainer or Compose-hosted Phoenix (**D-1201a**).
 **Depends on:** Phase 10 (runbook proves baseline; Phase 12 does not block Phase 11 execution)
 **Requirements:** LOCAL-DX-01
 **Plans:** 1 plan
@@ -288,9 +288,9 @@ Plans:
 **Goal:** Bulk-reconcile `REQUIREMENTS.md` v1 checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated**; optional CI drift guard (`DOCS-ALIGN-01`).
 **Depends on:** Phase 11 (dogfood narrative stable before locking REQ text to “shipped”)
 **Requirements:** DOCS-ALIGN-01
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 13-01-PLAN.md — drafted
+- [x] 13-01-PLAN.md — drafted
 
 ## Coverage
 
@@ -360,7 +360,7 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | 10. Local operator readiness (v0.2.0) | 1/1 | Complete    | 2026-04-22 |
 | 11. Game Boy emulator dogfood (v0.2.0) | 1/1 | Complete    | 2026-04-22 |
 | 12. Local Docker / dev DX (v0.2.0) | 0/1 | Planning | — |
-| 13. Requirements & roadmap hygiene (v0.2.0) | 0/1 | Planning | — |
+| 13. Requirements & roadmap hygiene (v0.2.0) | 1/1 | Complete    | 2026-04-22 |
 
 ## Milestone v0.2.0 — operator dogfood (active planning)
 
