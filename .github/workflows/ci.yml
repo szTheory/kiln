@@ -104,3 +104,43 @@ jobs:
       # probes even though GitHub Actions does NOT run `docker compose`.
       - name: Kiln boot checks (CI parity — D-34)
         run: KILN_DB_ROLE=kiln_owner mix ecto.migrate && mix kiln.boot_checks
+
+  # Compose-backed path (LOCAL-01 / D-1005) — not covered by the service-container
+  # Postgres job above; catches drift in compose.yaml, .env.sample, and host Phoenix boot.
+  integration-smoke:
+    name: integration smoke (first_run.sh)
+    needs: [check]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+        uses: erlef/setup-beam@v1.23.0
+        with:
+          elixir-version: "1.19.5-otp-28"
+          otp-version: "28.1.2"
+
+      - name: Cache deps + _build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-int-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+
+      - name: Install deps
+        run: mix deps.get
+
+      - name: Write CI .env (valid SECRET_KEY_BASE; first_run sources .env)
+        run: |
+          printf '%s\n' \
+            "DATABASE_URL=ecto://kiln:kiln_dev@localhost:5432/kiln_dev" \
+            "SECRET_KEY_BASE=ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx" \
+            "PHX_HOST=localhost" \
+            "PORT=4000" \
+            > .env
+
+      - name: Integration smoke (docker compose db + host Phoenix + /health)
+        run: bash test/integration/first_run.sh

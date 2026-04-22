@@ -30,3 +30,25 @@ smoke:
 # Start DB only, then hand off to host Phoenix in another shell.
 dev-deps: db-up
     @echo 'Postgres is up — run `mix phx.server` in another terminal (Phoenix stays on the host).'
+
+# Same env contract as `script/planning_gates.sh` / CI — loads `.env` when present
+# (`dotenv-load` above) so `DATABASE_URL` is not missing.
+precommit:
+    bash script/precommit.sh
+
+# CI-parity `mix check` (shift-left) before `/gsd-plan-phase N --gaps`. Requires
+# Postgres on `DATABASE_URL` (defaults match `.github/workflows/ci.yml`).
+planning-gates:
+    bash script/planning_gates.sh
+
+# Full shift-left: `mix check` + integration smoke (`first_run.sh`: Docker DB,
+# host Phoenix, `/health`). One command — no separate manual smoke pass.
+# `SHIFT_LEFT_SKIP_INTEGRATION=1 just shift-left` runs only `mix check`.
+shift-left:
+    bash script/shift_left_verify.sh
+
+# Runs `shift-left`, then prints the Cursor command for gap mode.
+before-plan-phase phase:
+    bash script/shift_left_verify.sh
+    @echo "Verification passed — run: /gsd-plan-phase {{phase}} --gaps"
+

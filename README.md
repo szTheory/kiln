@@ -112,6 +112,7 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `just dev-deps` | `db-up`, then prints a one-line reminder to start **`mix phx.server`** in another shell |
 | `just planning-gates` | `script/planning_gates.sh` — CI-parity **`mix check`** only (defaults match `.github/workflows/ci.yml`; Postgres must be reachable) |
 | `just shift-left` | `script/shift_left_verify.sh` — **`mix check`** then **`test/integration/first_run.sh`** (Docker + `/health`; full shift-left in one shot) |
+| `just precommit` | `script/precommit.sh` — same env defaults as CI when `.env` is missing; then **`mix precommit`** (`templates.verify` + `mix check`) |
 | `just before-plan-phase 12` | Runs **`shift-left`**, then prints **`/gsd-plan-phase 12 --gaps`** for GSD gap closure |
 
 ## Environment
