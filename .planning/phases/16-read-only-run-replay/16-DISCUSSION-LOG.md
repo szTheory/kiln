@@ -19,7 +19,7 @@
 | C — Primary scrub on `/audit` | Strong for cross-run; weak for “story of run X” | |
 
 **User's choice:** **A** (per synthesized recommendation after research).  
-**Notes:** Honeycomb/Sentry/GitHub Actions reinforce **object-permalink** + query refinements; router **literal-before-dynamic** rule applies (`replay` before `:run_id`). Complement with links to `/audit?run_id=…`.
+**Notes:** Honeycomb/Sentry/GitHub Actions reinforce **object-permalink** + query refinements; router follows **`/runs/:run_id/…` multi-segment** pattern (with `/runs/compare` still before bare `/runs/:run_id`). Complement with links to `/audit?run_id=…`.
 
 ---
 
