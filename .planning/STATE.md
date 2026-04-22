@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
-status: ready_to_plan
-last_updated: "2026-04-22T22:41:46.613Z"
-last_activity: 2026-04-22 -- Phase --phase execution started
+status: planning
+last_updated: "2026-04-22T23:25:38.281Z"
+last_activity: 2026-04-22
 progress:
-  total_phases: 20
+  total_phases: 21
   completed_phases: 20
   total_plans: 90
-  completed_plans: 87
+  completed_plans: 90
   percent: 100
 ---
 
@@ -21,11 +21,11 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
-**Current focus:** Phase --phase — 18
+**Current focus:** Phase 19 — Post-mortems & soft feedback (context ready)
 
 ## Current Position
 
-Phase: 999.1
+Phase: 19
 Plan: Not started
 Status: Ready to plan
 Last activity: 2026-04-22
@@ -40,6 +40,8 @@ Prior milestone velocity and decision log: see **Accumulated Context** history i
 
 ## Session Continuity
 
+Phase 19 discuss complete (parallel subagent research, one-shot synthesis): [.planning/phases/19-post-mortems-soft-feedback/19-CONTEXT.md](phases/19-post-mortems-soft-feedback/19-CONTEXT.md).
+
 Phase 18 discuss complete (auto-recs + research): [.planning/phases/18-cost-hints-budget-alerts/18-CONTEXT.md](phases/18-cost-hints-budget-alerts/18-CONTEXT.md).
 
 Phase 17 discuss complete: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md) (parallel research synthesis → locked decisions).
@@ -52,8 +54,8 @@ Phase 15 context: [.planning/phases/15-run-comparison/15-CONTEXT.md](phases/15-r
 
 Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md](phases/14-fair-parallel-runs/14-CONTEXT.md)
 
-Next: **`/gsd-plan-phase 18`** — Cost hints & budget alerts (research + tasks; `18-CONTEXT.md` ready).
+Next: **`/gsd-plan-phase 19`** — Post-mortems & soft feedback (research + tasks; `19-CONTEXT.md` ready).
 
 **Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
 
-**Planned Phase:** 18 (Cost hints & budget alerts) — 3 plans — 2026-04-22T20:26:04.033Z
+**Planned Phase:** 19 (Post-mortems & soft feedback) — context gathered 2026-04-22
