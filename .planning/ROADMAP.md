@@ -28,8 +28,8 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
 - [x] **Phase 10: Local operator readiness (v0.2.0)** — Runbook + env checklist + onboarding dry-run; closes README/compose/PROJECT drift for local use — **complete 2026-04-21** ([10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md))
 - [x] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **complete 2026-04-22** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md))
-- [x] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional **`just`/`make`** wrappers (Compose for data plane; Phoenix on host) — **planning** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md)) (completed 2026-04-22)
-- [x] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **planning** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md)) (completed 2026-04-22)
+- [x] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional **`just`/`make`** wrappers (Compose for data plane; Phoenix on host) — **complete 2026-04-22** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md), [12-01-SUMMARY.md](phases/12-local-docker-dx/12-01-SUMMARY.md))
+- [x] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **complete 2026-04-22** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md), [13-01-SUMMARY.md](phases/13-docs-requirements-reconciliation/13-01-SUMMARY.md))
 
 ## Phase Details
 
