@@ -7,7 +7,6 @@ defmodule KilnWeb.InboxLive do
 
   alias Kiln.Repo
   alias Kiln.Specs
-  alias Kiln.Dogfood.Template
   alias Kiln.Specs.SpecDraft
 
   @max_md_bytes 262_144
@@ -238,32 +237,6 @@ defmodule KilnWeb.InboxLive do
      |> push_patch(to: ~p"/inbox")}
   end
 
-  def handle_event("load_dogfood_template", _params, socket) do
-    case socket.assigns.editing do
-      {_id, %SpecDraft{} = d} ->
-        case Template.read() do
-          {:ok, body} ->
-            edit_form =
-              to_form(
-                %{"id" => d.id, "title" => d.title, "body" => body},
-                as: :spec_draft
-              )
-
-            {:noreply,
-             socket
-             |> assign(:edit_form, edit_form)
-             |> put_flash(:info, "Loaded dogfood template")}
-
-          {:error, reason} ->
-            {:noreply,
-             put_flash(socket, :error, "Could not load dogfood/spec.md (#{inspect(reason)})")}
-        end
-
-      _ ->
-        {:noreply, put_flash(socket, :error, "Open a draft in the editor first")}
-    end
-  end
-
   defp reload_drafts(socket) do
     drafts = Specs.list_open_drafts()
 
@@ -283,11 +256,20 @@ defmodule KilnWeb.InboxLive do
       operator_snapshots={@operator_snapshots}
     >
       <div id="inbox" class="space-y-8 text-bone">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold">Inbox</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
-            Triage spec drafts before they become runnable specs.
-          </p>
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-ash pb-4">
+          <div>
+            <h1 class="text-xl font-semibold">Inbox</h1>
+            <p class="mt-1 text-sm text-[var(--color-smoke)]">
+              Triage spec drafts before they become runnable specs.
+            </p>
+          </div>
+          <.link
+            navigate={~p"/templates"}
+            id="inbox-browse-templates"
+            class="btn btn-sm border border-ash bg-iron/40 text-bone hover:border-ember"
+          >
+            Browse templates
+          </.link>
         </div>
 
         <%= if @drafts_empty? do %>
@@ -347,14 +329,6 @@ defmodule KilnWeb.InboxLive do
               <.input field={@edit_form[:body]} type="textarea" label="Body" rows="12" />
               <div class="flex flex-wrap gap-2">
                 <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <button
-                  type="button"
-                  id="inbox-load-dogfood-template"
-                  class="btn btn-ghost btn-sm"
-                  phx-click="load_dogfood_template"
-                >
-                  Load dogfood template
-                </button>
                 <button type="button" class="btn btn-ghost btn-sm" phx-click="cancel_edit">
                   Cancel
                 </button>

@@ -106,7 +106,17 @@ defmodule KilnWeb.OnboardingLive do
           </button>
         </section>
 
-        <.link navigate={~p"/"} class="text-sm text-ember underline">Continue to runs</.link>
+        <.link
+          navigate={~p"/templates?from=onboarding"}
+          id="onboarding-start-from-template"
+          class="btn btn-sm border border-ash bg-iron/40 text-bone hover:border-ember"
+        >
+          Start from a template
+        </.link>
+
+        <.link navigate={~p"/"} class="mt-4 block text-sm text-ember underline">
+          Continue to runs
+        </.link>
       </div>
     </Layouts.app>
     """
