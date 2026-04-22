@@ -1,0 +1,13 @@
+# https://github.com/crate-ci/typos
+[files]
+extend-exclude = [
+  "_build/**",
+  "deps/**",
+  "site/node_modules/**",
+  "site/dist/**",
+  "site/.astro/**",
+  "priv/plts/**",
+]
+
+[default]
+extend-ignore-identifiers-re = []

@@ -1,0 +1,15 @@
+# https://github.com/lycheeverse/lychee
+verbose = "info"
+max_concurrency = 4
+timeout = 25
+accept = ["200..204", "429"]
+
+[runtime]
+cache_dir = ".lycheecache"
+
+# PRs stay fast; expand excludes if a host flakes in CI.
+exclude = [
+  '^https://example\.com',
+]
+
+exclude_path = ["node_modules", "dist", ".astro"]

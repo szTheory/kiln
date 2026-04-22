@@ -6,6 +6,10 @@ Software dark factory written in Elixir/Phoenix LiveView. Given a spec, Kiln shi
 
 See `.planning/PROJECT.md` for the full vision and constraints.
 
+## Documentation
+
+Operator docs and landing page (Astro + Starlight) are built from **`site/`** and published to **`https://szTheory.github.io/kiln/`** when GitHub Pages is enabled. See **`CONTRIBUTING.md`** for how to edit the site and optional `DOCS=1 mix docs.verify` checks.
+
 ## Prerequisites
 
 - **Elixir** `~> 1.19` and **OTP** `~> 28` (see `.tool-versions` for exact pins used in development).

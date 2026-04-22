@@ -1,0 +1,48 @@
+---
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-600.css";
+import "@fontsource/ibm-plex-mono/latin-400.css";
+
+const base = (import.meta.env.BASE ?? "/kiln").replace(/\/$/, "");
+const docsHref = `${base}/docs/`;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kiln — operator documentation</title>
+    <meta
+      name="description"
+      content="Kiln is a software dark factory. It plans, implements, verifies, and ships from a spec with durable audit and bounded autonomy."
+    />
+  </head>
+  <body
+    style="margin:0;font-family:Inter,system-ui,sans-serif;background:var(--color-coal,#121212);color:var(--color-bone,#F5EFE6);min-height:100vh;"
+  >
+    <main
+      style="max-width:52rem;margin:0 auto;padding:3rem 1.5rem;border:1px solid var(--color-iron,#262B31);border-radius:6px;background:var(--color-char,#1B1D21);"
+    >
+      <h1 style="margin-top:0;font-weight:600;letter-spacing:-0.02em;">Kiln</h1>
+      <p style="line-height:1.6;color:var(--color-ash,#C7BFB5);">
+        Kiln turns a written spec into shipped software. The factory runs in the open: plans,
+        stages, sandboxes, and audit events are visible, not hidden behind chat.
+      </p>
+      <p style="line-height:1.6;color:var(--color-ash,#C7BFB5);">
+        Read the docs to install locally, author workflows, and understand the architecture.
+      </p>
+      <p style="margin-top:2rem;">
+        <a
+          href={docsHref}
+          style="display:inline-block;padding:0.65rem 1.1rem;border:1px solid var(--color-ember,#E07A3F);border-radius:4px;color:var(--color-bone,#F5EFE6);text-decoration:none;font-weight:600;"
+          >Read the docs</a
+        >
+      </p>
+      <p
+        style="margin-top:2rem;font-family:'IBM Plex Mono',ui-monospace,monospace;font-size:0.85rem;color:var(--color-smoke,#8C857D);"
+      >
+        Next: run your first spec end-to-end after onboarding.
+      </p>
+    </main>
+  </body>
+</html>

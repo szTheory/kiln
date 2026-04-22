@@ -1,0 +1,9 @@
+# Used by scripts/htmltest-ci.sh after copying dist to a temp tree.
+DirectoryPath: "."
+CheckDoctype: false
+IgnoreDirs:
+  - pagefind
+IgnoreEmptyHref: true
+CheckExternal: false
+IgnoreInternalEmptyHash: true
+IgnoreAltMissing: true

@@ -1,0 +1,9 @@
+# https://github.com/wjdp/htmltest
+DirectoryPath: dist
+CheckDoctype: false
+IgnoreDirs:
+  - pagefind
+IgnoreEmptyHref: true
+CheckExternal: false
+IgnoreInternalEmptyHash: true
+IgnoreAltMissing: true

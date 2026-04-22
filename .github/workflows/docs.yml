@@ -1,0 +1,107 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "site/.htmltest.yml"
+      - "site/.htmltest.ci.yml"
+      - ".github/workflows/docs.yml"
+      - "typos.toml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "site/.htmltest.yml"
+      - "site/.htmltest.ci.yml"
+      - ".github/workflows/docs.yml"
+      - "typos.toml"
+
+concurrency:
+  group: pages-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: site build + gates
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - name: Install and build
+        working-directory: site
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec astro build
+          pnpm run verify:mermaid
+
+      - name: Install htmltest
+        env:
+          HTMLTEST_VERSION: "0.17.0"
+        run: |
+          set -euo pipefail
+          curl -sSL "https://github.com/wjdp/htmltest/releases/download/v${HTMLTEST_VERSION}/htmltest_${HTMLTEST_VERSION}_linux_amd64.tar.gz" | tar xz
+          sudo mv htmltest /usr/local/bin/htmltest
+          htmltest --version
+
+      - name: Run htmltest
+        working-directory: site
+        run: ./scripts/htmltest-ci.sh
+
+      - name: Run lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --config site/lychee.toml
+            --no-progress
+            README.md
+            CONTRIBUTING.md
+            site/README.md
+            site/src/content/docs
+
+      - name: Run typos
+        uses: crate-ci/typos@v1
+        with:
+          files: |
+            README.md
+            CONTRIBUTING.md
+            AGENTS.md
+            site
+          config: ./typos.toml
+
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    name: deploy GitHub Pages
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
