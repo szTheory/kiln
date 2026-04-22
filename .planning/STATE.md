@@ -40,10 +40,12 @@ Prior milestone velocity and decision log: see **Accumulated Context** history i
 
 ## Session Continuity
 
+Phase 16 context: [.planning/phases/16-read-only-run-replay/16-CONTEXT.md](phases/16-read-only-run-replay/16-CONTEXT.md)
+
 Phase 15 context: [.planning/phases/15-run-comparison/15-CONTEXT.md](phases/15-run-comparison/15-CONTEXT.md)
 
 Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md](phases/14-fair-parallel-runs/14-CONTEXT.md)
 
-Next: **`/gsd-plan-phase 15`** — Run comparison (PARA-02).
+Next: **`/gsd-plan-phase 16`** — Read-only run replay (REPL-01).
 
 **Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
