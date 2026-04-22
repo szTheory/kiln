@@ -30,9 +30,17 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **LOCAL-DX-01** — Optional **`justfile`** task-runner layer (host Phoenix + Compose data plane; no second official quick-start; no Phoenix-in-Compose / devcontainer). README optional subsection + `LOCAL-DX-AUDIT.md` pointer — **Validated in Phase 12: local-docker-dx** (2026-04-22).
 - [x] **DOGFOOD-01** — Kiln-side **external-repo vertical slice** for the Game Boy emulator path: spec + workflow + BDD + bounded caps scaffolding (`rust_gb_dogfood_v1`, scenario argv-only shell oracle, `priv/dogfood/gb_vertical_slice_spec.md`, tests) — **Phase 11** (2026-04-22). Full ROM-backed `cargo test` on a disposable clone remains **operator-owned** per `GB-SPIKE.md`.
 
-### Active
+### Active (v0.3.0 — in flight)
 
-<!-- Populated by `/gsd-new-milestone` after the next planning cycle. No Active requirement IDs until then. -->
+- [ ] **PARA-01** — Fair parallel run scheduling (Phase 14).
+- [ ] **PARA-02** — Run comparison view (Phase 15).
+- [ ] **REPL-01** — Read-only run timeline / replay MVP (Phase 16).
+- [ ] **WFE-01** — Workflow + spec template library with instantiate action (Phase 17).
+- [ ] **ONB-01** — ≥3 vetted onboarding templates incl. fast happy path (Phase 17).
+- [ ] **COST-01** — Advisory cost / model-tier hints (Phase 18).
+- [ ] **COST-02** — Budget threshold alerts (Phase 18).
+- [ ] **SELF-01** — Structured post-mortem artifact on merge (Phase 19).
+- [ ] **FEEDBACK-01** — Non-blocking in-flight operator nudge → `operator_feedback_received` audit (Phase 19).
 
 ### Out of Scope
 
@@ -110,18 +118,25 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current State (as of 2026-04-22 — after v0.2.0 milestone close)
+## Current Milestone: v0.3.0 — Scale → templates → operator intelligence
 
-- **v0.1.0 (Phases 1–9)** — Shipped: dark-factory runtime, operator UI, sandbox + agents, GitHub + CI, dogfood on Kiln. See `.planning/milestones/v0.1.0.md`.
-- **v0.2.0 (Phases 10–13)** — **Shipped:** local operator readiness (`first_run.sh` / README parity); Game Boy dogfood **Kiln-side** slice (workflow + spec stub + scenario compiler path); optional **`justfile`** + README DX; `REQUIREMENTS.md` / `ROADMAP.md` / `PROJECT.md` reconciliation (`DOCS-ALIGN-01`). Archives: `.planning/milestones/v0.2.0-ROADMAP.md`, `v0.2.0-REQUIREMENTS.md`. Git tag: **`v0.2.0`**.
-- **Tech debt at close:** `12-01-SUMMARY.md` records **Self-Check: PARTIAL** — full `mix check` was not green in that execution environment; **CI and a workstation with Postgres** remain the merge authority.
-- **Known operator action:** Host port `5432` may conflict with other Postgres instances — change host port in Compose or stop the other service.
-- **New seeds planted:** SEED-002, SEED-003, SEED-004 — dormant until their trigger conditions fire.
+**Goal:** Increase operator throughput and situational awareness in **three ordered tracks**—execution scale, curated templates, then cost/learning signals—each delivered as **small** shippable phases (14–19) so reviews stay tight.
 
-## Next milestone goals
+**Target features:**
 
-1. Run **`/gsd-new-milestone`** to define the next version, fresh `.planning/REQUIREMENTS.md`, and new phase rows in `.planning/ROADMAP.md`.
-2. After planning: pick the next highest-risk slice (multi-run fairness, replay UI, team primitives, etc. — see `REQUIREMENTS.md` **v2** section in the v0.2.0 archive for parked IDs).
+- **Track A — Execution & scale:** fair multi-run scheduling (PARA-01), run comparison (PARA-02), read-only replay / timeline MVP (REPL-01; no hypothetical re-run).
+- **Track B — Templates:** versioned workflow+spec template library (WFE-01) plus ≥3 vetted “first success” templates (ONB-01; carries SEED-003 intent).
+- **Track C — Cost & learning:** advisory cost hints (COST-01), budget threshold alerts (COST-02), merged-run post-mortem artifact (SELF-01), soft in-flight feedback persisted to audit without blocking autonomy (FEEDBACK-01; carries SEED-001 intent).
+
+**Planning notes:** Prior `.planning/phases/` directories are **retained** (historical plans). **`gsd-sdk phases.clear` was not used** — it would delete those directories. Domain research for hot phases can still be run via **`/gsd-research-phase N`** before planning.
+
+## Current State (as of 2026-04-22)
+
+- **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
+- **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
+- **v0.3.0 (Phases 14–19)** — **In planning / execution:** see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md`.
+- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
+- **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-22 — `/gsd-complete-milestone` v0.2.0 (operator dogfood, Phases 10–13)*
+*Last updated: 2026-04-22 — `/gsd-new-milestone` v0.3.0*
