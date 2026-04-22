@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
-status: planning
-last_updated: "2026-04-22T18:00:05.228Z"
+status: Ready to continue v0.3.0 roadmap
+last_updated: "2026-04-22T20:00:00.000Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 19
-  completed_phases: 18
+  completed_phases: 16
   total_plans: 84
   completed_plans: 84
-  percent: 100
+  percent: 97
 ---
 
 # Project State
@@ -40,6 +40,8 @@ Prior milestone velocity and decision log: see **Accumulated Context** history i
 
 ## Session Continuity
 
+Phase 17 discuss complete: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md) (parallel research synthesis → locked decisions).
+
 Phase 16 (REPL-01) executed: summaries and `16-VERIFICATION.md` under [.planning/phases/16-read-only-run-replay/](phases/16-read-only-run-replay/).
 
 Phase 16 context: [.planning/phases/16-read-only-run-replay/16-CONTEXT.md](phases/16-read-only-run-replay/16-CONTEXT.md)
@@ -48,6 +50,6 @@ Phase 15 context: [.planning/phases/15-run-comparison/15-CONTEXT.md](phases/15-r
 
 Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md](phases/14-fair-parallel-runs/14-CONTEXT.md)
 
-Next: **`/gsd-discuss-phase 17`** (recommended) or **`/gsd-plan-phase 17`** — Template library and onboarding specs.
+Next: **`/gsd-plan-phase 17`** — Template library and onboarding specs (research + tasks; context is ready).
 
 **Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
