@@ -84,7 +84,13 @@ defmodule KilnWeb.RunCompareLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div
         id="run-compare"
         class="space-y-6"

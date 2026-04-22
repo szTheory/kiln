@@ -83,6 +83,7 @@ defmodule KilnWeb do
       import KilnWeb.CoreComponents
       import KilnWeb.Components.AgentTicker
       import KilnWeb.Components.FactoryHeader
+      import KilnWeb.Components.OperatorChrome
       import KilnWeb.Components.RunProgress
       import KilnWeb.Components.UnblockPanel
 

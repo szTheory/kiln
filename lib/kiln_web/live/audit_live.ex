@@ -46,30 +46,20 @@ defmodule KilnWeb.AuditLive do
 
   @impl true
   def handle_event("validate", %{"audit" => fields}, socket) do
-    if allow?(socket) do
-      {:noreply, assign(socket, :form, to_form(fields, as: :audit))}
-    else
-      {:noreply, socket}
-    end
+    {:noreply, assign(socket, :form, to_form(fields, as: :audit))}
   end
 
   def handle_event("search", %{"audit" => fields}, socket) do
-    if allow?(socket) do
-      q =
-        fields
-        |> Enum.reject(fn {_, v} -> v in [nil, ""] end)
-        |> Map.new()
-        |> URI.encode_query()
+    q =
+      fields
+      |> Enum.reject(fn {_, v} -> v in [nil, ""] end)
+      |> Map.new()
+      |> URI.encode_query()
 
-      {:noreply, push_patch(socket, to: ~p"/audit?#{q}")}
-    else
-      {:noreply, socket}
-    end
+    {:noreply, push_patch(socket, to: ~p"/audit?#{q}")}
   end
 
   def handle_event(_, _, socket), do: {:noreply, socket}
-
-  defp allow?(_socket), do: true
 
   defp build_filters(params) do
     []
@@ -137,7 +127,13 @@ defmodule KilnWeb.AuditLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="audit-ledger" class="space-y-6 text-bone">
         <div class="border-b border-ash pb-4">
           <h1 class="text-xl font-semibold">Audit</h1>

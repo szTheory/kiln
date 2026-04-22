@@ -45,7 +45,13 @@ defmodule KilnWeb.OnboardingLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="onboarding-wizard" class="mx-auto max-w-xl space-y-6 text-bone">
         <h1 class="text-2xl font-semibold">Set up Kiln</h1>
         <%= if @review_mode do %>

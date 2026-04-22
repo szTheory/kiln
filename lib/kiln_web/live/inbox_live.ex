@@ -34,8 +34,6 @@ defmodule KilnWeb.InboxLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    _ = allow?(socket)
-
     editing =
       case params["edit"] do
         nil ->
@@ -81,221 +79,188 @@ defmodule KilnWeb.InboxLive do
 
   @impl true
   def handle_event("promote", %{"id" => id}, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      case Specs.promote_draft(id) do
-        {:ok, %{spec: spec}} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Draft promoted to spec")
-           |> stream_delete(:drafts, %SpecDraft{id: id})
-           |> assign(:drafts_empty?, Specs.list_open_drafts() == [])
-           |> push_navigate(to: ~p"/specs/#{spec.id}/edit")}
+    case Specs.promote_draft(id) do
+      {:ok, %{spec: spec}} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Draft promoted to spec")
+         |> stream_delete(:drafts, %SpecDraft{id: id})
+         |> assign(:drafts_empty?, Specs.list_open_drafts() == [])
+         |> push_navigate(to: ~p"/specs/#{spec.id}/edit")}
 
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Could not promote draft")}
-      end
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not promote draft")}
     end
   end
 
   def handle_event("archive", %{"id" => id}, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      case Specs.archive_draft(id) do
-        {:ok, _} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Draft archived")
-           |> stream_delete(:drafts, %SpecDraft{id: id})
-           |> assign(:drafts_empty?, Specs.list_open_drafts() == [])}
+    case Specs.archive_draft(id) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Draft archived")
+         |> stream_delete(:drafts, %SpecDraft{id: id})
+         |> assign(:drafts_empty?, Specs.list_open_drafts() == [])}
 
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Could not archive draft")}
-      end
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not archive draft")}
     end
   end
 
   def handle_event("import_github", %{"github" => %{"ref" => ref}}, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      ref = String.trim(ref)
-      socket = assign(socket, :github_busy?, true)
+    ref = String.trim(ref)
+    socket = assign(socket, :github_busy?, true)
 
-      import_opts = Application.get_env(:kiln, :inbox_github_import_opts, [])
+    import_opts = Application.get_env(:kiln, :inbox_github_import_opts, [])
 
-      result =
-        cond do
-          ref == "" ->
-            {:error, :empty}
+    result =
+      cond do
+        ref == "" ->
+          {:error, :empty}
 
-          String.contains?(ref, "github.com") ->
-            Specs.import_github_issue_from_url(ref, import_opts)
+        String.contains?(ref, "github.com") ->
+          Specs.import_github_issue_from_url(ref, import_opts)
 
-          true ->
-            Specs.import_github_issue_from_slug(ref, import_opts)
-        end
-
-      socket =
-        socket
-        |> assign(:github_busy?, false)
-        |> assign(:github_form, to_form(%{"ref" => ref}, as: :github))
-
-      case result do
-        {:ok, draft} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Imported GitHub issue")
-           |> assign(:drafts_empty?, false)
-           |> stream_insert(:drafts, draft)}
-
-        {:error, :empty} ->
-          {:noreply, put_flash(socket, :error, "Enter an issue URL or owner/repo#N")}
-
-        {:error, _} ->
-          {:noreply,
-           put_flash(socket, :error, "GitHub import failed — check reference and token")}
+        true ->
+          Specs.import_github_issue_from_slug(ref, import_opts)
       end
+
+    socket =
+      socket
+      |> assign(:github_busy?, false)
+      |> assign(:github_form, to_form(%{"ref" => ref}, as: :github))
+
+    case result do
+      {:ok, draft} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Imported GitHub issue")
+         |> assign(:drafts_empty?, false)
+         |> stream_insert(:drafts, draft)}
+
+      {:error, :empty} ->
+        {:noreply, put_flash(socket, :error, "Enter an issue URL or owner/repo#N")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "GitHub import failed — check reference and token")}
     end
   end
 
   def handle_event("create_freeform", %{"draft" => %{"title" => title, "body" => body}}, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
+    title = String.trim(title)
+    body = String.trim(body)
+
+    if title == "" or body == "" do
+      {:noreply, put_flash(socket, :error, "Title and body are required")}
     else
-      title = String.trim(title)
-      body = String.trim(body)
+      case Specs.create_draft(%{
+             title: title,
+             body: body,
+             source: :freeform
+           }) do
+        {:ok, draft} ->
+          {:noreply,
+           socket
+           |> put_flash(:info, "Draft created")
+           |> assign(:drafts_empty?, false)
+           |> assign(:freeform_form, to_form(%{"title" => "", "body" => ""}, as: :draft))
+           |> stream_insert(:drafts, draft)}
 
-      if title == "" or body == "" do
-        {:noreply, put_flash(socket, :error, "Title and body are required")}
-      else
-        case Specs.create_draft(%{
-               title: title,
-               body: body,
-               source: :freeform
-             }) do
-          {:ok, draft} ->
-            {:noreply,
-             socket
-             |> put_flash(:info, "Draft created")
-             |> assign(:drafts_empty?, false)
-             |> assign(:freeform_form, to_form(%{"title" => "", "body" => ""}, as: :draft))
-             |> stream_insert(:drafts, draft)}
-
-          {:error, _} ->
-            {:noreply, put_flash(socket, :error, "Could not create draft")}
-        end
+        {:error, _} ->
+          {:noreply, put_flash(socket, :error, "Could not create draft")}
       end
     end
   end
 
   def handle_event("import_markdown", _params, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      results =
-        consume_uploaded_entries(socket, :markdown, fn %{path: path}, entry ->
-          with {:ok, body} <- File.read(path),
-               true <- String.valid?(body) do
-            title = entry.client_name |> Path.rootname()
-            {:ok, {title, body}}
-          else
-            _ -> :error
-          end
-        end)
+    results =
+      consume_uploaded_entries(socket, :markdown, fn %{path: path}, entry ->
+        with {:ok, body} <- File.read(path),
+             true <- String.valid?(body) do
+          title = entry.client_name |> Path.rootname()
+          {:ok, {title, body}}
+        else
+          _ -> :error
+        end
+      end)
 
-      case results do
-        [{:ok, {title, body}}] ->
-          case Specs.create_draft(%{
-                 title: title,
-                 body: body,
-                 source: :markdown_import
-               }) do
-            {:ok, draft} ->
-              {:noreply,
-               socket
-               |> put_flash(:info, "Markdown imported")
-               |> assign(:drafts_empty?, false)
-               |> stream_insert(:drafts, draft)}
+    case results do
+      [{:ok, {title, body}}] ->
+        case Specs.create_draft(%{
+               title: title,
+               body: body,
+               source: :markdown_import
+             }) do
+          {:ok, draft} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Markdown imported")
+             |> assign(:drafts_empty?, false)
+             |> stream_insert(:drafts, draft)}
 
-            {:error, _} ->
-              {:noreply, put_flash(socket, :error, "Could not save imported markdown")}
-          end
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, "Could not save imported markdown")}
+        end
 
-        [] ->
-          {:noreply, put_flash(socket, :error, "Choose a markdown file")}
+      [] ->
+        {:noreply, put_flash(socket, :error, "Choose a markdown file")}
 
-        _ ->
-          {:noreply, put_flash(socket, :error, "Upload failed")}
-      end
+      _ ->
+        {:noreply, put_flash(socket, :error, "Upload failed")}
     end
   end
 
   def handle_event("save_edit", %{"spec_draft" => params}, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      id = params["id"]
-      title = params["title"] |> to_string() |> String.trim()
-      body = params["body"] |> to_string()
+    id = params["id"]
+    title = params["title"] |> to_string() |> String.trim()
+    body = params["body"] |> to_string()
 
-      case Specs.update_open_draft(id, %{title: title, body: body}) do
-        {:ok, draft} ->
-          {:noreply,
-           socket
-           |> put_flash(:info, "Draft saved")
-           |> assign(:editing, nil)
-           |> assign(:edit_form, nil)
-           |> stream_insert(:drafts, draft)
-           |> push_patch(to: ~p"/inbox")}
+    case Specs.update_open_draft(id, %{title: title, body: body}) do
+      {:ok, draft} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Draft saved")
+         |> assign(:editing, nil)
+         |> assign(:edit_form, nil)
+         |> stream_insert(:drafts, draft)
+         |> push_patch(to: ~p"/inbox")}
 
-        {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Could not save draft")}
-      end
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Could not save draft")}
     end
   end
 
   def handle_event("cancel_edit", _params, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      {:noreply,
-       socket
-       |> assign(:editing, nil)
-       |> assign(:edit_form, nil)
-       |> push_patch(to: ~p"/inbox")}
-    end
+    {:noreply,
+     socket
+     |> assign(:editing, nil)
+     |> assign(:edit_form, nil)
+     |> push_patch(to: ~p"/inbox")}
   end
 
   def handle_event("load_dogfood_template", _params, socket) do
-    unless allow?(socket) do
-      {:noreply, put_flash(socket, :error, "Not allowed")}
-    else
-      case socket.assigns.editing do
-        {_id, %SpecDraft{} = d} ->
-          case Template.read() do
-            {:ok, body} ->
-              edit_form =
-                to_form(
-                  %{"id" => d.id, "title" => d.title, "body" => body},
-                  as: :spec_draft
-                )
+    case socket.assigns.editing do
+      {_id, %SpecDraft{} = d} ->
+        case Template.read() do
+          {:ok, body} ->
+            edit_form =
+              to_form(
+                %{"id" => d.id, "title" => d.title, "body" => body},
+                as: :spec_draft
+              )
 
-              {:noreply,
-               socket
-               |> assign(:edit_form, edit_form)
-               |> put_flash(:info, "Loaded dogfood template")}
+            {:noreply,
+             socket
+             |> assign(:edit_form, edit_form)
+             |> put_flash(:info, "Loaded dogfood template")}
 
-            {:error, reason} ->
-              {:noreply,
-               put_flash(socket, :error, "Could not load dogfood/spec.md (#{inspect(reason)})")}
-          end
+          {:error, reason} ->
+            {:noreply,
+             put_flash(socket, :error, "Could not load dogfood/spec.md (#{inspect(reason)})")}
+        end
 
-        _ ->
-          {:noreply, put_flash(socket, :error, "Open a draft in the editor first")}
-      end
+      _ ->
+        {:noreply, put_flash(socket, :error, "Open a draft in the editor first")}
     end
   end
 
@@ -307,12 +272,16 @@ defmodule KilnWeb.InboxLive do
     |> stream(:drafts, drafts, reset: true, dom_id: &"draft-#{&1.id}")
   end
 
-  defp allow?(_socket), do: true
-
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="inbox" class="space-y-8 text-bone">
         <div class="border-b border-ash pb-4">
           <h1 class="text-xl font-semibold">Inbox</h1>

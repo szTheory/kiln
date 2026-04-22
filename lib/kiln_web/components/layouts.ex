@@ -40,6 +40,15 @@ defmodule KilnWeb.Layouts do
     default: %{active: 0, blocked: 0},
     doc: "UI-07 counts from `factory:summary` (see `KilnWeb.FactorySummaryHook`)"
 
+  attr :operator_runtime_mode, :atom,
+    default: :unknown,
+    doc: "Phase 999.2 demo vs live label (see `Kiln.OperatorRuntime` / `OperatorChromeHook`)"
+
+  attr :operator_snapshots, :list,
+    default: [],
+    doc:
+      "Phase 999.2 provider snapshot rows (see `Kiln.ModelRegistry.provider_health_snapshots/0`)"
+
   slot :inner_block, required: true
 
   def app(assigns) do
@@ -94,6 +103,13 @@ defmodule KilnWeb.Layouts do
             </li>
           </ul>
         </nav>
+      </div>
+      <div class="border-t border-ash/60 bg-iron/40 px-4 py-2 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl flex flex-col gap-2">
+          <.operator_mode_chip mode={@operator_runtime_mode} />
+          <.operator_provider_readiness mode={@operator_runtime_mode} snapshots={@operator_snapshots} />
+          <.operator_config_presence snapshots={@operator_snapshots} />
+        </div>
       </div>
       <div class="mx-auto max-w-7xl pb-3">
         <%!-- FactoryHeader (UI-07) — `KilnWeb.Components.FactoryHeader` --%>

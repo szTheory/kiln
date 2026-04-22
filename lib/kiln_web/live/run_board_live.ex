@@ -142,7 +142,13 @@ defmodule KilnWeb.RunBoardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="run-board" class="space-y-6">
         <div class="border-b border-ash pb-4">
           <h1 class="text-xl font-semibold text-bone">Runs</h1>

@@ -28,7 +28,6 @@ defmodule KilnWeb.ProviderHealthLive do
 
   @impl true
   def handle_params(_params, _uri, socket) do
-    _ = allow?(socket)
     {:noreply, assign(socket, :snapshots, ModelRegistry.provider_health_snapshots())}
   end
 
@@ -41,12 +40,16 @@ defmodule KilnWeb.ProviderHealthLive do
      |> assign(:snapshots, ModelRegistry.provider_health_snapshots())}
   end
 
-  defp allow?(_socket), do: true
-
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="provider-health" class="space-y-6 text-bone">
         <div class="border-b border-ash pb-4">
           <h1 class="text-xl font-semibold">Providers</h1>

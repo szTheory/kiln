@@ -21,7 +21,6 @@ defmodule KilnWeb.CostLive do
 
   @impl true
   def handle_params(params, _uri, socket) do
-    _ = allow?(socket)
     {surface, pivot, period} = parse_surface_pivot_period(params)
 
     rows =
@@ -168,12 +167,16 @@ defmodule KilnWeb.CostLive do
   defp pivot_copy(:agent_role), do: "agent role"
   defp pivot_copy(:provider), do: "provider"
 
-  defp allow?(_socket), do: true
-
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="cost-dashboard" class="space-y-6 text-bone">
         <div class="border-b border-ash pb-4">
           <h1 class="text-xl font-semibold">Costs</h1>

@@ -221,7 +221,13 @@ defmodule KilnWeb.RunDetailLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash} current_scope={@current_scope} factory_summary={@factory_summary}>
+    <Layouts.app
+      flash={@flash}
+      current_scope={@current_scope}
+      factory_summary={@factory_summary}
+      operator_runtime_mode={@operator_runtime_mode}
+      operator_snapshots={@operator_snapshots}
+    >
       <div id="run-detail" class="space-y-6 text-bone">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-ash pb-4">
           <div class="flex flex-wrap items-end gap-4">
