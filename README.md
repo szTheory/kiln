@@ -19,7 +19,7 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 
 ## Quick start (open `/onboarding` first)
 
-**Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose in v0.1.0; optional all-in-one / devcontainer DX is **Phase 12** in `.planning/ROADMAP.md` (see `.planning/research/LOCAL-DX-AUDIT.md`).
+**Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose. For **v0.2.0**, Phase 12 ships an **optional checked-in `justfile`** that names the same primitives as this quick start — host Phoenix plus Compose for the data plane only (see **Optional: Just recipes** below and `.planning/research/LOCAL-DX-AUDIT.md`). No Compose-hosted Kiln app and no `.devcontainer/` as the shipped strategy.
 
 1. **Environment** — `cp .env.sample .env` then load it (`direnv allow` or export vars manually). See **Environment** below for required keys.
 2. **Database** — `docker compose up -d db` and wait until Postgres is healthy.
@@ -61,9 +61,22 @@ Use this as a **cold-clone** sanity pass (order matches the happy path above):
 - [ ] **Machine smoke (optional)** — `bash test/integration/first_run.sh` or `mix integration.first_run` — DB + migrate + boot + `/health` JSON (does not prove browser onboarding).
 - [ ] **Traces (optional)** — See **Traces (local)**; set `OTEL_EXPORTER_OTLP_ENDPOINT` only when collector/Jaeger are up.
 
-**Why Compose does not start Kiln:** shipped layout is **Postgres + DTU (+ optional OTel) in Compose**, **Phoenix on the host** — see [`.planning/research/LOCAL-DX-AUDIT.md`](.planning/research/LOCAL-DX-AUDIT.md). Optional all-in-one / devcontainer DX is **Phase 12** (`.planning/ROADMAP.md`).
+**Why Compose does not start Kiln:** shipped layout is **Postgres + DTU (+ optional OTel) in Compose**, **Phoenix on the host** — see [`.planning/research/LOCAL-DX-AUDIT.md`](.planning/research/LOCAL-DX-AUDIT.md). Optional **`just`** orchestration lives in the repo root **`justfile`** (same contracts as this checklist).
 
 **Longer-form operator docs** (architecture, configuration) live in the Starlight site — [Operator docs](https://szTheory.github.io/kiln/docs/) — built from `site/` per **Documentation** above.
+
+## Optional: Just recipes (local orchestration)
+
+If you use [**just**](https://github.com/casey/just#installation) (`brew install just` on macOS), the checked-in **`justfile`** wraps the same **Compose + `KILN_DB_ROLE=kiln_owner mix setup` + `test/integration/first_run.sh`** flow as the numbered quick start above. **Phoenix stays on the host** — run **`mix phx.server`** yourself; `just` does **not** replace it.
+
+| Command | What it runs |
+|---------|----------------|
+| `just db-up` | `docker compose up -d db` |
+| `just dtu-up` | `docker compose up -d dtu` |
+| `just otel-up` | `docker compose up -d otel-collector jaeger` (see **Traces (local)**) |
+| `just setup` | `KILN_DB_ROLE=kiln_owner mix setup` |
+| `just smoke` | `bash test/integration/first_run.sh` (same SSOT as **Integration smoke**) |
+| `just dev-deps` | `db-up`, then prints a one-line reminder to start **`mix phx.server`** in another shell |
 
 ## Environment
 
