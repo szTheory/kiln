@@ -19,9 +19,9 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 1: Foundation & Durability Floor** - Project skeleton, Postgres, Oban, structured logging, append-only audit ledger, external_operations intent table, CI baseline — **complete 2026-04-19**
 - [x] **Phase 2: Workflow Engine Core** - YAML workflow schema + loader + graph compile + run state machine + checkpointing + idempotent job wrapper — **complete 2026-04-20**
 - [x] **Phase 3: Agent Adapter, Sandbox, DTU & Safety** - Provider-agnostic LLM adapter, ephemeral Docker sandbox with egress-blocked DTU, secret references, adaptive model routing, typed block reasons, cost budget circuit breaker — **complete 2026-04-20**
-- [ ] **Phase 4: Agent Tree & Shared Memory** - Mayor/worker OTP process tree, specialized agent roles, native beads-equivalent work-unit store with PubSub
-- [ ] **Phase 5: Spec, Verification & Bounded Loop** - Spec editor + executable BDD scenarios + deterministic verifier + holdout scenarios + loop-until-spec-met + bounded autonomy caps + stuck detector + zero-human-QA enforcement
-- [ ] **Phase 6: GitHub Integration** - Idempotent git commit/push, PR creation via `gh`, GitHub Actions status read/write
+- [x] **Phase 4: Agent Tree & Shared Memory** - Mayor/worker OTP process tree, specialized agent roles, native beads-equivalent work-unit store with PubSub — **complete 2026-04-21**
+- [x] **Phase 5: Spec, Verification & Bounded Loop** - Spec editor + executable BDD scenarios + deterministic verifier + holdout scenarios + loop-until-spec-met + bounded autonomy caps + stuck detector + zero-human-QA enforcement — **complete 2026-04-21**
+- [x] **Phase 6: GitHub Integration** - Idempotent git commit/push, PR creation via `gh`, GitHub Actions status read/write — **complete 2026-04-21**
 - [x] **Phase 7: Core Run UI (LiveView)** - Run board, run detail with stage graph + diff + logs + agent chatter, workflow registry, cost dashboard, audit ledger view, brand book applied — **complete 2026-04-21**
 - [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
@@ -123,7 +123,12 @@ Plans:
 **Research flag**: HIGH. Before planning, run `/gsd-research-phase`:
   - Beads-equivalent behaviors: compaction policy, ready-queue semantics, cross-agent claim atomicity (Gas Town Dolt has public fragility reports — design must avoid those failure modes)
   - Agent-to-agent handoff protocol (how Mayor delegates; how QA reports back)
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [x] 04-01-PLAN.md — **complete 2026-04-21**
+- [x] 04-02-PLAN.md — **complete 2026-04-21**
+- [x] 04-03-PLAN.md — **complete 2026-04-21**
+- [x] 04-04-PLAN.md — **complete 2026-04-21**
 
 ### Phase 5: Spec, Verification & Bounded Loop
 **Goal**: The dark-factory loop closes — a spec with BDD scenarios drives the Verifier (deterministic runner is authoritative, LLM explains), the loop-until-spec-met is gated by bounded-autonomy caps and a stuck-run detector, and the scenario runner is the sole acceptance oracle with zero manual QA.
@@ -142,7 +147,14 @@ Plans:
 **Research flag**: HIGH. Before planning, run `/gsd-research-phase`:
   - **Bounded-autonomy cap semantics** — the category's hardest unsolved problem. What counts as a "step"? How do retries and cost caps interact? When does a cap trigger escalation vs retry-with-backoff?
   - Holdout scenario access-control enforcement mechanism (filesystem permissions? Ecto scope? both?)
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [x] 05-01-PLAN.md — **complete 2026-04-21**
+- [x] 05-02-PLAN.md — **complete 2026-04-21**
+- [x] 05-03-PLAN.md — **complete 2026-04-21**
+- [x] 05-04-PLAN.md — **complete 2026-04-21**
+- [x] 05-05-PLAN.md — **complete 2026-04-21**
+- [x] 05-06-PLAN.md — **complete 2026-04-21**
 
 ### Phase 6: GitHub Integration
 **Goal**: Kiln's output lands in git idempotently — commits, pushes, PRs via `gh`, and GitHub Actions status reads — so the dark-factory loop closes externally.
@@ -156,7 +168,12 @@ Plans:
 **Phase artifacts**: `Kiln.Git` (thin `System.cmd` wrapper with `git ls-remote` precondition on push); `Kiln.GitHub` (PR creation via `gh`, checks API reader); Oban workers `Kiln.GitHub.PushWorker`, `Kiln.GitHub.OpenPRWorker`, `Kiln.GitHub.CheckPoller` — all use the `external_operations` intent table from Phase 1; integration test that simulates push race + mid-flight kill.
 **Pitfalls addressed**: P3 (idempotent git push + PR — the canonical failure mode), P6 (GitHub API mock-vs-real contract test weekly).
 **Research flag**: standard (`gh` + git shell-out is boring).
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [x] 06-01-PLAN.md — **complete 2026-04-21**
+- [x] 06-02-PLAN.md — **complete 2026-04-21**
+- [x] 06-03-PLAN.md — **complete 2026-04-21**
+- [x] 06-04-PLAN.md — **complete 2026-04-21**
 
 ### Phase 7: Core Run UI (LiveView)
 **Goal**: An operator can watch a run work, inspect any stage's diff/logs/events/agent chatter, see the workflow that's executing, see spend, and audit every event — all under the Kiln brand book.
@@ -172,7 +189,15 @@ Plans:
 **Phase artifacts**: `KilnWeb.RunBoardLive`, `KilnWeb.RunDetailLive`, `KilnWeb.WorkflowLive`, `KilnWeb.CostLive`, `KilnWeb.AuditLive`; LiveView stream scaffolds; `stream_async/4` for slow views; `LazyHTML` test helpers; brand-book component library (`KilnWeb.Components.*`); Oban Web mounted at `/ops/oban`; LiveDashboard at `/ops/dashboard`; PubSub topic design doc; bounded log buffer utility.
 **Pitfalls addressed**: P13 (LiveView memory leaks — streams everywhere, dynamic container IDs), P14 (N+1 — query-count gates per view in dev), P16 (PubSub topic explosion — topic cardinality bounded), P17 (OTel span context into LV — `opentelemetry_process_propagator`), P18 (LV event auth — every `handle_event` auth-checked even solo).
 **Research flag**: standard (LiveView streams + PubSub patterns well-established; brand book locked in `kiln-brand-book.md`).
-**Plans**: TBD
+**Plans:** 6 plans
+Plans:
+- [x] 07-01-PLAN.md — **complete 2026-04-21**
+- [x] 07-02-PLAN.md — **complete 2026-04-21**
+- [x] 07-03-PLAN.md — **complete 2026-04-21**
+- [x] 07-04-PLAN.md — **complete 2026-04-21**
+- [x] 07-05-PLAN.md — **complete 2026-04-21**
+- [x] 07-06-PLAN.md — **complete 2026-04-21**
+
 **UI hint**: yes
 
 ### Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)
@@ -193,7 +218,19 @@ Plans:
 **Phase artifacts**: `KilnWeb.InboxLive` (+ `INTAKE-01` drafts from freeform / markdown / GitHub issue importer `Kiln.Intents.GitHubIssueImporter`); `Kiln.Intents` context (draft CRUD, "file as follow-up" generator); `KilnWeb.ProviderHealthLive` (polls `Kiln.ModelRegistry` + adapter health probes); `KilnWeb.CostIntelLive` (advisor rules over telemetry); `Kiln.Diagnostics.Snapshot` (redactor + zipper); `KilnWeb.UnblockPanelComponent` (rendered in `RunDetailLive` when state is `blocked`); `KilnWeb.OnboardingLive` (wizard with gate check, runs once on empty state); `KilnWeb.Components.FactoryHeader`, `KilnWeb.Components.RunProgress`, `KilnWeb.Components.AgentTicker`; PubSub topic `"agent_ticker"` (rate-limited fan-out).
 **Pitfalls addressed**: P16 (ticker + header PubSub topic cardinality bounded), P18 (onboarding/unblock actions all auth-checked), P6 (onboarding's `gh auth status` catches mock-vs-real auth drift at first-run time).
 **Research flag**: standard (LiveView + PubSub + forms patterns established). Optional: onboarding UX prototype (wizard flow vs checklist flow) — lightweight decision.
-**Plans**: TBD
+**Plans:** 10 plans
+Plans:
+- [x] 08-01-PLAN.md — **complete 2026-04-21**
+- [x] 08-02-PLAN.md — **complete 2026-04-21**
+- [x] 08-03-PLAN.md — **complete 2026-04-21**
+- [x] 08-04-PLAN.md — **complete 2026-04-21**
+- [x] 08-05-PLAN.md — **complete 2026-04-21**
+- [x] 08-06-PLAN.md — **complete 2026-04-21**
+- [x] 08-07-PLAN.md — **complete 2026-04-21**
+- [x] 08-08-PLAN.md — **complete 2026-04-21**
+- [x] 08-09-PLAN.md — **complete 2026-04-21**
+- [x] 08-10-PLAN.md — **complete 2026-04-21**
+
 **UI hint**: yes
 
 ### Phase 9: Dogfood & Release (v0.1.0)
@@ -209,7 +246,13 @@ Plans:
 **Phase artifacts**: `.github/workflows/ci.yml` (Kiln's own CI); full `opentelemetry_phoenix|bandit|ecto|oban` wiring; README.md with screenshots from the dogfood run; CHANGELOG.md; `mix check` alias finalized; release notes; v0.1.0 git tag.
 **Pitfalls addressed**: P17 (OTel context propagation validated end-to-end); validation that no HIGH-cost pitfall surfaces in a real run (treated as release-blocking).
 **Research flag**: standard (polish + docs). Verify OTel metric/log SDK status in Erlang (still marked *development* April 2026 per STACK research — recheck before wiring metrics).
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [x] 09-01-PLAN.md — **complete 2026-04-22**
+- [x] 09-02-PLAN.md — **complete 2026-04-22**
+- [x] 09-03-PLAN.md — **complete 2026-04-22**
+- [x] 09-04-PLAN.md — **complete 2026-04-22**
+- [x] 09-05-PLAN.md — **complete 2026-04-22**
 
 ## Coverage
 
@@ -250,7 +293,7 @@ These are NOT features; they are invariants engineered into the system from the 
 
 ## Research Flags Summary
 
-Phases needing `/gsd-research-phase` before planning:
+Phases needing `/gsd-research-phase` before planning (flags are **pre-planning** guidance; Phases 1–9 have been executed):
 
 | Phase | Flag | What Needs Research |
 |-------|------|---------------------|
@@ -268,13 +311,13 @@ Phases needing `/gsd-research-phase` before planning:
 |-------|----------------|--------|-----------|
 | 1. Foundation & Durability Floor | 7/7 | Complete | 2026-04-19 |
 | 2. Workflow Engine Core | 9/9 | Complete | 2026-04-20 |
-| 3. Agent Adapter, Sandbox, DTU & Safety | 1/12 | In progress | - |
-| 4. Agent Tree & Shared Memory | 0/TBD | Not started | - |
-| 5. Spec, Verification & Bounded Loop | 0/TBD | Not started | - |
-| 6. GitHub Integration | 0/TBD | Not started | - |
-| 7. Core Run UI (LiveView) | 0/TBD | Not started | - |
+| 3. Agent Adapter, Sandbox, DTU & Safety | 12/12 | Complete | 2026-04-20 |
+| 4. Agent Tree & Shared Memory | 4/4 | Complete | 2026-04-21 |
+| 5. Spec, Verification & Bounded Loop | 6/6 | Complete | 2026-04-21 |
+| 6. GitHub Integration | 4/4 | Complete | 2026-04-21 |
+| 7. Core Run UI (LiveView) | 6/6 | Complete | 2026-04-21 |
 | 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 10/10 | Complete | 2026-04-21 |
-| 9. Dogfood & Release (v0.1.0) | 0/TBD | Not started | - |
+| 9. Dogfood & Release (v0.1.0) | 5/5 | Complete | 2026-04-22 |
 
 ## Backlog
 
@@ -285,10 +328,14 @@ Ideas captured for future planning but unsequenced. These live outside the 1–9
 **Goal:** [Captured for future planning — see `.planning/phases/999.1-docs-landing-site/` for detail]
 **Requirements:** `DOCS-01..DOCS-07` (see REQUIREMENTS.md § Docs & Release (v1.0+))
 **Slot decision:** Deferred to late Phase 8 / early Phase 9. Two defensible slots: **Phase 10 inside v0.1.0 milestone** (tighter product binding, better first-tag impression) OR **v1.1 milestone post-v0.1.0** (keeps v0.1.0 focused on runtime). Decide once v0.1.0 scope is locked.
-**Plans:** 5/5 plans complete
+**Plans:** 5 plans (executed on backlog slot — **complete 2026-04-22**)
 
 Plans:
-- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+- [x] 999.1-01-PLAN.md — **complete 2026-04-22**
+- [x] 999.1-02-PLAN.md — **complete 2026-04-22**
+- [x] 999.1-03-PLAN.md — **complete 2026-04-22**
+- [x] 999.1-04-PLAN.md — **complete 2026-04-22**
+- [x] 999.1-05-PLAN.md — **complete 2026-04-22**
 
 ---
 *Roadmap created: 2026-04-18*
