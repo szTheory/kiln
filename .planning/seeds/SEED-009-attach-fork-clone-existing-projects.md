@@ -3,7 +3,7 @@ id: SEED-009
 status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 planning (captured mid-session from operator)
-trigger_when: Phase 8 intake UX (INTAKE-01..03) OR Phase 9 onboarding wizard scoping OR v1.0 release-prep OR any milestone touching "workspace bootstrap", "project initialization", "existing repo", "fork", "migrate", "port to", "clone into <stack>", or first operator asks "can I point Kiln at my existing project?"
+trigger_when: Phase 8 intake UX (INTAKE-01..03) OR Phase 9 onboarding wizard scoping OR v1.0 release-prep OR any milestone touching "workspace bootstrap", "project initialization", "existing repo", "fork", "migrate", "port to", "clone into <stack>", "legacy codebase", "brownfield", "multi-root" / multiple workspace folders, "per-feature PR" / "per-bug PR" team cadence, or first operator asks "can I point Kiln at my existing project?"
 scope: Medium-to-Large (spans intake, workspace hydration, git integration, and sandbox mount semantics)
 ---
 
@@ -124,6 +124,14 @@ Shape 1 alone would unlock ~80% of the operator value ("I want Kiln to work on m
 ## One-Line Operator Framing
 
 > "Kiln should treat an existing repo as a first-class starting point, not a greenfield-only special case. Attach is the common case; fork-continue is the OSS case; clone-to-stack is the ambitious case. Make the picker obvious and the defaults safe."
+
+## Operator preference — 2026-04-22 (informal / GSD)
+
+Captured during `/gsd-discuss-phase` work on **999.2**; not a committed product decision.
+
+**Intent:** At some point, Kiln should plug into **existing / legacy** projects comfortably — **one folder or possibly multiple folders** (multi-root / monorepo-style) — and support a **normal developer workflow**: **individual feature or bugfix PRs**, not only greenfield “factory owns the whole repo” narratives. The operator is unsure whether Kiln should *emphasize* this vs stay greenfield-first, but the **directional preference** is clear: keep Kiln’s bounded autonomy while fitting **brownfield and team-shaped** work (tickets-sized units, PR cadence) where automation still feels trustworthy.
+
+**Planning hooks:** Extends **Shape 1 (Attach)** toward explicit **multi-root workspace** semantics and **PR-per-unit-of-work** (feature/bug) scoping; may intersect **SEED-006** (reference mounts) if secondary folders are read-only libraries. When a milestone scopes intake, workspaces, or GitHub PR policy, re-read this note alongside the three-shape table above.
 
 ---
 
