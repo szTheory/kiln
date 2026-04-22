@@ -1,6 +1,6 @@
 ---
 id: SEED-005
-status: dormant
+status: parked
 planted: 2026-04-18
 planted_during: v0.1.0 / Phase 1 execution (captured mid-run from operator)
 trigger_when: Phase 9 dogfood complete OR v1.0 release-prep OR first time an operator asks "my code works — how do I actually ship it?"

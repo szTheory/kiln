@@ -1,6 +1,6 @@
 ---
 id: SEED-010
-status: dormant
+status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 execution recovery
 trigger_when: any milestone touching external integrations, remote operation, public API surface, SDK/CLI ergonomics, developer documentation publishing, or automatic project-site generation

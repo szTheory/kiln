@@ -1,6 +1,6 @@
 ---
 id: SEED-007
-status: dormant
+status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 planning (captured mid-session from operator)
 trigger_when: Phase 8 intake UX (INTAKE-01..03) build OR v1.0 release-prep OR first non-primary operator struggles to write a good first spec OR any milestone touching "onboarding", "first-run experience", "spec authoring", or "project setup"

@@ -1,6 +1,6 @@
 ---
 id: SEED-002
-status: dormant
+status: parked
 planted: 2026-04-18
 planted_during: v0.1.0 / Phase 1 execution (captured mid-run from operator)
 trigger_when: Phase 7 operator-dashboard scoping OR v1.0 release-prep OR first time operator says "I wish I could check progress from my phone"

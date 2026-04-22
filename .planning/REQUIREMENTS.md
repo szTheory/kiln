@@ -153,7 +153,7 @@ Originally surfaced in `.planning/phases/01-foundation-durability-floor/01-CONTE
 
 ## Docs & Release (v1.0+)
 
-Captured in backlog as `999.1-docs-landing-site` (see `ROADMAP.md § Backlog`). Slot decision — new Phase 10 inside v0.1.0 milestone vs v1.1 milestone post-tag — is deferred to late Phase 8 / early Phase 9. Both slots remain defensible; deciding now risks scope-creeping v0.1.0.
+Captured in backlog as `999.1-docs-landing-site` (see `ROADMAP.md` § Parking slot). **Resolved 2026-04-22:** work shipped as **999.x parking-lot** execution; integer **Phase 10** is **Local operator readiness (v0.2.0)** — see `.planning/todos/completed/2026-04-18-phase-10-slot-decision.md`.
 
 - **DOCS-01**: Landing / home page — single-page why-Kiln, 60–90s operator video or live demo embed, "run your first spec in 10 minutes" CTA. Brand-matched per `prompts/kiln-brand-book.md` (Inter + IBM Plex Mono, coal/char/iron/bone/ash/ember palette, borders over shadows, restrained operator voice).
 - **DOCS-02**: Operator onboarding guide — zero-to-first-run walkthrough (`.env`, `docker compose up`, writing your first spec), common footguns and their fixes. Happy-path first, edge cases in collapsible sections. Supersedes/extends `LOCAL-03` (Phase 9 README walkthrough) with guided long-form content.

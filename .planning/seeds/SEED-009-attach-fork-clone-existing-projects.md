@@ -1,6 +1,6 @@
 ---
 id: SEED-009
-status: dormant
+status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 planning (captured mid-session from operator)
 trigger_when: Phase 8 intake UX (INTAKE-01..03) OR Phase 9 onboarding wizard scoping OR v1.0 release-prep OR any milestone touching "workspace bootstrap", "project initialization", "existing repo", "fork", "migrate", "port to", "clone into <stack>", or first operator asks "can I point Kiln at my existing project?"

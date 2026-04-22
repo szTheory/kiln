@@ -1,6 +1,6 @@
 ---
 id: SEED-008
-status: dormant
+status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 planning (captured mid-session from operator)
 trigger_when: Phase 7 Core Run UI discuss/plan OR Phase 8 Operator UX discuss/plan OR any milestone touching LiveView dashboard, workflow visualization, operator experience, or "why is it hard to tell what Kiln is doing"

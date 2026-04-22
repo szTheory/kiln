@@ -1,6 +1,6 @@
 ---
 id: SEED-006
-status: dormant
+status: parked
 planted: 2026-04-20
 planted_during: v0.1.0 / Phase 3 planning (captured mid-session from operator)
 trigger_when: Phase 7 workflow engine build OR Phase 8 intake UX (INTAKE-01..03) OR any milestone scoping touching "reference", "analog", "prior art", "example project", "ADR import", or when a phase's CONTEXT.md cites external repos the agents can't actually read

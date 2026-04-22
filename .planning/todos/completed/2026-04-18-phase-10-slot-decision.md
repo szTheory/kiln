@@ -5,9 +5,23 @@ captured: 2026-04-18
 captured_during: Phase 1 planning
 priority: medium
 trigger: late Phase 8 / early Phase 9 (before v0.1.0 tag)
+resolved: 2026-04-22
+resolution: parking-slot-9991
 ---
 
 # Revisit Phase 10 slot decision — Docs & Landing Site
+
+## Resolution (2026-04-22)
+
+Neither “new Phase 10 inside v0.1.0” nor “first phase of v1.1 only” was taken as originally framed.
+
+**What shipped:** `999.1-docs-landing-site` ran as a **999.x parking-lot slot** (not an integer roadmap phase). Integer **Phase 10** was assigned to **Local operator readiness (v0.2.0)** per `.planning/ROADMAP.md` and `.planning/STATE.md`. Phase **999.1** completed 2026-04-22 with artifacts under `.planning/phases/999.1-docs-landing-site/`.
+
+**Why close now:** The open question in this file is superseded by executed roadmap history; no further slot promotion is required for milestone hygiene.
+
+---
+
+## Original capture (historical)
 
 ## The question
 

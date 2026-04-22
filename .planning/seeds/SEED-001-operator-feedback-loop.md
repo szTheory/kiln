@@ -1,6 +1,6 @@
 ---
 id: SEED-001
-status: dormant
+status: parked
 planted: 2026-04-18
 planted_during: v0.1.0 / Phase 1 planning
 trigger_when: Phase 9 verification OR v1 release-prep OR any future milestone involving self-evaluation / human-in-the-loop steering

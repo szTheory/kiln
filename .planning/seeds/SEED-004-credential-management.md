@@ -1,6 +1,6 @@
 ---
 id: SEED-004
-status: dormant
+status: parked
 planted: 2026-04-18
 planted_during: v0.1.0 / Phase 1 execution (captured mid-run from operator)
 trigger_when: Phase 6 git-push work OR Phase 8 GitHub PR work OR first time operator runs Kiln on a headless / remote host
