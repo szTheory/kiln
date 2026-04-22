@@ -27,7 +27,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
 - [x] **Phase 10: Local operator readiness (v0.2.0)** — Runbook + env checklist + onboarding dry-run; closes README/compose/PROJECT drift for local use — **complete 2026-04-21** ([10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md))
-- [ ] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **planning** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md))
+- [x] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **complete 2026-04-22** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md))
 - [ ] **Phase 12: Local Docker / dev environment DX (v0.2.0)** — Optional devcontainer, Compose `app` service, or task-runner wrapper — **planning** ([12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md))
 - [ ] **Phase 13: Requirements & roadmap hygiene (v0.2.0)** — Reconcile `REQUIREMENTS.md` checkboxes with shipped Phases 1–9 and `PROJECT.md` **Validated** — **planning** ([13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md))
 
@@ -271,9 +271,9 @@ Plans:
 **Goal:** First external repo run with spec + workflow + BDD; open test ROMs only; bounded caps (`DOGFOOD-01`).
 **Depends on:** Phase 10
 **Requirements:** DOGFOOD-01, UAT-01, UAT-02
-**Plans:** 1 plan + spike
+**Plans:** 1/1 plans complete
 Plans:
-- [ ] 11-01-PLAN.md — drafted
+- [x] 11-01-PLAN.md — **complete 2026-04-22** ([11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md))
 - Spike: [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md)
 
 ### Phase 12: Local Docker / dev environment DX (v0.2.0)
@@ -358,7 +358,7 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 10/10 | Complete | 2026-04-21 |
 | 9. Dogfood & Release (v0.1.0) | 5/5 | Complete | 2026-04-22 |
 | 10. Local operator readiness (v0.2.0) | 1/1 | Complete    | 2026-04-22 |
-| 11. Game Boy emulator dogfood (v0.2.0) | 0/1 | Planning | — |
+| 11. Game Boy emulator dogfood (v0.2.0) | 1/1 | Complete    | 2026-04-22 |
 | 12. Local Docker / dev DX (v0.2.0) | 0/1 | Planning | — |
 | 13. Requirements & roadmap hygiene (v0.2.0) | 0/1 | Planning | — |
 
@@ -371,7 +371,7 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | Phase | Plans | Status | Notes |
 |-------|-------|--------|--------|
 | 10. Local operator readiness | 1/1 complete | Complete | [10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md), [10-01-SUMMARY.md](phases/10-local-operator-readiness/10-01-SUMMARY.md) |
-| 11. Game Boy emulator dogfood vertical slice | 1 plan drafted | Planning | [11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md) |
+| 11. Game Boy emulator dogfood vertical slice | 1/1 complete | Complete | [11-01-SUMMARY.md](phases/11-gameboy-dogfood-vertical-slice/11-01-SUMMARY.md), [GB-SPIKE.md](phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md) |
 | 12. Local Docker / dev environment DX | 1 plan drafted | Planning | [12-01-PLAN.md](phases/12-local-docker-dx/12-01-PLAN.md) |
 | 13. Requirements & roadmap hygiene | 1 plan drafted | Planning | [13-01-PLAN.md](phases/13-docs-requirements-reconciliation/13-01-PLAN.md) |
 

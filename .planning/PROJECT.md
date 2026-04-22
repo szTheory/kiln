@@ -114,7 +114,7 @@ This document evolves at phase transitions and milestone boundaries.
 ## Current State (as of 2026-04-22)
 
 - **Milestone v0.1.0 (Phases 1–9)** — Shipped per `.planning/ROADMAP.md`. Runtime: Postgres + DTU + optional OTel via Compose; Phoenix on host; LiveView operator UI; sandbox + agents + GitHub path; dogfood CI on Kiln itself.
-- **Next milestone v0.2** — Operator dogfood (Phases **10–13**); plans under `.planning/phases/10-*` … `13-*`.
+- **Next milestone v0.2** — Operator dogfood (Phases **10–13**); plans under `.planning/phases/10-*` … `13-*`. **Phase 11 plan 11-01 (2026-04-22):** Kiln-side scenario **shell** oracle bridge, `rust_gb_dogfood_v1` workflow YAML, `priv/dogfood/gb_vertical_slice_spec.md`, and README **D-1105** wiring — external Rust clone + `cargo test` argv swap still operator-owned per GB-SPIKE.
 - **Validated requirements:** See **Validated** section above (Phase 1 items + Phases 2–9 bundle line).
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances — change host port in Compose or stop the other service.
 - **New seeds planted:** SEED-002, SEED-003, SEED-004 — dormant until their trigger conditions fire.
@@ -126,4 +126,4 @@ This document evolves at phase transitions and milestone boundaries.
 3. Milestone-close hygiene: `PROJECT.md` / `REQUIREMENTS.md` / `ROADMAP.md` stay aligned (**DOCS-ALIGN-01** / **Phase 13**).
 
 ---
-*Last updated: 2026-04-22 — v0.1.0 requirements reconciled; v0.2 planning started*
+*Last updated: 2026-04-22 — Phase 11 plan 11-01 executed (Kiln-side dogfood prerequisites)*
