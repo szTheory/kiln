@@ -148,6 +148,13 @@ defmodule Kiln.Agents.BudgetGuard do
     end
   end
 
+  @doc """
+  Sum of `cost_usd` for terminal stage runs (`:succeeded`, `:failed`) for a
+  run. Shared with `Kiln.BudgetAlerts` (D-138 spend semantics).
+  """
+  @spec sum_completed_stage_spend(Ecto.UUID.t()) :: Decimal.t()
+  def sum_completed_stage_spend(run_id), do: sum_stage_spend(run_id)
+
   defp sum_stage_spend(run_id) do
     import Ecto.Query
 

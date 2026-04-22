@@ -18,8 +18,8 @@ defmodule Kiln.Audit.EventKindTest do
   ]
 
   describe "values/0" do
-    test "contains exactly 35 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 2 P8)" do
-      assert length(EventKind.values()) == 35
+    test "contains exactly 36 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 2 P8 + 1 P18)" do
+      assert length(EventKind.values()) == 36
     end
 
     test "every element is an atom" do
@@ -42,12 +42,12 @@ defmodule Kiln.Audit.EventKindTest do
       # After Phase 3: the last 8 kinds before any Phase-8 tail MUST be the D-145
       # additions. Phase 8 appends `:spec_draft_promoted` then `:follow_up_drafted`.
       values = EventKind.values()
-      assert List.last(values) == :follow_up_drafted
+      assert List.last(values) == :budget_threshold_crossed
 
-      last_p3_block = values |> Enum.drop(-2) |> Enum.take(-8)
+      last_p3_block = values |> Enum.drop(-3) |> Enum.take(-8)
       assert last_p3_block == @p3_new_kinds
 
-      three_before_p3_block = values |> Enum.take(-13) |> Enum.take(3)
+      three_before_p3_block = values |> Enum.take(-14) |> Enum.take(3)
 
       assert three_before_p3_block == [
                :stage_input_rejected,

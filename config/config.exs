@@ -20,6 +20,10 @@ config :kiln,
   # lib/kiln/credo/no_mix_env_at_runtime.ex).
   env: Mix.env()
 
+# Phase 18 COST-02 — soft budget threshold bands (% of `max_tokens_usd`).
+config :kiln, Kiln.BudgetAlerts,
+  soft_thresholds_pct: [50, 80]
+
 # Configure the endpoint
 config :kiln, KilnWeb.Endpoint,
   url: [host: "localhost"],
