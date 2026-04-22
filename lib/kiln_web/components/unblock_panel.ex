@@ -41,7 +41,7 @@ defmodule KilnWeb.Components.UnblockPanel do
           )
 
         {:error, _} ->
-            "Playbook unavailable for #{inspect(assigns.block_reason)}."
+          "Playbook unavailable for #{inspect(assigns.block_reason)}."
       end
 
     assigns = assign(assigns, :playbook_text, text)

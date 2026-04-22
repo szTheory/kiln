@@ -31,7 +31,9 @@ defmodule KilnWeb.OnboardingLive do
   def handle_event("verify_github", _, socket) do
     v = OperatorReadiness.probe_github_cli?()
     {:ok, _} = OperatorReadiness.mark_step(:github, v)
-    {:noreply, put_flash(socket, :info, if(v, do: "Verified", else: "GitHub CLI not authenticated"))}
+
+    {:noreply,
+     put_flash(socket, :info, if(v, do: "Verified", else: "GitHub CLI not authenticated"))}
   end
 
   def handle_event("verify_docker", _, socket) do
@@ -47,13 +49,16 @@ defmodule KilnWeb.OnboardingLive do
       <div id="onboarding-wizard" class="mx-auto max-w-xl space-y-6 text-bone">
         <h1 class="text-2xl font-semibold">Set up Kiln</h1>
         <%= if @review_mode do %>
-          <p class="text-sm text-[var(--color-smoke)]">Review mode — probes only; navigation stays open when ready.</p>
+          <p class="text-sm text-[var(--color-smoke)]">
+            Review mode — probes only; navigation stays open when ready.
+          </p>
         <% end %>
 
         <section class="space-y-3 rounded border border-ash bg-char/80 p-4">
           <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Anthropic</h2>
           <p class="text-sm text-[var(--color-smoke)]">
-            Ensure <span class="font-mono">:anthropic_api_key_ref</span> is configured (secret ref only).
+            Ensure <span class="font-mono">:anthropic_api_key_ref</span>
+            is configured (secret ref only).
           </p>
           <button
             type="button"
@@ -67,7 +72,9 @@ defmodule KilnWeb.OnboardingLive do
 
         <section class="space-y-3 rounded border border-ash bg-char/80 p-4">
           <h2 class="text-sm font-semibold text-[var(--color-smoke)]">GitHub CLI</h2>
-          <p class="text-sm text-[var(--color-smoke)]">Uses <span class="font-mono">gh auth status</span> read-only.</p>
+          <p class="text-sm text-[var(--color-smoke)]">
+            Uses <span class="font-mono">gh auth status</span> read-only.
+          </p>
           <button
             type="button"
             id="verify-github-btn"
@@ -80,7 +87,9 @@ defmodule KilnWeb.OnboardingLive do
 
         <section class="space-y-3 rounded border border-ash bg-char/80 p-4">
           <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Docker</h2>
-          <p class="text-sm text-[var(--color-smoke)]">Uses <span class="font-mono">docker info</span> read-only.</p>
+          <p class="text-sm text-[var(--color-smoke)]">
+            Uses <span class="font-mono">docker info</span> read-only.
+          </p>
           <button
             type="button"
             id="verify-docker-btn"

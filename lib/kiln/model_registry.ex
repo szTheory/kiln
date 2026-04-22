@@ -199,7 +199,10 @@ defmodule Kiln.ModelRegistry do
     for id <- @provider_ids do
       case :ets.lookup(@health_ets, id) do
         [] ->
-          :ets.insert(@health_ets, {id, %{oks: 0, errors: 0, last_ok_at: nil, rate_limit_remaining: nil}})
+          :ets.insert(
+            @health_ets,
+            {id, %{oks: 0, errors: 0, last_ok_at: nil, rate_limit_remaining: nil}}
+          )
 
         _ ->
           :ok

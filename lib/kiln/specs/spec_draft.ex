@@ -19,7 +19,11 @@ defmodule Kiln.Specs.SpecDraft do
   schema "spec_drafts" do
     field(:title, :string)
     field(:body, :string)
-    field(:source, Ecto.Enum, values: [:freeform, :markdown_import, :github_issue, :run_follow_up])
+
+    field(:source, Ecto.Enum,
+      values: [:freeform, :markdown_import, :github_issue, :run_follow_up]
+    )
+
     field(:inbox_state, Ecto.Enum, values: [:open, :archived, :promoted])
 
     field(:archived_at, :utc_datetime_usec)

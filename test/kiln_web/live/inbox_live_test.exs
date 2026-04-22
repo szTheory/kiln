@@ -52,7 +52,9 @@ defmodule KilnWeb.InboxLiveTest do
 
       previous = Application.get_env(:kiln, :inbox_github_import_opts)
 
-      Application.put_env(:kiln, :inbox_github_import_opts, req_options: [plug: {Req.Test, @req_stub}])
+      Application.put_env(:kiln, :inbox_github_import_opts,
+        req_options: [plug: {Req.Test, @req_stub}]
+      )
 
       on_exit(fn ->
         if previous == nil do

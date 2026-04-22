@@ -93,12 +93,15 @@ defmodule KilnWeb.CostLive do
   defp load_rows_for_pivot(:provider, nil), do: CostRollups.by_provider(%{})
 
   defp load_rows_for_pivot(:run, %{from: f, to: t}), do: CostRollups.by_run(%{from: f, to: t})
-  defp load_rows_for_pivot(:workflow, %{from: f, to: t}), do: CostRollups.by_workflow(%{from: f, to: t})
+
+  defp load_rows_for_pivot(:workflow, %{from: f, to: t}),
+    do: CostRollups.by_workflow(%{from: f, to: t})
 
   defp load_rows_for_pivot(:agent_role, %{from: f, to: t}),
     do: CostRollups.by_agent_role(%{from: f, to: t})
 
-  defp load_rows_for_pivot(:provider, %{from: f, to: t}), do: CostRollups.by_provider(%{from: f, to: t})
+  defp load_rows_for_pivot(:provider, %{from: f, to: t}),
+    do: CostRollups.by_provider(%{from: f, to: t})
 
   defp window_for_period(period) do
     to = DateTime.utc_now(:microsecond)
@@ -202,10 +205,16 @@ defmodule KilnWeb.CostLive do
         </section>
 
         <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Cost views">
-          <.link patch={~p"/costs?#{[tab: "summary", pivot: to_string(@pivot)]}"} class={surface_class(@surface, :summary)}>
+          <.link
+            patch={~p"/costs?#{[tab: "summary", pivot: to_string(@pivot)]}"}
+            class={surface_class(@surface, :summary)}
+          >
             Summary
           </.link>
-          <.link patch={~p"/costs?#{[tab: "intel", pivot: to_string(@pivot), period: to_string(@period)]}"} class={surface_class(@surface, :intel)}>
+          <.link
+            patch={~p"/costs?#{[tab: "intel", pivot: to_string(@pivot), period: to_string(@period)]}"}
+            class={surface_class(@surface, :intel)}
+          >
             Intel
           </.link>
         </nav>
@@ -220,7 +229,10 @@ defmodule KilnWeb.CostLive do
             <% end %>
           </section>
 
-          <nav class="flex flex-wrap gap-2 text-xs text-[var(--color-smoke)]" aria-label="Intel period">
+          <nav
+            class="flex flex-wrap gap-2 text-xs text-[var(--color-smoke)]"
+            aria-label="Intel period"
+          >
             <%= for p <- [:day, :week, :month] do %>
               <.link
                 patch={~p"/costs?#{[tab: "intel", pivot: to_string(@pivot), period: to_string(p)]}"}
@@ -234,7 +246,10 @@ defmodule KilnWeb.CostLive do
 
         <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Pivot">
           <%= for t <- @pivot_tabs do %>
-            <.link patch={~p"/costs?#{pivot_query_attrs(@surface, @period, t)}"} class={tab_class(@pivot, t)}>
+            <.link
+              patch={~p"/costs?#{pivot_query_attrs(@surface, @period, t)}"}
+              class={tab_class(@pivot, t)}
+            >
               {tab_label(t)}
             </.link>
           <% end %>
@@ -279,7 +294,9 @@ defmodule KilnWeb.CostLive do
   end
 
   defp pivot_query_attrs(:summary, _period, pivot), do: [tab: "summary", pivot: to_string(pivot)]
-  defp pivot_query_attrs(:intel, period, pivot), do: [tab: "intel", pivot: to_string(pivot), period: to_string(period)]
+
+  defp pivot_query_attrs(:intel, period, pivot),
+    do: [tab: "intel", pivot: to_string(pivot), period: to_string(period)]
 
   defp surface_class(current, tab) do
     base = "rounded border px-3 py-1 font-sans transition-colors"

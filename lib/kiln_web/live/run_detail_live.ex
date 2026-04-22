@@ -183,8 +183,7 @@ defmodule KilnWeb.RunDetailLive do
                |> put_flash(:info, "Draft created — open the Inbox to edit.")}
 
             {:error, reason} ->
-              {:noreply,
-               put_flash(socket, :error, "Could not create draft: #{inspect(reason)}")}
+              {:noreply, put_flash(socket, :error, "Could not create draft: #{inspect(reason)}")}
           end
       end
     else

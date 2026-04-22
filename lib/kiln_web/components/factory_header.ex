@@ -12,7 +12,10 @@ defmodule KilnWeb.Components.FactoryHeader do
 
   def factory_header(assigns) do
     ~H"""
-    <div id="factory-header" class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded border border-ash bg-iron/30 px-3 py-2 text-xs text-bone">
+    <div
+      id="factory-header"
+      class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded border border-ash bg-iron/30 px-3 py-2 text-xs text-bone"
+    >
       <div class="font-mono tabular-nums">
         <span class="text-[var(--color-smoke)]">Active</span>
         <span class="ml-1 font-semibold text-bone">{@summary.active}</span>
