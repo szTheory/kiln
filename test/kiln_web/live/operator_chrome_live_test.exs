@@ -34,7 +34,8 @@ defmodule KilnWeb.OperatorChromeLiveTest do
     {:ok, view, _html} = live(conn, ~p"/")
     html = render(view)
 
-    assert html =~ "Live"
+    assert html =~ ~s(id="operator-mode-chip")
+    assert html =~ "Runtime credentials apply; external APIs may incur cost."
   end
 
   test "config presence strip lists Providers", %{conn: conn} do
