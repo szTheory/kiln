@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: planning
+status: milestone_complete
 stopped_at: Phase 999.1 context gathered
-last_updated: "2026-04-22T00:58:58.216Z"
-last_activity: 2026-04-22 -- Phase 09 execution merged to working tree
+last_updated: "2026-04-22T01:00:58.138Z"
+last_activity: 2026-04-22 -- Phase --phase execution started
 progress:
   total_phases: 10
-  completed_phases: 9
+  completed_phases: 10
   total_plans: 68
   completed_plans: 63
-  percent: 93
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase 999.1 — docs landing (next); Phase 09 code complete
+**Current focus:** Phase --phase — 999.1
 
 ## Current Position
 
 Phase: 999.1
 Plan: Not started
-Status: Ready to plan (Phase 09 shipped in repo; run `09-05-SUMMARY` operator steps for public tag)
-Last activity: 2026-04-22 -- Phase 09 execution merged to working tree
+Status: Milestone complete
+Last activity: 2026-04-22
 
 Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100% (milestone plans in `.planning/R
 
 **Velocity:**
 
-- Total plans completed: 53
+- Total plans completed: 58
 - Average duration: ~19 min
 - Total execution time: ~155 min
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100% (milestone plans in `.planning/R
 | 06 | 4 | - | - |
 | 08 | 10 | - | - |
 | 09 | 5 | - | - |
+| 999.1 | 5 | - | - |
 
 **Recent Trend:**
 
