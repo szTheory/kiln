@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: executing
-stopped_at: Phase 9 execution — code landed; operator tag/release pending
-last_updated: "2026-04-22T00:25:00.000Z"
-last_activity: 2026-04-22 -- Phase 09 plans 01–05 implemented (SUMMARYs + VERIFICATION)
+status: planning
+stopped_at: Phase 999.1 context gathered
+last_updated: "2026-04-22T00:47:09.834Z"
+last_activity: 2026-04-22 -- Phase 09 execution merged to working tree
 progress:
   total_phases: 10
   completed_phases: 9
@@ -182,9 +182,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: Phase 9 discuss-phase (subagent research + `09-CONTEXT.md`)
-Stopped at: Phase 9 context gathered
-Resume file: `.planning/phases/09-dogfood-release-v0-1-0/09-CONTEXT.md`
+Last session: --stopped-at
+Stopped at: Phase 999.1 context gathered
+Resume file: --resume-file
 Next command: `/clear` then `/gsd-plan-phase 9` (ROADMAP research flag for Phase 9 is **standard**; add `/gsd-research-phase 9` only if planner finds gaps)
 
 **Completed Phase:** 8 (Operator UX) — 10 plans — completed 2026-04-21
