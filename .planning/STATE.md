@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: — operator dogfood
 status: planning
-stopped_at: Phase 11 plan 11-01 executed (Kiln-side dogfood prerequisites)
-last_updated: "2026-04-22T03:15:00.000Z"
+stopped_at: Phase 12 context gathered
+last_updated: "2026-04-22T03:23:53.978Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 10
   completed_phases: 10
-  total_plans: 65
-  completed_plans: 65
+  total_plans: 64
+  completed_plans: 64
   percent: 100
 ---
 
@@ -185,9 +185,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: Phase 11 execution (inline)
-Stopped at: Phase 11 complete — resume Phase 12 when ready
-Resume file: (none)
+Last session: --stopped-at
+Stopped at: Phase 12 context gathered
+Resume file: --resume-file
 Next command: `/gsd-discuss-phase 12` (optional) then `/gsd-plan-phase 12` or `/gsd-execute-phase 12`
 
 **Completed milestone:** v0.1.0 — Phases 1–9 + backlog slot 999.1 (docs site work) — 2026-04-22
