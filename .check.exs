@@ -26,6 +26,9 @@
     # ---- Hard format gate ----
     {:formatter, "mix format --check-formatted"},
 
+    # ---- Phase 17 — shipped template packs (manifest + workflow compile) ----
+    {:templates_verify, "mix templates.verify"},
+
     # ---- Hard compile gate — no warnings allowed ----
     {:compiler, "mix compile --warnings-as-errors --all-warnings"},
 

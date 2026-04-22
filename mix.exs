@@ -136,10 +136,14 @@ defmodule Kiln.MixProject do
   # Aliases are shortcuts or tasks specific to the current project.
   defp aliases do
     [
+      # Phase 17 — built-in templates: run before full `mix check` (wired for AGENTS.md `mix precommit`).
+      precommit: ["templates.verify", "check"],
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      # Shift-left: `mix check` + `test/integration/first_run.sh` (see `script/shift_left_verify.sh`).
+      shift_left: ["shift_left.verify"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind kiln", "esbuild kiln"],
       "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"],
