@@ -7,6 +7,7 @@ defmodule Kiln.Workflows.CompilerTest do
 
   use ExUnit.Case, async: true
 
+  alias Kiln.Workflows
   alias Kiln.Workflows.{CompiledGraph, Compiler}
 
   # Build a valid base workflow map with one entry-node stage. Tests
@@ -45,6 +46,16 @@ defmodule Kiln.Workflows.CompilerTest do
     }
 
     Map.merge(base, overrides)
+  end
+
+  describe "bundled workflow fixtures" do
+    test "compiles rust_gb_dogfood_v1 from priv/workflows" do
+      assert {:ok, %CompiledGraph{} = cg} =
+               Workflows.load("priv/workflows/rust_gb_dogfood_v1.yaml")
+
+      assert cg.model_profile == "elixir_lib"
+      assert Enum.map(cg.stages, & &1.id) == ["plan", "code", "test", "verify", "merge"]
+    end
   end
 
   describe "happy path" do
