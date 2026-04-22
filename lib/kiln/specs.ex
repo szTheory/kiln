@@ -138,13 +138,14 @@ defmodule Kiln.Specs do
   @doc """
   Promotes an **open** draft into `specs` + `spec_revisions`, marks the draft
   **`:promoted`**, and appends `:spec_draft_promoted` in the **same** transaction.
+
+  Pass **`template_id:`** to record built-in template provenance on the audit
+  payload (optional JSON-Schema field).
   """
-  @spec promote_draft(Ecto.UUID.t()) ::
+  @spec promote_draft(Ecto.UUID.t(), keyword()) ::
           {:ok, %{draft: SpecDraft.t(), spec: Spec.t(), revision: SpecRevision.t()}}
           | {:error, :not_found | :invalid_state | Ecto.Changeset.t() | term()}
-  def promote_draft(draft_id) when is_binary(draft_id) do
-    correlation_id = Ecto.UUID.generate()
-
+  def promote_draft(draft_id, opts \\ []) when is_binary(draft_id) and is_list(opts) do
     Repo.transaction(fn ->
       draft =
         from(d in SpecDraft,
@@ -161,29 +162,103 @@ defmodule Kiln.Specs do
           Repo.rollback(:invalid_state)
 
         %SpecDraft{} = draft ->
-          with {:ok, spec} <- insert_spec_from_draft(draft),
-               {:ok, rev} <- insert_revision_from_draft(spec, draft),
-               {:ok, promoted_draft} <- mark_draft_promoted(draft, spec.id),
-               {:ok, _audit} <-
-                 Audit.append(%{
-                   event_kind: :spec_draft_promoted,
-                   correlation_id: correlation_id,
-                   payload: %{
-                     "draft_id" => uuid_string!(draft.id),
-                     "spec_id" => uuid_string!(spec.id),
-                     "spec_revision_id" => uuid_string!(rev.id)
-                   }
-                 }) do
-            %{draft: promoted_draft, spec: spec, revision: rev}
-          else
-            {:error, %Ecto.Changeset{} = cs} -> Repo.rollback(cs)
-            {:error, other} -> Repo.rollback(other)
+          case promote_locked_open_draft(draft, opts) do
+            {:ok, result} ->
+              result
+
+            {:error, %Ecto.Changeset{} = cs} ->
+              Repo.rollback(cs)
+
+            {:error, other} ->
+              Repo.rollback(other)
           end
       end
     end)
     |> case do
       {:ok, result} -> {:ok, result}
       {:error, reason} -> {:error, reason}
+    end
+  end
+
+  @doc """
+  Creates a **`spec_drafts`** row from a built-in template and **promotes** it in
+  one Postgres transaction (D-1706 / D-1707).
+  """
+  @spec instantiate_template_promoted(String.t()) ::
+          {:ok, %{spec: Spec.t(), revision: SpecRevision.t()}}
+          | {:error, :unknown_template | File.posix() | Ecto.Changeset.t() | term()}
+  def instantiate_template_promoted(template_id) when is_binary(template_id) do
+    case Kiln.Templates.fetch(template_id) do
+      {:error, :unknown_template} = not_found ->
+        not_found
+
+      {:ok, entry} ->
+        case Kiln.Templates.read_spec(template_id) do
+          {:error, reason} ->
+            {:error, reason}
+
+          {:ok, body} ->
+            Repo.transaction(fn ->
+              cs =
+                SpecDraft.changeset(%SpecDraft{}, %{
+                  title: entry.title,
+                  body: body,
+                  source: :template,
+                  inbox_state: :open
+                })
+
+              case Repo.insert(cs) do
+                {:error, changeset} ->
+                  Repo.rollback(changeset)
+
+                {:ok, draft} ->
+                  case promote_locked_open_draft(draft, template_id: template_id) do
+                    {:ok, %{spec: spec, revision: rev}} ->
+                      %{spec: spec, revision: rev}
+
+                    {:error, other} ->
+                      Repo.rollback(other)
+                  end
+              end
+            end)
+            |> case do
+              {:ok, %{spec: spec, revision: rev}} ->
+                {:ok, %{spec: spec, revision: rev}}
+
+              {:error, reason} ->
+                {:error, reason}
+            end
+        end
+    end
+  end
+
+  defp promote_locked_open_draft(%SpecDraft{} = draft, opts) when is_list(opts) do
+    correlation_id = Keyword.get(opts, :correlation_id, Ecto.UUID.generate())
+    template_id = Keyword.get(opts, :template_id)
+
+    with {:ok, spec} <- insert_spec_from_draft(draft),
+         {:ok, rev} <- insert_revision_from_draft(spec, draft),
+         {:ok, promoted_draft} <- mark_draft_promoted(draft, spec.id),
+         {:ok, _audit} <-
+           Audit.append(%{
+             event_kind: :spec_draft_promoted,
+             correlation_id: correlation_id,
+             payload: audit_payload_spec_draft_promoted(draft, spec, rev, template_id)
+           }) do
+      {:ok, %{draft: promoted_draft, spec: spec, revision: rev}}
+    end
+  end
+
+  defp audit_payload_spec_draft_promoted(draft, spec, rev, template_id) do
+    base = %{
+      "draft_id" => uuid_string!(draft.id),
+      "spec_id" => uuid_string!(spec.id),
+      "spec_revision_id" => uuid_string!(rev.id)
+    }
+
+    case template_id do
+      nil -> base
+      id when is_binary(id) -> Map.put(base, "template_id", id)
     end
   end
 

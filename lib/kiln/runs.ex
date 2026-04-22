@@ -21,6 +21,10 @@ defmodule Kiln.Runs do
 
   alias Kiln.Repo
   alias Kiln.Runs.{Compare, Run}
+  alias Kiln.Specs.Spec
+  alias Kiln.Templates
+  alias Kiln.Workflows
+  alias Kiln.Workflows.CompiledGraph
 
   @doc """
   Insert a new run. The `state` field defaults to `:queued`; callers
@@ -38,6 +42,50 @@ defmodule Kiln.Runs do
     %Run{}
     |> Run.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @doc """
+  Inserts a **queued** run using the shipped workflow referenced by a built-in
+  **`template_id`** (dispatcher path `priv/workflows/<workflow_id>.yaml`).
+
+  The **`spec`** argument is reserved for future binding (intent enqueue);
+  callers must still pass the spec that was promoted from the template.
+  """
+  @spec create_for_promoted_template(Spec.t(), String.t()) ::
+          {:ok, Run.t()}
+          | {:error, Ecto.Changeset.t() | :unknown_template | {:workflow_load_failed, term()}}
+  def create_for_promoted_template(%Spec{} = spec, template_id)
+      when is_binary(template_id) do
+    _ = spec
+
+    case Templates.fetch(template_id) do
+      {:error, :unknown_template} = e ->
+        e
+
+      {:ok, entry} ->
+        path = Templates.shipped_workflow_yaml_path(entry.workflow_id)
+
+        case Workflows.load(path) do
+          {:ok, %CompiledGraph{} = cg} ->
+            attrs = %{
+              workflow_id: cg.id,
+              workflow_version: cg.version,
+              workflow_checksum: Workflows.checksum(cg),
+              correlation_id: Ecto.UUID.generate(),
+              model_profile_snapshot: %{"profile" => cg.model_profile},
+              caps_snapshot: caps_snapshot_from_compiled_graph(cg)
+            }
+
+            create(attrs)
+
+          {:error, reason} ->
+            {:error, {:workflow_load_failed, reason}}
+        end
+    end
+  end
+
+  defp caps_snapshot_from_compiled_graph(%CompiledGraph{caps: caps}) when is_map(caps) do
+    Jason.decode!(Jason.encode!(caps))
   end
 
   @doc """

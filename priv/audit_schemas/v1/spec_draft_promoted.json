@@ -7,7 +7,11 @@
   "properties": {
     "draft_id": { "type": "string", "format": "uuid" },
     "spec_id": { "type": "string", "format": "uuid" },
-    "spec_revision_id": { "type": "string", "format": "uuid" }
+    "spec_revision_id": { "type": "string", "format": "uuid" },
+    "template_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,63}$"
+    }
   },
   "additionalProperties": false
 }

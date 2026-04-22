@@ -9,7 +9,8 @@ defmodule Kiln.Specs.SpecDraft do
   import Ecto.Changeset
 
   @type inbox_state :: :open | :archived | :promoted
-  @type source :: :freeform | :markdown_import | :github_issue | :run_follow_up
+  @type source ::
+          :freeform | :markdown_import | :github_issue | :run_follow_up | :template
 
   @type t :: %__MODULE__{}
 
@@ -21,7 +22,7 @@ defmodule Kiln.Specs.SpecDraft do
     field(:body, :string)
 
     field(:source, Ecto.Enum,
-      values: [:freeform, :markdown_import, :github_issue, :run_follow_up]
+      values: [:freeform, :markdown_import, :github_issue, :run_follow_up, :template]
     )
 
     field(:inbox_state, Ecto.Enum, values: [:open, :archived, :promoted])
