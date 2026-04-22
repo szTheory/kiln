@@ -77,7 +77,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 ## Backlog
 
-### Phase 999.2: Operator demo vs live mode and provider readiness UX (BACKLOG)
+### Phase 999.2: Operator demo vs live mode and provider readiness UX (shipped 2026-04-22)
 
 **Goal:** Global **demo** (fixtures / stub providers / no paid API calls) vs **live** (runtime env / secret refs per **SEC-01**) mode is obvious in the operator shell (e.g. `Layouts` strip or chip). In **live** mode, unreachable or misconfigured providers show **calm** inline status and links to **`/providers`** — never silent failure. In **demo** mode, copy states that outcomes are **mock or seed-driven**. One surface for **config presence** (which providers are configured — names only, never key values) to improve local and production bring-up. Composes with existing **`ProviderHealthLive`** (`/providers`) and `ModelRegistry` health snapshots.
 
@@ -85,11 +85,13 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 **Canonical refs (seed):** `CLAUDE.md` (SEC-01), `lib/kiln_web/live/provider_health_live.ex`, `.cursor/plans/GB dogfood note backlog-6d919cbd.plan.md` (intent note; do not treat as executable spec).
 
-**Plans:** 3/3 plans complete
+**Plans:** 3/3 plans complete — artifacts: [.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/](phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/).
 
 Plans:
 
-- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+- [x] 999.2-01 — `Kiln.OperatorRuntime` + config (`KILN_OPERATOR_RUNTIME_MODE`)
+- [x] 999.2-02 — `KilnWeb.OperatorChromeHook` (assigns + 5s refresh)
+- [x] 999.2-03 — `Layouts.app` chrome + LiveView tests
 
 ---
 *Milestone v0.3.0 opened: 2026-04-22*
