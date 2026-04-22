@@ -109,6 +109,20 @@ case System.get_env("KILN_DB_ROLE") do
   role -> config :kiln, Kiln.Repo, parameters: [role: role]
 end
 
+# Phase 999.2: optional operator runtime mode override (demo vs live UI only).
+case System.get_env("KILN_OPERATOR_RUNTIME_MODE") do
+  v when v in [nil, ""] ->
+    :ok
+
+  v when is_binary(v) ->
+    case v |> String.trim() |> String.downcase() do
+      "demo" -> config :kiln, :operator_runtime_mode, :demo
+      "live" -> config :kiln, :operator_runtime_mode, :live
+      # Invalid non-empty values → explicit :unknown so `OperatorRuntime.mode/0` matches intent.
+      _ -> config :kiln, :operator_runtime_mode, :unknown
+    end
+end
+
 Kiln.Secrets.put(:anthropic_api_key, System.get_env("ANTHROPIC_API_KEY"))
 Kiln.Secrets.put(:openai_api_key, System.get_env("OPENAI_API_KEY"))
 Kiln.Secrets.put(:google_api_key, System.get_env("GOOGLE_API_KEY"))
