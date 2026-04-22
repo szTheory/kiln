@@ -14,6 +14,12 @@ defmodule Kiln.BlockersTest do
     end
   end
 
+  test "raise_block/3 rejects advisory (non-blocking) reasons" do
+    assert_raise ArgumentError, ~r/non-blocking reason/, fn ->
+      Blockers.raise_block(:budget_threshold_50, "run-a", %{})
+    end
+  end
+
   test "fetch/1 delegates to PlaybookRegistry" do
     assert {:ok, _pb} = Blockers.fetch(:missing_api_key)
   end

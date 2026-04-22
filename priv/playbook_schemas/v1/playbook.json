@@ -25,7 +25,9 @@
         "policy_violation",
         "gh_auth_expired",
         "gh_permissions_insufficient",
-        "unrecoverable_stage_failure"
+        "unrecoverable_stage_failure",
+        "budget_threshold_50",
+        "budget_threshold_80"
       ]
     },
     "severity": {
@@ -69,7 +71,7 @@
     "owning_phase": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 9
+      "maximum": 99
     },
     "stub": {
       "type": "boolean",

@@ -11,9 +11,9 @@ defmodule Kiln.Blockers do
       for operator-facing surfaces (desktop notification in P3, unblock
       panel in P8).
 
-  The enum `Kiln.Blockers.Reason` is the closed 9-atom SSOT; the registry
-  `Kiln.Blockers.PlaybookRegistry` proves compile-time that every atom has
-  a corresponding playbook markdown file.
+  The enum `Kiln.Blockers.Reason` is the closed SSOT (blocking + advisory
+  atoms); the registry `Kiln.Blockers.PlaybookRegistry` proves compile-time
+  that every atom has a corresponding playbook markdown file.
 
   This module is a sub-facade under the `Kiln.Policies` bounded context —
   it is NOT itself one of the 13 bounded contexts pinned by D-97 (the
@@ -34,6 +34,11 @@ defmodule Kiln.Blockers do
     if not Reason.valid?(reason) do
       raise ArgumentError,
             "Kiln.Blockers.raise_block/3 received unknown reason: #{inspect(reason)}"
+    end
+
+    unless Reason.blocking?(reason) do
+      raise ArgumentError,
+            "Kiln.Blockers.raise_block/3 non-blocking reason #{inspect(reason)} — use advisory/notify paths instead"
     end
 
     raise BlockedError, reason: reason, run_id: run_id, context: context
