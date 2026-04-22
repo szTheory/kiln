@@ -79,7 +79,11 @@ defmodule KilnWeb.RunReplayLive do
     socket =
       case load_status do
         :unknown_at ->
-          put_flash(socket, :info, "That event is not on the loaded window — showing the latest tail.")
+          put_flash(
+            socket,
+            :info,
+            "That event is not on the loaded window — showing the latest tail."
+          )
 
         _ ->
           socket
@@ -259,7 +263,7 @@ defmodule KilnWeb.RunReplayLive do
 
         <%= if @pending_tail_count > 0 && !@live_edge? do %>
           <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-ember/40 bg-char px-4 py-3 text-sm text-bone">
-            <span><%= @pending_tail_count %> new events — jump to latest</span>
+            <span>{@pending_tail_count} new events — jump to latest</span>
             <button
               type="button"
               id="replay-jump-latest"
@@ -332,7 +336,11 @@ defmodule KilnWeb.RunReplayLive do
             <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
               Timeline
             </h2>
-            <div id="replay-events" phx-update="stream" class="max-h-[32rem] space-y-2 overflow-y-auto">
+            <div
+              id="replay-events"
+              phx-update="stream"
+              class="max-h-[32rem] space-y-2 overflow-y-auto"
+            >
               <div
                 :for={{dom_id, event} <- @streams.events}
                 id={dom_id}
@@ -399,7 +407,8 @@ defmodule KilnWeb.RunReplayLive do
       raw ->
         case Ecto.UUID.cast(raw) do
           :error ->
-            {put_flash(socket, :error, "Invalid event id") |> assign(:selected_event_id, nil), nil}
+            {put_flash(socket, :error, "Invalid event id") |> assign(:selected_event_id, nil),
+             nil}
 
           {:ok, uuid} ->
             {assign(socket, :selected_event_id, uuid), uuid}
@@ -457,7 +466,7 @@ defmodule KilnWeb.RunReplayLive do
               (e.occurred_at == ^ev.occurred_at and e.id > ^ev.id)
       )
 
-    %{events: rows, truncated: (truncated_before || false) || truncated_after}
+    %{events: rows, truncated: truncated_before || false || truncated_after}
   end
 
   defp pick_selection([], _), do: {nil, 0}

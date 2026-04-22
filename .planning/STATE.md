@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
-status: Ready to continue v0.3.0 roadmap
-last_updated: "2026-04-22T17:31:40.684Z"
-last_activity: 2026-04-22
+status: ready_to_plan
+last_updated: "2026-04-22T17:40:42.501Z"
+last_activity: 2026-04-22 -- Phase --phase execution started
 progress:
   total_phases: 18
-  completed_phases: 17
-  total_plans: 81
+  completed_phases: 18
+  total_plans: 84
   completed_plans: 81
   percent: 100
 ---
@@ -21,16 +21,16 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
-**Current focus:** Phase 999.2 complete — operator demo vs live chrome shipped.
+**Current focus:** Phase --phase — 16
 
 ## Current Position
 
-Phase: 999.2
-Plan: Complete (3/3)
-Status: Ready to continue v0.3.0 roadmap
+Phase: 999.1
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-04-22
 
-Progress: **1 / 6** phases complete for v0.3.0 (Phase 15 discuss done; implementation not started).
+Progress: v0.3.0 roadmap in flight — see ROADMAP for per-phase completion.
 
 ## Accumulated Context
 
@@ -49,3 +49,5 @@ Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md
 Next: **`/gsd-plan-phase 16`** — Read-only run replay (REPL-01).
 
 **Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
+
+**Planned Phase:** 16 (read-only-run-replay) — 3 plans — 2026-04-22T17:39:03.389Z

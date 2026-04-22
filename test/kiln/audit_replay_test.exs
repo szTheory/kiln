@@ -47,6 +47,7 @@ defmodule Kiln.AuditReplayTest do
 
     # Same occurred_at → ORDER BY occurred_at ASC, id ASC must disambiguate by id.
     assert e1.occurred_at == e2.occurred_at
+
     sorted =
       Audit.replay(run_id: run.id)
       |> Enum.sort_by(fn e -> {e.occurred_at, e.id} end)

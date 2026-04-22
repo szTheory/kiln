@@ -18,7 +18,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 - [x] **Phase 14: Fair parallel runs** — PARA-01 — fair scheduling / queueing when multiple runs are active; respects caps and idempotency. (completed 2026-04-22)
 - [x] **Phase 15: Run comparison** — PARA-02 — side-by-side operator view for two runs. (completed 2026-04-22)
-- [ ] **Phase 16: Read-only run replay** — REPL-01 — timeline scrub over persisted audit/checkpoint data (MVP).
+- [x] **Phase 16: Read-only run replay** — REPL-01 — timeline scrub over persisted audit/checkpoint data (MVP). (completed 2026-04-22)
 - [ ] **Phase 17: Template library & onboarding specs** — WFE-01, ONB-01 — `priv` (or agreed) template packs + UI to start from template.
 - [ ] **Phase 18: Cost hints & budget alerts** — COST-01, COST-02 — advisory + threshold notifications.
 - [ ] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail.
@@ -85,7 +85,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 **Canonical refs (seed):** `CLAUDE.md` (SEC-01), `lib/kiln_web/live/provider_health_live.ex`, `.cursor/plans/GB dogfood note backlog-6d919cbd.plan.md` (intent note; do not treat as executable spec).
 
-**Plans:** 3/3 plans complete — artifacts: [.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/](phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/).
+**Plans:** 3/3 plans complete
 
 Plans:
 
