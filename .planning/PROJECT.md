@@ -25,7 +25,8 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **LOCAL-01** — `docker compose` runs **Postgres** (required for dev), **DTU** + internal sandbox network for stage sandboxes, and optional **OTel/Jaeger**. The **Phoenix app runs on the host** (`mix phx.server`; Elixir/OTP per `.tool-versions`). Single-command “Kiln in Compose” / devcontainer is **not** v0.1.0 scope — see **Phase 12** and `.planning/research/LOCAL-DX-AUDIT.md`. — Phase 1 + operator docs (wording corrected 2026-04-22).
 - [x] **LOCAL-02** — `.tool-versions` pins Elixir/Erlang — Phase 1.
 - [x] **LOCAL-03** — README zero-to-first-run walkthrough — Phase 9.
-- [x] **Phases 2–9 (v0.1.0 capability bundle)** — ORCH-05/06; AGENT-01..05; SAND-01..04; SPEC-01..03; GIT-01..04; UI-01..09; OBS-02, OBS-04 (OBS-01/OBS-03 were Phase 1); UAT-01/02; BLOCK-01..04; INTAKE-01..03; OPS-01..05 — shipped per `.planning/ROADMAP.md` Phases 2–9 (2026-04-20–22). REQ IDs remain the stable vocabulary for audits and future milestones.
+- [x] **Phases 2–9 (v0.1.0 capability bundle)** — ORCH-05/06; AGENT-01..05; SAND-01..04; SPEC-01..04; GIT-01..04; UI-01..09; OBS-02, OBS-04 (OBS-01/OBS-03 were Phase 1); UAT-01/02; BLOCK-01..04; INTAKE-01..03; OPS-01..05 — shipped per `.planning/ROADMAP.md` Phases 2–9 (2026-04-20–22). REQ IDs remain the stable vocabulary for audits and future milestones.
+- [x] **DOCS-ALIGN-01** — `PROJECT.md` **Validated**, `REQUIREMENTS.md` § v1 checkboxes, and `ROADMAP.md` stay mutually consistent at milestone boundaries — Phase 13 (`13-01-PLAN.md`).
 
 ### Active
 
@@ -33,7 +34,6 @@ That single promise is what the whole system must deliver. Every design tradeoff
 
 - [ ] **DOGFOOD-01** — First **external** repo run from local Kiln (Game Boy emulator **vertical slice**: spec + workflow + BDD + bounded caps; open test ROMs only). Context: `.planning/phases/11-gameboy-dogfood-vertical-slice/GB-SPIKE.md`, Phase **11** plan.
 - [ ] **LOCAL-DX-01** — Optional single-command / containerized dev environment (devcontainer vs Compose `app` vs task runner — **TBD**). **Phase 12** (after Phase **10** runbook).
-- [ ] **DOCS-ALIGN-01** — Keep `PROJECT.md` / `REQUIREMENTS.md` / roadmap in sync at each milestone boundary. **Phase 13**.
 
 ### Out of Scope
 
@@ -123,7 +123,7 @@ This document evolves at phase transitions and milestone boundaries.
 
 1. Run Kiln locally against a **throwaway git remote** and complete at least one bounded run for an external spec (Game Boy emulator vertical slice).
 2. Decide and optionally implement **one** local DX improvement in **Phase 12** after Phase **10**.
-3. Milestone-close hygiene: `PROJECT.md` / `REQUIREMENTS.md` / `ROADMAP.md` stay aligned (**DOCS-ALIGN-01** / **Phase 13**).
+3. Milestone-close hygiene: `DOCS-ALIGN-01` re-runs implicitly whenever planning docs change; last explicit reconciliation was **Phase 13** (2026-04-22).
 
 ---
-*Last updated: 2026-04-22 — Phase 11 plan 11-01 executed (Kiln-side dogfood prerequisites)*
+*Last updated: 2026-04-22 — Phase 13: requirements reconciliation + `DOCS-ALIGN-01` validated*

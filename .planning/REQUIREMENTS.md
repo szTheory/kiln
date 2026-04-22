@@ -3,75 +3,70 @@
 **Defined:** 2026-04-18
 **Core Value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
-**Sync note (2026-04-22):** v0.1.0 shipped scope is reflected in `.planning/PROJECT.md` (**Validated**) and `.planning/ROADMAP.md` (Phases 1–9). Checkboxes in **§ v1 Requirements** below may still read `[ ]` from the 2026-04-18 baseline; **do not infer shipping status from this file alone** until **Phase 13** (`13-01-PLAN.md`) reconciles them. **v0.2 active goals:** `DOGFOOD-01`, `LOCAL-DX-01`, `DOCS-ALIGN-01` in `PROJECT.md`.
+**Reconciled (2026-04-22, Phase 13):** § v1 checkboxes match the **v0.1.0 shipped bundle** — `.planning/PROJECT.md` **Validated** (including the Phases 2–9 capability line) and `.planning/ROADMAP.md` Phases 1–9 marked complete. **v0.2** work stays under `PROJECT.md` **Active** (`DOGFOOD-01`, `LOCAL-DX-01`, `DOCS-ALIGN-01`); those IDs are not part of the original 55 v1 rows below.
 
 ## v1 Requirements
 
-All v1 requirements are hypotheses until shipped and validated on a real end-to-end run (Phase 8 dogfood).
+All v1 requirements below were treated as hypotheses until **v0.1.0** (Phases 1–9) shipped; checkboxes now record that closure. New work uses **Active** IDs in `PROJECT.md` or **§ v2 Requirements** here.
 
 ### Core Orchestration
 
-- [x] **ORCH-01
-**: Workflow definition is a YAML/JSON graph, versioned in git, schema-validated (JSON Schema Draft 2020-12) at load time
-- [x] **ORCH-02
-**: Stage executor runs each stage in a supervised BEAM process with crash isolation (agent failure must not kill the run)
-- [x] **ORCH-03
-**: Run state machine persists to Postgres with explicit allowed transitions: queued → planning → coding → testing → verifying → (merged | failed | escalated); every transition writes an Audit.Event in the same Postgres transaction
-- [x] **ORCH-04
-**: Every stage writes an artifact + event before emitting success; runs are resumable from the last checkpoint after crash or redeploy
-- [ ] **ORCH-05**: When the Verifier reports failure, the run loops back to the Planner with a structured `%VerifierResult{}` diagnostic — this is the "loop until spec met" core
-- [ ] **ORCH-06**: Bounded autonomy — per-run hard caps on retries, token spend (USD and tokens), and elapsed steps; escalation = halt with diagnostic artifact; never silently continue after repeated verification failure
-- [x] **ORCH-07
-**: Idempotency — every Oban job has an insert-time unique key AND handler-level dedupe; every external side-effect (git push, GitHub API call, LLM API call, Docker op) has an `external_operations` intent-table row with two-phase (intent → action → completion) semantics
+- [x] **ORCH-01**: Workflow definition is a YAML/JSON graph, versioned in git, schema-validated (JSON Schema Draft 2020-12) at load time — Phase 2
+- [x] **ORCH-02**: Stage executor runs each stage in a supervised BEAM process with crash isolation (agent failure must not kill the run) — Phase 2
+- [x] **ORCH-03**: Run state machine persists to Postgres with explicit allowed transitions: queued → planning → coding → testing → verifying → (merged | failed | escalated); every transition writes an Audit.Event in the same Postgres transaction — Phase 2
+- [x] **ORCH-04**: Every stage writes an artifact + event before emitting success; runs are resumable from the last checkpoint after crash or redeploy — Phase 2
+- [x] **ORCH-05**: When the Verifier reports failure, the run loops back to the Planner with a structured `%VerifierResult{}` diagnostic — this is the "loop until spec met" core — Phase 5
+- [x] **ORCH-06**: Bounded autonomy — per-run hard caps on retries, token spend (USD and tokens), and elapsed steps; escalation = halt with diagnostic artifact; never silently continue after repeated verification failure — Phase 5
+- [x] **ORCH-07**: Idempotency — every Oban job has an insert-time unique key AND handler-level dedupe; every external side-effect (git push, GitHub API call, LLM API call, Docker op) has an `external_operations` intent-table row with two-phase (intent → action → completion) semantics — Phase 2
 
 ### Agents
 
-- [ ] **AGENT-01**: Provider-agnostic LLM adapter via `Kiln.Agents.Adapter` behaviour; Anthropic (via anthropix 0.6) shipped in v1; OpenAI, Google, and local Ollama adapters ship on Req (rolled-own, ~200 LOC each) as the workflow schema supports them
-- [ ] **AGENT-02**: Per-stage model selection via workflow YAML (e.g., `planner: opus`, `coder: sonnet`, `router: haiku`); ModelRegistry resolves role → model with explicit fallback chain
-- [ ] **AGENT-03**: Specialized agent roles as OTP processes — Planner, Coder, Tester, Reviewer, UI/UX, QA/Verifier, Mayor (orchestrator-of-record). Agents supervised under per-run `Agents.SessionSupervisor`; agent crash does not kill the run
-- [ ] **AGENT-04**: Agent-shared memory implemented as native Ecto `work_units` current-state table + `work_unit_events` append-only ledger + Phoenix.PubSub broadcast (beads-equivalent, Option A per BEADS.md)
-- [ ] **AGENT-05**: Token + cost telemetry emitted per agent call, stored per stage and per run; `:telemetry` events + OTel spans; both `requested_model` and `actual_model_used` recorded to catch silent fallback
+- [x] **AGENT-01**: Provider-agnostic LLM adapter via `Kiln.Agents.Adapter` behaviour; Anthropic (via anthropix 0.6) shipped in v1; OpenAI, Google, and local Ollama adapters ship on Req (rolled-own, ~200 LOC each) as the workflow schema supports them
+- [x] **AGENT-02**: Per-stage model selection via workflow YAML (e.g., `planner: opus`, `coder: sonnet`, `router: haiku`); ModelRegistry resolves role → model with explicit fallback chain
+- [x] **AGENT-03**: Specialized agent roles as OTP processes — Planner, Coder, Tester, Reviewer, UI/UX, QA/Verifier, Mayor (orchestrator-of-record). Agents supervised under per-run `Agents.SessionSupervisor`; agent crash does not kill the run
+- [x] **AGENT-04**: Agent-shared memory implemented as native Ecto `work_units` current-state table + `work_unit_events` append-only ledger + Phoenix.PubSub broadcast (beads-equivalent, Option A per BEADS.md)
+- [x] **AGENT-05**: Token + cost telemetry emitted per agent call, stored per stage and per run; `:telemetry` events + OTel spans; both `requested_model` and `actual_model_used` recorded to catch silent fallback
 
 ### Sandbox
 
-- [ ] **SAND-01**: Every stage runs in an ephemeral Docker container, auto-cleaned on completion or crash (`--rm` + explicit `docker rm` on crash paths)
-- [ ] **SAND-02**: Network egress blocked at the Docker bridge layer (`internal: true`) except to the Kiln-hosted DTU mock network; adversarial negative tests verify TCP/UDP/DNS/ICMP/IPv6 are all blocked
-- [ ] **SAND-03**: Digital Twin Universe — local HTTP mocks for GitHub API and common third-party integrations used during spec execution; mocks versioned and contract-tested weekly against real services
-- [ ] **SAND-04**: Git + filesystem workspace mounted read-write into sandbox; diff captured at stage end and stored in content-addressed artifact store
+- [x] **SAND-01**: Every stage runs in an ephemeral Docker container, auto-cleaned on completion or crash (`--rm` + explicit `docker rm` on crash paths)
+- [x] **SAND-02**: Network egress blocked at the Docker bridge layer (`internal: true`) except to the Kiln-hosted DTU mock network; adversarial negative tests verify TCP/UDP/DNS/ICMP/IPv6 are all blocked
+- [x] **SAND-03**: Digital Twin Universe — local HTTP mocks for GitHub API and common third-party integrations used during spec execution; mocks versioned and contract-tested weekly against real services
+- [x] **SAND-04**: Git + filesystem workspace mounted read-write into sandbox; diff captured at stage end and stored in content-addressed artifact store
 
 ### Spec & Validation
 
-- [ ] **SPEC-01**: Spec editor in LiveView — markdown body with embedded BDD scenarios (Given/When/Then); saved versioned to Postgres
-- [ ] **SPEC-02**: BDD scenarios compile to executable acceptance tests run inside the sandbox against the produced software
-- [ ] **SPEC-03**: Verifier is deterministic-first: the scenario runner's exit code is authoritative pass/fail; LLM verifier *explains* failures but never overrides the scenario runner's verdict
-- [ ] **SPEC-04**: Holdout scenarios — a subset of scenarios stored where Coder, Planner, and Reviewer agents cannot read them; only the Verifier process accesses them at verification time (StrongDM holdout pattern, closes FEATURES.md Gap G-06)
+- [x] **SPEC-01**: Spec editor in LiveView — markdown body with embedded BDD scenarios (Given/When/Then); saved versioned to Postgres
+- [x] **SPEC-02**: BDD scenarios compile to executable acceptance tests run inside the sandbox against the produced software
+- [x] **SPEC-03**: Verifier is deterministic-first: the scenario runner's exit code is authoritative pass/fail; LLM verifier *explains* failures but never overrides the scenario runner's verdict
+- [x] **SPEC-04**: Holdout scenarios — a subset of scenarios stored where Coder, Planner, and Reviewer agents cannot read them; only the Verifier process accesses them at verification time (StrongDM holdout pattern, closes FEATURES.md Gap G-06)
 
 ### Security & Secrets
 
-- [ ] **SEC-01**: Kiln stores secret *references* only (names, not values); values are fetched from `persistent_term` at point-of-use, redacted via `@derive {Inspect, except: [:api_key]}`, never rendered to UI or logs, never persisted to the sandbox workspace. Short-lived credentials where the provider supports them. (Closes FEATURES.md Gap G-01; maps to Pitfalls P5 and P21.)
+- [x] **SEC-01**: Kiln stores secret *references* only (names, not values); values are fetched from `persistent_term` at point-of-use, redacted via `@derive {Inspect, except: [:api_key]}`, never rendered to UI or logs, never persisted to the sandbox workspace. Short-lived credentials where the provider supports them. (Closes FEATURES.md Gap G-01; maps to Pitfalls P5 and P21.)
 
 ### GitHub Integration
 
-- [ ] **GIT-01**: Kiln drives `git` (commit, push, branch, worktree) via `System.cmd` in the workspace; every git mutation is wrapped in an Oban worker with idempotency key `{run_id, stage_id, op_name}` and `git ls-remote` precondition
-- [ ] **GIT-02**: Kiln opens pull requests via `gh` CLI when the workflow has a PR stage; PR metadata (title, body, base, reviewers) derived from run artifacts
-- [ ] **GIT-03**: Kiln reads and updates GitHub Actions status on PRs (checks API); run board surfaces CI status inline
-- [ ] **GIT-04**: Kiln's own GitHub repository ships a GitHub Actions workflow running `mix check` (mix test, credo, dialyzer, xref, sobelow, mix_audit) on every push and PR
+- [x] **GIT-01**: Kiln drives `git` (commit, push, branch, worktree) via `System.cmd` in the workspace; every git mutation is wrapped in an Oban worker with idempotency key `{run_id, stage_id, op_name}` and `git ls-remote` precondition
+- [x] **GIT-02**: Kiln opens pull requests via `gh` CLI when the workflow has a PR stage; PR metadata (title, body, base, reviewers) derived from run artifacts
+- [x] **GIT-03**: Kiln reads and updates GitHub Actions status on PRs (checks API); run board surfaces CI status inline
+- [x] **GIT-04**: Kiln's own GitHub repository ships a GitHub Actions workflow running `mix check` (mix test, credo, dialyzer, xref, sobelow, mix_audit) on every push and PR
 
 ### UI (LiveView Dashboard)
 
-- [ ] **UI-01**: Run board — kanban-style columns by state (queued / planning / coding / testing / verifying / merged / failed / escalated); real-time updates via PubSub + LiveView streams; no unbounded assigns
-- [ ] **UI-02**: Run detail view — stage graph (topologically laid out), per-stage diff viewer, bounded log buffer, event timeline, agent chatter stream; streams for all list-shaped data
-- [ ] **UI-03**: Workflow registry — read-only viewer for loaded workflow YAMLs; shows version history; no web-based workflow authoring (anti-feature)
-- [ ] **UI-04**: Token + cost dashboard — per run, per workflow, per agent; daily/weekly spend view; projection to end-of-run based on burn rate
-- [ ] **UI-05**: Audit ledger view — append-only events, filterable by run/stage/actor/event-type; time-range picker; event payload inspectable
-- [ ] **UI-06**: Kiln brand book applied globally — Inter + IBM Plex Mono typography; coal/char/iron/bone/ash/ember palette; borders over shadows; state-aware components (loading/empty/success/warning/error/focus/disabled); operator microcopy ("Start run", "Verify changes", "Build verified", "Verification failed", "Retry step", "Waiting on upstream")
+- [x] **UI-01**: Run board — kanban-style columns by state (queued / planning / coding / testing / verifying / merged / failed / escalated); real-time updates via PubSub + LiveView streams; no unbounded assigns
+- [x] **UI-02**: Run detail view — stage graph (topologically laid out), per-stage diff viewer, bounded log buffer, event timeline, agent chatter stream; streams for all list-shaped data
+- [x] **UI-03**: Workflow registry — read-only viewer for loaded workflow YAMLs; shows version history; no web-based workflow authoring (anti-feature)
+- [x] **UI-04**: Token + cost dashboard — per run, per workflow, per agent; daily/weekly spend view; projection to end-of-run based on burn rate
+- [x] **UI-05**: Audit ledger view — append-only events, filterable by run/stage/actor/event-type; time-range picker; event payload inspectable
+- [x] **UI-06**: Kiln brand book applied globally — Inter + IBM Plex Mono typography; coal/char/iron/bone/ash/ember palette; borders over shadows; state-aware components (loading/empty/success/warning/error/focus/disabled); operator microcopy ("Start run", "Verify changes", "Build verified", "Verification failed", "Retry step", "Waiting on upstream")
 
 ### Observability & Audit
 
 - [x] **OBS-01**: Structured JSON logging via logger_json with correlation_id, causation_id, actor, run_id, stage_id on every log line; Logger metadata propagates through Oban/Task boundaries via explicit threading (never `Process.put/2`) — **Done (Plan 01-05)**
-- [ ] **OBS-02**: OpenTelemetry traces (Erlang SDK, stable as of 2026) — spans per stage, per agent call, per Docker op, per LLM call; `opentelemetry_process_propagator` wired through Oban workers
+- [x] **OBS-02**: OpenTelemetry traces (Erlang SDK, stable as of 2026) — spans per stage, per agent call, per Docker op, per LLM call; `opentelemetry_process_propagator` wired through Oban workers
 - [x] **OBS-03**: Append-only audit ledger (`audit_events` table) with three-layer INSERT-only enforcement at the Postgres level (REVOKE UPDATE/DELETE/TRUNCATE from runtime role; `BEFORE UPDATE/DELETE/TRUNCATE` trigger `audit_events_immutable()`; `CREATE RULE … DO INSTEAD NOTHING` safety net — see 01-CONTEXT.md D-12); time-travel query support via event replay — **Done (Plan 01-03)**
-- [ ] **OBS-04**: Stuck-run detector — sliding window over (stage, failure-class) tuples; halts run with `escalated` state + diagnostic artifact when the same failure class repeats N times (N configurable per workflow, defaults to 3)
+- [x] **OBS-04**: Stuck-run detector — sliding window over (stage, failure-class) tuples; halts run with `escalated` state + diagnostic artifact when the same failure class repeats N times (N configurable per workflow, defaults to 3)
 
 ### Local Dev & Distribution
 
@@ -81,35 +76,35 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 
 ### Automation & Zero-Human Verification
 
-- [ ] **UAT-01**: All scenarios (including SPEC-04 holdouts) are executable in the sandbox by the deterministic scenario runner; `mix check` + GitHub Actions CI runs them automatically. Zero manual QA steps for code paths — the scenario runner's exit code is the acceptance oracle.
-- [ ] **UAT-02**: Human intervention is reserved for a short, explicit, typed list: credential/secret provisioning, first-time external integration auth, budget approvals above configured cap, and hard escalations (ORCH-06). Nothing else is allowed to require a human; anything else that blocks automatically escalates as a bug against Kiln itself.
+- [x] **UAT-01**: All scenarios (including SPEC-04 holdouts) are executable in the sandbox by the deterministic scenario runner; `mix check` + GitHub Actions CI runs them automatically. Zero manual QA steps for code paths — the scenario runner's exit code is the acceptance oracle.
+- [x] **UAT-02**: Human intervention is reserved for a short, explicit, typed list: credential/secret provisioning, first-time external integration auth, budget approvals above configured cap, and hard escalations (ORCH-06). Nothing else is allowed to require a human; anything else that blocks automatically escalates as a bug against Kiln itself.
 
 ### Unblock Flow (when human IS required)
 
-- [ ] **BLOCK-01**: Typed block reasons — `:missing_api_key`, `:invalid_api_key`, `:rate_limit_exhausted`, `:quota_exceeded`, `:gh_auth_expired`, `:gh_permissions_insufficient`, `:budget_exceeded`, `:unrecoverable_stage_failure`, `:policy_violation`. Each reason maps to a remediation playbook.
-- [ ] **BLOCK-02**: Unblock panel — when a run blocks, LiveView surfaces a clear panel with: what happened (typed reason), what to do (exact commands / config changes), "I fixed it — retry" action that resumes from last checkpoint. Panels are scannable at a glance.
-- [ ] **BLOCK-03**: Desktop notification (macOS/Linux via `osascript`/`notify-send` shell-out, configurable) when a run enters blocked/escalated state; optional email/webhook integration for remote operators (v1.1+).
+- [x] **BLOCK-01**: Typed block reasons — `:missing_api_key`, `:invalid_api_key`, `:rate_limit_exhausted`, `:quota_exceeded`, `:gh_auth_expired`, `:gh_permissions_insufficient`, `:budget_exceeded`, `:unrecoverable_stage_failure`, `:policy_violation`. Each reason maps to a remediation playbook.
+- [x] **BLOCK-02**: Unblock panel — when a run blocks, LiveView surfaces a clear panel with: what happened (typed reason), what to do (exact commands / config changes), "I fixed it — retry" action that resumes from last checkpoint. Panels are scannable at a glance.
+- [x] **BLOCK-03**: Desktop notification (macOS/Linux via `osascript`/`notify-send` shell-out, configurable) when a run enters blocked/escalated state; optional email/webhook integration for remote operators (v1.1+).
 - [x] **BLOCK-04**: First-run onboarding wizard — on empty-state (`docker compose up` fresh clone), the UI walks the operator through provisioning API keys (Anthropic required, others optional), GitHub App install, sandbox prerequisites check. No run can start until the wizard passes.
 
 ### Intake (how work enters the factory)
 
-- [ ] **INTAKE-01**: New-spec entry points: (a) freeform text in the LiveView spec editor, (b) import markdown file, (c) convert a GitHub issue (by URL or `owner/repo#N`) into a spec draft — title+body+labels populate; operator edits and commits.
-- [ ] **INTAKE-02**: Inbox view — list of spec drafts not yet promoted to runs; operator can triage (promote, archive, edit). `INTAKE-01(c)` issues land here by default.
-- [ ] **INTAKE-03**: Feedback loop — when a produced PR is merged and real-world usage reveals a bug or missing capability, a "File as follow-up" button on the run detail view creates a new spec draft in the inbox pre-populated with the run's artifacts as context.
+- [x] **INTAKE-01**: New-spec entry points: (a) freeform text in the LiveView spec editor, (b) import markdown file, (c) convert a GitHub issue (by URL or `owner/repo#N`) into a spec draft — title+body+labels populate; operator edits and commits.
+- [x] **INTAKE-02**: Inbox view — list of spec drafts not yet promoted to runs; operator can triage (promote, archive, edit). `INTAKE-01(c)` issues land here by default.
+- [x] **INTAKE-03**: Feedback loop — when a produced PR is merged and real-world usage reveals a bug or missing capability, a "File as follow-up" button on the run detail view creates a new spec draft in the inbox pre-populated with the run's artifacts as context.
 
 ### Operations & SRE (self-healing where possible, hands-off where not)
 
-- [ ] **OPS-01**: Provider health panel — per-LLM-provider status card showing: API key present/valid, last successful call timestamp, rate-limit headroom (from provider response headers), recent error rate, token budget remaining today. Red-amber-green indicators. No digging through logs to answer "why did my run stall?"
-- [ ] **OPS-02**: Adaptive model routing — on HTTP 429 (rate limit) or 5xx (provider outage), `Kiln.ModelRegistry` automatically falls back to the workflow-configured alternate model/provider for the same role; both `requested_model` and `actual_model_used` recorded on the stage; operator notified if fallback crosses a tier (e.g., Opus→Sonnet acceptable, Sonnet→Haiku warns).
-- [ ] **OPS-03**: Opinionated model-profile presets — Kiln ships with profiles keyed to software type: `elixir_lib` / `phoenix_saas_feature` / `typescript_web_feature` / `python_cli` / `bugfix_critical` / `docs_update`. Each preset maps `{role → model}` pairs. Operator selects a profile when starting a run; workflow YAML can override per-stage. Presets documented, not magic.
-- [ ] **OPS-04**: Cost intelligence — per-run / per-workflow / per-agent / per-provider spend broken down; daily/weekly/monthly views; "you're spending $X/week on Opus for the Coder role; `phoenix_saas_feature_budget` profile would cost $Y with these tradeoffs" advisory.
-- [ ] **OPS-05**: Diagnostic snapshot — one-click "bundle last 60 minutes of runs + config + logs" into a sharable zip for support/debugging (secrets redacted).
+- [x] **OPS-01**: Provider health panel — per-LLM-provider status card showing: API key present/valid, last successful call timestamp, rate-limit headroom (from provider response headers), recent error rate, token budget remaining today. Red-amber-green indicators. No digging through logs to answer "why did my run stall?"
+- [x] **OPS-02**: Adaptive model routing — on HTTP 429 (rate limit) or 5xx (provider outage), `Kiln.ModelRegistry` automatically falls back to the workflow-configured alternate model/provider for the same role; both `requested_model` and `actual_model_used` recorded on the stage; operator notified if fallback crosses a tier (e.g., Opus→Sonnet acceptable, Sonnet→Haiku warns).
+- [x] **OPS-03**: Opinionated model-profile presets — Kiln ships with profiles keyed to software type: `elixir_lib` / `phoenix_saas_feature` / `typescript_web_feature` / `python_cli` / `bugfix_critical` / `docs_update`. Each preset maps `{role → model}` pairs. Operator selects a profile when starting a run; workflow YAML can override per-stage. Presets documented, not magic.
+- [x] **OPS-04**: Cost intelligence — per-run / per-workflow / per-agent / per-provider spend broken down; daily/weekly/monthly views; "you're spending $X/week on Opus for the Coder role; `phoenix_saas_feature_budget` profile would cost $Y with these tradeoffs" advisory.
+- [x] **OPS-05**: Diagnostic snapshot — one-click "bundle last 60 minutes of runs + config + logs" into a sharable zip for support/debugging (secrets redacted).
 
 ### Progress Visibility
 
-- [ ] **UI-07**: Global factory header — visible on every page: active runs count, blocked runs count (with color/badge), spend today, provider-health summary lights. One-click to the relevant detail.
-- [ ] **UI-08**: Per-run progress indicator — percent-complete (stages done / total), elapsed time, estimated remaining (from historical stage-duration percentiles when the workflow has prior runs), "last activity" timestamp with staleness color ramp (green <30s, amber <5min, red ≥5min). Surfaces on run board cards and run detail header.
-- [ ] **UI-09**: Agent activity ticker — live-updating rolling log of agent events across all active runs ("Coder completed `lib/foo.ex` — 430 tokens, $0.013", "Verifier running 12 scenarios"); makes it unmistakable that the factory IS doing something.
+- [x] **UI-07**: Global factory header — visible on every page: active runs count, blocked runs count (with color/badge), spend today, provider-health summary lights. One-click to the relevant detail.
+- [x] **UI-08**: Per-run progress indicator — percent-complete (stages done / total), elapsed time, estimated remaining (from historical stage-duration percentiles when the workflow has prior runs), "last activity" timestamp with staleness color ramp (green <30s, amber <5min, red ≥5min). Surfaces on run board cards and run detail header.
+- [x] **UI-09**: Agent activity ticker — live-updating rolling log of agent events across all active runs ("Coder completed `lib/foo.ex` — 430 tokens, $0.013", "Verifier running 12 scenarios"); makes it unmistakable that the factory IS doing something.
 
 ## v2 Requirements
 
@@ -205,57 +200,57 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | ORCH-02 | Phase 2 | Complete |
 | ORCH-03 | Phase 2 | Complete |
 | ORCH-04 | Phase 2 | Complete |
-| ORCH-05 | Phase 5 | Pending |
-| ORCH-06 | Phase 5 | Pending |
+| ORCH-05 | Phase 5 | Complete |
+| ORCH-06 | Phase 5 | Complete |
 | ORCH-07 | Phase 2 | Complete |
-| AGENT-01 | Phase 3 | Pending |
-| AGENT-02 | Phase 3 | Pending |
-| AGENT-03 | Phase 4 | Pending |
-| AGENT-04 | Phase 4 | Pending |
-| AGENT-05 | Phase 3 | Pending |
-| SAND-01 | Phase 3 | Pending |
-| SAND-02 | Phase 3 | Pending |
-| SAND-03 | Phase 3 | Pending |
-| SAND-04 | Phase 3 | Pending |
-| SPEC-01 | Phase 5 | Pending |
-| SPEC-02 | Phase 5 | Pending |
-| SPEC-03 | Phase 5 | Pending |
-| SPEC-04 | Phase 5 | Pending |
-| SEC-01 | Phase 3 | Pending |
-| GIT-01 | Phase 6 | Pending |
-| GIT-02 | Phase 6 | Pending |
-| GIT-03 | Phase 6 | Pending |
-| GIT-04 | Phase 9 | Pending |
-| UI-01 | Phase 7 | Pending |
-| UI-02 | Phase 7 | Pending |
-| UI-03 | Phase 7 | Pending |
-| UI-04 | Phase 7 | Pending |
-| UI-05 | Phase 7 | Pending |
-| UI-06 | Phase 7 | Pending |
-| OBS-01 | Phase 1 | Done (Plan 01-05 — 5888aac, 0a5ba87) |
-| OBS-02 | Phase 9 | Pending |
-| OBS-03 | Phase 1 | Done (Plan 01-03 — ea6b174, aeede36, 00a3782) |
-| OBS-04 | Phase 5 | Pending |
-| LOCAL-01 | Phase 1 | Done (Plan 01-01 — structural f567c7e; Plan 01-06 — BootChecks + HealthPlug + first_run.sh smoke, a271a6a/a82d070/6e88813) |
-| LOCAL-02 | Phase 1 | Done (Plan 01-01 — `.tool-versions` + `mix.exs` pins, f567c7e; Plan 01-02 — `mix check` gate + GHA CI, cb05fa1/18de9a4) |
+| AGENT-01 | Phase 3 | Complete |
+| AGENT-02 | Phase 3 | Complete |
+| AGENT-03 | Phase 4 | Complete |
+| AGENT-04 | Phase 4 | Complete |
+| AGENT-05 | Phase 3 | Complete |
+| SAND-01 | Phase 3 | Complete |
+| SAND-02 | Phase 3 | Complete |
+| SAND-03 | Phase 3 | Complete |
+| SAND-04 | Phase 3 | Complete |
+| SPEC-01 | Phase 5 | Complete |
+| SPEC-02 | Phase 5 | Complete |
+| SPEC-03 | Phase 5 | Complete |
+| SPEC-04 | Phase 5 | Complete |
+| SEC-01 | Phase 3 | Complete |
+| GIT-01 | Phase 6 | Complete |
+| GIT-02 | Phase 6 | Complete |
+| GIT-03 | Phase 6 | Complete |
+| GIT-04 | Phase 9 | Complete |
+| UI-01 | Phase 7 | Complete |
+| UI-02 | Phase 7 | Complete |
+| UI-03 | Phase 7 | Complete |
+| UI-04 | Phase 7 | Complete |
+| UI-05 | Phase 7 | Complete |
+| UI-06 | Phase 7 | Complete |
+| OBS-01 | Phase 1 | Complete (Plan 01-05 — 5888aac, 0a5ba87) |
+| OBS-02 | Phase 9 | Complete |
+| OBS-03 | Phase 1 | Complete (Plan 01-03 — ea6b174, aeede36, 00a3782) |
+| OBS-04 | Phase 5 | Complete |
+| LOCAL-01 | Phase 1 | Complete (Plan 01-01 — structural f567c7e; Plan 01-06 — BootChecks + HealthPlug + first_run.sh smoke, a271a6a/a82d070/6e88813) |
+| LOCAL-02 | Phase 1 | Complete (Plan 01-01 — `.tool-versions` + `mix.exs` pins, f567c7e; Plan 01-02 — `mix check` gate + GHA CI, cb05fa1/18de9a4) |
 | LOCAL-03 | Phase 9 | Complete |
-| UAT-01 | Phase 5 | Pending |
-| UAT-02 | Phase 5 | Pending |
-| BLOCK-01 | Phase 3 | Pending |
-| BLOCK-02 | Phase 8 | Pending |
-| BLOCK-03 | Phase 3 | Pending |
+| UAT-01 | Phase 5 | Complete |
+| UAT-02 | Phase 5 | Complete |
+| BLOCK-01 | Phase 3 | Complete |
+| BLOCK-02 | Phase 8 | Complete |
+| BLOCK-03 | Phase 3 | Complete |
 | BLOCK-04 | Phase 8 | Complete |
-| INTAKE-01 | Phase 8 | Pending |
-| INTAKE-02 | Phase 8 | Pending |
-| INTAKE-03 | Phase 8 | Pending |
-| OPS-01 | Phase 8 | Pending |
-| OPS-02 | Phase 3 | Pending |
-| OPS-03 | Phase 3 | Pending |
-| OPS-04 | Phase 8 | Pending |
-| OPS-05 | Phase 8 | Pending |
-| UI-07 | Phase 8 | Pending |
-| UI-08 | Phase 8 | Pending |
-| UI-09 | Phase 8 | Pending |
+| INTAKE-01 | Phase 8 | Complete |
+| INTAKE-02 | Phase 8 | Complete |
+| INTAKE-03 | Phase 8 | Complete |
+| OPS-01 | Phase 8 | Complete |
+| OPS-02 | Phase 3 | Complete |
+| OPS-03 | Phase 3 | Complete |
+| OPS-04 | Phase 8 | Complete |
+| OPS-05 | Phase 8 | Complete |
+| UI-07 | Phase 8 | Complete |
+| UI-08 | Phase 8 | Complete |
+| UI-09 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 55 total
@@ -264,4 +259,4 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after roadmap created (traceability populated, 9 phases)*
+*Last updated: 2026-04-22 — Phase 13: § v1 checkboxes + traceability Status aligned to v0.1.0 shipped scope (`PROJECT.md` Validated, `ROADMAP.md` Phases 1–9).*
