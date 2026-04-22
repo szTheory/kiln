@@ -27,11 +27,43 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 4. **Run the app** — `mix phx.server`.
 5. **Open first** — `http://localhost:4000/onboarding` (operator wizard; Phase 8 intake). The root `/` route shows the run board after onboarding completes.
 
+### Digital Twin / sandbox mocks (DTU)
+
+Sandbox stages talk to **DTU** (mock HTTP) on Compose’s internal **`kiln-sandbox`** network (`internal: true` in `compose.yaml` — no egress to the public internet from that bridge). The quick start above only starts **Postgres** so you can reach the UI quickly.
+
+**Before your first sandbox-backed stage**, start DTU and wait until it is healthy:
+
+```bash
+docker compose up -d dtu
+docker compose ps dtu
+```
+
+See service definitions in [`compose.yaml`](compose.yaml) (`db`, `dtu`, `otel-collector`, `jaeger`). Optional **`sandbox-net-anchor`** profile exists for advanced local networking — not required for the default README path.
+
 ### Other useful URLs
 
 - `http://localhost:4000/ops/dashboard` — Phoenix LiveDashboard
 - `http://localhost:4000/ops/oban` — Oban.Web
 - `http://localhost:4000/health` — JSON health probe (Plan 06 contract)
+
+## Operator checklist
+
+Use this as a **cold-clone** sanity pass (order matches the happy path above):
+
+- [ ] **Tooling** — Elixir/OTP per [`.tool-versions`](.tool-versions), Docker with Compose v2, `mix` on `PATH` (see **Prerequisites**).
+- [ ] **Secrets file** — `cp .env.sample .env`; fill at least `SECRET_KEY_BASE`, `DATABASE_URL`, `PORT` / `PHX_HOST` as in **Environment** below.
+- [ ] **Database** — `docker compose up -d db`; Postgres shows **healthy** in `docker compose ps`.
+- [ ] **Port 5432** — If another Postgres or container holds host `5432`, remap in `compose.yaml` + `DATABASE_URL` (see [`test/integration/first_run.sh`](test/integration/first_run.sh) error text).
+- [ ] **Migrations** — `KILN_DB_ROLE=kiln_owner mix setup` once (creates DB if needed, migrates, seeds, assets). Day-to-day runs leave `KILN_DB_ROLE` unset (`kiln_app`).
+- [ ] **App** — `mix phx.server` without `KILN_SKIP_BOOTCHECKS` (BootChecks must pass).
+- [ ] **Onboarding** — Open `/onboarding` first; complete the wizard or resolve typed blockers (API keys, Docker, `gh` when using GitHub automation).
+- [ ] **Sandbox work** — Before stages that hit mocks: `docker compose up -d dtu` (subsection above).
+- [ ] **Machine smoke (optional)** — `bash test/integration/first_run.sh` or `mix integration.first_run` — DB + migrate + boot + `/health` JSON (does not prove browser onboarding).
+- [ ] **Traces (optional)** — See **Traces (local)**; set `OTEL_EXPORTER_OTLP_ENDPOINT` only when collector/Jaeger are up.
+
+**Why Compose does not start Kiln:** shipped layout is **Postgres + DTU (+ optional OTel) in Compose**, **Phoenix on the host** — see [`.planning/research/LOCAL-DX-AUDIT.md`](.planning/research/LOCAL-DX-AUDIT.md). Optional all-in-one / devcontainer DX is **Phase 12** (`.planning/ROADMAP.md`).
+
+**Longer-form operator docs** (architecture, configuration) live in the Starlight site — [Operator docs](https://szTheory.github.io/kiln/docs/) — built from `site/` per **Documentation** above.
 
 ## Environment
 
@@ -75,8 +107,16 @@ mix test --stale # fast inner loop
 
 ## Integration smoke (`first_run.sh`)
 
+**SSOT command** (DB + migrate + host boot + `/health` JSON — does not hit `/onboarding`; see **Human-required vs automated**):
+
 ```bash
 bash test/integration/first_run.sh
+```
+
+Mix-discoverable alias (same script, no duplicated orchestration):
+
+```bash
+mix integration.first_run
 ```
 
 Header comments in `test/integration/first_run.sh` match this README: **asdf is not invoked** — the script assumes `docker`, `jq`, `curl`, `lsof`, and `mix` are already on `PATH` per the prerequisites above.

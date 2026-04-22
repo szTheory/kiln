@@ -21,6 +21,12 @@
 - **Shipped truth:** LOCAL-01 = Compose for **data plane + DTU + optional observability**; **Kiln = host process**.  
 - **v0.2:** Evaluate one DX strategy in **Phase 12**; do not block dogfood on full containerized app.
 
+## Runbook (operator)
+
+**Canonical quick path:** follow **[`README.md`](../../README.md)** end-to-end — quick start, **Operator checklist**, **Digital Twin (DTU)** subsection, and **Human-required vs automated**. That file is what a fresh `git clone` should use first. Machine smoke is **`bash test/integration/first_run.sh`** or the one-line delegate **`mix integration.first_run`** (same script; see README **Integration smoke**).
+
+**This audit file** is for **rationale**, **drift history** (findings table), and **edge cases** (e.g. why there is no `app` service, Phase 12 pointer). Do not fork a second competing quick-start here; patch README + compose when reality changes, then summarize the “why” here if needed.
+
 ## References
 
 - [`compose.yaml`](../../compose.yaml)  

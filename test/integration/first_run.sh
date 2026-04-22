@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# LOCAL-01 / VALIDATION.md behavior 42 — fresh-clone first-run smoke
-# test.  Not wired into `mix check` (requires Docker + jq); run locally
+# LOCAL-01 / VALIDATION.md behavior 42 — fresh-clone first-run smoke.
+# Not wired into `mix check` (requires Docker + jq + host Mix); run locally
 # when compose.yaml, mix setup aliases, or the Kiln.HealthPlug contract
-# changes.
+# changes. README **Integration smoke** names this path; optional
+# `mix integration.first_run` delegates here in one step (D-1005).
 #
 # README alignment (Phase 9 / D-932): this script does **not** install
 # Erlang/Elixir. Match the README “Prerequisites” contract — `mix` must
@@ -25,7 +26,7 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 
 echo "[first_run] checking prerequisites..."
-for cmd in docker jq curl lsof; do
+for cmd in docker jq curl lsof mix; do
   command -v "$cmd" >/dev/null || {
     echo "[first_run] FAIL: '$cmd' not on PATH"
     echo "[first_run]   install: brew install ${cmd} (or apt/yum equivalent)"

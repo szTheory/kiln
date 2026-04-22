@@ -142,7 +142,26 @@ defmodule Kiln.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind kiln", "esbuild kiln"],
-      "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"]
+      "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"],
+      # Phase 10 / D-1005 — single SSOT: shell script only (no duplicated compose/migrate logic).
+      "integration.first_run": &integration_first_run/1
     ]
+  end
+
+  defp integration_first_run(_args) do
+    script = Path.expand("test/integration/first_run.sh", File.cwd!())
+
+    unless File.exists?(script) do
+      Mix.raise("missing #{script}")
+    end
+
+    Mix.shell().info("[integration.first_run] #{script}")
+    {output, status} = System.cmd("bash", [script], stderr_to_stdout: true)
+
+    if output != "", do: Mix.shell().info(String.trim_trailing(output))
+
+    if status != 0 do
+      Mix.raise("integration.first_run failed (exit #{status})")
+    end
   end
 end
