@@ -4,8 +4,13 @@
 # when compose.yaml, mix setup aliases, or the Kiln.HealthPlug contract
 # changes.
 #
-# Prerequisites: asdf, direnv, Docker Desktop (or Engine + Compose v2),
-# jq, curl, lsof.
+# README alignment (Phase 9 / D-932): this script does **not** install
+# Erlang/Elixir. Match the README “Prerequisites” contract — `mix` must
+# already be on PATH (via asdf, mise, rtx, distro packages, etc.). The
+# script never runs `asdf install`; optional **direnv** only loads `.env`.
+#
+# Prerequisites: Docker Desktop (or Engine + Compose v2), jq, curl, lsof,
+# plus Elixir/Mix on PATH per `.tool-versions` / README.
 #
 # Steps (D-40 first-run UX):
 #   1. cp .env.sample .env (if missing)

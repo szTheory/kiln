@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v0.1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-04-21T23:59:40.319Z"
-last_activity: 2026-04-21 -- Phase 9 discuss complete (context + research synthesis committed)
+status: executing
+stopped_at: Phase 9 execution — code landed; operator tag/release pending
+last_updated: "2026-04-22T00:25:00.000Z"
+last_activity: 2026-04-22 -- Phase 09 plans 01–05 implemented (SUMMARYs + VERIFICATION)
 progress:
   total_phases: 10
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 63
-  completed_plans: 58
-  percent: 92
+  completed_plans: 63
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase 9 — Dogfood & Release (v0.1.0)
+**Current focus:** Phase 999.1 — docs landing (next); Phase 09 code complete
 
 ## Current Position
 
-Phase: 9
+Phase: 999.1
 Plan: Not started
-Status: Ready to plan (discuss → plan before execute)
-Last activity: 2026-04-21 -- Phase 9 discuss complete (context + research synthesis committed)
+Status: Ready to plan (Phase 09 shipped in repo; run `09-05-SUMMARY` operator steps for public tag)
+Last activity: 2026-04-22 -- Phase 09 execution merged to working tree
 
 Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100% (milestone plans in `.planning/R
 
 **Velocity:**
 
-- Total plans completed: 48
+- Total plans completed: 53
 - Average duration: ~19 min
 - Total execution time: ~155 min
 
@@ -50,6 +50,7 @@ Progress: [██████████] 100% (milestone plans in `.planning/R
 | 05 | 6 | - | - |
 | 06 | 4 | - | - |
 | 08 | 10 | - | - |
+| 09 | 5 | - | - |
 
 **Recent Trend:**
 

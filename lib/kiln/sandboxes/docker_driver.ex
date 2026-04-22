@@ -19,6 +19,7 @@ defmodule Kiln.Sandboxes.DockerDriver do
   alias DockerEngineAPI.Connection, as: DockerConnection
   alias Kiln.ExternalOperations
   alias Kiln.Sandboxes.ContainerSpec
+  alias Kiln.Telemetry.Spans
 
   @docker_api_version "v1.43"
   @docker_socket_path "/var/run/docker.sock"
@@ -72,10 +73,12 @@ defmodule Kiln.Sandboxes.DockerDriver do
 
   @impl true
   def kill(container_id) when is_binary(container_id) do
-    case system_cmd().("docker", ["rm", "-f", container_id], stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {output, code} -> {:error, {:docker_rm_failed, code, output}}
-    end
+    Spans.with_docker_op(%{command: "docker rm", container_id: container_id}, fn ->
+      case system_cmd().("docker", ["rm", "-f", container_id], stderr_to_stdout: true) do
+        {_output, 0} -> :ok
+        {output, code} -> {:error, {:docker_rm_failed, code, output}}
+      end
+    end)
   end
 
   @impl true

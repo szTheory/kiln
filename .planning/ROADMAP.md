@@ -24,7 +24,7 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [ ] **Phase 6: GitHub Integration** - Idempotent git commit/push, PR creation via `gh`, GitHub Actions status read/write
 - [x] **Phase 7: Core Run UI (LiveView)** - Run board, run detail with stage graph + diff + logs + agent chatter, workflow registry, cost dashboard, audit ledger view, brand book applied — **complete 2026-04-21**
 - [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
-- [ ] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged
+- [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
 
 ## Phase Details
 

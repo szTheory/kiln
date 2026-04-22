@@ -7,6 +7,7 @@ defmodule KilnWeb.InboxLive do
 
   alias Kiln.Repo
   alias Kiln.Specs
+  alias Kiln.Dogfood.Template
   alias Kiln.Specs.SpecDraft
 
   @max_md_bytes 262_144
@@ -154,7 +155,8 @@ defmodule KilnWeb.InboxLive do
           {:noreply, put_flash(socket, :error, "Enter an issue URL or owner/repo#N")}
 
         {:error, _} ->
-          {:noreply, put_flash(socket, :error, "GitHub import failed — check reference and token")}
+          {:noreply,
+           put_flash(socket, :error, "GitHub import failed — check reference and token")}
       end
     end
   end
@@ -267,6 +269,36 @@ defmodule KilnWeb.InboxLive do
     end
   end
 
+  def handle_event("load_dogfood_template", _params, socket) do
+    unless allow?(socket) do
+      {:noreply, put_flash(socket, :error, "Not allowed")}
+    else
+      case socket.assigns.editing do
+        {_id, %SpecDraft{} = d} ->
+          case Template.read() do
+            {:ok, body} ->
+              edit_form =
+                to_form(
+                  %{"id" => d.id, "title" => d.title, "body" => body},
+                  as: :spec_draft
+                )
+
+              {:noreply,
+               socket
+               |> assign(:edit_form, edit_form)
+               |> put_flash(:info, "Loaded dogfood template")}
+
+            {:error, reason} ->
+              {:noreply,
+               put_flash(socket, :error, "Could not load dogfood/spec.md (#{inspect(reason)})")}
+          end
+
+        _ ->
+          {:noreply, put_flash(socket, :error, "Open a draft in the editor first")}
+      end
+    end
+  end
+
   defp reload_drafts(socket) do
     drafts = Specs.list_open_drafts()
 
@@ -326,7 +358,10 @@ defmodule KilnWeb.InboxLive do
                 >
                   Archive
                 </button>
-                <.link patch={~p"/inbox?edit=#{draft.id}"} class="btn btn-sm border border-ash bg-iron/40">
+                <.link
+                  patch={~p"/inbox?edit=#{draft.id}"}
+                  class="btn btn-sm border border-ash bg-iron/40"
+                >
                   Edit
                 </.link>
               </div>
@@ -341,9 +376,19 @@ defmodule KilnWeb.InboxLive do
               <.input field={@edit_form[:id]} type="hidden" />
               <.input field={@edit_form[:title]} type="text" label="Title" />
               <.input field={@edit_form[:body]} type="textarea" label="Body" rows="12" />
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
                 <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <button type="button" class="btn btn-ghost btn-sm" phx-click="cancel_edit">Cancel</button>
+                <button
+                  type="button"
+                  id="inbox-load-dogfood-template"
+                  class="btn btn-ghost btn-sm"
+                  phx-click="load_dogfood_template"
+                >
+                  Load dogfood template
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" phx-click="cancel_edit">
+                  Cancel
+                </button>
               </div>
             </.form>
           </section>
@@ -352,7 +397,12 @@ defmodule KilnWeb.InboxLive do
         <section class="grid gap-6 rounded border border-ash bg-char/60 p-4 md:grid-cols-2">
           <div>
             <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">New draft</h2>
-            <.form for={@freeform_form} id="inbox-freeform-form" phx-submit="create_freeform" class="mt-3 space-y-2">
+            <.form
+              for={@freeform_form}
+              id="inbox-freeform-form"
+              phx-submit="create_freeform"
+              class="mt-3 space-y-2"
+            >
               <.input field={@freeform_form[:title]} type="text" label="Title" />
               <.input field={@freeform_form[:body]} type="textarea" label="Body" rows="6" />
               <button type="submit" class="btn btn-primary btn-sm">Create draft</button>
@@ -361,17 +411,26 @@ defmodule KilnWeb.InboxLive do
 
           <div class="space-y-4">
             <div>
-              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">Import from GitHub</h2>
-              <.form for={@github_form} id="inbox-github-form" phx-submit="import_github" class="mt-3 space-y-2">
+              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">
+                Import from GitHub
+              </h2>
+              <.form
+                for={@github_form}
+                id="inbox-github-form"
+                phx-submit="import_github"
+                class="mt-3 space-y-2"
+              >
                 <.input field={@github_form[:ref]} type="text" label="URL or owner/repo#N" />
                 <button type="submit" class="btn btn-primary btn-sm" disabled={@github_busy?}>
-                  <%= if @github_busy?, do: "Syncing issue…", else: "Import from GitHub" %>
+                  {if @github_busy?, do: "Syncing issue…", else: "Import from GitHub"}
                 </button>
               </.form>
             </div>
 
             <div>
-              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">Import markdown</h2>
+              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">
+                Import markdown
+              </h2>
               <.form for={%{}} id="inbox-md-form" phx-submit="import_markdown" class="mt-3 space-y-2">
                 <.live_file_input upload={@uploads.markdown} />
                 <button type="submit" class="btn btn-primary btn-sm">Import markdown</button>

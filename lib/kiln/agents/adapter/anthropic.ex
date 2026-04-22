@@ -43,6 +43,7 @@ defmodule Kiln.Agents.Adapter.Anthropic do
 
   alias Kiln.Agents.{Prompt, Response}
   alias Kiln.{ExternalOperations, Secrets, Telemetry}
+  alias Kiln.Telemetry.Spans
 
   require Logger
 
@@ -93,7 +94,21 @@ defmodule Kiln.Agents.Adapter.Anthropic do
     :telemetry.execute([:kiln, :agent, :call, :start], %{system_time: start_system}, meta_start)
 
     try do
-      case do_complete(prompt, opts) do
+      Spans.with_agent_call(
+        %{
+          provider: "anthropic",
+          run_id: to_string(run_id || ""),
+          stage_id: to_string(stage_id || ""),
+          requested_model: to_string(requested_model || "")
+        },
+        fn ->
+          Spans.with_llm_request(
+            %{provider: "anthropic", model: to_string(requested_model || "")},
+            fn -> do_complete(prompt, opts) end
+          )
+        end
+      )
+      |> case do
         {:ok, %Response{} = response} ->
           if op, do: record_completion(op, response)
 

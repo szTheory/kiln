@@ -42,6 +42,7 @@ defmodule Kiln.Runs.Transitions do
   alias Kiln.ExternalOperations
   alias Kiln.Runs.Run
   alias Kiln.Policies.StuckDetector
+  alias Kiln.Telemetry.Spans
 
   @terminal ~w(merged failed escalated)a
   @any_state ~w(queued planning coding testing verifying blocked)a
@@ -92,41 +93,48 @@ defmodule Kiln.Runs.Transitions do
   @spec transition(Ecto.UUID.t(), atom(), map()) ::
           {:ok, Run.t()} | {:error, :illegal_transition | :not_found | term()}
   def transition(run_id, to, meta \\ %{}) when is_atom(to) do
-    result =
-      Repo.transact(fn ->
-        with {:ok, run} <- lock_run(run_id),
-             :ok <- assert_allowed(run.state, to) do
-          case maybe_escalate_caps(run, to, meta) do
-            {:escalate, reason} ->
-              escalate_in_tx(run, reason, meta)
+    rid = to_string(run_id)
 
-            :ok ->
-              case StuckDetector.check(%{run: run, to: to, meta: meta}) do
-                {:halt, :stuck, halt} ->
-                  escalate_stuck_in_tx(run, halt, meta)
+    Spans.with_run_stage(
+      %{run_id: rid, "transition.to": Atom.to_string(to)},
+      fn ->
+        result =
+          Repo.transact(fn ->
+            with {:ok, run} <- lock_run(run_id),
+                 :ok <- assert_allowed(run.state, to) do
+              case maybe_escalate_caps(run, to, meta) do
+                {:escalate, reason} ->
+                  escalate_in_tx(run, reason, meta)
 
-                {:ok, new_window} ->
-                  transition_ok(run, to, meta, new_window)
+                :ok ->
+                  case StuckDetector.check(%{run: run, to: to, meta: meta}) do
+                    {:halt, :stuck, halt} ->
+                      escalate_stuck_in_tx(run, halt, meta)
+
+                    {:ok, new_window} ->
+                      transition_ok(run, to, meta, new_window)
+                  end
               end
-          end
+            end
+          end)
+
+        # CRITICAL: PubSub broadcast AFTER tx commits — never inside the
+        # closure. Broadcasting from within the transaction risks announcing
+        # a state change the DB could still roll back (Pitfall #1 in
+        # RESEARCH.md; D-90).
+        case result do
+          {:ok, run} ->
+            maybe_abandon_ops(run)
+            Phoenix.PubSub.broadcast(Kiln.PubSub, "run:#{run.id}", {:run_state, run})
+            Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, run})
+            maybe_broadcast_agent_ticker(run, meta)
+            {:ok, run}
+
+          other ->
+            other
         end
-      end)
-
-    # CRITICAL: PubSub broadcast AFTER tx commits — never inside the
-    # closure. Broadcasting from within the transaction risks announcing
-    # a state change the DB could still roll back (Pitfall #1 in
-    # RESEARCH.md; D-90).
-    case result do
-      {:ok, run} ->
-        maybe_abandon_ops(run)
-        Phoenix.PubSub.broadcast(Kiln.PubSub, "run:#{run.id}", {:run_state, run})
-        Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, run})
-        maybe_broadcast_agent_ticker(run, meta)
-        {:ok, run}
-
-      other ->
-        other
-    end
+      end
+    )
   end
 
   @doc """

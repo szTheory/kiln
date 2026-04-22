@@ -113,3 +113,23 @@ Kiln.Secrets.put(:anthropic_api_key, System.get_env("ANTHROPIC_API_KEY"))
 Kiln.Secrets.put(:openai_api_key, System.get_env("OPENAI_API_KEY"))
 Kiln.Secrets.put(:google_api_key, System.get_env("GOOGLE_API_KEY"))
 Kiln.Secrets.put(:ollama_host, System.get_env("OLLAMA_HOST"))
+
+# OBS-02 / Phase 9: export traces when OTLP endpoint is set; never in test.
+case config_env() do
+  :test ->
+    config :opentelemetry, traces_exporter: :none
+
+  _ ->
+    case System.get_env("OTEL_EXPORTER_OTLP_ENDPOINT") do
+      url when is_binary(url) and url != "" ->
+        config :opentelemetry,
+          traces_exporter: :otlp,
+          resource: [service: [name: "kiln"]]
+
+      _ ->
+        config :opentelemetry, traces_exporter: :none
+    end
+end
+
+# Dogfood PR automation (Phase 9) — optional PAT / App token; values never logged.
+Kiln.Secrets.put(:dogfood_github_token, System.get_env("KILN_DOGFOOD_GITHUB_TOKEN"))

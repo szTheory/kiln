@@ -111,6 +111,11 @@ defmodule Kiln.MixProject do
       {:opentelemetry, "~> 1.6"},
       {:opentelemetry_api, "~> 1.4"},
       {:opentelemetry_exporter, "~> 1.8"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_bandit, "~> 0.3"},
+      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_oban, "~> 1.2"},
+      {:opentelemetry_process_propagator, "~> 0.3.0"},
       {:telemetry, "~> 1.3"},
 
       # Dev/test tooling (Plan 02 wires `.check.exs`; deps ship here)

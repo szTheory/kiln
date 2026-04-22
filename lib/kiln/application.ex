@@ -42,6 +42,8 @@ defmodule Kiln.Application do
         # printed to stderr.
         Kiln.BootChecks.run!()
 
+        :ok = Kiln.Telemetry.Otel.setup()
+
         # Stage 3: attach the Oban telemetry handler (Plan 05). Telemetry
         # handlers are ETS-backed, not process-backed — they aren't
         # supervisor children, so this doesn't affect the 10-child count.
