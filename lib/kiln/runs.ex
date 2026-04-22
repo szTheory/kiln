@@ -20,7 +20,7 @@ defmodule Kiln.Runs do
   import Ecto.Changeset, only: [change: 2]
 
   alias Kiln.Repo
-  alias Kiln.Runs.Run
+  alias Kiln.Runs.{Compare, Run}
 
   @doc """
   Insert a new run. The `state` field defaults to `:queued`; callers
@@ -114,6 +114,19 @@ defmodule Kiln.Runs do
       nil -> {:error, :not_found}
       sha -> {:ok, sha}
     end
+  end
+
+  @doc """
+  Two-run compare read model for `/runs/compare` (PARA-02).
+
+  `baseline_id` / `candidate_id` are `Ecto.UUID.t()` binaries or canonical
+  UUID strings.
+  """
+  @spec compare_snapshot(Ecto.UUID.t() | String.t(), Ecto.UUID.t() | String.t()) ::
+          %Compare.Snapshot{}
+  def compare_snapshot(baseline_id, candidate_id)
+      when is_binary(baseline_id) and is_binary(candidate_id) do
+    Compare.snapshot(baseline_id, candidate_id)
   end
 
   @doc """

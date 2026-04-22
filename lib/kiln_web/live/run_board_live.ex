@@ -42,6 +42,8 @@ defmodule KilnWeb.RunBoardLive do
       |> assign(:page_title, "Runs")
       |> assign(:run_states, run_states)
       |> assign(:runs_empty?, runs == [])
+      |> assign(:compare_baseline_id, nil)
+      |> assign(:compare_candidate_id, nil)
       |> assign(:ticker_ids, [])
       |> stream(:ticker_lines, [], reset: true)
 
@@ -92,11 +94,40 @@ defmodule KilnWeb.RunBoardLive do
 
   @impl true
   def handle_event("noop", _params, socket) do
-    unless allow?(socket), do: raise("forbidden")
     {:noreply, socket}
   end
 
-  defp allow?(_socket), do: true
+  def handle_event("pick_compare_slot", %{"id" => id, "slot" => slot}, socket) do
+    with {:ok, uuid} <- Ecto.UUID.cast(id),
+         true <- slot in ["baseline", "candidate"] do
+      socket =
+        case slot do
+          "baseline" -> assign(socket, :compare_baseline_id, uuid)
+          "candidate" -> assign(socket, :compare_candidate_id, uuid)
+        end
+
+      b = socket.assigns.compare_baseline_id
+      c = socket.assigns.compare_candidate_id
+
+      if b && c do
+        q =
+          URI.encode_query(%{
+            "baseline" => uuid_to_string(b),
+            "candidate" => uuid_to_string(c)
+          })
+
+        {:noreply,
+         socket
+         |> assign(:compare_baseline_id, nil)
+         |> assign(:compare_candidate_id, nil)
+         |> push_navigate(to: "/runs/compare?" <> q)}
+      else
+        {:noreply, socket}
+      end
+    else
+      _ -> {:noreply, socket}
+    end
+  end
 
   defp stream_for(state), do: Map.fetch!(@stream_keys, state)
 
@@ -118,6 +149,36 @@ defmodule KilnWeb.RunBoardLive do
           <p class="mt-1 text-sm text-[var(--color-smoke)]">
             Active and terminal runs for this factory.
           </p>
+          <div
+            id="compare-strip"
+            class="mt-4 rounded border border-ash bg-iron/40 p-3 text-sm text-bone"
+          >
+            <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              Compare
+            </p>
+            <div class="mt-2 flex flex-wrap gap-6">
+              <div>
+                <p class="text-[var(--color-smoke)]">Choose baseline run</p>
+                <p class="mt-1 font-mono text-xs tabular-nums text-bone">
+                  <%= if @compare_baseline_id do %>
+                    {short_compare(@compare_baseline_id)}
+                  <% else %>
+                    <span class="text-[var(--color-smoke)]">None selected</span>
+                  <% end %>
+                </p>
+              </div>
+              <div>
+                <p class="text-[var(--color-smoke)]">Choose candidate run</p>
+                <p class="mt-1 font-mono text-xs tabular-nums text-bone">
+                  <%= if @compare_candidate_id do %>
+                    {short_compare(@compare_candidate_id)}
+                  <% else %>
+                    <span class="text-[var(--color-smoke)]">None selected</span>
+                  <% end %>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <%= if @runs_empty? do %>
@@ -334,6 +395,26 @@ defmodule KilnWeb.RunBoardLive do
         last_activity_at={@run.updated_at}
       />
     </div>
+    <div class="mt-2 flex gap-1">
+      <button
+        type="button"
+        phx-click="pick_compare_slot"
+        phx-value-id={uuid_to_string(@run.id)}
+        phx-value-slot="baseline"
+        class="rounded border border-ash px-1.5 py-0.5 text-[10px] text-bone transition-colors hover:border-ember"
+      >
+        Baseline
+      </button>
+      <button
+        type="button"
+        phx-click="pick_compare_slot"
+        phx-value-id={uuid_to_string(@run.id)}
+        phx-value-slot="candidate"
+        class="rounded border border-ash px-1.5 py-0.5 text-[10px] text-bone transition-colors hover:border-ember"
+      >
+        Candidate
+      </button>
+    </div>
     """
   end
 
@@ -346,5 +427,31 @@ defmodule KilnWeb.RunBoardLive do
 
   defp short_id(id) do
     id |> to_string() |> String.slice(0, 8)
+  end
+
+  defp short_compare(<<_::128>> = id) do
+    uuid_to_string(id) |> String.slice(0, 8)
+  end
+
+  defp uuid_to_string(<<_::128>> = raw) do
+    h = Base.encode16(raw, case: :lower)
+
+    String.slice(h, 0, 8) <>
+      "-" <>
+      String.slice(h, 8, 4) <>
+      "-" <>
+      String.slice(h, 12, 4) <>
+      "-" <>
+      String.slice(h, 16, 4) <>
+      "-" <>
+      String.slice(h, 20, 12)
+  end
+
+  defp uuid_to_string(s) when is_binary(s) do
+    case Ecto.UUID.cast(s) do
+      {:ok, bin} when byte_size(bin) == 16 -> uuid_to_string(bin)
+      {:ok, _} -> ""
+      :error -> ""
+    end
   end
 end

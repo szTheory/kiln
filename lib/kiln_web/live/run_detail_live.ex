@@ -64,6 +64,8 @@ defmodule KilnWeb.RunDetailLive do
              |> assign(:graph_ids, graph_ids)
              |> assign(:latest_by_stage, latest)
              |> assign(:stages, stages)
+             |> assign(:compare_picker_open, false)
+             |> assign(:compare_pick_list, [])
              |> stream(:logs, [], reset: true)
              |> stream(:events, [], reset: true)
              |> stream(:chatter, [], reset: true)}
@@ -109,91 +111,112 @@ defmodule KilnWeb.RunDetailLive do
 
   @impl true
   def handle_event("pick_stage", %{"wid" => wid}, socket) do
-    if allow?(socket) do
-      {:noreply,
-       push_patch(socket,
-         to:
-           ~p"/runs/#{socket.assigns.run.id}?#{%{stage: wid, pane: socket.assigns.pane} |> URI.encode_query()}"
-       )}
-    else
-      {:noreply, socket}
-    end
+    {:noreply,
+     push_patch(socket,
+       to:
+         ~p"/runs/#{socket.assigns.run.id}?#{%{stage: wid, pane: socket.assigns.pane} |> URI.encode_query()}"
+     )}
   end
 
   def handle_event("unblock_retry", %{"to" => to}, socket) do
-    if allow?(socket) do
-      allowed = %{
-        "planning" => :planning,
-        "coding" => :coding,
-        "testing" => :testing,
-        "verifying" => :verifying
-      }
+    allowed = %{
+      "planning" => :planning,
+      "coding" => :coding,
+      "testing" => :testing,
+      "verifying" => :verifying
+    }
 
-      run = socket.assigns.run
+    run = socket.assigns.run
 
-      case Map.get(allowed, to) do
-        nil ->
-          {:noreply, put_flash(socket, :error, "Invalid resume target")}
+    case Map.get(allowed, to) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Invalid resume target")}
 
-        target ->
-          case Transitions.transition(run.id, target, %{reason: :operator_unblock}) do
-            {:ok, updated} ->
-              {:noreply,
-               socket
-               |> assign(:run, updated)
-               |> assign(:block_reason, infer_block_reason(updated))
-               |> put_flash(:info, "Resumed run at #{target}")}
+      target ->
+        case Transitions.transition(run.id, target, %{reason: :operator_unblock}) do
+          {:ok, updated} ->
+            {:noreply,
+             socket
+             |> assign(:run, updated)
+             |> assign(:block_reason, infer_block_reason(updated))
+             |> put_flash(:info, "Resumed run at #{target}")}
 
-            {:error, reason} ->
-              {:noreply, put_flash(socket, :error, "Resume failed: #{inspect(reason)}")}
-          end
-      end
-    else
-      {:noreply, socket}
+          {:error, reason} ->
+            {:noreply, put_flash(socket, :error, "Resume failed: #{inspect(reason)}")}
+        end
     end
   end
 
   def handle_event("bundle_diagnostics", _params, socket) do
-    if allow?(socket) do
-      run = socket.assigns.run
+    run = socket.assigns.run
 
-      {:noreply,
-       socket
-       |> put_flash(:info, "Diagnostic bundle ready")
-       |> push_navigate(to: ~p"/runs/#{run.id}/diagnostics/bundle.zip")}
-    else
-      {:noreply, socket}
+    {:noreply,
+     socket
+     |> put_flash(:info, "Diagnostic bundle ready")
+     |> push_navigate(to: ~p"/runs/#{run.id}/diagnostics/bundle.zip")}
+  end
+
+  def handle_event("open_compare_picker", _params, socket) do
+    run = socket.assigns.run
+
+    others =
+      Runs.list_for_board()
+      |> Enum.reject(&(&1.id == run.id))
+      |> Enum.take(10)
+
+    {:noreply,
+     socket
+     |> assign(:compare_pick_list, others)
+     |> assign(:compare_picker_open, true)}
+  end
+
+  def handle_event("close_compare_picker", _params, socket) do
+    {:noreply, assign(socket, :compare_picker_open, false)}
+  end
+
+  def handle_event("pick_compare_target", %{"other_id" => oid}, socket) do
+    run = socket.assigns.run
+
+    case Ecto.UUID.cast(oid) do
+      {:ok, other} ->
+        q =
+          URI.encode_query(%{
+            "baseline" => uuid_to_canonical(run.id),
+            "candidate" => uuid_to_canonical(other)
+          })
+
+        {:noreply,
+         socket
+         |> assign(:compare_picker_open, false)
+         |> push_navigate(to: "/runs/compare?" <> q)}
+
+      :error ->
+        {:noreply, put_flash(socket, :error, "Invalid run id")}
     end
   end
 
   def handle_event("follow_up", _params, socket) do
-    if allow?(socket) do
-      run = socket.assigns.run
-      cid = socket.assigns.follow_up_correlation_id
+    run = socket.assigns.run
+    cid = socket.assigns.follow_up_correlation_id
 
-      cond do
-        run.state != :merged or is_nil(cid) ->
-          {:noreply, put_flash(socket, :error, "Follow-up is not available for this run.")}
+    cond do
+      run.state != :merged or is_nil(cid) ->
+        {:noreply, put_flash(socket, :error, "Follow-up is not available for this run.")}
 
-        true ->
-          case Specs.file_follow_up_from_run(run, correlation_id: cid) do
-            {:ok, _draft} ->
-              {:noreply,
-               socket
-               |> put_flash(:info, "Draft created — open the Inbox to edit.")}
+      true ->
+        case Specs.file_follow_up_from_run(run, correlation_id: cid) do
+          {:ok, _draft} ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Draft created — open the Inbox to edit.")}
 
-            {:error, reason} ->
-              {:noreply, put_flash(socket, :error, "Could not create draft: #{inspect(reason)}")}
-          end
-      end
-    else
-      {:noreply, socket}
+          {:error, reason} ->
+            {:noreply, put_flash(socket, :error, "Could not create draft: #{inspect(reason)}")}
+        end
     end
   end
 
   def handle_event(_other, _params, socket), do: {:noreply, socket}
-
-  defp allow?(_socket), do: true
 
   @impl true
   def render(assigns) do
@@ -233,6 +256,14 @@ defmodule KilnWeb.RunDetailLive do
               class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
             >
               Bundle last 60 minutes
+            </button>
+            <button
+              type="button"
+              id="run-detail-compare-open"
+              phx-click="open_compare_picker"
+              class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
+            >
+              Compare with…
             </button>
             <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
           </div>
@@ -308,6 +339,43 @@ defmodule KilnWeb.RunDetailLive do
                   </div>
                 </section>
             <% end %>
+        <% end %>
+
+        <%= if @compare_picker_open do %>
+          <div
+            id="run-detail-compare-modal"
+            class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+          >
+            <div class="w-full max-w-md rounded border border-ash bg-char p-4 shadow-lg">
+              <div class="flex items-start justify-between gap-3">
+                <h2 class="text-lg font-semibold text-bone">Compare with…</h2>
+                <button
+                  type="button"
+                  phx-click="close_compare_picker"
+                  class="text-sm text-[var(--color-smoke)] underline"
+                >
+                  Close
+                </button>
+              </div>
+              <ul class="mt-4 max-h-72 space-y-2 overflow-y-auto">
+                <%= for other <- @compare_pick_list do %>
+                  <li>
+                    <button
+                      type="button"
+                      phx-click="pick_compare_target"
+                      phx-value-other_id={uuid_to_canonical(other.id)}
+                      class="w-full rounded border border-ash px-3 py-2 text-left text-sm text-bone transition-colors hover:border-ember"
+                    >
+                      {other.workflow_id} — {short(other.id)}
+                    </button>
+                  </li>
+                <% end %>
+              </ul>
+              <%= if @compare_pick_list == [] do %>
+                <p class="mt-3 text-sm text-[var(--color-smoke)]">No other runs available.</p>
+              <% end %>
+            </div>
+          </div>
         <% end %>
       </div>
     </Layouts.app>
@@ -437,6 +505,13 @@ defmodule KilnWeb.RunDetailLive do
     |> case do
       nil -> :missing_api_key
       a -> a
+    end
+  end
+
+  defp uuid_to_canonical(<<_::128>> = raw) do
+    case Ecto.UUID.load(raw) do
+      {:ok, s} -> s
+      :error -> ""
     end
   end
 
