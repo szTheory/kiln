@@ -271,6 +271,12 @@ defmodule KilnWeb.RunDetailLive do
             >
               Compare with…
             </button>
+            <.link
+              class="text-sm text-ember underline"
+              navigate={~p"/runs/#{@run.id}/replay"}
+            >
+              Timeline
+            </.link>
             <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
