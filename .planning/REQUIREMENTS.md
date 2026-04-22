@@ -89,7 +89,7 @@ All v1 requirements are hypotheses until shipped and validated on a real end-to-
 - [ ] **BLOCK-01**: Typed block reasons — `:missing_api_key`, `:invalid_api_key`, `:rate_limit_exhausted`, `:quota_exceeded`, `:gh_auth_expired`, `:gh_permissions_insufficient`, `:budget_exceeded`, `:unrecoverable_stage_failure`, `:policy_violation`. Each reason maps to a remediation playbook.
 - [ ] **BLOCK-02**: Unblock panel — when a run blocks, LiveView surfaces a clear panel with: what happened (typed reason), what to do (exact commands / config changes), "I fixed it — retry" action that resumes from last checkpoint. Panels are scannable at a glance.
 - [ ] **BLOCK-03**: Desktop notification (macOS/Linux via `osascript`/`notify-send` shell-out, configurable) when a run enters blocked/escalated state; optional email/webhook integration for remote operators (v1.1+).
-- [ ] **BLOCK-04**: First-run onboarding wizard — on empty-state (`docker compose up` fresh clone), the UI walks the operator through provisioning API keys (Anthropic required, others optional), GitHub App install, sandbox prerequisites check. No run can start until the wizard passes.
+- [x] **BLOCK-04**: First-run onboarding wizard — on empty-state (`docker compose up` fresh clone), the UI walks the operator through provisioning API keys (Anthropic required, others optional), GitHub App install, sandbox prerequisites check. No run can start until the wizard passes.
 
 ### Intake (how work enters the factory)
 
@@ -238,13 +238,13 @@ Populated by `gsd-roadmapper` during roadmap creation. Each v1 requirement maps 
 | OBS-04 | Phase 5 | Pending |
 | LOCAL-01 | Phase 1 | Done (Plan 01-01 — structural f567c7e; Plan 01-06 — BootChecks + HealthPlug + first_run.sh smoke, a271a6a/a82d070/6e88813) |
 | LOCAL-02 | Phase 1 | Done (Plan 01-01 — `.tool-versions` + `mix.exs` pins, f567c7e; Plan 01-02 — `mix check` gate + GHA CI, cb05fa1/18de9a4) |
-| LOCAL-03 | Phase 9 | Pending |
+| LOCAL-03 | Phase 9 | Complete |
 | UAT-01 | Phase 5 | Pending |
 | UAT-02 | Phase 5 | Pending |
 | BLOCK-01 | Phase 3 | Pending |
 | BLOCK-02 | Phase 8 | Pending |
 | BLOCK-03 | Phase 3 | Pending |
-| BLOCK-04 | Phase 8 | Pending |
+| BLOCK-04 | Phase 8 | Complete |
 | INTAKE-01 | Phase 8 | Pending |
 | INTAKE-02 | Phase 8 | Pending |
 | INTAKE-03 | Phase 8 | Pending |
