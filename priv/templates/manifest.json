@@ -1,0 +1,54 @@
+{
+  "templates": [
+    {
+      "id": "hello-kiln",
+      "title": "Hello Kiln",
+      "workflow_id": "elixir_phoenix_feature",
+      "spec_file": "spec.md",
+      "workflow_file": "workflow.yaml",
+      "purpose": "Smallest promoted-spec path using the standard Elixir/Phoenix feature workflow.",
+      "time_hint": "low (single feature slice)",
+      "cost_hint": "low / moderate — bounded by workflow caps; actual usage varies with model and retries.",
+      "assumptions": [
+        "Operator has provider credentials configured if stages reach live agents.",
+        "Typical duration (not a guarantee): under one hour for a trivial spec on a warm cache."
+      ],
+      "last_verified_at": "2026-04-22",
+      "last_verified_kiln_version": "0.1.0",
+      "tags": ["onboarding", "elixir", "hello"]
+    },
+    {
+      "id": "gameboy-vertical-slice",
+      "title": "Game Boy vertical slice",
+      "workflow_id": "rust_gb_dogfood_v1",
+      "spec_file": "spec.md",
+      "workflow_file": "workflow.yaml",
+      "purpose": "Dogfood-depth slice: external Rust Game Boy path with honest compile caps.",
+      "time_hint": "moderate / high — cold compile and multi-stage pipeline",
+      "cost_hint": "moderate — see workflow caps; indicative cost (USD) is not a guarantee.",
+      "assumptions": [
+        "External workspace may be required for full scenario parity (see spec body).",
+        "Open or test ROMs only."
+      ],
+      "last_verified_at": "2026-04-22",
+      "last_verified_kiln_version": "0.1.0",
+      "tags": ["dogfood", "rust", "gb"]
+    },
+    {
+      "id": "markdown-spec-stub",
+      "title": "Markdown spec stub",
+      "workflow_id": "elixir_phoenix_feature",
+      "spec_file": "spec.md",
+      "workflow_file": "workflow.yaml",
+      "purpose": "Structured markdown spec example for inbox import and edit-first flows.",
+      "time_hint": "low",
+      "cost_hint": "low / moderate — same workflow caps as Hello Kiln.",
+      "assumptions": [
+        "Spec is operator-authored markdown only — no code execution at template load."
+      ],
+      "last_verified_at": "2026-04-22",
+      "last_verified_kiln_version": "0.1.0",
+      "tags": ["markdown", "stub"]
+    }
+  ]
+}

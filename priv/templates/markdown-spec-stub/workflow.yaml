@@ -1,0 +1,90 @@
+apiVersion: kiln.dev/v1
+id: elixir_phoenix_feature
+version: 1
+metadata:
+  description: "Standard Elixir/Phoenix feature workflow: plan -> code -> test -> verify -> merge."
+  author: "Kiln"
+  tags:
+    - elixir
+    - phoenix
+    - feature
+signature: null
+spec:
+  caps:
+    max_retries: 3
+    max_tokens_usd: 10.00
+    max_elapsed_seconds: 3600
+    max_stage_duration_seconds: 600
+  model_profile: phoenix_saas_feature
+  stages:
+    - id: plan
+      kind: planning
+      agent_role: planner
+      depends_on: []
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readonly
+
+    - id: code
+      kind: coding
+      agent_role: coder
+      depends_on:
+        - plan
+      timeout_seconds: 600
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite
+      on_failure:
+        action: route
+        to: plan
+        attach: plan_ref
+
+    - id: test
+      kind: testing
+      agent_role: tester
+      depends_on:
+        - code
+      timeout_seconds: 600
+      retry_policy:
+        max_attempts: 3
+        backoff: exponential
+        base_delay_seconds: 5
+      sandbox: readwrite
+      on_failure:
+        action: route
+        to: plan
+        attach: code_ref
+
+    - id: verify
+      kind: verifying
+      agent_role: qa_verifier
+      depends_on:
+        - test
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 2
+        backoff: fixed
+        base_delay_seconds: 10
+      sandbox: readonly
+      on_failure:
+        action: route
+        to: plan
+        attach: test_output_ref
+
+    - id: merge
+      kind: merge
+      agent_role: coder
+      depends_on:
+        - verify
+      timeout_seconds: 300
+      retry_policy:
+        max_attempts: 1
+        backoff: fixed
+        base_delay_seconds: 0
+      sandbox: readwrite
+      on_failure: escalate
