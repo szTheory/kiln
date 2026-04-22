@@ -1,0 +1,28 @@
+# Local development and Docker DX audit
+
+**Date:** 2026-04-22  
+**Scope:** Align `PROJECT.md` LOCAL-01 wording, `README.md`, and `compose.yaml` with how Kiln actually runs in v0.1.0.
+
+## Findings
+
+| Artifact | Claim | Reality |
+|----------|--------|---------|
+| `compose.yaml` | Services: `db`, `dtu`, `otel-collector`, `jaeger`, optional profile `network-anchor` | No Phoenix/Kiln app service. |
+| `README.md` | Quick start: `docker compose up -d db`, then `mix phx.server` on host | Accurate for default loop. |
+| `PROJECT.md` Active (stale) | LOCAL-01: "`docker-compose up` spins up Kiln + Postgres + sandbox runtime" | **Inaccurate:** Kiln is not started by Compose; sandbox stages use host `docker` CLI + compose-defined networks/images. |
+
+## Doc-only vs product gaps
+
+- **Doc-only:** Stale `PROJECT.md` **Active** checklist duplicated **Validated** and implied unshipped work. **Mitigation:** Move shipped items to **Validated**; keep **Active** for v0.2 only.
+- **Product gap (optional v0.2):** No single command starts **DB + app** for operators without a local Elixir install. **Mitigation:** Backlog **999.3** — choose devcontainer vs `compose` `app` service vs `make`/`just` wrapper after spike.
+
+## Decision (v0.1.0)
+
+- **Shipped truth:** LOCAL-01 = Compose for **data plane + DTU + optional observability**; **Kiln = host process**.  
+- **v0.2:** Evaluate one DX strategy under backlog **999.3**; do not block dogfood on full containerized app.
+
+## References
+
+- [`compose.yaml`](../../compose.yaml)  
+- [`README.md`](../../README.md)  
+- [`.planning/ROADMAP.md`](../ROADMAP.md) Backlog **999.3**

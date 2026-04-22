@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.1.0
-milestone_name: milestone
-status: milestone_complete
-stopped_at: Phase 999.1 context gathered
-last_updated: "2026-04-22T01:00:58.138Z"
-last_activity: 2026-04-22 -- Phase --phase execution started
+milestone: v0.2.0
+milestone_name: operator-dogfood
+status: planning
+stopped_at: null
+last_updated: "2026-04-22T12:00:00.000Z"
+last_activity: 2026-04-22 — v0.2 planning seeded (backlog 999.2–999.4; phases 10–11 plans)
 progress:
-  total_phases: 10
-  completed_phases: 10
-  total_plans: 68
-  completed_plans: 63
-  percent: 100
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-18)
+See: .planning/PROJECT.md (updated 2026-04-22)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
-**Current focus:** Phase --phase — 999.1
+**Current focus:** Milestone **v0.2.0** — operator dogfood (external Game Boy slice) + optional local DX. Prior milestone **v0.1.0** (Phases 1–9 + backlog 999.1) is complete.
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
-Status: Milestone complete
+Phase: (none active — promote backlog **999.2** / **999.3** / **999.4** or start **Phase 10** via `/gsd-review-backlog` / `/gsd-execute-phase`)
+Plan: —
+Status: planning (v0.2.0)
 Last activity: 2026-04-22
 
-Progress: [██████████] 100% (milestone plans in `.planning/ROADMAP.md`; phase overview uses 9 user-facing phases)
+Progress: [░░░░░░░░░░] 0% (two planned phases: **10** local operator readiness, **11** GB dogfood vertical slice — see `.planning/phases/10-*` and `11-*`)
 
 ## Performance Metrics
 
@@ -183,11 +183,11 @@ None yet.
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 999.1 context gathered
-Resume file: --resume-file
-Next command: `/clear` then `/gsd-plan-phase 9` (ROADMAP research flag for Phase 9 is **standard**; add `/gsd-research-phase 9` only if planner finds gaps)
+Last session: v0.1.0 closed; v0.2.0 planning artifacts written
+Stopped at: —
+Resume file: —
+Next command: `/gsd-discuss-phase 10` (or `/gsd-review-backlog` to sequence **999.2** → integer phases), then `/gsd-execute-phase 10`
 
-**Completed Phase:** 8 (Operator UX) — 10 plans — completed 2026-04-21
+**Completed milestone:** v0.1.0 — Phases 1–9 + backlog slot 999.1 (docs site work) — 2026-04-22
 
-**Planned Phase:** 999.1 (Docs & Landing Site (BACKLOG)) — 5 plans — 2026-04-22T00:58:58.207Z
+**Active planning:** v0.2.0 — Phase **10** (local operator readiness), Phase **11** (Game Boy emulator dogfood); backlogs **999.2–999.4** for parking-lot detail

@@ -19,6 +19,8 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 
 ## Quick start (open `/onboarding` first)
 
+**Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose in v0.1.0; optional all-in-one / devcontainer DX is tracked for a later milestone (`.planning/research/LOCAL-DX-AUDIT.md`).
+
 1. **Environment** — `cp .env.sample .env` then load it (`direnv allow` or export vars manually). See **Environment** below for required keys.
 2. **Database** — `docker compose up -d db` and wait until Postgres is healthy.
 3. **Migrations (owner role)** — `KILN_DB_ROLE=kiln_owner mix setup` (runs `ecto.create`, `ecto.migrate`, seeds, assets). Runtime sessions use the restricted `kiln_app` role by default.

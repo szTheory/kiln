@@ -16,90 +16,24 @@ That single promise is what the whole system must deliver. Every design tradeoff
 
 <!-- Shipped and confirmed valuable. -->
 
-- [x] **LOCAL-01**, **LOCAL-02**, **OBS-01**, **OBS-03** — validated in Phase 1 (Foundation & Durability Floor).
+- [x] **OBS-01**, **OBS-03** — validated in Phase 1 (Foundation & Durability Floor).
 - [x] **ORCH-01** Workflow definition format: YAML/JSON graph, versioned in git, schema-validated at load — validated in Phase 2 (Workflow Engine Core).
 - [x] **ORCH-02** Stage executor runs each stage in a supervised BEAM process with crash isolation — validated in Phase 2.
 - [x] **ORCH-03** Run state machine: queued → planning → coding → testing → verifying → (merged | failed | escalated); persisted to Postgres — validated in Phase 2.
 - [x] **ORCH-04** Checkpointing: every stage writes an artifact + event before emitting success; runs resumable from last checkpoint — validated in Phase 2.
 - [x] **ORCH-07** Idempotency: every Oban job has idempotency key; every external side-effect is retry-safe — validated in Phase 2.
+- [x] **LOCAL-01** — `docker compose` runs **Postgres** (required for dev), **DTU** + internal sandbox network for stage sandboxes, and optional **OTel/Jaeger**. The **Phoenix app runs on the host** (`mix phx.server`; Elixir/OTP per `.tool-versions`). Single-command “Kiln in Compose” / devcontainer is **not** v0.1.0 scope — see backlog **999.3** and `.planning/research/LOCAL-DX-AUDIT.md`. — Phase 1 + operator docs (wording corrected 2026-04-22).
+- [x] **LOCAL-02** — `.tool-versions` pins Elixir/Erlang — Phase 1.
+- [x] **LOCAL-03** — README zero-to-first-run walkthrough — Phase 9.
+- [x] **Phases 2–9 (v0.1.0 capability bundle)** — ORCH-05/06; AGENT-01..05; SAND-01..04; SPEC-01..03; GIT-01..04; UI-01..09; OBS-02, OBS-04 (OBS-01/OBS-03 were Phase 1); UAT-01/02; BLOCK-01..04; INTAKE-01..03; OPS-01..05 — shipped per `.planning/ROADMAP.md` Phases 2–9 (2026-04-20–22). REQ IDs remain the stable vocabulary for audits and future milestones.
 
 ### Active
 
-<!-- Current scope. Building toward v1. -->
+<!-- v0.2 — operator dogfood + DX. Promoted from backlog / phase plans when execution starts. -->
 
-**Core orchestration**
-- [ ] **ORCH-05** Loop-until-spec-met: Verifier failure routes back to Planner with structured failure diagnostic
-- [ ] **ORCH-06** Bounded autonomy: per-run caps on retries, token spend, elapsed steps; escalation = halt + diagnostic artifact
-
-**Agents**
-- [ ] **AGENT-01** Provider-agnostic LLM adapter (Anthropic, OpenAI, Google, local Ollama) via behaviour-defined port
-- [ ] **AGENT-02** Per-stage model selection (planner = Opus-class, coder = Sonnet-class, router = Haiku-class; configurable)
-- [ ] **AGENT-03** Specialized agent roles: Planner, Coder, Tester, Reviewer, UI/UX, QA/Verifier, Mayor (orchestrator-of-record)
-- [ ] **AGENT-04** Agent-shared memory (beads-equivalent, native Elixir implementation)
-- [ ] **AGENT-05** Token + cost telemetry per agent per run
-
-**Sandbox**
-- [ ] **SAND-01** Per-stage ephemeral Docker container, auto-cleaned
-- [ ] **SAND-02** Network egress blocked except to Kiln-hosted mock services
-- [ ] **SAND-03** Digital Twin Universe: local mocks for GitHub API and common HTTP integrations used during spec execution
-- [ ] **SAND-04** Git + filesystem workspace mounted read-write into sandbox; diff captured at stage end
-
-**Spec & validation**
-- [ ] **SPEC-01** Spec editor (markdown + embedded BDD scenarios) in LiveView
-- [ ] **SPEC-02** Scenarios are executable acceptance tests against the produced software
-- [ ] **SPEC-03** Verifier runs all scenarios in sandbox; pass = done, fail = loop
-
-**GitHub integration**
-- [ ] **GIT-01** Kiln drives `git commit` / `git push` via shell in workspace
-- [ ] **GIT-02** Kiln opens PR via `gh` when workflow has a PR stage
-- [ ] **GIT-03** Kiln reads/updates GitHub Actions status on PRs
-- [ ] **GIT-04** GitHub Actions workflow shipped for Kiln itself (mix test, credo, dialyzer, xref)
-
-**UI (LiveView dashboard)**
-- [ ] **UI-01** Run board (kanban-style columns by state); real-time via PubSub
-- [ ] **UI-02** Run detail: stage graph, per-stage diff viewer, logs, events, agent chatter
-- [ ] **UI-03** Workflow registry: list, view YAML, show version history
-- [ ] **UI-04** Token/cost dashboard per run, per workflow, per agent
-- [ ] **UI-05** Audit ledger view (append-only events, filterable)
-- [ ] **UI-06** Kiln brand book applied globally (Inter/IBM Plex Mono, coal palette, border-first components, operator microcopy)
-
-**Observability & audit**
-- [ ] **OBS-01** Structured logging with correlation_id, causation_id, actor, run_id, stage_id on every log line
-- [ ] **OBS-02** OpenTelemetry traces — Kiln emits spans per stage/agent call
-- [ ] **OBS-03** Append-only audit ledger with time-travel query support
-- [ ] **OBS-04** Stuck-run detector: alerts + halts when no progress for configurable interval
-
-**Local dev & distribution**
-- [ ] **LOCAL-01** `docker-compose up` spins up Kiln + Postgres + sandbox runtime
-- [ ] **LOCAL-02** `.tool-versions` pins Elixir/Erlang for `asdf`
-- [ ] **LOCAL-03** README with zero-to-first-run walkthrough
-
-**Automation & zero-human verification**
-- [ ] **UAT-01** Scenario runner is the sole acceptance oracle; all UAT/integration/E2E runs in CI, zero manual QA steps
-- [ ] **UAT-02** Human intervention reserved for typed short list only (credentials, first-time auth, budget approvals, hard escalations); anything else auto-blocking = Kiln bug
-
-**Unblock flow (when human IS required)**
-- [ ] **BLOCK-01** Typed block reasons (`:missing_api_key`, `:rate_limit_exhausted`, etc.) with remediation playbooks
-- [ ] **BLOCK-02** Unblock panel with clear what-happened/what-to-do/retry action
-- [ ] **BLOCK-03** Desktop notification on block/escalation
-- [ ] **BLOCK-04** First-run onboarding wizard gates run start on API keys + GitHub auth + Docker prerequisites
-
-**Intake**
-- [ ] **INTAKE-01** Spec drafts from freeform text, markdown file, or GitHub issue conversion
-- [ ] **INTAKE-02** Inbox view for triage (promote/archive/edit)
-- [ ] **INTAKE-03** "File as follow-up" from a shipped run to generate a new spec draft with context
-
-**Operations & SRE**
-- [ ] **OPS-01** Provider health panel (API key status, rate-limit headroom, token budget) with RAG indicators
-- [ ] **OPS-02** Adaptive model routing with automatic fallback on 429/5xx; `actual_model_used` recorded
-- [ ] **OPS-03** Opinionated model-profile presets per software type (`elixir_lib`, `phoenix_saas_feature`, etc.); switchable
-- [ ] **OPS-04** Cost intelligence — spend breakdown + switching advisories
-- [ ] **OPS-05** Diagnostic snapshot bundle (secrets redacted)
-
-**Progress visibility**
-- [ ] **UI-07** Global factory header (active / blocked / spend / provider-health)
-- [ ] **UI-08** Per-run progress indicator with estimated remaining + staleness color ramp
-- [ ] **UI-09** Agent activity ticker (live-updating rolling event feed across all runs)
+- [ ] **DOGFOOD-01** — First **external** repo run from local Kiln (Game Boy emulator **vertical slice**: spec + workflow + BDD + bounded caps; open test ROMs only). Context: `.planning/phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md`, backlog **999.2**, Phase **11** plan.
+- [ ] **LOCAL-DX-01** — Optional single-command / containerized dev environment (devcontainer vs Compose `app` vs task runner — **TBD**). Backlog **999.3**, Phase **10** plan.
+- [ ] **DOCS-ALIGN-01** — Keep `PROJECT.md` / `REQUIREMENTS.md` / roadmap in sync at each milestone boundary. Backlog **999.4**.
 
 ### Out of Scope
 
@@ -177,14 +111,19 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current State (as of 2026-04-20)
+## Current State (as of 2026-04-22)
 
-- **Phase 1 complete** — Foundation & Durability Floor shipped. Append-only `audit_events` table with three-layer enforcement, `external_operations` two-phase intent machine, `logger_json` + six-key metadata threading, `Kiln.BootChecks.run!/0`, 7-child supervision tree, `/health` endpoint.
-- **Phase 2 complete** — Workflow Engine Core shipped. YAML → JSV Draft 2020-12 → 6 D-62 Elixir validators → topological sort → `%CompiledGraph{}`. `Kiln.Runs.Transitions` (9-state D-87 matrix, `Repo.transact` + `SELECT FOR UPDATE` + `StuckDetector.check/1` inside tx + post-commit PubSub). `Kiln.Artifacts` 13th bounded context (CAS with streaming SHA-256 + atomic rename + integrity-on-read). `Kiln.Stages.StageWorker` drives workflows end-to-end. RunSupervisor + RunDirector (:permanent boot-scan + DOWN handler + 30s periodic scan) wired into the live application tree. Oban 6-queue taxonomy (default:2, stages:4, github:2, audit_async:4, dtu:2, maintenance:2; aggregate 16; pool 20). BootChecks extended to workflow-schema load enforcement. 4 new migrations (audit CHECK 22→25, runs, stage_runs, artifacts).
-- **Phase 3 complete** — Agent adapters, model registry, budget guard, sandbox runtime, DTU sidecar scaffold, typed blockers, notifications, provider-secret store, 14-child application tree, 8-invariant BootChecks, and StageWorker auto-enqueue are all wired. `RunDirector.start_run/1` now halts missing-provider runs with a typed `:missing_api_key` block before any LLM call. The full `mix test` suite passes with 468 tests green (12 excluded).
-- **Validated requirements:** LOCAL-01, LOCAL-02, OBS-01, OBS-03, ORCH-01, ORCH-02, ORCH-03, ORCH-04, ORCH-07.
-- **Known operator action:** Host port 5432 conflict with `sigra-uat-postgres` blocks `docker compose up -d db` on primary dev host — pre-existing condition, pg_uuidv7 migration ships with kjmph pure-SQL fallback so tests run against any Postgres 16.
-- **New seeds planted:** SEED-002 (remote operator control plane), SEED-003 (onboarding template library), SEED-004 (GitHub credential management) — dormant until their trigger conditions fire.
+- **Milestone v0.1.0 (Phases 1–9)** — Shipped per `.planning/ROADMAP.md`. Runtime: Postgres + DTU + optional OTel via Compose; Phoenix on host; LiveView operator UI; sandbox + agents + GitHub path; dogfood CI on Kiln itself.
+- **Next milestone v0.2** — Operator dogfood (external Game Boy emulator slice) + optional local DX (backlog **999.2–999.4**); phase plans under `.planning/phases/10-*` and `11-*`.
+- **Validated requirements:** See **Validated** section above (Phase 1 items + Phases 2–9 bundle line).
+- **Known operator action:** Host port `5432` may conflict with other Postgres instances — change host port in Compose or stop the other service.
+- **New seeds planted:** SEED-002, SEED-003, SEED-004 — dormant until their trigger conditions fire.
+
+## Next milestone goals (v0.2)
+
+1. Run Kiln locally against a **throwaway git remote** and complete at least one bounded run for an external spec (Game Boy emulator vertical slice).
+2. Decide and optionally implement **one** local DX improvement from backlog **999.3** after spike.
+3. Milestone-close hygiene: `PROJECT.md` / `REQUIREMENTS.md` / `ROADMAP.md` stay aligned (**DOCS-ALIGN-01** / **999.4**).
 
 ---
-*Last updated: 2026-04-20 after Phase 2 completion*
+*Last updated: 2026-04-22 — v0.1.0 requirements reconciled; v0.2 planning started*

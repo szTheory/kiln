@@ -25,6 +25,8 @@ The category's reliability lessons are loud and consistent: dark factories fail 
 - [x] **Phase 7: Core Run UI (LiveView)** - Run board, run detail with stage graph + diff + logs + agent chatter, workflow registry, cost dashboard, audit ledger view, brand book applied — **complete 2026-04-21**
 - [x] **Phase 8: Operator UX (Intake, Ops, Unblock, Onboarding)** - Intake inbox + spec drafts, provider health panel, cost intelligence, diagnostic snapshot, unblock panel, desktop notifications, first-run onboarding wizard, global factory header, per-run progress indicator, agent activity ticker — **complete 2026-04-21**
 - [x] **Phase 9: Dogfood & Release (v0.1.0)** - Kiln builds Kiln on a small real spec; CI for Kiln itself; full OTel span coverage; README validated against fresh clone; v0.1.0 tagged — **code + CI complete 2026-04-22** (operator: push `v0.1.0` tag + `gh release` per `09-05-SUMMARY.md`)
+- [ ] **Phase 10: Local operator readiness (v0.2.0)** — Runbook + env checklist + onboarding dry-run; closes README/compose/PROJECT drift for local use — **planning** ([10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md))
+- [ ] **Phase 11: Game Boy emulator dogfood vertical slice (v0.2.0)** — First external repo + spec + BDD vertical slice; open test ROMs only — **planning** ([11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md), [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md))
 
 ## Phase Details
 
@@ -318,6 +320,21 @@ Phases needing `/gsd-research-phase` before planning (flags are **pre-planning**
 | 7. Core Run UI (LiveView) | 6/6 | Complete | 2026-04-21 |
 | 8. Operator UX (Intake, Ops, Unblock, Onboarding) | 10/10 | Complete | 2026-04-21 |
 | 9. Dogfood & Release (v0.1.0) | 5/5 | Complete | 2026-04-22 |
+| 10. Local operator readiness (v0.2.0) | 0/1 | Planning | — |
+| 11. Game Boy emulator dogfood (v0.2.0) | 0/1 | Planning | — |
+
+## Milestone v0.2.0 — operator dogfood (active planning)
+
+**Goal:** Run Kiln locally as the solo operator, complete at least one **external** bounded run (Game Boy emulator vertical slice), and optionally improve one-shot dev bring-up.
+
+**Execution order:** 10 → 11 (after `/gsd-discuss-phase` / `/gsd-plan-phase` refinements).
+
+| Phase | Plans | Status | Notes |
+|-------|-------|--------|--------|
+| 10. Local operator readiness | 1 plan drafted | Planning | Runbook, env checklist, onboarding dry-run — [10-01-PLAN.md](phases/10-local-operator-readiness/10-01-PLAN.md) |
+| 11. Game Boy emulator dogfood vertical slice | 1 plan drafted | Planning | Spec + workflow + BDD + throwaway remote — [11-01-PLAN.md](phases/11-gameboy-dogfood-vertical-slice/11-01-PLAN.md) |
+
+Spike (scope input for Phase 11): [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md).
 
 ## Backlog
 
@@ -337,7 +354,35 @@ Plans:
 - [x] 999.1-04-PLAN.md — **complete 2026-04-22**
 - [x] 999.1-05-PLAN.md — **complete 2026-04-22**
 
+### Phase 999.2: Game Boy emulator operator dogfood (BACKLOG)
+
+**Goal:** First external vertical slice — spec + workflow + executable BDD against a **throwaway** git repo; **open test ROMs only** (no retail ROMs). Feeds **Phase 11** when promoted.
+**Requirements:** `DOGFOOD-01` (see `.planning/PROJECT.md` **Active**); spike [GB-SPIKE.md](phases/999.2-gameboy-emulator-dogfood/GB-SPIKE.md)
+**Plans:** 0 plans (promote with `/gsd-review-backlog` when ready)
+
+Plans:
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
+### Phase 999.3: Local Docker / dev environment DX (BACKLOG)
+
+**Goal:** Optional single-command or containerized operator environment (Compose `app` service vs **devcontainer** vs `make`/`just` wrapper — **decide in Phase 10**). See `.planning/research/LOCAL-DX-AUDIT.md`.
+**Requirements:** `LOCAL-DX-01`
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
+### Phase 999.4: REQUIREMENTS.md ↔ PROJECT.md reconciliation (BACKLOG)
+
+**Goal:** Bulk-check v1 requirement checkboxes in `REQUIREMENTS.md` against shipped Phases 1–9; remove ambiguity with `PROJECT.md` **Validated** (or automate a drift check in CI). **Do not** use unchecked lines in `REQUIREMENTS.md` alone as shipping signal until this closes.
+**Requirements:** `DOCS-ALIGN-01`
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ---
 *Roadmap created: 2026-04-18*
 *Phases derived from 55 v1 requirements + research convergence (FEATURES dependency graph + ARCHITECTURE context DAG + PITFALLS recovery-cost ordering)*
 *Backlog 999.1 added: 2026-04-18*
+*v0.2.0 milestone + backlogs 999.2–999.4 added: 2026-04-22*
