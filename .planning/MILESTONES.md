@@ -2,6 +2,13 @@
 
 Living summary of shipped versions. Detailed phase history lives under `.planning/milestones/` and `.planning/phases/`.
 
+## v0.3.0 — Scale → templates → operator intelligence
+
+**Status:** In progress (opened 2026-04-22)  
+**Phases:** 14–19 (six bite-sized slices) — see [.planning/ROADMAP.md](ROADMAP.md) · [.planning/REQUIREMENTS.md](REQUIREMENTS.md)
+
+**Intent:** Track **A** (PARA / REPL read-only), then **B** (WFE / onboarding templates), then **C** (cost + post-mortem + soft feedback).
+
 ## v0.2.0 — Operator dogfood
 
 **Shipped:** 2026-04-22  
