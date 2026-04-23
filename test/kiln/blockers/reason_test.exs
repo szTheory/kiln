@@ -100,7 +100,10 @@ defmodule Kiln.Blockers.ReasonTest do
       "short_message" => "Spend is about {pct}% of the frozen cap. The run continues.",
       "title" => "Budget notice: half of run cap reached ({run_id})",
       "remediation_commands" => [
-        %{"label" => "Review run detail", "command" => "open http://localhost:4000/ops/runs/{run_id}"}
+        %{
+          "label" => "Review run detail",
+          "command" => "open http://localhost:4000/ops/runs/{run_id}"
+        }
       ],
       "next_action_on_resolve" => "resume_run",
       "owning_phase" => 18

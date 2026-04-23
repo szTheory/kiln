@@ -49,6 +49,37 @@ defmodule Kiln.OperatorReadiness do
     |> Repo.update()
   end
 
+  @doc """
+  Returns the current persisted probe state as a plain map plus a
+  verified/total count. Used by the onboarding wizard to show stateful
+  step chips without each step touching the repo itself.
+  """
+  @spec current_state() :: %{
+          anthropic: boolean(),
+          github: boolean(),
+          docker: boolean(),
+          verified: non_neg_integer(),
+          total: non_neg_integer()
+        }
+  def current_state do
+    row =
+      case Repo.get(ProbeRow, @singleton_id) do
+        %ProbeRow{} = r -> r
+        _ -> %ProbeRow{anthropic_configured: false, github_cli_ok: false, docker_ok: false}
+      end
+
+    flags = [row.anthropic_configured, row.github_cli_ok, row.docker_ok]
+    verified = Enum.count(flags, & &1)
+
+    %{
+      anthropic: row.anthropic_configured || false,
+      github: row.github_cli_ok || false,
+      docker: row.docker_ok || false,
+      verified: verified,
+      total: length(flags)
+    }
+  end
+
   @doc false
   @spec probe_anthropic_configured?() :: boolean()
   def probe_anthropic_configured? do

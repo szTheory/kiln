@@ -17,7 +17,7 @@ defmodule Kiln.Specs.FollowUpDraftTest do
              Specs.file_follow_up_from_run(run, correlation_id: cid)
 
     assert id1 == id2
-    assert Repo.aggregate(SpecDraft, :count) == 1
+    assert Repo.aggregate(from(d in SpecDraft, where: d.source_run_id == ^run.id), :count) == 1
   end
 
   test "different correlation ids create distinct drafts" do
@@ -27,6 +27,6 @@ defmodule Kiln.Specs.FollowUpDraftTest do
     assert {:ok, d2} = Specs.file_follow_up_from_run(run, correlation_id: Ecto.UUID.generate())
 
     assert d1.id != d2.id
-    assert Repo.aggregate(SpecDraft, :count) == 2
+    assert Repo.aggregate(from(d in SpecDraft, where: d.source_run_id == ^run.id), :count) == 2
   end
 end

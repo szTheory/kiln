@@ -10,7 +10,7 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
       system_cmd_fun: fn _cmd, _args, _opts -> {"", 0} end,
       audit_append_fun: fn _event -> {:ok, :stubbed} end,
       periodic_scan_ms: 0,
-      boot_epoch_fun: fn -> 12345 end
+      boot_epoch_fun: fn -> 12_345 end
     )
 
     on_exit(fn ->
@@ -33,7 +33,7 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
   end
 
   test "init/1 defers work by sending itself :boot_scan" do
-    assert {:ok, %{boot_epoch: 12345}} = OrphanSweeper.init([])
+    assert {:ok, %{boot_epoch: 12_345}} = OrphanSweeper.init([])
     assert_received :boot_scan
   end
 
@@ -41,7 +41,7 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
     parent = self()
 
     Application.put_env(:kiln, OrphanSweeper,
-      list_orphans_fun: fn 12345 -> ["dead-1", "dead-2"] end,
+      list_orphans_fun: fn 12_345 -> ["dead-1", "dead-2"] end,
       system_cmd_fun: fn "docker", ["rm", "-f", container_id], _opts ->
         send(parent, {:docker_rm, container_id})
         {"", 0}
@@ -51,11 +51,11 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
         {:ok, :stubbed}
       end,
       periodic_scan_ms: 0,
-      boot_epoch_fun: fn -> 12345 end
+      boot_epoch_fun: fn -> 12_345 end
     )
 
-    assert {:noreply, %{boot_epoch: 12345}} =
-             OrphanSweeper.handle_info(:boot_scan, %{boot_epoch: 12345})
+    assert {:noreply, %{boot_epoch: 12_345}} =
+             OrphanSweeper.handle_info(:boot_scan, %{boot_epoch: 12_345})
 
     assert_received {:audit_append,
                      %{
@@ -75,14 +75,14 @@ defmodule Kiln.Sandboxes.OrphanSweeperTest do
   end
 
   test "periodic scan re-arms its timer" do
-    assert {:noreply, %{boot_epoch: 12345}} =
-             OrphanSweeper.handle_info(:periodic_scan, %{boot_epoch: 12345})
+    assert {:noreply, %{boot_epoch: 12_345}} =
+             OrphanSweeper.handle_info(:periodic_scan, %{boot_epoch: 12_345})
 
     assert_received :periodic_scan
   end
 
   test "catch-all handle_info/2 ignores stray messages" do
-    state = %{boot_epoch: 12345}
+    state = %{boot_epoch: 12_345}
     assert {:noreply, ^state} = OrphanSweeper.handle_info(:something_else, state)
   end
 

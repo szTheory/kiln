@@ -144,3 +144,140 @@ jobs:
 
       - name: Integration smoke (docker compose db + host Phoenix + /health)
         run: bash test/integration/first_run.sh
+
+  # Shift-left UI e2e — Playwright against all 14 LiveView routes in
+  # light+dark across desktop+mobile, plus axe-core a11y. Runs after
+  # `check` so we don't waste minutes on a broken compile.
+  e2e:
+    name: Playwright e2e (14 routes x light/dark x mobile/desktop + axe)
+    needs: [check]
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kiln
+          POSTGRES_PASSWORD: kiln_dev
+          POSTGRES_DB: kiln_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kiln"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MIX_ENV: dev
+      DATABASE_URL: ecto://kiln:kiln_dev@localhost:5432/kiln_dev
+      SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      PHX_HOST: localhost
+      PORT: "4000"
+      KILN_SKIP_OPERATOR_READINESS: "1"
+      KILN_E2E_BASE_URL: http://localhost:4000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+        uses: erlef/setup-beam@v1.23.0
+        with:
+          elixir-version: "1.19.5-otp-28"
+          otp-version: "28.1.2"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache deps + _build (dev env for phx.server)
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-e2e-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('test/e2e/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Cache e2e npm deps
+        uses: actions/cache@v4
+        with:
+          path: test/e2e/node_modules
+          key: ${{ runner.os }}-e2e-npm-${{ hashFiles('test/e2e/package.json') }}
+
+      - name: Install Elixir deps
+        run: mix deps.get
+
+      - name: Compile (dev env, so `mix phx.server` boots immediately)
+        run: mix compile
+
+      - name: Migrate + seed e2e fixtures
+        run: |
+          KILN_DB_ROLE=kiln_owner mix ecto.migrate
+          mix run priv/repo/seeds_e2e.exs
+
+      - name: Build assets (app.css + app.js)
+        run: mix assets.build
+
+      - name: Start Phoenix (background, /health gated)
+        run: |
+          KILN_SKIP_OPERATOR_READINESS=1 mix phx.server > /tmp/kiln-phx.log 2>&1 &
+          echo $! > /tmp/kiln-phx.pid
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:4000/health >/dev/null; then
+              echo "Phoenix up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "FAIL: /health not ready"; tail -n 120 /tmp/kiln-phx.log; exit 1
+
+      - name: Install Playwright + browsers
+        working-directory: test/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium webkit
+
+      - name: Run Playwright suite
+        working-directory: test/e2e
+        run: npx playwright test --reporter=html,list,github
+
+      - name: Tear down Phoenix
+        if: always()
+        run: |
+          if [ -f /tmp/kiln-phx.pid ]; then
+            kill "$(cat /tmp/kiln-phx.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test/e2e/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces + videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test/e2e/test-results
+          retention-days: 14
+
+      - name: Upload Phoenix log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phx-server-log
+          path: /tmp/kiln-phx.log
+          retention-days: 14

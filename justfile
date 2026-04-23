@@ -31,6 +31,10 @@ smoke:
 dev-deps: db-up
     @echo 'Postgres is up — run `mix phx.server` in another terminal (Phoenix stays on the host).'
 
+# One command: Postgres + `mix setup` + `mix phx.server` (foreground). See `script/dev_up.sh`.
+dev:
+    bash script/dev_up.sh
+
 # Same env contract as `script/planning_gates.sh` / CI — loads `.env` when present
 # (`dotenv-load` above) so `DATABASE_URL` is not missing.
 precommit:
@@ -51,4 +55,15 @@ shift-left:
 before-plan-phase phase:
     bash script/shift_left_verify.sh
     @echo "Verification passed — run: /gsd-plan-phase {{phase}} --gaps"
+
+# Boot Phoenix (compose DB + seed fixtures + host Phoenix on :4000) and run
+# the full Playwright suite — all 14 LV routes x light/dark x mobile/desktop
+# + axe-core a11y. Tears down the server when Playwright exits.
+e2e:
+    mix kiln.e2e
+
+# Same as `just e2e` but opens Playwright's watch UI (great for local
+# debugging of a single spec).
+e2e-ui:
+    mix kiln.e2e --ui
 

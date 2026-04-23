@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # LOCAL-01 / VALIDATION.md behavior 42 — fresh-clone first-run smoke.
-# Not wired into `mix check` (requires Docker + jq + host Mix); run locally
-# when compose.yaml, mix setup aliases, or the Kiln.HealthPlug contract
-# changes. README **Integration smoke** names this path; optional
+# Not wired into `mix check` alone (requires Docker + jq + host Mix). It **is**
+# chained after `mix check` by `script/shift_left_verify.sh` (`just shift-left`,
+# `mix shift_left.verify`). README **Integration smoke** names this path; optional
 # `mix integration.first_run` delegates here in one step (D-1005).
 #
 # README alignment (Phase 9 / D-932): this script does **not** install
@@ -107,7 +107,7 @@ echo "[first_run]   response: $RESP"
 echo "$RESP" | jq -e '.status == "ok"' >/dev/null
 echo "$RESP" | jq -e '.postgres == "up"' >/dev/null
 echo "$RESP" | jq -e '.oban == "up"' >/dev/null
-echo "$RESP" | jq -e '.contexts == 12' >/dev/null
+echo "$RESP" | jq -e '.contexts == 13' >/dev/null
 echo "$RESP" | jq -e '.version | type == "string"' >/dev/null
 
 echo "[first_run] OK — fresh-clone boot reached /health with all dependency fields green."

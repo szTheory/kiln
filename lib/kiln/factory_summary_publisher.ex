@@ -47,7 +47,13 @@ defmodule Kiln.FactorySummaryPublisher do
   end
 
   defp compute_summary do
-    runs = Runs.list_for_board()
+    runs =
+      try do
+        Runs.list_for_board()
+      rescue
+        DBConnection.OwnershipError -> []
+        RuntimeError -> []
+      end
 
     active =
       Enum.count(runs, fn %Run{state: s} -> s in Run.active_states() end)

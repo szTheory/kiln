@@ -7,6 +7,13 @@ defmodule Kiln.OperatorReadiness.ProbeRow do
 
   @primary_key {:id, :integer, autogenerate: false}
 
+  @type t :: %__MODULE__{
+          id: integer(),
+          anthropic_configured: boolean(),
+          github_cli_ok: boolean(),
+          docker_ok: boolean()
+        }
+
   schema "operator_readiness" do
     field(:anthropic_configured, :boolean)
     field(:github_cli_ok, :boolean)

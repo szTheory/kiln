@@ -76,6 +76,12 @@
     {:no_compile_secrets, "mix check_no_compile_time_secrets"},
     {:no_manual_qa, "mix check_no_manual_qa_gates"},
 
+    # ---- Phase-reskin regression guard — fails if retired brand tokens
+    #      (text-bone, bg-char, kiln-btn*, …) reappear in `lib/kiln_web`
+    #      or `assets/css/app.css`. Pairs with the rendered-HTML guard in
+    #      `test/kiln_web/live/route_smoke_test.exs`. ----
+    {:kiln_ui_lint, "mix kiln.ui.lint"},
+
     # ---- Phase 2 D-65: no v1 workflow populates the reserved
     #      `signature:` top-level key (workflow signing defers to v2
     #      WFE-02; sign via `git commit -S` for v1). Scans

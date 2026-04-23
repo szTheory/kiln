@@ -170,8 +170,7 @@ defmodule Kiln.Runs do
   `baseline_id` / `candidate_id` are `Ecto.UUID.t()` binaries or canonical
   UUID strings.
   """
-  @spec compare_snapshot(Ecto.UUID.t() | String.t(), Ecto.UUID.t() | String.t()) ::
-          %Compare.Snapshot{}
+  @spec compare_snapshot(binary(), binary()) :: Compare.Snapshot.t()
   def compare_snapshot(baseline_id, candidate_id)
       when is_binary(baseline_id) and is_binary(candidate_id) do
     Compare.snapshot(baseline_id, candidate_id)

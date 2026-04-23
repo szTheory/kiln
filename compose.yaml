@@ -25,7 +25,8 @@ services:
       POSTGRES_PASSWORD: kiln_dev
       POSTGRES_DB: kiln_dev
     ports:
-      - "5432:5432"
+      # Host port is configurable when 5432 is already taken (see `.env.sample`).
+      - "${KILN_DB_HOST_PORT:-5432}:5432"
     volumes:
       - kiln_pgdata:/var/lib/postgresql/data
     healthcheck:

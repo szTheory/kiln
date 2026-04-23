@@ -12,7 +12,7 @@ defmodule Kiln.HealthPlug do
       { "status":   "ok" | "degraded" | "down",
         "postgres": "up" | "down",
         "oban":     "up" | "down",
-        "contexts": 12,
+        "contexts": <integer from Kiln.BootChecks.context_count/0 — 13 in v1>,
         "version":  "0.1.0" }
 
   Status semantics:
@@ -23,9 +23,8 @@ defmodule Kiln.HealthPlug do
     * `"down"`      — postgres down; returns HTTP 503 (nothing useful
       can happen without the audit ledger)
 
-  The 12-element contexts count is the single SSOT from
-  `Kiln.BootChecks.context_count/0` (D-42) — we import rather than
-  duplicate so a future context addition updates both endpoints.
+  The bounded-context count is the SSOT from `Kiln.BootChecks.context_count/0`
+  (D-42 / D-97 — 13 contexts in v1) — we call it here rather than duplicating.
   """
 
   @behaviour Plug
@@ -95,14 +94,25 @@ defmodule Kiln.HealthPlug do
     _ -> "down"
   end
 
-  # `Process.whereis(Oban)` returns the pid of Oban's root supervisor when
-  # started. If it's not registered or not alive, Oban isn't serving — we
-  # call that "down" even if the Oban application itself is loaded.
   defp oban_status do
-    case Process.whereis(Oban) do
+    case oban_pid() do
       pid when is_pid(pid) -> if Process.alive?(pid), do: "up", else: "down"
       _ -> "down"
     end
+  end
+
+  defp oban_pid do
+    children = Supervisor.which_children(Kiln.Supervisor)
+
+    case Enum.find(children, fn
+           {Oban, pid, _, _} when is_pid(pid) -> true
+           _ -> false
+         end) do
+      {Oban, pid, _, _} -> pid
+      _ -> nil
+    end
+  rescue
+    _ -> nil
   end
 
   # `"degraded"` returns 200 so an upstream load-balancer sees the factory

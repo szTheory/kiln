@@ -47,6 +47,22 @@ if config_env() == :test do
   db = "kiln_test#{System.get_env("MIX_TEST_PARTITION")}"
   config :kiln, Kiln.Repo, database: db
   config :kiln, Kiln.Repo.VerifierReadRepo, database: db
+
+  case System.get_env("DATABASE_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo, url: url
+
+    _ ->
+      :ok
+  end
+
+  case System.get_env("DATABASE_VERIFIER_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo.VerifierReadRepo, url: url
+
+    _ ->
+      :ok
+  end
 end
 
 # SPEC-04 (holdouts): optional verifier-only DB URL in production.
