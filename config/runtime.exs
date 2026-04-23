@@ -24,7 +24,22 @@ if System.get_env("PHX_SERVER") do
   config :kiln, KilnWeb.Endpoint, server: true
 end
 
-config :kiln, KilnWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
+dev_bind_ip =
+  if config_env() == :dev and System.get_env("KILN_DEV_BIND_ALL") == "1" do
+    {0, 0, 0, 0}
+  else
+    nil
+  end
+
+http_base = [port: String.to_integer(System.get_env("PORT", "4000"))]
+
+http_opts =
+  case dev_bind_ip do
+    nil -> http_base
+    ip -> Keyword.put(http_base, :ip, ip)
+  end
+
+config :kiln, KilnWeb.Endpoint, http: http_opts
 
 # MIX_TEST_PARTITION support (parallel CI DBs) — lives here to keep compile-time
 # config free of env-var reads per T-02 mitigation.
@@ -85,6 +100,26 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
     secret_key_base: secret_key_base
+end
+
+# Phase 21: optional Dev Container / host-published Postgres — allow full DB
+# URLs from the environment in :dev only (T-02: env reads stay in runtime.exs).
+if config_env() == :dev do
+  case System.get_env("DATABASE_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo, url: url
+
+    _ ->
+      :ok
+  end
+
+  case System.get_env("DATABASE_VERIFIER_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo.VerifierReadRepo, url: url
+
+    _ ->
+      :ok
+  end
 end
 
 # D-48: two-role Postgres access model. Postgrex reads the `:parameters`

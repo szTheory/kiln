@@ -38,7 +38,9 @@ config :kiln, Kiln.Repo.VerifierReadRepo,
 # to bundle .js and .css sources.
 config :kiln, KilnWeb.Endpoint,
   # Binding to loopback ipv4 address prevents access from other machines.
-  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
+  # `KILN_DEV_BIND_ALL=1` is handled in `config/runtime.exs` (T-02: no env
+  # reads in compile-time config files). Published-port bind uses
+  # `ip: {0, 0, 0, 0}` — see README “Optional: Dev Container”.
   http: [ip: {127, 0, 0, 1}],
   check_origin: false,
   code_reloader: true,
