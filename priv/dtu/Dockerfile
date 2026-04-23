@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.19.5-erlang-28.1.1-alpine-3.21 AS build
+FROM elixir:1.19.5-otp-28-alpine AS build
 
 RUN apk add --no-cache git build-base
 WORKDIR /build
