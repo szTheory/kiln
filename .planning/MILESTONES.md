@@ -6,7 +6,7 @@ Living summary of shipped versions. Detailed phase history lives under `.plannin
 
 **Shipped:** 2026-04-23  
 **Phases:** 14–21 (**8** phases, **24** plans)  
-**Archives:** [v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md) (2026-04-22 snapshot + close note)  
+**Archives:** [v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md) (`status: passed`; 2026-04-22 draft preserved under **Historical**)  
 **Tag:** `v0.3.0`
 
 **What shipped**
@@ -17,7 +17,7 @@ Living summary of shipped versions. Detailed phase history lives under `.plannin
 4. **Post-mortems & soft feedback** — SELF-01 merged-run artifact + FEEDBACK-01 non-blocking `operator_feedback_received` audit path; formal `19-VERIFICATION.md` and Phase **20** planning SSOT.
 5. **Containerized local operator DX (optional)** — Phase **21** devcontainer / documented Docker-centric path alongside host Phoenix + Compose.
 
-**Milestone audit:** The 2026-04-22 audit recorded `gaps_found` on Phase 19 verification + requirements checkboxes; **Phase 20** and **`19-VERIFICATION.md`** closed those items before ship.
+**Milestone audit:** First draft (2026-04-22) recorded `gaps_found`; **Phase 20** + **`19-VERIFICATION.md`** closed gaps. Archived audit YAML now **`passed`** with the draft in a collapsible historical section.
 
 ## v0.2.0 — Operator dogfood
 
