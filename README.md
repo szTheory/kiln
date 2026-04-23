@@ -73,6 +73,10 @@ docker compose ps dtu
 
 See service definitions in [`compose.yaml`](compose.yaml) (`db`, `dtu`, `otel-collector`, `jaeger`). Optional **`sandbox-net-anchor`** profile exists for advanced local networking — not required for the default README path.
 
+### Merge authority (CI)
+
+Pull requests targeting **`main`** need green **[GitHub Actions](https://github.com/szTheory/kiln/actions/workflows/ci.yml)**. Full tier table, boot checks, integration smoke, and optional local commands: [`.planning/PROJECT.md#merge-authority`](.planning/PROJECT.md#merge-authority). Local `mix check` may read **PARTIAL** vs CI when Postgres, Docker, Dialyzer PLTs, or env differ — see [`.planning/phases/12-local-docker-dx/12-01-SUMMARY.md`](.planning/phases/12-local-docker-dx/12-01-SUMMARY.md).
+
 ### Other useful URLs
 
 - `http://localhost:4000/ops/dashboard` — Phoenix LiveDashboard
