@@ -58,11 +58,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
         uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: "1.19.5-otp-28"
-          otp-version: "28.1.2"
+          otp-version: "28.1.1"
 
       - name: Cache deps + _build
         uses: actions/cache@v4
@@ -70,17 +70,17 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
 
       - name: Cache Dialyzer PLT (D-27 — key matches mix.lock hash)
         uses: actions/cache@v4
         with:
           path: priv/plts
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-plt-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-plt-
 
       - name: Install deps
         run: mix deps.get
@@ -114,11 +114,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
         uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: "1.19.5-otp-28"
-          otp-version: "28.1.2"
+          otp-version: "28.1.1"
 
       - name: Cache deps + _build
         uses: actions/cache@v4
@@ -126,9 +126,9 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-int-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-int-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
 
       - name: Install deps
         run: mix deps.get
@@ -180,11 +180,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
         uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: "1.19.5-otp-28"
-          otp-version: "28.1.2"
+          otp-version: "28.1.1"
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
@@ -197,9 +197,9 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-e2e-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-e2e-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
