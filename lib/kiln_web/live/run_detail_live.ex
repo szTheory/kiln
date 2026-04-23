@@ -301,12 +301,13 @@ defmodule KilnWeb.RunDetailLive do
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
     >
-      <div id="run-detail" class="space-y-6 text-bone">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-ash pb-4">
+      <div id="run-detail" class="space-y-6">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-base-300 pb-4">
           <div class="flex flex-wrap items-end gap-4">
-            <div>
-              <p class="font-mono text-xs text-[var(--color-smoke)]">{@run.id}</p>
-              <h1 class="text-xl font-semibold">Run {@run.workflow_id}</h1>
+            <div class="min-w-0">
+              <p class="kiln-eyebrow">Run</p>
+              <h1 class="kiln-h1 mt-0.5">{@run.workflow_id}</h1>
+              <p class="kiln-mono text-base-content/60 mt-1">{@run.id}</p>
             </div>
             <%!-- RunProgress (UI-08) --%>
             <.run_progress
@@ -322,17 +323,17 @@ defmodule KilnWeb.RunDetailLive do
                 type="button"
                 id="follow-up-btn"
                 phx-click="follow_up"
-                class="rounded border border-clay px-3 py-1.5 text-sm font-semibold text-bone transition-colors hover:bg-clay/20"
+                class="btn btn-sm btn-outline btn-warning"
               >
                 File as follow-up
               </button>
-              <.link class="text-sm text-ember underline" navigate={~p"/inbox"}>Inbox</.link>
+              <.link class="link link-primary text-sm" navigate={~p"/inbox"}>Inbox</.link>
             <% end %>
             <button
               type="button"
               id="bundle-diagnostics-btn"
               phx-click="bundle_diagnostics"
-              class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
+              class="btn btn-sm btn-ghost border border-base-300 hover:border-primary"
             >
               Bundle last 60 minutes
             </button>
@@ -340,57 +341,61 @@ defmodule KilnWeb.RunDetailLive do
               type="button"
               id="run-detail-compare-open"
               phx-click="open_compare_picker"
-              class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
+              class="btn btn-sm btn-ghost border border-base-300 hover:border-primary"
             >
               Compare with…
             </button>
             <.link
-              class="text-sm text-ember underline"
+              class="link link-primary text-sm"
               navigate={~p"/runs/#{@run.id}/replay"}
             >
               Timeline
             </.link>
-            <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
+            <.link class="link link-primary text-sm" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
 
         <%= if @run.state == :merged do %>
-          <section id="post-mortem-panel" class="rounded border border-ash bg-char/80 p-4">
-            <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Post-mortem</h2>
-            <%= cond do %>
-              <% @post_mortem == nil -> %>
-                <p class="mt-2 text-sm text-[var(--color-smoke)]">Summary generating…</p>
-              <% @post_mortem.status == :pending -> %>
-                <p class="mt-2 text-sm text-[var(--color-smoke)]">Summary generating…</p>
-              <% @post_mortem.status == :complete -> %>
-                <p class="mt-2 font-mono text-xs text-bone">schema {@post_mortem.schema_version}</p>
-                <p class="mt-1 text-sm text-bone">
-                  Stages captured: {length(Map.get(@post_mortem.snapshot || %{}, "stages", []))}
-                </p>
-              <% true -> %>
-                <p class="mt-2 text-sm text-ember">Post-mortem capture failed</p>
-            <% end %>
+          <section id="post-mortem-panel" class="card card-bordered bg-base-200 border-base-300">
+            <div class="card-body p-5">
+              <h2 class="kiln-eyebrow">Post-mortem</h2>
+              <%= cond do %>
+                <% @post_mortem == nil -> %>
+                  <p class="kiln-meta mt-2">Summary generating…</p>
+                <% @post_mortem.status == :pending -> %>
+                  <p class="kiln-meta mt-2">Summary generating…</p>
+                <% @post_mortem.status == :complete -> %>
+                  <p class="kiln-mono text-xs mt-2">schema {@post_mortem.schema_version}</p>
+                  <p class="kiln-body mt-1">
+                    Stages captured: {length(Map.get(@post_mortem.snapshot || %{}, "stages", []))}
+                  </p>
+                <% true -> %>
+                  <p class="text-error mt-2 text-sm">Post-mortem capture failed</p>
+              <% end %>
+            </div>
           </section>
         <% end %>
 
         <%= if nudge_composer_visible?(@run) do %>
-          <section class="rounded border border-ash bg-char/80 p-4">
-            <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Operator note</h2>
-            <.form
-              for={@nudge_form}
-              id="operator-nudge-form"
-              phx-submit="submit_nudge"
-              class="mt-3 space-y-3"
-            >
-              <.input field={@nudge_form[:body]} type="textarea" label="Context for the planner" />
-              <button
-                type="submit"
-                class="rounded border border-clay px-3 py-1.5 text-sm font-semibold text-bone transition-colors hover:bg-clay/20"
-                phx-disable-with="Recording…"
+          <section class="card card-bordered bg-base-200 border-base-300">
+            <div class="card-body p-5">
+              <h2 class="kiln-eyebrow">Operator note</h2>
+              <.form
+                for={@nudge_form}
+                id="operator-nudge-form"
+                phx-submit="submit_nudge"
+                class="mt-3 space-y-3"
               >
-                Record note
-              </button>
-            </.form>
+                <.input field={@nudge_form[:body]} type="textarea" label="Context for the planner" />
+                <button
+                  type="submit"
+                  class="btn btn-sm btn-outline btn-warning"
+                  phx-disable-with="Recording…"
+                >
+                  Record note
+                </button>
+              </.form>
+            </div>
           </section>
         <% end %>
 
@@ -403,52 +408,57 @@ defmodule KilnWeb.RunDetailLive do
             id="run-detail-budget-banner"
             role="status"
             aria-live="polite"
-            class="flex flex-wrap items-start justify-between gap-3 rounded border border-ash bg-iron/40 p-3 text-sm text-bone"
+            class="alert alert-warning alert-soft flex flex-wrap items-start justify-between gap-3 text-sm"
           >
-            <p class="text-bone">{budget_banner_title(@budget_alert)}</p>
+            <p>{budget_banner_title(@budget_alert)}</p>
             <button
               type="button"
               id="run-detail-budget-banner-dismiss"
               phx-click="dismiss_budget_banner"
               aria-label="Dismiss budget notice"
-              class="shrink-0 rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)] transition-colors hover:border-ember hover:text-ember"
+              class="btn btn-xs btn-ghost"
             >
               Dismiss
             </button>
           </div>
         <% end %>
 
-        <section class="rounded border border-ash bg-char/80 p-4">
-          <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Stages</h2>
-          <ol class="mt-3 flex flex-wrap gap-2">
-            <%= for wid <- @graph_ids do %>
-              <li>
-                <button
-                  type="button"
-                  phx-click="pick_stage"
-                  phx-value-wid={wid}
-                  class={[
-                    "rounded border px-2 py-1 font-mono text-xs",
-                    selected_wid?(@selected_stage_run, wid) && "border-ember text-ember",
-                    !selected_wid?(@selected_stage_run, wid) && "border-ash text-bone"
-                  ]}
-                >
-                  {wid}
-                </button>
-              </li>
-            <% end %>
-          </ol>
+        <section class="card card-bordered bg-base-200 border-base-300">
+          <div class="card-body p-5">
+            <h2 class="kiln-eyebrow">Stages</h2>
+            <ol class="mt-3 flex flex-wrap gap-2">
+              <%= for wid <- @graph_ids do %>
+                <li>
+                  <button
+                    type="button"
+                    phx-click="pick_stage"
+                    phx-value-wid={wid}
+                    class={[
+                      "btn btn-xs kiln-mono",
+                      selected_wid?(@selected_stage_run, wid) && "btn-primary",
+                      !selected_wid?(@selected_stage_run, wid) &&
+                        "btn-ghost border border-base-300 hover:border-primary"
+                    ]}
+                  >
+                    {wid}
+                  </button>
+                </li>
+              <% end %>
+            </ol>
+          </div>
         </section>
 
         <%= cond do %>
           <% @stage_missing? -> %>
-            <p class="text-sm text-[var(--color-clay)]">Stage not found</p>
+            <p class="text-sm text-warning">Stage not found</p>
           <% is_nil(@selected_stage_run) -> %>
-            <section class="rounded border border-ash bg-char/80 p-6">
-              <h2 class="text-lg font-semibold">Select a stage</h2>
-              <p class="mt-2 text-sm text-[var(--color-smoke)]">
-                Choose a stage in the graph to inspect diff, logs, events, and agent output.
-              </p>
+            <section class="card card-bordered bg-base-200 border-base-300">
+              <div class="card-body p-6">
+                <h2 class="kiln-h2">Select a stage</h2>
+                <p class="kiln-meta mt-2">
+                  Choose a stage in the graph to inspect diff, logs, events, and agent output.
+                </p>
+              </div>
             </section>
           <% true -> %>
             <.pane_toolbar run={@run} selected={@selected_stage_run} pane={@pane} />
@@ -456,66 +466,68 @@ defmodule KilnWeb.RunDetailLive do
             <%= if match?(%StageRun{state: :succeeded}, @selected_stage_run) do %>
               <section
                 id="run-detail-cost-hint-panel"
-                class="mt-3 rounded border border-ash bg-char/80 p-4 text-sm text-bone"
+                class="card card-bordered bg-base-200 border-base-300 mt-3"
               >
-                <h3 class="text-xs font-semibold uppercase text-[var(--color-smoke)]">
-                  Stage cost (advisory)
-                </h3>
-                <dl class="mt-3 grid gap-2 font-mono text-xs sm:grid-cols-2">
-                  <div>
-                    <dt class="text-[var(--color-smoke)]">Stage spend (USD)</dt>
-                    <dd>{format_stage_money(@selected_stage_run.cost_usd)}</dd>
+                <div class="card-body p-5">
+                  <h3 class="kiln-eyebrow">Stage cost (advisory)</h3>
+                  <dl class="mt-3 grid gap-2 font-mono text-xs sm:grid-cols-2">
+                    <div>
+                      <dt class="text-base-content/60">Stage spend (USD)</dt>
+                      <dd>{format_stage_money(@selected_stage_run.cost_usd)}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-base-content/60">Cap headroom (USD)</dt>
+                      <dd>{format_stage_money(cap_headroom_usd(@run, @selected_stage_run))}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-base-content/60">Requested model</dt>
+                      <dd>{model_label(@selected_stage_run.requested_model)}</dd>
+                    </div>
+                    <div>
+                      <dt class="text-base-content/60">Routed model</dt>
+                      <dd>{model_label(@selected_stage_run.actual_model_used)}</dd>
+                    </div>
+                  </dl>
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    <span class="badge badge-ghost badge-sm">
+                      Advisory — does not change run caps
+                    </span>
+                    <span class="badge badge-ghost badge-sm">
+                      Spend follows routed model
+                    </span>
                   </div>
-                  <div>
-                    <dt class="text-[var(--color-smoke)]">Cap headroom (USD)</dt>
-                    <dd>{format_stage_money(cap_headroom_usd(@run, @selected_stage_run))}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-[var(--color-smoke)]">Requested model</dt>
-                    <dd>{model_label(@selected_stage_run.requested_model)}</dd>
-                  </div>
-                  <div>
-                    <dt class="text-[var(--color-smoke)]">Routed model</dt>
-                    <dd>{model_label(@selected_stage_run.actual_model_used)}</dd>
-                  </div>
-                </dl>
-                <div class="mt-3 flex flex-wrap gap-2">
-                  <span class="rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)]">
-                    Advisory — does not change run caps
-                  </span>
-                  <span class="rounded border border-ash px-2 py-1 text-xs text-[var(--color-smoke)]">
-                    Spend follows routed model
-                  </span>
                 </div>
               </section>
             <% end %>
 
             <%= case @pane do %>
               <% "diff" -> %>
-                <section class="rounded border border-ash bg-iron/40 p-4">
-                  <pre class="max-h-[32rem] overflow-auto whitespace-pre-wrap font-mono text-xs text-bone phx-no-curly-interpolation">{@diff_text}</pre>
+                <section class="rounded-lg border border-base-300 bg-base-200 p-4">
+                  <pre class="max-h-[32rem] overflow-auto whitespace-pre-wrap kiln-mono text-xs phx-no-curly-interpolation">{@diff_text}</pre>
                 </section>
               <% "logs" -> %>
-                <section class="rounded border border-ash bg-iron/40 p-2">
+                <section class="rounded-lg border border-base-300 bg-base-200 p-3">
                   <div id="run-detail-logs" phx-update="stream" class="space-y-1 font-mono text-xs">
-                    <div :for={{id, row} <- @streams.logs} id={id} class="text-bone">{row.line}</div>
+                    <div :for={{id, row} <- @streams.logs} id={id} class="text-base-content">
+                      {row.line}
+                    </div>
                   </div>
                 </section>
               <% "events" -> %>
-                <section class="rounded border border-ash bg-iron/40 p-2">
+                <section class="rounded-lg border border-base-300 bg-base-200 p-3">
                   <div id="run-detail-events" phx-update="stream" class="space-y-2">
                     <details
                       :for={{id, ev} <- @streams.events}
                       id={id}
-                      class="rounded border border-ash bg-char/80 p-2 text-xs text-bone"
+                      class="rounded-md border border-base-300 bg-base-100 p-2 text-xs text-base-content"
                     >
                       <summary class="cursor-pointer font-semibold">{inspect(ev.event_kind)}</summary>
-                      <pre class="mt-2 overflow-x-auto text-[var(--color-smoke)] phx-no-curly-interpolation">{Jason.encode!(ev.payload, pretty: true)}</pre>
+                      <pre class="mt-2 overflow-x-auto text-base-content/70 phx-no-curly-interpolation">{Jason.encode!(ev.payload, pretty: true)}</pre>
                     </details>
                   </div>
                 </section>
               <% "chatter" -> %>
-                <section class="rounded border border-ash bg-iron/40 p-4 text-sm text-[var(--color-smoke)]">
+                <section class="rounded-lg border border-base-300 bg-base-200 p-4 text-sm text-base-content/70">
                   <div id="run-detail-chatter" phx-update="stream">
                     <div :for={{id, row} <- @streams.chatter} id={id}>{row.line}</div>
                   </div>
@@ -528,13 +540,13 @@ defmodule KilnWeb.RunDetailLive do
             id="run-detail-compare-modal"
             class="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
           >
-            <div class="w-full max-w-md rounded border border-ash bg-char p-4 shadow-lg">
+            <div class="w-full max-w-md rounded-lg border border-base-300 bg-base-100 p-5 shadow-xl">
               <div class="flex items-start justify-between gap-3">
-                <h2 class="text-lg font-semibold text-bone">Compare with…</h2>
+                <h2 class="kiln-h2">Compare with…</h2>
                 <button
                   type="button"
                   phx-click="close_compare_picker"
-                  class="text-sm text-[var(--color-smoke)] underline"
+                  class="link link-primary text-sm"
                 >
                   Close
                 </button>
@@ -546,7 +558,7 @@ defmodule KilnWeb.RunDetailLive do
                       type="button"
                       phx-click="pick_compare_target"
                       phx-value-other_id={uuid_to_canonical(other.id)}
-                      class="w-full rounded border border-ash px-3 py-2 text-left text-sm text-bone transition-colors hover:border-ember"
+                      class="btn btn-sm btn-ghost w-full justify-start border border-base-300 hover:border-primary font-normal"
                     >
                       {other.workflow_id} — {short(other.id)}
                     </button>
@@ -554,7 +566,7 @@ defmodule KilnWeb.RunDetailLive do
                 <% end %>
               </ul>
               <%= if @compare_pick_list == [] do %>
-                <p class="mt-3 text-sm text-[var(--color-smoke)]">No other runs available.</p>
+                <p class="kiln-meta mt-3">No other runs available.</p>
               <% end %>
             </div>
           </div>
@@ -578,7 +590,7 @@ defmodule KilnWeb.RunDetailLive do
     assigns = assign(assigns, :stage_q, wid)
 
     ~H"""
-    <nav class="flex flex-wrap gap-2 border-b border-ash pb-3 text-sm" aria-label="Panes">
+    <nav class="flex flex-wrap gap-2 border-b border-base-300 pb-3 text-sm" aria-label="Panes">
       <.link patch={~p"/runs/#{@run.id}?#{qs(@stage_q, "diff")}"} class={tab_class(@pane, "diff")}>
         Diff
       </.link>
@@ -608,9 +620,9 @@ defmodule KilnWeb.RunDetailLive do
     base = "rounded border px-3 py-1 font-sans transition-colors"
 
     if current == pane do
-      [base, "border-ember text-ember"]
+      [base, "border-primary text-primary"]
     else
-      [base, "border-ash text-bone hover:border-ash"]
+      [base, "border-base-300 text-base-content hover:border-base-300"]
     end
   end
 
@@ -756,6 +768,13 @@ defmodule KilnWeb.RunDetailLive do
   defp uuid_to_canonical(<<_::128>> = raw) do
     case Ecto.UUID.load(raw) do
       {:ok, s} -> s
+      :error -> ""
+    end
+  end
+
+  defp uuid_to_canonical(uuid) when is_binary(uuid) do
+    case Ecto.UUID.cast(uuid) do
+      {:ok, canonical} -> canonical
       :error -> ""
     end
   end

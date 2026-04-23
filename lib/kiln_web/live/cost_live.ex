@@ -177,37 +177,41 @@ defmodule KilnWeb.CostLive do
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
     >
-      <div id="cost-dashboard" class="space-y-6 text-bone">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold">Costs</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
+      <div id="cost-dashboard" class="space-y-6 text-base-content">
+        <div class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Control</p>
+          <h1 class="kiln-h1 mt-1">Costs</h1>
+          <p class="mt-1 text-sm text-base-content/60">
             Spend rollups from <span class="font-mono">stage_runs.cost_usd</span> (UTC windows).
           </p>
         </div>
 
-        <section class="grid gap-4 rounded border border-ash bg-char/80 p-4 font-mono text-sm md:grid-cols-3">
+        <section class="grid gap-4 rounded border border-base-300 bg-base-200 p-4 font-mono text-sm md:grid-cols-3">
           <div>
-            <div class="text-xs font-semibold uppercase text-[var(--color-smoke)]">Today actual</div>
-            <div class="mt-1 text-lg text-bone">{format_usd(today_total())}</div>
+            <div class="kiln-eyebrow">Today actual</div>
+            <div class="mt-1 text-lg text-base-content">{format_usd(today_total())}</div>
           </div>
           <div>
-            <div class="text-xs font-semibold uppercase text-[var(--color-smoke)]">
+            <div class="kiln-eyebrow">
               This week actual
             </div>
-            <div class="mt-1 text-lg text-bone">{format_usd(week_total())}</div>
+            <div class="mt-1 text-lg text-base-content">{format_usd(week_total())}</div>
           </div>
           <div>
-            <div class="text-xs font-semibold uppercase text-[var(--color-smoke)]">
+            <div class="kiln-eyebrow">
               Week projection
             </div>
-            <div class="mt-1 text-sm text-[var(--color-smoke)]">{@projection_note}</div>
-            <div class="text-xs text-[var(--color-smoke)]">
+            <div class="mt-1 text-sm text-base-content/60">{@projection_note}</div>
+            <div class="text-xs text-base-content/60">
               Projection row is modeled separately from actuals (D-721).
             </div>
           </div>
         </section>
 
-        <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Cost views">
+        <nav
+          class="flex flex-wrap gap-2 border-b border-base-300 pb-2 text-sm"
+          aria-label="Cost views"
+        >
           <.link
             patch={~p"/costs?#{[tab: "summary", pivot: to_string(@pivot)]}"}
             class={surface_class(@surface, :summary)}
@@ -223,17 +227,17 @@ defmodule KilnWeb.CostLive do
         </nav>
 
         <%= if @surface == :intel do %>
-          <section class="rounded border border-ash bg-char/80 p-4 text-sm text-bone">
-            <h2 class="text-xs font-semibold uppercase text-[var(--color-smoke)]">Advisory</h2>
+          <section class="rounded border border-base-300 bg-base-200 p-4 text-sm text-base-content">
+            <h2 class="kiln-eyebrow">Advisory</h2>
             <%= if @intel_advisory do %>
-              <p class="mt-2 leading-relaxed text-bone">{@intel_advisory}</p>
+              <p class="mt-2 leading-relaxed text-base-content">{@intel_advisory}</p>
             <% else %>
-              <p class="mt-2 text-[var(--color-smoke)]">Not enough history for an advisory yet</p>
+              <p class="mt-2 text-base-content/60">Not enough history for an advisory yet</p>
             <% end %>
           </section>
 
           <nav
-            class="flex flex-wrap gap-2 text-xs text-[var(--color-smoke)]"
+            class="flex flex-wrap gap-2 text-xs text-base-content/60"
             aria-label="Intel period"
           >
             <%= for p <- [:day, :week, :month] do %>
@@ -247,7 +251,7 @@ defmodule KilnWeb.CostLive do
           </nav>
         <% end %>
 
-        <nav class="flex flex-wrap gap-2 border-b border-ash pb-2 text-sm" aria-label="Pivot">
+        <nav class="flex flex-wrap gap-2 border-b border-base-300 pb-2 text-sm" aria-label="Pivot">
           <%= for t <- @pivot_tabs do %>
             <.link
               patch={~p"/costs?#{pivot_query_attrs(@surface, @period, t)}"}
@@ -259,16 +263,20 @@ defmodule KilnWeb.CostLive do
         </nav>
 
         <%= if @rows == [] do %>
-          <section class="rounded border border-ash bg-char/80 p-8">
+          <section class="rounded border border-base-300 bg-base-200 p-8">
             <h2 class="text-lg font-semibold">No spend recorded yet</h2>
-            <p class="mt-2 text-sm text-[var(--color-smoke)]">
+            <p class="mt-2 text-sm text-base-content/60">
               Cost appears after agents run. Confirm telemetry from the adapter is enabled if this stays empty.
             </p>
           </section>
         <% else %>
-          <div class="overflow-x-auto rounded border border-ash bg-iron/40">
-            <table class="w-full min-w-[28rem] font-mono text-xs text-bone">
-              <thead class="border-b border-ash text-left text-[var(--color-smoke)]">
+          <div
+            class="overflow-x-auto rounded border border-base-300 bg-base-300/60"
+            tabindex="0"
+            aria-label="Cost summary table"
+          >
+            <table class="w-full min-w-[28rem] font-mono text-xs text-base-content">
+              <thead class="border-b border-base-300 text-left text-base-content/60">
                 <tr>
                   <th class="p-2">Key</th>
                   <th class="p-2">Calls</th>
@@ -277,7 +285,7 @@ defmodule KilnWeb.CostLive do
               </thead>
               <tbody>
                 <%= for row <- @rows do %>
-                  <tr class="border-b border-ash/60">
+                  <tr class="border-b border-base-300/60">
                     <td class="p-2">{format_key(row.key)}</td>
                     <td class="p-2">{row.calls}</td>
                     <td class="p-2">{format_usd(row.usd)}</td>
@@ -288,8 +296,8 @@ defmodule KilnWeb.CostLive do
           </div>
         <% end %>
 
-        <footer class="space-y-1 text-xs text-[var(--color-smoke)]">
-          <p class="text-sm opacity-70">
+        <footer class="space-y-1 text-xs text-base-content/60">
+          <p class="text-sm text-base-content/80">
             Advisory: rollups here are indicative and do not change per-run caps. Open a run on the board for per-stage truth and the full disclaimer chips.
           </p>
           <p>Last updated: {DateTime.to_iso8601(@last_updated_at)}</p>
@@ -308,9 +316,9 @@ defmodule KilnWeb.CostLive do
     base = "rounded border px-3 py-1 font-sans transition-colors"
 
     if current == tab do
-      [base, "border-ember text-ember"]
+      [base, "border-primary text-primary"]
     else
-      [base, "border-ash text-bone hover:border-ash"]
+      [base, "border-base-300 text-base-content hover:border-base-300"]
     end
   end
 
@@ -318,9 +326,9 @@ defmodule KilnWeb.CostLive do
     base = "rounded border px-2 py-0.5 font-mono transition-colors"
 
     if current == p do
-      [base, "border-ember text-ember"]
+      [base, "border-primary text-primary"]
     else
-      [base, "border-ash text-bone hover:border-ash"]
+      [base, "border-base-300 text-base-content hover:border-base-300"]
     end
   end
 
@@ -333,9 +341,9 @@ defmodule KilnWeb.CostLive do
     base = "rounded border px-3 py-1 font-sans transition-colors"
 
     if current == tab do
-      [base, "border-ember text-ember"]
+      [base, "border-primary text-primary"]
     else
-      [base, "border-ash text-bone hover:border-ash"]
+      [base, "border-base-300 text-base-content hover:border-base-300"]
     end
   end
 

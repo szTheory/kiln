@@ -153,10 +153,11 @@ defmodule KilnWeb.TemplatesLive do
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
     >
-      <div id="templates-root" class="mx-auto max-w-5xl space-y-8 text-bone">
-        <header class="border-b border-ash pb-4">
-          <h1 class="text-2xl font-semibold">{@page_title}</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
+      <div id="templates-root" class="mx-auto max-w-5xl space-y-8 text-base-content">
+        <header class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Start here</p>
+          <h1 class="kiln-h1 mt-1">{@page_title}</h1>
+          <p class="mt-1 text-sm text-base-content/60">
             Built-in specs and workflows ship with Kiln — pick a template, then start a run when ready.
           </p>
         </header>
@@ -166,16 +167,18 @@ defmodule KilnWeb.TemplatesLive do
             <%= for t <- @templates do %>
               <article
                 id={"template-card-#{t.id}"}
-                class="flex flex-col rounded border border-ash bg-char/80 p-4 shadow-none"
+                class="flex flex-col rounded border border-base-300 bg-base-200 p-4 shadow-none"
               >
                 <h2 class="text-lg font-semibold">{t.title}</h2>
-                <p class="mt-2 line-clamp-4 text-sm text-[var(--color-smoke)]">{t.purpose}</p>
-                <p class="mt-3 text-xs text-[var(--color-smoke)]">
-                  <span class="font-medium text-bone">Typical duration (not a guarantee):</span>
+                <p class="mt-2 line-clamp-4 text-sm text-base-content/60">{t.purpose}</p>
+                <p class="mt-3 text-xs text-base-content/60">
+                  <span class="font-medium text-base-content">
+                    Typical duration (not a guarantee):
+                  </span>
                   {t.time_hint}
                 </p>
-                <p class="mt-1 text-xs text-[var(--color-smoke)]">
-                  <span class="font-medium text-bone">Indicative cost (USD):</span>
+                <p class="mt-1 text-xs text-base-content/60">
+                  <span class="font-medium text-base-content">Indicative cost (USD):</span>
                   {t.cost_hint}
                   <span class="block pt-1">
                     Actual usage varies with model, retries, and spec changes.
@@ -184,7 +187,7 @@ defmodule KilnWeb.TemplatesLive do
                 <div class="mt-4 flex flex-wrap gap-2">
                   <.link
                     navigate={~p"/templates/#{t.id}"}
-                    class="btn btn-sm border border-ash bg-iron/40 text-bone hover:border-ember"
+                    class="btn btn-sm border border-base-300 bg-base-300/60 text-base-content hover:border-primary"
                   >
                     View
                   </.link>
@@ -196,15 +199,15 @@ defmodule KilnWeb.TemplatesLive do
 
         <%= if @live_action == :show && @selected do %>
           <% t = @selected %>
-          <section class="space-y-6 rounded border border-ash bg-char/80 p-6">
+          <section class="space-y-6 rounded border border-base-300 bg-base-200 p-6">
             <div>
-              <p class="text-xs font-mono text-[var(--color-smoke)]">{t.id}</p>
+              <p class="text-xs font-mono text-base-content/60">{t.id}</p>
               <h2 class="mt-1 text-xl font-semibold">{t.title}</h2>
-              <p class="mt-3 text-sm text-[var(--color-smoke)]">{t.purpose}</p>
+              <p class="mt-3 text-sm text-base-content/60">{t.purpose}</p>
             </div>
 
-            <div class="rounded border border-iron/60 bg-iron/20 p-3 text-sm text-[var(--color-smoke)]">
-              <p class="font-medium text-bone">Assumptions</p>
+            <div class="rounded border border-base-300/60 bg-base-300/30 p-3 text-sm text-base-content/60">
+              <p class="font-medium text-base-content">Assumptions</p>
               <ul class="mt-2 list-disc space-y-1 pl-5">
                 <%= for a <- t.assumptions do %>
                   <li>{a}</li>
@@ -217,7 +220,7 @@ defmodule KilnWeb.TemplatesLive do
                 <input type="hidden" name="template_id" value={t.id} />
                 <button
                   type="submit"
-                  class="btn btn-sm bg-ember text-ink hover:bg-ember/90"
+                  class="btn btn-sm btn-primary"
                   disabled={@use_busy?}
                 >
                   {if(@use_busy?, do: "Applying…", else: "Use template")}
@@ -228,7 +231,7 @@ defmodule KilnWeb.TemplatesLive do
                 <input type="hidden" name="template_id" value={t.id} />
                 <button
                   type="submit"
-                  class="btn btn-sm border border-ash bg-iron/40"
+                  class="btn btn-sm border border-base-300 bg-base-300/60"
                   disabled={@edit_first_busy?}
                 >
                   Edit in inbox first
@@ -239,10 +242,10 @@ defmodule KilnWeb.TemplatesLive do
             <%= if @last_promoted && @last_promoted.template_id == t.id do %>
               <div
                 id="templates-success-panel"
-                class="rounded border border-ember/40 bg-char/90 p-4 text-sm text-bone"
+                class="rounded border border-primary/40 bg-base-200 p-4 text-sm text-base-content"
               >
                 <p class="font-semibold">Spec promoted</p>
-                <p class="mt-1 text-[var(--color-smoke)]">
+                <p class="mt-1 text-base-content/60">
                   {@last_promoted.spec.title} is ready. Start a queued run on the saved workflow.
                 </p>
                 <form id="templates-start-run-form" phx-submit="start_run" class="mt-3">
@@ -250,19 +253,19 @@ defmodule KilnWeb.TemplatesLive do
                   <button
                     type="submit"
                     id="templates-start-run"
-                    class="btn btn-sm bg-ember text-ink hover:bg-ember/90"
+                    class="btn btn-sm btn-primary"
                     disabled={@start_busy?}
                   >
                     {if(@start_busy?, do: "Starting…", else: "Start run")}
                   </button>
                 </form>
-                <p class="mt-3 text-xs text-[var(--color-smoke)]">
+                <p class="mt-3 text-xs text-base-content/60">
                   <%!-- TODO(D-1711): wire external_operations idempotency key template_instantiate:{template_id} when KilnWeb adopts the intent table for spec flows. Double-submit guard: buttons disabled while pending. --%>
                 </p>
               </div>
             <% end %>
 
-            <.link navigate={~p"/templates"} class="text-sm text-ember underline">
+            <.link navigate={~p"/templates"} class="text-sm text-primary underline">
               Back to catalog
             </.link>
           </section>

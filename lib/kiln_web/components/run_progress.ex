@@ -24,13 +24,13 @@ defmodule KilnWeb.Components.RunProgress do
         @stale_class
       ]}
     >
-      <div class="text-bone">
+      <div class="text-base-content">
         Stages {@stages_done}/{@stages_total}
       </div>
-      <div class="mt-0.5 text-[var(--color-smoke)]">
+      <div class="mt-0.5 text-base-content/60">
         Elapsed {@elapsed_label}
       </div>
-      <div class="mt-0.5 text-[var(--color-smoke)]">
+      <div class="mt-0.5 text-base-content/60">
         Not enough history
       </div>
     </div>
@@ -46,15 +46,15 @@ defmodule KilnWeb.Components.RunProgress do
   defp format_elapsed(s) when s < 60, do: "#{s}s"
   defp format_elapsed(s), do: "#{div(s, 60)}m #{rem(s, 60)}s"
 
-  defp staleness_class(nil), do: "border-ash text-bone"
+  defp staleness_class(nil), do: "border-base-300 text-base-content"
 
   defp staleness_class(%DateTime{} = at) do
     diff = DateTime.diff(DateTime.utc_now(:microsecond), at, :second)
 
     cond do
-      diff < 30 -> "border-emerald-700/60 text-bone"
-      diff < 300 -> "border-amber-600/70 text-bone"
-      true -> "border-[var(--color-clay)] text-bone"
+      diff < 30 -> "border-success/70 text-base-content"
+      diff < 300 -> "border-warning/70 text-base-content"
+      true -> "border-error text-base-content"
     end
   end
 end

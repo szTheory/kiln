@@ -61,25 +61,26 @@ defmodule KilnWeb.WorkflowLive do
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
     >
-      <div id="workflow-registry" class="space-y-6 text-bone">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold">Workflows</h1>
-          <p class="mt-1 max-w-3xl text-sm text-[var(--color-smoke)]">
+      <div id="workflow-registry" class="space-y-6 text-base-content">
+        <div class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Factory</p>
+          <h1 class="kiln-h1 mt-1">Workflows</h1>
+          <p class="mt-1 max-w-3xl text-sm text-base-content/60">
             Snapshots capture each successful load from disk. Editing stays out of the browser — change YAML in the repo, then reload.
           </p>
         </div>
 
         <%= if @snapshots == [] do %>
-          <section class="rounded border border-ash bg-char/80 p-8">
+          <section class="rounded border border-base-300 bg-base-200 p-8">
             <h2 class="text-lg font-semibold">No workflows loaded</h2>
-            <p class="mt-2 text-sm text-[var(--color-smoke)]">
+            <p class="mt-2 text-sm text-base-content/60">
               Load a workflow from disk to inspect YAML and version history here. Editing stays out of the browser.
             </p>
           </section>
         <% else %>
           <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-            <aside class="rounded border border-ash bg-char/80 p-4">
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <aside class="rounded border border-base-300 bg-base-200 p-4">
+              <h2 class="kiln-eyebrow">
                 Snapshots
               </h2>
               <ul class="mt-3 space-y-2 font-mono text-xs">
@@ -87,11 +88,11 @@ defmodule KilnWeb.WorkflowLive do
                   <li>
                     <.link
                       navigate={~p"/workflows/#{s.workflow_id}"}
-                      class="block truncate text-ember underline"
+                      class="block truncate text-primary underline"
                     >
                       {s.workflow_id} v{s.version}
                     </.link>
-                    <div class="text-[var(--color-smoke)]">
+                    <div class="text-base-content/60">
                       {DateTime.to_iso8601(s.inserted_at)}
                     </div>
                   </li>
@@ -99,14 +100,18 @@ defmodule KilnWeb.WorkflowLive do
               </ul>
             </aside>
 
-            <section class="rounded border border-ash bg-iron/40 p-4">
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <section class="rounded border border-base-300 bg-base-300/60 p-4">
+              <h2 class="kiln-eyebrow">
                 Loaded definitions
               </h2>
               <%= if @yaml_text && @yaml_text != "" do %>
-                <pre class="mt-3 max-h-[40rem] overflow-auto text-xs text-bone phx-no-curly-interpolation">{@yaml_text}</pre>
+                <pre
+                  class="mt-3 max-h-[40rem] overflow-auto text-xs text-base-content phx-no-curly-interpolation"
+                  tabindex="0"
+                  aria-label="Workflow YAML"
+                >{@yaml_text}</pre>
               <% else %>
-                <p class="mt-3 text-sm text-[var(--color-smoke)]">
+                <p class="mt-3 text-sm text-base-content/60">
                   <%= if @selected_snapshot && @selected_snapshot.truncated do %>
                     YAML omitted (snapshot truncated at load time). Checksum: {@selected_snapshot.compiled_checksum}
                   <% else %>

@@ -150,64 +150,67 @@ defmodule KilnWeb.RunBoardLive do
       operator_snapshots={@operator_snapshots}
     >
       <div id="run-board" class="space-y-6">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold text-bone">Runs</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
+        <div class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Factory</p>
+          <h1 class="kiln-h1 mt-1">Runs</h1>
+          <p class="kiln-meta mt-1">
             Active and terminal runs for this factory.
           </p>
           <div
             id="compare-strip"
-            class="mt-4 rounded border border-ash bg-iron/40 p-3 text-sm text-bone"
+            class="card card-bordered bg-base-200 border-base-300 mt-4"
           >
-            <p class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
-              Compare
-            </p>
-            <div class="mt-2 flex flex-wrap gap-6">
-              <div>
-                <p class="text-[var(--color-smoke)]">Choose baseline run</p>
-                <p class="mt-1 font-mono text-xs tabular-nums text-bone">
-                  <%= if @compare_baseline_id do %>
-                    {short_compare(@compare_baseline_id)}
-                  <% else %>
-                    <span class="text-[var(--color-smoke)]">None selected</span>
-                  <% end %>
-                </p>
-              </div>
-              <div>
-                <p class="text-[var(--color-smoke)]">Choose candidate run</p>
-                <p class="mt-1 font-mono text-xs tabular-nums text-bone">
-                  <%= if @compare_candidate_id do %>
-                    {short_compare(@compare_candidate_id)}
-                  <% else %>
-                    <span class="text-[var(--color-smoke)]">None selected</span>
-                  <% end %>
-                </p>
+            <div class="card-body p-4 text-sm">
+              <p class="kiln-eyebrow">Compare</p>
+              <div class="mt-2 flex flex-wrap gap-6">
+                <div>
+                  <p class="kiln-meta">Choose baseline run</p>
+                  <p class="mt-1 font-mono text-xs tabular-nums text-base-content">
+                    <%= if @compare_baseline_id do %>
+                      {short_compare(@compare_baseline_id)}
+                    <% else %>
+                      <span class="text-base-content/50">None selected</span>
+                    <% end %>
+                  </p>
+                </div>
+                <div>
+                  <p class="kiln-meta">Choose candidate run</p>
+                  <p class="mt-1 font-mono text-xs tabular-nums text-base-content">
+                    <%= if @compare_candidate_id do %>
+                      {short_compare(@compare_candidate_id)}
+                    <% else %>
+                      <span class="text-base-content/50">None selected</span>
+                    <% end %>
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <%= if @runs_empty? do %>
-          <section class="rounded border border-ash bg-char/80 p-8">
-            <h2 class="text-lg font-semibold text-bone">No runs in flight</h2>
-            <p class="mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-smoke)]">
-              Start a run from the workflow registry when you are ready. New activity appears here in real time.
-            </p>
+          <section class="card card-bordered bg-base-200 border-base-300">
+            <div class="card-body p-8">
+              <h2 class="kiln-h2">No runs in flight</h2>
+              <p class="kiln-body text-base-content/70 mt-2 max-w-xl">
+                Start a run from the workflow registry when you are ready. New activity appears here in real time.
+              </p>
+            </div>
           </section>
         <% else %>
           <div class="grid gap-4 overflow-x-auto pb-4 lg:grid-cols-9">
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="queued"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Queued
               </h2>
               <div id="runs_queued" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_queued}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -215,17 +218,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="planning"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Planning
               </h2>
               <div id="runs_planning" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_planning}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -233,17 +236,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="coding"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Coding
               </h2>
               <div id="runs_coding" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_coding}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -251,17 +254,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="testing"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Testing
               </h2>
               <div id="runs_testing" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_testing}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -269,17 +272,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="verifying"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Verifying
               </h2>
               <div id="runs_verifying" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_verifying}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -287,17 +290,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="blocked"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Blocked
               </h2>
               <div id="runs_blocked" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_blocked}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -305,17 +308,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="merged"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Merged
               </h2>
               <div id="runs_merged" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_merged}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -323,17 +326,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="failed"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Failed
               </h2>
               <div id="runs_failed" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_failed}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -341,17 +344,17 @@ defmodule KilnWeb.RunBoardLive do
             </section>
 
             <section
-              class="flex min-w-[10.5rem] flex-col gap-2 rounded border border-ash bg-char/80 p-2"
+              class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="escalated"
             >
-              <h2 class="border-b border-ash pb-1 font-sans text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+              <h2 class="kiln-eyebrow border-b border-base-300 pb-1.5">
                 Escalated
               </h2>
               <div id="runs_escalated" phx-update="stream" class="flex flex-col gap-2">
                 <div
                   :for={{dom_id, run} <- @streams.runs_escalated}
                   id={dom_id}
-                  class="rounded border border-ash bg-iron/60 p-2 font-mono text-xs text-bone"
+                  class="rounded-md border border-base-300 bg-base-100 p-2.5 font-mono text-xs text-base-content"
                 >
                   <.board_run_card run={run} />
                 </div>
@@ -364,7 +367,7 @@ defmodule KilnWeb.RunBoardLive do
           <div
             id="agent-ticker"
             phx-update="stream"
-            class="max-h-64 space-y-1 overflow-y-auto font-mono text-[11px] text-bone"
+            class="max-h-64 space-y-1 overflow-y-auto font-mono text-[11px] text-base-content"
           >
             <div :for={{tid, row} <- @streams.ticker_lines} id={tid}>
               {row.line}
@@ -388,10 +391,10 @@ defmodule KilnWeb.RunBoardLive do
       |> assign(:stages_total, stages_total)
 
     ~H"""
-    <div class="truncate font-semibold text-ember" title={@run.id}>
+    <div class="truncate font-semibold text-primary" title={@run.id}>
       {short_id(@run.id)}
     </div>
-    <div class="mt-1 truncate text-[var(--color-smoke)]">{@run.workflow_id}</div>
+    <div class="mt-1 truncate text-base-content/60">{@run.workflow_id}</div>
     <div class="mt-2">
       <%!-- RunProgress (UI-08) --%>
       <.run_progress
@@ -407,7 +410,7 @@ defmodule KilnWeb.RunBoardLive do
         phx-click="pick_compare_slot"
         phx-value-id={uuid_to_string(@run.id)}
         phx-value-slot="baseline"
-        class="rounded border border-ash px-1.5 py-0.5 text-[10px] text-bone transition-colors hover:border-ember"
+        class="btn btn-xs btn-ghost border border-base-300 hover:border-primary"
       >
         Baseline
       </button>
@@ -416,7 +419,7 @@ defmodule KilnWeb.RunBoardLive do
         phx-click="pick_compare_slot"
         phx-value-id={uuid_to_string(@run.id)}
         phx-value-slot="candidate"
-        class="rounded border border-ash px-1.5 py-0.5 text-[10px] text-bone transition-colors hover:border-ember"
+        class="btn btn-xs btn-ghost border border-base-300 hover:border-primary"
       >
         Candidate
       </button>

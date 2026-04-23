@@ -49,6 +49,28 @@ defmodule KilnWeb.RunCompareLiveTest do
 
       assert {:error, {:live_redirect, %{to: "/"}}} = live(conn, path)
     end
+
+    test "swap flips baseline and candidate query params", %{conn: conn} do
+      a = RunFactory.insert(:run, workflow_id: "elixir_phoenix_feature")
+      b = RunFactory.insert(:run, workflow_id: "elixir_phoenix_feature")
+
+      bl = canonical_uuid_string(a.id)
+      ca = canonical_uuid_string(b.id)
+
+      path = "/runs/compare?" <> URI.encode_query(%{"baseline" => bl, "candidate" => ca})
+      {:ok, view, _html} = live(conn, path)
+
+      assert render_click(element(view, "#run-compare-swap")) =~ "data-baseline-id=\"#{ca}\""
+
+      assert_patch(
+        view,
+        "/runs/compare?" <> URI.encode_query(%{"baseline" => ca, "candidate" => bl})
+      )
+
+      html = render(view)
+      assert html =~ "data-baseline-id=\"#{ca}\""
+      assert html =~ "data-candidate-id=\"#{bl}\""
+    end
   end
 
   defp canonical_uuid_string(id) do

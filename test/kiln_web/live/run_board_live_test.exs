@@ -4,9 +4,12 @@ defmodule KilnWeb.RunBoardLiveTest do
   import Phoenix.LiveViewTest
 
   alias Kiln.Factory.Run, as: RunFactory
+  alias Kiln.Repo
+  alias Kiln.Runs.Run
 
   describe "GET /" do
     test "renders run board shell and empty state", %{conn: conn} do
+      Repo.delete_all(Run)
       {:ok, view, _html} = live(conn, ~p"/")
 
       assert has_element?(view, "#run-board")

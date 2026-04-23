@@ -41,6 +41,11 @@ defmodule KilnWeb.ProviderHealthLive do
   end
 
   @impl true
+  def handle_info({:factory_summary, summary}, socket) do
+    {:noreply, assign(socket, :factory_summary, summary)}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app
@@ -50,15 +55,16 @@ defmodule KilnWeb.ProviderHealthLive do
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
     >
-      <div id="provider-health" class="space-y-6 text-bone">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold">Providers</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
+      <div id="provider-health" class="space-y-6">
+        <div class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Operations</p>
+          <h1 class="kiln-h1 mt-1">Providers</h1>
+          <p class="kiln-meta mt-1">
             API presence and recent outcomes (poll every {@poll_ms |> div(1000)}s). Keys are never shown.
           </p>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <%= for snap <- @snapshots do %>
             <.provider_card snapshot={snap} />
           <% end %>
@@ -81,47 +87,62 @@ defmodule KilnWeb.ProviderHealthLive do
 
     ~H"""
     <section class={[
-      "rounded border-2 p-4 font-sans",
+      "card card-bordered bg-base-200 border-2",
       @rag
     ]}>
-      <h2 class="text-lg font-semibold capitalize">{to_string(@snap.id)}</h2>
-      <p class="mt-2 text-sm font-medium">{@status}</p>
-      <dl class="mt-4 grid gap-2 text-xs text-[var(--color-smoke)]">
-        <div class="flex justify-between gap-2">
-          <dt>Spend today (USD)</dt>
-          <dd class="font-mono text-bone">{format_usd(@snap.spend_usd_today)}</dd>
+      <div class="card-body p-5">
+        <div class="flex items-start justify-between gap-3">
+          <h2 class="kiln-h2 capitalize">{to_string(@snap.id)}</h2>
+          <span class={["badge", status_badge_class(@snap)]}>{@status}</span>
         </div>
-        <div class="flex justify-between gap-2">
-          <dt>Recent error rate</dt>
-          <dd class="font-mono text-bone">{format_rate(@snap.recent_error_rate)}</dd>
-        </div>
-        <div class="flex justify-between gap-2">
-          <dt>Last success</dt>
-          <dd class="font-mono text-bone">{format_dt(@snap.last_ok_at)}</dd>
-        </div>
-        <div class="flex justify-between gap-2">
-          <dt>Rate-limit headroom</dt>
-          <dd class="font-mono text-bone">{format_optional_int(@snap.rate_limit_remaining)}</dd>
-        </div>
-        <div class="flex justify-between gap-2">
-          <dt>Token budget (today)</dt>
-          <dd class="font-mono text-bone">{format_budget(@snap.token_budget_remaining_today)}</dd>
-        </div>
-      </dl>
+        <dl class="mt-4 grid gap-2 text-xs">
+          <div class="flex justify-between gap-2">
+            <dt class="text-base-content/60">Spend today (USD)</dt>
+            <dd class="font-mono tabular-nums text-base-content">
+              {format_usd(@snap.spend_usd_today)}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-base-content/60">Recent error rate</dt>
+            <dd class="font-mono tabular-nums text-base-content">
+              {format_rate(@snap.recent_error_rate)}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-base-content/60">Last success</dt>
+            <dd class="font-mono tabular-nums text-base-content">{format_dt(@snap.last_ok_at)}</dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-base-content/60">Rate-limit headroom</dt>
+            <dd class="font-mono tabular-nums text-base-content">
+              {format_optional_int(@snap.rate_limit_remaining)}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-2">
+            <dt class="text-base-content/60">Token budget (today)</dt>
+            <dd class="font-mono tabular-nums text-base-content">
+              {format_budget(@snap.token_budget_remaining_today)}
+            </dd>
+          </div>
+        </dl>
+      </div>
     </section>
     """
   end
 
   defp rag_classes(snap) do
     cond do
-      snap.recent_error_rate >= 0.5 ->
-        "border-red-700/80 bg-char/60"
+      snap.recent_error_rate >= 0.5 -> "border-error"
+      !snap.key_configured? -> "border-warning"
+      true -> "border-success"
+    end
+  end
 
-      !snap.key_configured? ->
-        "border-clay bg-char/60"
-
-      true ->
-        "border-emerald-700/70 bg-char/60"
+  defp status_badge_class(snap) do
+    cond do
+      snap.recent_error_rate >= 0.5 -> "badge-error"
+      !snap.key_configured? -> "badge-warning"
+      true -> "badge-success"
     end
   end
 

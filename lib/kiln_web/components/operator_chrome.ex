@@ -16,51 +16,45 @@ defmodule KilnWeb.Components.OperatorChrome do
 
   def operator_mode_chip(assigns) do
     ~H"""
-    <div
+    <span
       id="operator-mode-chip"
       class={[
-        "rounded border px-3 py-2 text-xs leading-snug",
-        @mode == :live && "border-ember/80",
-        @mode == :demo && "border-ember/50",
-        @mode == :unknown && "border-ash"
+        "kiln-chip",
+        @mode == :live && "kiln-chip--live",
+        @mode == :demo && "kiln-chip--demo",
+        @mode == :unknown && "kiln-chip--warn"
       ]}
       aria-label={mode_aria_label(@mode)}
+      title={mode_tooltip(@mode)}
     >
-      <%= cond do %>
-        <% @mode == :live -> %>
-          <div class="text-[12px] font-semibold leading-[1.4] text-bone">Live</div>
-          <p class="mt-1 max-w-xl text-[16px] font-normal leading-[1.5] text-[var(--color-smoke)]">
-            Runtime credentials apply; external APIs may incur cost.
-          </p>
-        <% @mode == :demo -> %>
-          <div class="text-[12px] font-semibold leading-[1.4] text-bone">Demo</div>
-          <p class="mt-1 max-w-xl text-[16px] font-normal leading-[1.5] text-[var(--color-smoke)]">
-            Outcomes use fixtures and stubs; no paid provider calls.
-          </p>
-        <% true -> %>
-          <div class="text-[12px] font-semibold leading-[1.4] text-bone">
-            Runtime mode unavailable
-          </div>
-          <p class="mt-1 max-w-xl text-[16px] font-normal leading-[1.5] text-[var(--color-smoke)]">
-            The shell could not read demo vs live state. Open provider health to verify providers.
-          </p>
-          <p class="mt-2">
-            <.link navigate={~p"/providers"} class="text-sm font-semibold text-ember underline">
-              Open provider health
-            </.link>
-          </p>
-      <% end %>
-    </div>
+      <span class="kiln-chip__dot" aria-hidden="true" />
+      {mode_label(@mode)}
+    </span>
     """
   end
 
   attr :snapshots, :list, default: []
 
   def operator_config_presence(assigns) do
+    configured = Enum.count(assigns.snapshots, &(&1[:key_configured?] == true))
+    total = length(assigns.snapshots)
+
+    assigns =
+      assigns
+      |> assign(:configured, configured)
+      |> assign(:total, total)
+
     ~H"""
-    <div id="operator-config-presence" class="text-xs text-bone">
-      <div class="text-[12px] font-semibold leading-[1.4]">Providers</div>
-      <ul class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[16px] font-normal leading-[1.5] text-[var(--color-smoke)]">
+    <details
+      id="operator-config-presence"
+      class="kiln-status-numeric inline-flex items-center"
+    >
+      <summary class="inline-flex cursor-pointer list-none items-center gap-1 outline-none">
+        <span class="kiln-status-numeric__label">Providers</span>
+        <span class="tabular-nums">{@configured}/{@total}</span>
+        <span class="kiln-status-numeric__label ml-1">configured</span>
+      </summary>
+      <ul class="kiln-meta mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 pl-2">
         <%= for snap <- @snapshots do %>
           <li>
             {provider_display_name(snap)}:
@@ -72,7 +66,7 @@ defmodule KilnWeb.Components.OperatorChrome do
           </li>
         <% end %>
       </ul>
-    </div>
+    </details>
     """
   end
 
@@ -83,7 +77,7 @@ defmodule KilnWeb.Components.OperatorChrome do
     assigns = assign(assigns, :body, readiness_inner(assigns.mode, assigns.snapshots))
 
     ~H"""
-    <div id="operator-provider-readiness" role="status">
+    <div id="operator-provider-readiness" role="status" class="mt-1.5">
       <%= if @body != :empty do %>
         {@body}
       <% end %>
@@ -96,10 +90,12 @@ defmodule KilnWeb.Components.OperatorChrome do
 
   def operator_chrome(assigns) do
     ~H"""
-    <div class="flex flex-col gap-2">
-      <.operator_mode_chip mode={@mode} />
+    <div class="kiln-status-bar">
+      <div class="kiln-status-bar__group">
+        <.operator_mode_chip mode={@mode} />
+        <.operator_config_presence snapshots={@snapshots} />
+      </div>
       <.operator_provider_readiness mode={@mode} snapshots={@snapshots} />
-      <.operator_config_presence snapshots={@snapshots} />
     </div>
     """
   end
@@ -140,18 +136,16 @@ defmodule KilnWeb.Components.OperatorChrome do
     assigns = %{title: title, body: body}
 
     ~H"""
-    <div class="rounded border border-amber-700/50 bg-char/80 px-3 py-2">
-      <div class="flex items-start gap-2">
-        <.icon name="hero-signal-slash" class="mt-0.5 size-4 shrink-0 text-amber-200/90" />
-        <div>
-          <div class="text-[12px] font-semibold leading-[1.4] text-bone">{@title}</div>
-          <p class="mt-1 text-[16px] font-normal leading-[1.5] text-[var(--color-smoke)]">{@body}</p>
-          <p class="mt-2">
-            <.link navigate={~p"/providers"} class="text-sm font-semibold text-ember underline">
-              Open provider health
-            </.link>
-          </p>
-        </div>
+    <div class="kiln-readiness-banner">
+      <.icon name="hero-signal-slash" class="mt-0.5 size-4 shrink-0" />
+      <div class="flex-1">
+        <div class="kiln-readiness-banner__title">{@title}</div>
+        <p class="kiln-readiness-banner__body">{@body}</p>
+        <p class="mt-1.5">
+          <.link navigate={~p"/providers"} class="link link-primary text-[13px]">
+            Open provider health
+          </.link>
+        </p>
       </div>
     </div>
     """
@@ -171,6 +165,19 @@ defmodule KilnWeb.Components.OperatorChrome do
   defp mode_aria_label(:live), do: "Live mode, external APIs may be used"
   defp mode_aria_label(:demo), do: "Demo mode, fixtures and stubs without paid provider calls"
   defp mode_aria_label(_), do: "Runtime mode unavailable"
+
+  defp mode_label(:live), do: "Live"
+  defp mode_label(:demo), do: "Demo"
+  defp mode_label(_), do: "Runtime unavailable"
+
+  defp mode_tooltip(:live),
+    do: "Runtime credentials apply; external APIs may incur cost."
+
+  defp mode_tooltip(:demo),
+    do: "Outcomes use fixtures and stubs; no paid provider calls."
+
+  defp mode_tooltip(_),
+    do: "The shell could not read demo vs live state."
 
   defp provider_display_name(%{id: :anthropic}), do: "Anthropic"
   defp provider_display_name(%{id: :openai}), do: "OpenAI"
