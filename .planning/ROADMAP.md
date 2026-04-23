@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-22 — **Milestone v0.3.0** started (Phases **14–19**)
+**Updated:** 2026-04-22 — **Milestone v0.3.0** (Phases **14–20**)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -8,7 +8,7 @@
 
 - ✅ **v0.1.0** — Phases **1–9** + parking **999.1** — [.planning/milestones/v0.1.0.md](milestones/v0.1.0.md)
 - ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md)
-- 🚧 **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–19** — requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
+- 🚧 **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–20** — requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
 
 ## Overview (v0.3.0)
 
@@ -22,6 +22,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 - [x] **Phase 17: Template library & onboarding specs** — WFE-01, ONB-01 — `priv` (or agreed) template packs + UI to start from template. (completed 2026-04-22)
 - [x] **Phase 18: Cost hints & budget alerts** — COST-01, COST-02 — advisory + threshold notifications. (completed 2026-04-22)
 - [ ] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail.
+- [ ] **Phase 20: Phase 19 verification & planning SSOT** — SELF-01, FEEDBACK-01 — formal `19-VERIFICATION.md` + REQUIREMENTS/ROADMAP alignment per milestone audit.
 
 **Parking / decimals:** Use **999.x** only for ad-hoc backlog execution; no decimal insert planned for v0.3.0 launch.
 
@@ -68,6 +69,15 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 **Success criteria:**
 1. On merge, a structured post-mortem artifact is persisted and discoverable from the run.
 2. Soft nudge writes `operator_feedback_received` audit event; does not pause the run unless existing blockers apply.
+
+### Phase 20: Phase 19 verification & planning SSOT
+**Goal:** Close the formal milestone audit gaps: three-source verification for Phase 19, and planning single-source-of-truth for v0.3.0 requirements vs roadmap.  
+**Requirements:** SELF-01, FEEDBACK-01 (signed off via `19-VERIFICATION.md`); RE traceability refresh for PARA-01 … COST-02.  
+**Gap closure:** Closes gaps from `.planning/v0.3.0-MILESTONE-AUDIT.md` (missing `19-VERIFICATION.md`; REQUIREMENTS.md / ROADMAP.md drift).  
+**Success criteria:**
+1. `.planning/phases/19-post-mortems-soft-feedback/19-VERIFICATION.md` exists, lists SELF-01 / FEEDBACK-01 must-haves, cites commands run, and records `status: passed` when green.
+2. Phase 19 plan SUMMARY frontmatter lists `requirements-completed` for SELF-01 and FEEDBACK-01 where applicable.
+3. `REQUIREMENTS.md` checkboxes and traceability table match phase verification outcomes; `ROADMAP.md` marks Phase 19 complete when verification passes.
 
 ---
 

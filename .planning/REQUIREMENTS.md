@@ -9,19 +9,19 @@ Scope is **ordered A → B → C** in **bite-sized** phases (continuing roadmap 
 
 ### A — Execution & scale (first)
 
-- [ ] **PARA-01**: Operator can run **multiple runs concurrently** with **fair-share scheduling** (no single run starves others under load); caps and `RunDirector` / queue semantics stay consistent with ORCH-06/07.
-- [ ] **PARA-02**: Operator can open a **run comparison** view for two runs (metadata, stage outcomes, artifact/diff pointers, cost summary) without leaving the dashboard.
-- [ ] **REPL-01**: Operator can **scrub a read-only timeline** of a run (audit + stage checkpoints) for post-incident understanding — **MVP**: query existing append-only data; no branching alternate realities in this milestone.
+- [x] **PARA-01**: Operator can run **multiple runs concurrently** with **fair-share scheduling** (no single run starves others under load); caps and `RunDirector` / queue semantics stay consistent with ORCH-06/07.
+- [x] **PARA-02**: Operator can open a **run comparison** view for two runs (metadata, stage outcomes, artifact/diff pointers, cost summary) without leaving the dashboard.
+- [x] **REPL-01**: Operator can **scrub a read-only timeline** of a run (audit + stage checkpoints) for post-incident understanding — **MVP**: query existing append-only data; no branching alternate realities in this milestone.
 
 ### B — Templates & workflow ecosystem (second)
 
-- [ ] **WFE-01**: Kiln ships a **versioned template library** (workflow + spec pairs under `priv/` or equivalent) and the operator can **instantiate** a new spec/run from a template in one action.
-- [ ] **ONB-01**: At least **three vetted templates** ship with estimated cost/time notes (per SEED-003 intent); “Hello Kiln”-class happy path included.
+- [x] **WFE-01**: Kiln ships a **versioned template library** (workflow + spec pairs under `priv/` or equivalent) and the operator can **instantiate** a new spec/run from a template in one action.
+- [x] **ONB-01**: At least **three vetted templates** ship with estimated cost/time notes (per SEED-003 intent); “Hello Kiln”-class happy path included.
 
 ### C — Cost, operations & learning loop (third)
 
-- [ ] **COST-01**: **Cost optimization hints** — advisory text when a cheaper model tier is likely safe given recent stage outcomes (never overrides scenario oracle or caps).
-- [ ] **COST-02**: **Budget alerts** at configured thresholds (e.g. 50% / 80% / 100% of per-run cap) surfaced in UI + existing notification path where applicable.
+- [x] **COST-01**: **Cost optimization hints** — advisory text when a cheaper model tier is likely safe given recent stage outcomes (never overrides scenario oracle or caps).
+- [x] **COST-02**: **Budget alerts** at configured thresholds (e.g. 50% / 80% / 100% of per-run cap) surfaced in UI + existing notification path where applicable.
 - [ ] **SELF-01**: Every **merged** run emits a **structured post-mortem** artifact (tokens/$ by stage/role, retries, `requested_model` vs `actual_model_used`, scenario verdict trail, block reasons).
 - [ ] **FEEDBACK-01**: Operator can send a **one-line soft nudge** during a run; persisted as **`operator_feedback_received`** audit event; **non-blocking** (does not add approval gates; UAT-02 unchanged).
 
@@ -43,17 +43,17 @@ Scope is **ordered A → B → C** in **bite-sized** phases (continuing roadmap 
 
 | Requirement | Phase | Status |
 |---------------|-------|--------|
-| PARA-01 | Phase 14 | Pending |
-| PARA-02 | Phase 15 | Pending |
-| REPL-01 | Phase 16 | Pending |
-| WFE-01 | Phase 17 | Pending |
-| ONB-01 | Phase 17 | Pending |
-| COST-01 | Phase 18 | Pending |
-| COST-02 | Phase 18 | Pending |
-| SELF-01 | Phase 19 | Pending |
-| FEEDBACK-01 | Phase 19 | Pending |
+| PARA-01 | Phase 14 | Complete |
+| PARA-02 | Phase 15 | Complete |
+| REPL-01 | Phase 16 | Complete |
+| WFE-01 | Phase 17 | Complete |
+| ONB-01 | Phase 17 | Complete |
+| COST-01 | Phase 18 | Complete |
+| COST-02 | Phase 18 | Complete |
+| SELF-01 | Phase 20 | Pending |
+| FEEDBACK-01 | Phase 20 | Pending |
 
-**Coverage:** v0.3.0 requirements: **9** — mapped: **9** — unmapped: **0**.
+**Coverage:** v0.3.0 requirements: **9** — mapped: **9** — unmapped: **0** — complete: **7** — pending: **2** (gap closure tracked in Phase 20 per `.planning/v0.3.0-MILESTONE-AUDIT.md`).
 
 ---
 *Requirements defined: 2026-04-22 — `/gsd-new-milestone` v0.3.0*
