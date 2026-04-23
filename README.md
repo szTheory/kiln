@@ -52,7 +52,7 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 
 ## Quick start (open `/onboarding` first)
 
-**Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose. For **v0.2.0**, Phase 12 ships an **optional checked-in `justfile`** that names the same primitives as this quick start — host Phoenix plus Compose for the data plane only (see **Optional: Just recipes** below and `.planning/research/LOCAL-DX-AUDIT.md`). No Compose-hosted Kiln app and no `.devcontainer/` as the shipped strategy.
+**Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose. For **v0.2.0**, Phase 12 ships an **optional checked-in `justfile`** that names the same primitives as this quick start — host Phoenix plus Compose for the data plane only (see **Optional: Just recipes** below and `.planning/research/LOCAL-DX-AUDIT.md`). **Phase 21** adds an **optional** [`.devcontainer/`](.devcontainer/) path (same Compose data plane; BEAM may run inside the container) — see **Optional: Dev Container** below. No Compose-hosted Kiln `app` service is required for either path.
 
 1. **Environment** — `cp .env.sample .env` then load it (`direnv allow` or export vars manually). See **Environment** below for required keys.
 2. **Database** — `docker compose up -d db` and wait until Postgres is healthy.
@@ -97,6 +97,22 @@ Use this as a **cold-clone** sanity pass (order matches the happy path above):
 **Why Compose does not start Kiln:** shipped layout is **Postgres + DTU (+ optional OTel) in Compose**, **Phoenix on the host** — see [`.planning/research/LOCAL-DX-AUDIT.md`](.planning/research/LOCAL-DX-AUDIT.md). Optional **`just`** orchestration lives in the repo root **`justfile`** (same contracts as this checklist).
 
 **Longer-form operator docs** (architecture, configuration) live in the Starlight site — [Operator docs](https://szTheory.github.io/kiln/docs/) — built from `site/` per **Documentation** above.
+
+## Optional: Dev Container (minimal host installs)
+
+Use this when you want a **reproducible Linux toolchain** inside Docker and are fine with **bind-mount + volume** tradeoffs (often slower file sync than host Phoenix — prefer **Docker Desktop VirtioFS** or the fastest file-sharing mode your engine offers; if live reload misbehaves, run **`mix phx.server` on the host** instead).
+
+**Prerequisites:** Docker Desktop or Colima with the Compose v2 plugin, the **Dev Containers** extension (VS Code / compatible editors), and the same **`.env`** contract as the host path (`cp .env.sample .env`).
+
+**Same logical sequence as the quick start** (only **where BEAM runs** changes):
+
+1. On the **host**, bring up the data plane: `docker compose up -d db` (add `dtu` before any sandbox-backed stage: `docker compose up -d dtu`).
+2. **Open the repo in the dev container** (see [`.devcontainer/`](.devcontainer/) — image pin matches `.tool-versions`).
+3. Inside the container: `KILN_DB_ROLE=kiln_owner mix setup` (Postgres must be reachable; on macOS Docker Desktop the default `DATABASE_URL` in the devcontainer uses **`host.docker.internal`** as the DB host). **Colima / Podman:** set `DOCKER_HOST` to your engine’s socket (see your engine docs); keep **`kiln-sandbox` + `dtu` on the same daemon** Kiln targets or you will see “network not found” / unreachable DTU.
+4. **`KILN_DEV_BIND_ALL=1`** is preset in the devcontainer so Bandit listens on **`0.0.0.0`** and **`http://localhost:4000`** from the host reaches the app.
+5. Run **`mix phx.server`**, then open **`http://localhost:4000/onboarding`** (same as host).
+
+**DooD (Docker outside of Docker):** the **orchestrator** may talk to the **host** Docker daemon (`DOCKER_HOST` or a socket visible only to the devcontainer) so `System.cmd("docker", …)` and DTU-backed sandboxes keep using **`kiln-sandbox`** on that daemon. **Never** mount the Docker socket (or inject `DOCKER_HOST`) into **Kiln-spawned stage/sandbox** containers — sandboxes stay isolated per `CLAUDE.md`.
 
 ## Optional: Just recipes (local orchestration)
 
