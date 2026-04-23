@@ -22,17 +22,16 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current focus
 
-**Phase 21 — Containerized local operator DX** — **Discuss queued**
+**Phase 21 — Containerized local operator DX** — **Context gathered** (ready for planning)
 
 All handoff text that survives **`/clear`** lives in:
 
 - [.planning/ROADMAP.md](ROADMAP.md) — Phase 21 row + phase details
 - [.planning/phases/21-containerized-local-operator-dx/21-BRIEF.md](phases/21-containerized-local-operator-dx/21-BRIEF.md) — intent, anchors, gray-area seeds
-- [.planning/phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md](phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md) — append during discuss
+- [.planning/phases/21-containerized-local-operator-dx/21-CONTEXT.md](phases/21-containerized-local-operator-dx/21-CONTEXT.md) — locked implementation decisions
+- [.planning/phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md](phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md) — discuss audit trail
 
-**Next command:** **`/gsd-discuss-phase 21`**
-
-After discuss: **`/gsd-plan-phase 21`** (requires **`21-CONTEXT.md`**).
+**Next command:** **`/gsd-plan-phase 21`**
 
 ## Milestone note
 
@@ -40,6 +39,7 @@ After discuss: **`/gsd-plan-phase 21`** (requires **`21-CONTEXT.md`**).
 
 ## Session continuity (recent CONTEXT files)
 
+- Phase 21: [.planning/phases/21-containerized-local-operator-dx/21-CONTEXT.md](phases/21-containerized-local-operator-dx/21-CONTEXT.md)
 - Phase 19: [.planning/phases/19-post-mortems-soft-feedback/19-CONTEXT.md](phases/19-post-mortems-soft-feedback/19-CONTEXT.md)
 - Phase 18: [.planning/phases/18-cost-hints-budget-alerts/18-CONTEXT.md](phases/18-cost-hints-budget-alerts/18-CONTEXT.md)
 - Phase 17: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md)
