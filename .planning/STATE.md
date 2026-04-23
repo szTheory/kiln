@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
-status: ready_to_plan
-last_updated: "2026-04-23T01:25:59.436Z"
+status: milestone_complete
+last_updated: "2026-04-23T12:00:00.000Z"
 progress:
   total_phases: 23
   completed_phases: 23
@@ -22,13 +22,13 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current focus
 
-**Milestone v0.3.0 — Phases 14–21** — all slices in [ROADMAP](ROADMAP.md) overview are **complete**, including **Phase 19** (post-mortems + soft feedback), **Phase 20** (verification + planning SSOT), and **Phase 21** (containerized local operator DX).
+**v0.3.0 shipped** (2026-04-23) — tag **`v0.3.0`**; archives under [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) and [.planning/milestones/v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md). Root `REQUIREMENTS.md` was removed at close; **`/gsd-new-milestone`** creates the next milestone’s requirements file.
 
-**Next command:** **`/gsd-progress`** — confirm milestone status and choose the next cycle (e.g. new milestone, backlog **999.x**, or polish).
+**Next command:** **`/gsd-new-milestone`** — define the next version’s requirements and roadmap slice.
 
 ## Milestone note
 
-v0.3.0 roadmap checkboxes through Phase **21** are closed; requirements SSOT is in [REQUIREMENTS.md](REQUIREMENTS.md) with SELF-01 / FEEDBACK-01 marked complete after [`19-VERIFICATION.md`](phases/19-post-mortems-soft-feedback/19-VERIFICATION.md) passed.
+v0.3.0 **Phases 14–21** closed with [`19-VERIFICATION.md`](phases/19-post-mortems-soft-feedback/19-VERIFICATION.md) (**passed**) and Phase **20** planning SSOT; optional **Phase 21** container-first operator path is documented alongside host Phoenix + Compose.
 
 ## Session continuity (recent CONTEXT files)
 

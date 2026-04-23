@@ -4,10 +4,20 @@ Living summary of shipped versions. Detailed phase history lives under `.plannin
 
 ## v0.3.0 — Scale → templates → operator intelligence
 
-**Status:** In progress (opened 2026-04-22)  
-**Phases:** 14–19 (six bite-sized slices) — see [.planning/ROADMAP.md](ROADMAP.md) · [.planning/REQUIREMENTS.md](REQUIREMENTS.md)
+**Shipped:** 2026-04-23  
+**Phases:** 14–21 (**8** phases, **24** plans)  
+**Archives:** [v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md) (2026-04-22 snapshot + close note)  
+**Tag:** `v0.3.0`
 
-**Intent:** Track **A** (PARA / REPL read-only), then **B** (WFE / onboarding templates), then **C** (cost + post-mortem + soft feedback).
+**What shipped**
+
+1. **Fair parallel runs + comparison + replay** — PARA-01/02 and read-only REPL-01 timeline MVP for multi-run operations and incident-style review.
+2. **Template library & onboarding** — WFE-01 / ONB-01 with curated `priv/` templates and one-action instantiate.
+3. **Cost hints & budget alerts** — COST-01 advisory tier hints + COST-02 threshold notifications.
+4. **Post-mortems & soft feedback** — SELF-01 merged-run artifact + FEEDBACK-01 non-blocking `operator_feedback_received` audit path; formal `19-VERIFICATION.md` and Phase **20** planning SSOT.
+5. **Containerized local operator DX (optional)** — Phase **21** devcontainer / documented Docker-centric path alongside host Phoenix + Compose.
+
+**Milestone audit:** The 2026-04-22 audit recorded `gaps_found` on Phase 19 verification + requirements checkboxes; **Phase 20** and **`19-VERIFICATION.md`** closed those items before ship.
 
 ## v0.2.0 — Operator dogfood
 

@@ -2,6 +2,45 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v0.3.0 — Scale → templates → operator intelligence
+
+**Shipped:** 2026-04-23  
+**Phases:** 8 (14–21) | **Plans:** 24
+
+### What Was Built
+
+- **Multi-run fairness and operator situational awareness:** fair scheduling (PARA-01), run comparison (PARA-02), read-only replay / timeline scrub (REPL-01).
+- **Template library + onboarding:** versioned `priv/` templates with one-action instantiate (WFE-01 / ONB-01).
+- **Spend visibility:** advisory cost hints (COST-01) and budget threshold alerts (COST-02).
+- **Learning loop:** merged-run post-mortem artifact (SELF-01) and non-blocking soft nudge to audit (FEEDBACK-01), with formal **`19-VERIFICATION.md`** and **Phase 20** SSOT.
+- **Optional container-first local path:** Phase **21** devcontainer / documented Docker-centric operator DX alongside host Phoenix + Compose.
+
+### What Worked
+
+- **Small vertical slices** (14–19) kept reviews bounded; **Phase 20** as an explicit “close the audit gaps” slice avoided pretending SSOT was green while checkboxes lagged.
+- **Three-source gate** (VERIFICATION + SUMMARY + REQUIREMENTS) for SELF-01 / FEEDBACK-01 became enforceable once `19-VERIFICATION.md` landed.
+
+### What Was Inefficient
+
+- **`gsd-sdk query milestone.complete`** still returns `GSDError: version required for phases archive` — milestone close remains **manual** archive + git steps (same as v0.2.0 retrospective).
+- **`gsd-sdk query roadmap.analyze`** still returns empty `phases` for this repo’s ROADMAP shape — readiness checks are manual or script-assisted.
+
+### Patterns Established
+
+- **Parking 999.x** for shipped backlog work stays referenced from the living roadmap without re-opening integer phases.
+- **Tiered LOCAL DX:** host Phoenix canonical; optional `.devcontainer/` + CI drift gate for Linux-reproducible toolchains.
+
+### Key Lessons
+
+1. When a milestone audit finds **`gaps_found`**, either run a dedicated “SSOT + verification” phase (here: **20**) or accept explicit tech debt in `MILESTONES.md` — do not silently retag.
+2. Keep **Nyquist / VALIDATION** honesty in phase docs; “partial” is acceptable if CI is named as authority.
+
+### Cost Observations
+
+- Post-mortem materialization (SELF-01) improves future cost forensics; no in-repo token spend aggregates added in this retrospective pass.
+
+---
+
 ## Milestone: v0.2.0 — Operator dogfood
 
 **Shipped:** 2026-04-22  
@@ -48,6 +87,7 @@
 |-----------|------------------|------------|
 | v0.1.0 | 1–9 (+999.1) | First end-to-end dark-factory + CI on Kiln itself |
 | v0.2.0 | 10–13 | Operator dogfood slice + DX + documentation reconciliation before next planning cycle |
+| v0.3.0 | 14–21 | Scale + templates + cost/post-mortem signals + optional containerized operator DX |
 
 ### Top Lessons (Verified Across Milestones)
 

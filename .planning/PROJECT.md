@@ -37,9 +37,9 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **COST-01**, **COST-02** — Advisory cost hints + budget threshold alerts — **Validated in Phase 18: cost-hints-budget-alerts** (2026-04-22).
 - [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, `REQUIREMENTS.md`) (2026-04-22).
 
-### Active (v0.3.0)
+### Active
 
-_All roadmap phases **14–21** are complete — see [.planning/ROADMAP.md](ROADMAP.md). No open requirements in this milestone slice._
+None — v0.3.0 shipped. Run **`/gsd-new-milestone`** to add the next milestone’s requirement IDs and phase cuts.
 
 ### Out of Scope
 
@@ -117,26 +117,18 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current Milestone: v0.3.0 — Scale → templates → operator intelligence
+## Next milestone (not opened)
 
-**Goal:** Increase operator throughput and situational awareness in **three ordered tracks**—execution scale, curated templates, then cost/learning signals—each delivered as **small** shippable phases (14–19) so reviews stay tight.
-
-**Target features:**
-
-- **Track A — Execution & scale:** fair multi-run scheduling (PARA-01), run comparison (PARA-02), read-only replay / timeline MVP (REPL-01; no hypothetical re-run).
-- **Track B — Templates:** versioned workflow+spec template library (WFE-01) plus ≥3 vetted “first success” templates (ONB-01; carries SEED-003 intent).
-- **Track C — Cost & learning:** advisory cost hints (COST-01), budget threshold alerts (COST-02), merged-run post-mortem artifact (SELF-01), soft in-flight feedback persisted to audit without blocking autonomy (FEEDBACK-01; carries SEED-001 intent).
-
-**Planning notes:** Prior `.planning/phases/` directories are **retained** (historical plans). **`gsd-sdk phases.clear` was not used** — it would delete those directories. Domain research for hot phases can still be run via **`/gsd-research-phase N`** before planning.
+Use **`/gsd-new-milestone`** to capture the next version’s requirements, traceability, and phase list. Prior `.planning/phases/` directories remain historical execution records.
 
 ## Current State (as of 2026-04-23)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
-- **v0.3.0 (Phases 14–21)** — **Complete** on roadmap: execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21). Phase **21** adds **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate (tiered LOCAL DX; host Phoenix remains canonical).
+- **v0.3.0 (Phases 14–21)** — **Shipped**; tag **`v0.3.0`**; archives `.planning/milestones/v0.3.0-ROADMAP.md`, `v0.3.0-REQUIREMENTS.md`, `v0.3.0-MILESTONE-AUDIT.md`. Execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21) with **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate; host Phoenix + Compose remains canonical.
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
 - **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-23 — Phase 20 closed planning SSOT for Phase 19; v0.3.0 roadmap Phases 14–21 complete*
+*Last updated: 2026-04-23 after v0.3.0 milestone close (archived roadmap + requirements; root `REQUIREMENTS.md` removed until next milestone)*
