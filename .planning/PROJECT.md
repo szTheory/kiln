@@ -133,6 +133,34 @@ This document evolves at phase transitions and milestone boundaries.
 
 **Planning notes:** Phase directories **22+** will be created under `.planning/phases/` when `/gsd-discuss-phase` / `/gsd-plan-phase` runs; prior phase trees remain historical records.
 
+## Merge authority
+
+**Policy:** A pull request may merge into **`main`** once **GitHub Actions** is green for that pull request. Exact enforcement (required checks, review counts) lives in GitHub branch protection; this section maps what operators see in the Actions UI to jobs in **`.github/workflows/ci.yml`**.
+
+| Tier | Role | Job `name:` (today) | What it proves |
+|------|------|---------------------|----------------|
+| **A** | PR merge gate | **`mix check`** | `mix compile --warnings-as-errors`, then full **`mix check`** (format, tests, Credo, Dialyzer, Sobelow, `mix_audit`, xref cycle gate, grep gates) on the workflow **Postgres 16** service container |
+| **B** | Durability / DB invariants | Same `check` job | Step **`Kiln boot checks (CI parity — D-34)`** — `KILN_DB_ROLE=kiln_owner mix ecto.migrate && mix kiln.boot_checks` |
+| **C** | Compose integration smoke | **`integration smoke (first_run.sh)`** | After `check`: `bash test/integration/first_run.sh` (Compose + host boot path drift) |
+| **D** | Tag-only | **`tag vs mix.exs version`** | Runs only on **`v*`** tags; not required for ordinary PRs |
+
+**Workflow SSOT:** reconcile UI labels with YAML `name:` fields in `.github/workflows/ci.yml` — `mix check`, `integration smoke (first_run.sh)`, `tag vs mix.exs version`.
+
+### Recommended before push (optional, not merge authority)
+
+These improve local signal **only**; they are **not** merge gates unless duplicated in CI **and** required by branch protection:
+
+- **`just planning-gates`** — CI-parity `mix check` (defaults mirror `.github/workflows/ci.yml`; Postgres must be reachable).
+- **`just shift-left`** — `mix check` then `test/integration/first_run.sh`.
+- **`script/precommit.sh`** / **`mix precommit`** — `templates.verify` + `mix check` with CI-like defaults when `.env` is missing.
+- **`DOCS=1 mix docs.verify`** — site/docs link and orphan checks when enabled.
+
+### Local vs CI
+
+CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **Local** `mix check` or compose smoke may report **PARTIAL** or fail when Postgres, Docker, Dialyzer PLTs, or environment variables differ from CI. Factual operator log: `.planning/phases/12-local-docker-dx/12-01-SUMMARY.md` (Phase 12 verification; Self-Check: PARTIAL).
+
+**Phase 21** (optional devcontainer) stays documented in `README.md` **below** the canonical host quick start; it does **not** replace GitHub Actions as merge authority for PRs to **`main`**.
+
 ## Current State (as of 2026-04-23)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
