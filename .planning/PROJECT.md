@@ -130,14 +130,14 @@ This document evolves at phase transitions and milestone boundaries.
 
 **Planning notes:** Prior `.planning/phases/` directories are **retained** (historical plans). **`gsd-sdk phases.clear` was not used** — it would delete those directories. Domain research for hot phases can still be run via **`/gsd-research-phase N`** before planning.
 
-## Current State (as of 2026-04-22)
+## Current State (as of 2026-04-23)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
-- **v0.3.0 (Phases 14–19)** — **In planning / execution:** see `.planning/REQUIREMENTS.md` and `.planning/ROADMAP.md`.
+- **v0.3.0 (Phases 14–21)** — **In execution:** Phases **14–18** + **21** shipped; **19–20** open per `.planning/ROADMAP.md`. Phase **21** adds optional **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate (tiered LOCAL DX; host Phoenix remains canonical).
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
 - **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-22 — Phase 17 template library + onboarding specs shipped; WFE-01 / ONB-01 validated*
+*Last updated: 2026-04-23 — Phase 21 containerized local operator DX shipped (optional devcontainer + Docker operator CI)*
