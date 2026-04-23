@@ -1,0 +1,72 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-04-23T15:46:03Z",
+  "context": "ad-hoc-plan",
+  "phase": null,
+  "phase_name": "Shift-left UI e2e verification",
+  "phase_dir": ".cursor/plans/Shift-left UI e2e verification-ce553935.plan.md",
+  "plan": null,
+  "task": 11,
+  "total_tasks": 11,
+  "status": "paused",
+  "completed_tasks": [
+    {"id": "layer1-smoke", "name": "test/kiln_web/live/route_smoke_test.exs (14 routes, legacy-token refute, landmark assert)", "status": "done", "verified": "mix test → 6 tests / 0 failures"},
+    {"id": "layer2-lint", "name": "mix kiln.ui.lint + wired into .check.exs", "status": "done", "verified": "mix kiln.ui.lint → OK"},
+    {"id": "layer3-pw-scaffold", "name": "test/e2e/ scaffold (package.json, playwright.config.ts, tsconfig.json, .gitignore, fixtures/kiln.ts)", "status": "done"},
+    {"id": "layer3-pw-specs", "name": "theme-toggle, routes, onboarding, inbox, run-compare, a11y-axe specs", "status": "done"},
+    {"id": "seed-fixtures", "name": "priv/repo/seeds_e2e.exs + test/e2e/.fixture-ids.json export", "status": "done", "verified": "mix run priv/repo/seeds_e2e.exs → wrote .fixture-ids.json"},
+    {"id": "boot-script", "name": "script/e2e_boot.sh (compose up, setup, seed, KILN_SKIP_OPERATOR_READINESS=1, /health wait)", "status": "done"},
+    {"id": "mix-tasks", "name": "lib/mix/tasks/kiln/e2e.ex wrapping boot + playwright", "status": "done", "verified": "mix compile → clean"},
+    {"id": "ci-job", "name": "e2e job in .github/workflows/ci.yml (needs: [check], Playwright browser cache, artifact upload)", "status": "done"},
+    {"id": "shift-left", "name": "script/shift_left_verify.sh extended with (3/3) Playwright step gated by SHIFT_LEFT_SKIP_E2E", "status": "done"},
+    {"id": "dx", "name": "just e2e / just e2e-ui recipes, .gitignore additions, README Integration & e2e section", "status": "done"}
+  ],
+  "remaining_tasks": [
+    {"id": "verify", "name": "Run mix check + local Playwright + push branch, confirm all three CI jobs green", "status": "not_started"}
+  ],
+  "blockers": [],
+  "human_actions_pending": [
+    {"action": "Run `mix check` end-to-end locally (cold cache ~5-10min for Dialyzer) and fix any fallout from the new `mix kiln.ui.lint` step + `route_smoke_test`", "context": "Layer 1 + 2 only verified in isolation so far", "blocking": false},
+    {"action": "`cd test/e2e && npm ci && npx playwright install --with-deps chromium webkit` (or `mix kiln.e2e --no-install` after first run)", "context": "First run needs ~300MB of Playwright browsers; cached after that", "blocking": false},
+    {"action": "Run `bash script/e2e_boot.sh` (or `mix kiln.e2e`) locally to confirm all 14 routes pass axe + console + theme matrix", "context": "Key acceptance for this plan", "blocking": false},
+    {"action": "Push branch and confirm CI `check` + `integration-smoke` + `e2e` jobs all green before merge", "context": "Final gate", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Seeds use `mix run priv/repo/seeds_e2e.exs` without KILN_DB_ROLE override", "rationale": "kiln_owner role can't SELECT on workflow_definition_snapshots (only kiln_app can); dev runs as superuser `kiln` which has access to both."},
+    {"decision": "Playwright matrix = 4 projects (desktop-chromium x {light,dark}, mobile-safari x {light,dark}), not 2 browsers x 2 themes via per-test fixtures", "rationale": "Playwright's native `colorScheme` + `viewport` per-project gives much better reporting and parallelism than spec-level params."},
+    {"decision": "axe scan fails only on serious/critical, not moderate/minor", "rationale": "Matches brand book's contrast-first posture; moderate/minor are reported in traces but don't gate merge."},
+    {"decision": "`mix kiln.ui.lint` uses pure string scan, not `rg` shell-out as originally proposed", "rationale": "No dependency on rg being installed; runs under Elixir BEAM which is already required; supports `# kiln-ui-lint:allow` line-level escape hatch."},
+    {"decision": "Layer 1 test file refute list matches Layer 2 lint list exactly", "rationale": "Two independent gates on the same token set — HTML-rendered (Layer 1) + source-level (Layer 2) — so regressions surface on any code path."}
+  ],
+  "uncommitted_files": {
+    "modified": [
+      ".check.exs",
+      ".github/workflows/ci.yml",
+      ".gitignore",
+      "README.md",
+      "justfile",
+      "script/shift_left_verify.sh"
+    ],
+    "new": [
+      "lib/mix/tasks/kiln/e2e.ex",
+      "lib/mix/tasks/kiln/ui/lint.ex",
+      "priv/repo/seeds_e2e.exs",
+      "script/e2e_boot.sh",
+      "test/e2e/package.json",
+      "test/e2e/playwright.config.ts",
+      "test/e2e/tsconfig.json",
+      "test/e2e/.gitignore",
+      "test/e2e/fixtures/kiln.ts",
+      "test/e2e/tests/theme-toggle.spec.ts",
+      "test/e2e/tests/routes.spec.ts",
+      "test/e2e/tests/onboarding.spec.ts",
+      "test/e2e/tests/inbox.spec.ts",
+      "test/e2e/tests/run-compare.spec.ts",
+      "test/e2e/tests/a11y-axe.spec.ts",
+      "test/kiln_web/live/route_smoke_test.exs"
+    ],
+    "note": "Broader working-tree mods from the prior Phase reskin session (lib/kiln_web/**, assets/css/app.css) are already staged/untracked from before this session — not introduced here."
+  },
+  "next_action": "Run `mix check` cold and fix any fallout, then `mix kiln.e2e` to confirm Playwright goes green end-to-end. After that, commit & push to trigger CI across all three jobs.",
+  "context_notes": "The plan is fully implemented except for final verification. All 10 scaffolding/implementation todos are done and self-tested in isolation (route_smoke_test passes, kiln.ui.lint passes, seed script writes .fixture-ids.json). The only risk is the integration-time verification: Dialyzer cold cache, browser download, and whether LV routes render without console errors/axe violations on real hardware. Plan file is `.cursor/plans/Shift-left UI e2e verification-ce553935.plan.md` — do NOT edit it."
+}
