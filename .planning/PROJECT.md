@@ -31,16 +31,15 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **DOGFOOD-01** — Kiln-side **external-repo vertical slice** for the Game Boy emulator path: spec + workflow + BDD + bounded caps scaffolding (`rust_gb_dogfood_v1`, scenario argv-only shell oracle, `priv/dogfood/gb_vertical_slice_spec.md`, tests) — **Phase 11** (2026-04-22). Full ROM-backed `cargo test` on a disposable clone remains **operator-owned** per `GB-SPIKE.md`.
 - [x] **WFE-01** — Workflow + spec template library with instantiate action — **Validated in Phase 17: template-library-onboarding-specs** (2026-04-22).
 - [x] **ONB-01** — ≥3 vetted onboarding templates incl. fast happy path — **Validated in Phase 17: template-library-onboarding-specs** (2026-04-22).
+- [x] **PARA-01** — Fair parallel run scheduling — **Validated in Phase 14: fair-parallel-runs** (2026-04-22).
+- [x] **PARA-02** — Run comparison view — **Validated in Phase 15: run-comparison** (2026-04-22).
+- [x] **REPL-01** — Read-only run timeline / replay MVP — **Validated in Phase 16: read-only-run-replay** (2026-04-22).
+- [x] **COST-01**, **COST-02** — Advisory cost hints + budget threshold alerts — **Validated in Phase 18: cost-hints-budget-alerts** (2026-04-22).
+- [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, `REQUIREMENTS.md`) (2026-04-22).
 
-### Active (v0.3.0 — in flight)
+### Active (v0.3.0)
 
-- [ ] **PARA-01** — Fair parallel run scheduling (Phase 14).
-- [ ] **PARA-02** — Run comparison view (Phase 15).
-- [ ] **REPL-01** — Read-only run timeline / replay MVP (Phase 16).
-- [ ] **COST-01** — Advisory cost / model-tier hints (Phase 18).
-- [ ] **COST-02** — Budget threshold alerts (Phase 18).
-- [ ] **SELF-01** — Structured post-mortem artifact on merge (Phase 19).
-- [ ] **FEEDBACK-01** — Non-blocking in-flight operator nudge → `operator_feedback_received` audit (Phase 19).
+_All roadmap phases **14–21** are complete — see [.planning/ROADMAP.md](ROADMAP.md). No open requirements in this milestone slice._
 
 ### Out of Scope
 
@@ -134,10 +133,10 @@ This document evolves at phase transitions and milestone boundaries.
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
-- **v0.3.0 (Phases 14–21)** — **In execution:** Phases **14–18** + **21** shipped; **19–20** open per `.planning/ROADMAP.md`. Phase **21** adds optional **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate (tiered LOCAL DX; host Phoenix remains canonical).
+- **v0.3.0 (Phases 14–21)** — **Complete** on roadmap: execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21). Phase **21** adds **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate (tiered LOCAL DX; host Phoenix remains canonical).
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
 - **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-23 — Phase 21 containerized local operator DX shipped (optional devcontainer + Docker operator CI)*
+*Last updated: 2026-04-23 — Phase 20 closed planning SSOT for Phase 19; v0.3.0 roadmap Phases 14–21 complete*
