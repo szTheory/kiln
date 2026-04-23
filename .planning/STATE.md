@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v0.4.0
 milestone_name: — Trust, docs & validation closure
 status: ready_to_plan
-last_updated: "2026-04-23T18:00:00.000Z"
+last_updated: "2026-04-22T22:30:00.000Z"
 progress:
   total_phases: 3
   completed_phases: 0
@@ -22,10 +22,10 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-**Phase:** Not started (defining plans)  
+**Phase:** 22 — Merge authority & operator docs  
 **Plan:** —  
-**Status:** Milestone v0.4.0 opened — requirements + roadmap drafted  
-**Last activity:** 2026-04-23 — `/gsd-new-milestone` v0.4.0
+**Status:** Context gathered (`22-CONTEXT.md`); ready for planning  
+**Last activity:** 2026-04-22 — `/gsd-discuss-phase 22` (research-backed decisions)
 
 ## Current focus
 
@@ -33,7 +33,7 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 Ship **DOCS-08** (merge authority honesty), **NYQ-01** (validation closure or waivers), **UAT-03** (template → run smoke).
 
-**Next command:** **`/gsd-discuss-phase 22`** (or **`/gsd-plan-phase 22`** if scope is already clear).
+**Next command:** **`/gsd-plan-phase 22`** (implementation: README + `.planning/PROJECT.md` per `22-CONTEXT.md`).
 
 ## Milestone note
 
@@ -41,6 +41,7 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 continues **integer phase nu
 
 ## Session continuity (recent CONTEXT files)
 
+- Phase 22: [.planning/phases/22-merge-authority-operator-docs/22-CONTEXT.md](phases/22-merge-authority-operator-docs/22-CONTEXT.md)
 - Phase 21: [.planning/phases/21-containerized-local-operator-dx/21-CONTEXT.md](phases/21-containerized-local-operator-dx/21-CONTEXT.md)
 - Phase 20: [.planning/phases/20-phase-19-verification-planning-ssot/20-CONTEXT.md](phases/20-phase-19-verification-planning-ssot/20-CONTEXT.md)
 - Phase 19: [.planning/phases/19-post-mortems-soft-feedback/19-CONTEXT.md](phases/19-post-mortems-soft-feedback/19-CONTEXT.md)
