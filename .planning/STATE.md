@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v0.4.0
 milestone_name: — Trust, docs & validation closure
-status: planning
-last_updated: "2026-04-23T02:02:43.213Z"
-last_activity: 2026-04-22 — `/gsd-discuss-phase 22` (research-backed decisions)
+status: executing
+last_updated: "2026-04-23T02:05:47.668Z"
+last_activity: 2026-04-23 — `/gsd-execute-phase 22` (in progress)
 progress:
   total_phases: 24
   completed_phases: 23
@@ -25,8 +25,8 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 **Phase:** 22 — Merge authority & operator docs  
 **Plan:** 22-01  
-**Status:** Ready to execute (`22-01-PLAN.md` + `22-RESEARCH.md` + `22-VALIDATION.md`)  
-**Last activity:** 2026-04-23 — `/gsd-plan-phase 22`
+**Status:** Executing (`22-01-PLAN.md` — DOCS-08)  
+**Last activity:** 2026-04-23 — `/gsd-execute-phase 22`
 
 ## Current focus
 
