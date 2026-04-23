@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/post_mortem_snapshot_stored.json",
+  "title": "audit_events post_mortem_snapshot_stored payload",
+  "type": "object",
+  "required": ["schema_version", "source_watermark", "run_id"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "source_watermark": { "type": "string" },
+    "run_id": { "type": "string", "format": "uuid" }
+  }
+}

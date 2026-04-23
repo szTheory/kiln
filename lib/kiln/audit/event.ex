@@ -8,7 +8,7 @@ defmodule Kiln.Audit.Event do
   audit-ledger replay view relies on.
 
   `event_kind` is declared as an `Ecto.Enum` over
-  `Kiln.Audit.EventKind.values/0`, so any atom outside the 22-value taxonomy
+  `Kiln.Audit.EventKind.values/0`, so any atom outside the taxonomy
   is rejected at changeset time — before the INSERT reaches the Postgres
   CHECK constraint. Two layers of enforcement (app + DB) with the same SSOT.
 

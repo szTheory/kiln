@@ -18,6 +18,8 @@ defmodule KilnWeb.RunDetailLive do
   alias Kiln.Artifacts
   alias Kiln.Audit
   alias Kiln.Blockers.Reason
+  alias Kiln.OperatorNudges
+  alias Kiln.Repo
   alias Kiln.Runs
   alias Kiln.Runs.Run
   alias Kiln.Runs.Transitions
@@ -47,6 +49,7 @@ defmodule KilnWeb.RunDetailLive do
              |> push_navigate(to: ~p"/")}
 
           run ->
+            run = Repo.preload(run, :post_mortem)
             stages = Stages.list_for_run(run.id)
             graph_ids = Workflows.graph_for_run(run)
             latest = Workflows.latest_stage_runs_for(run.id)
@@ -60,6 +63,8 @@ defmodule KilnWeb.RunDetailLive do
               socket
               |> assign(:page_title, "Run #{short(uuid)}")
               |> assign(:run, run)
+              |> assign(:post_mortem, run.post_mortem)
+              |> assign(:nudge_form, to_form(%{"body" => ""}, as: :nudge))
               |> assign(:block_reason, block_reason)
               |> assign(:follow_up_correlation_id, follow_cor)
               |> assign(:graph_ids, graph_ids)
@@ -104,7 +109,11 @@ defmodule KilnWeb.RunDetailLive do
 
   @impl true
   def handle_info({:run_state, _}, socket) do
-    run = Runs.get!(socket.assigns.run.id)
+    run =
+      socket.assigns.run.id
+      |> Runs.get!()
+      |> Repo.preload(:post_mortem)
+
     stages = Stages.list_for_run(run.id)
     graph_ids = Workflows.graph_for_run(run)
     latest = Workflows.latest_stage_runs_for(run.id)
@@ -112,6 +121,7 @@ defmodule KilnWeb.RunDetailLive do
     socket =
       socket
       |> assign(:run, run)
+      |> assign(:post_mortem, run.post_mortem)
       |> assign(:stages, stages)
       |> assign(:graph_ids, graph_ids)
       |> assign(:latest_by_stage, latest)
@@ -122,7 +132,11 @@ defmodule KilnWeb.RunDetailLive do
   end
 
   def handle_info({:budget_alert, payload}, socket) do
-    run = Runs.get!(socket.assigns.run.id)
+    run =
+      socket.assigns.run.id
+      |> Runs.get!()
+      |> Repo.preload(:post_mortem)
+
     stages = Stages.list_for_run(run.id)
     graph_ids = Workflows.graph_for_run(run)
     latest = Workflows.latest_stage_runs_for(run.id)
@@ -132,6 +146,7 @@ defmodule KilnWeb.RunDetailLive do
     socket =
       socket
       |> assign(:run, run)
+      |> assign(:post_mortem, run.post_mortem)
       |> assign(:stages, stages)
       |> assign(:graph_ids, graph_ids)
       |> assign(:latest_by_stage, latest)
@@ -185,6 +200,24 @@ defmodule KilnWeb.RunDetailLive do
 
   def handle_event("dismiss_budget_banner", _params, socket) do
     {:noreply, assign(socket, :budget_banner_dismissed?, true)}
+  end
+
+  def handle_event("submit_nudge", %{"nudge" => %{"body" => body}}, socket) do
+    run = socket.assigns.run
+
+    case OperatorNudges.submit(run.id, body) do
+      {:ok, _} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, "Note recorded")
+         |> assign(:nudge_form, to_form(%{"body" => ""}, as: :nudge))}
+
+      {:error, :rate_limited} ->
+        {:noreply, put_flash(socket, :error, "Try again in a few seconds — rate limited.")}
+
+      {:error, reason} ->
+        {:noreply, put_flash(socket, :error, "Could not record note: #{inspect(reason)}")}
+    end
   end
 
   def handle_event("bundle_diagnostics", _params, socket) do
@@ -320,6 +353,46 @@ defmodule KilnWeb.RunDetailLive do
             <.link class="text-sm text-ember underline" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
+
+        <%= if @run.state == :merged do %>
+          <section id="post-mortem-panel" class="rounded border border-ash bg-char/80 p-4">
+            <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Post-mortem</h2>
+            <%= cond do %>
+              <% @post_mortem == nil -> %>
+                <p class="mt-2 text-sm text-[var(--color-smoke)]">Summary generating…</p>
+              <% @post_mortem.status == :pending -> %>
+                <p class="mt-2 text-sm text-[var(--color-smoke)]">Summary generating…</p>
+              <% @post_mortem.status == :complete -> %>
+                <p class="mt-2 font-mono text-xs text-bone">schema {@post_mortem.schema_version}</p>
+                <p class="mt-1 text-sm text-bone">
+                  Stages captured: {length(Map.get(@post_mortem.snapshot || %{}, "stages", []))}
+                </p>
+              <% true -> %>
+                <p class="mt-2 text-sm text-ember">Post-mortem capture failed</p>
+            <% end %>
+          </section>
+        <% end %>
+
+        <%= if nudge_composer_visible?(@run) do %>
+          <section class="rounded border border-ash bg-char/80 p-4">
+            <h2 class="text-sm font-semibold text-[var(--color-smoke)]">Operator note</h2>
+            <.form
+              for={@nudge_form}
+              id="operator-nudge-form"
+              phx-submit="submit_nudge"
+              class="mt-3 space-y-3"
+            >
+              <.input field={@nudge_form[:body]} type="textarea" label="Context for the planner" />
+              <button
+                type="submit"
+                class="rounded border border-clay px-3 py-1.5 text-sm font-semibold text-bone transition-colors hover:bg-clay/20"
+                phx-disable-with="Recording…"
+              >
+                Record note
+              </button>
+            </.form>
+          </section>
+        <% end %>
 
         <%= if @run.state == :blocked && @block_reason do %>
           <.unblock_panel run={@run} block_reason={@block_reason} />
@@ -524,6 +597,9 @@ defmodule KilnWeb.RunDetailLive do
     </nav>
     """
   end
+
+  defp nudge_composer_visible?(%Run{state: s}),
+    do: s not in [:merged, :failed, :escalated]
 
   defp qs("", pane), do: URI.encode_query(%{pane: pane})
   defp qs(stage, pane), do: URI.encode_query(%{stage: stage, pane: pane})

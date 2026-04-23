@@ -37,8 +37,12 @@ defmodule Kiln.Runs.Transitions do
   """
 
   import Ecto.Query
+
+  alias Oban
+
   require Logger
   alias Kiln.{AgentTickerRateLimiter, Audit, Repo}
+  alias Kiln.Oban.PostMortemMaterializeWorker
   alias Kiln.ExternalOperations
   alias Kiln.Runs.{Run, SchedulingTelemetry}
   alias Kiln.Policies.StuckDetector
@@ -125,6 +129,7 @@ defmodule Kiln.Runs.Transitions do
         case result do
           {:ok, run} ->
             maybe_abandon_ops(run)
+            maybe_enqueue_post_mortem(to, run)
             Phoenix.PubSub.broadcast(Kiln.PubSub, "run:#{run.id}", {:run_state, run})
             Phoenix.PubSub.broadcast(Kiln.PubSub, "runs:board", {:run_state, run})
             maybe_broadcast_agent_ticker(run, meta)
@@ -357,6 +362,22 @@ defmodule Kiln.Runs.Transitions do
   end
 
   defp maybe_abandon_ops(_), do: :ok
+
+  defp maybe_enqueue_post_mortem(:merged, %Run{id: id}) do
+    args = %{
+      "run_id" => to_string(id),
+      "idempotency_key" => "post_mortem_materialize:" <> to_string(id)
+    }
+
+    _ =
+      args
+      |> PostMortemMaterializeWorker.new()
+      |> Oban.insert()
+
+    :ok
+  end
+
+  defp maybe_enqueue_post_mortem(_, _), do: :ok
 
   defp append_audit(run, from, to, meta) do
     payload =

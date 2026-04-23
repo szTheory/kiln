@@ -64,6 +64,7 @@ defmodule Kiln.Stages.StageWorker do
 
   alias Kiln.Artifacts
   alias Kiln.BudgetAlerts
+  alias Kiln.OperatorNudges
   alias Kiln.Repo
   alias Kiln.Runs.Transitions
   alias Kiln.Stages.{ContractRegistry, NextStageDispatcher, StageRun}
@@ -102,7 +103,8 @@ defmodule Kiln.Stages.StageWorker do
            }),
          :ok <- guard_not_completed(op),
          {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :running}),
-         {:ok, _artifact} <- stub_dispatch(run_id, stage_run_id, stage_kind),
+         {:ok, nudge_suffix} <- planning_nudge_suffix(run_id, stage_kind),
+         {:ok, _artifact} <- stub_dispatch(run_id, stage_run_id, stage_kind, nudge_suffix),
          {:ok, _stage_run} <- update_stage_run(stage_run_id, %{state: :succeeded}),
          :ok <- budget_alerts_after_stage_success(run_id),
          :ok <- maybe_transition_after_stage(run_id, stage_kind),
@@ -185,8 +187,31 @@ defmodule Kiln.Stages.StageWorker do
   # does not call `String.to_existing_atom/1` — the atom is guaranteed
   # to exist because Kiln.Artifacts.Artifact's `@content_types` module
   # attribute creates it at compile time.
-  defp stub_dispatch(run_id, stage_run_id, stage_kind) do
-    body = ["# Stub output for stage_kind=", Atom.to_string(stage_kind), "\n"]
+  defp planning_nudge_suffix(run_id, :planning) do
+    case OperatorNudges.consume_pending_for_planning(run_id) do
+      {:ok, rows} ->
+        n = length(rows)
+
+        suffix =
+          if n > 0 do
+            "\noperator_nudges_consumed: #{n}\n"
+          else
+            ""
+          end
+
+        {:ok, suffix}
+
+      {:error, reason} ->
+        Logger.warning("operator nudge consume failed run_id=#{run_id} reason=#{inspect(reason)}")
+
+        {:ok, ""}
+    end
+  end
+
+  defp planning_nudge_suffix(_run_id, _kind), do: {:ok, ""}
+
+  defp stub_dispatch(run_id, stage_run_id, stage_kind, extra) do
+    body = ["# Stub output for stage_kind=", Atom.to_string(stage_kind), "\n", extra]
 
     Artifacts.put(stage_run_id, "#{stage_kind}.md", body,
       run_id: run_id,

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kiln://audit/v1/operator_feedback_received.json",
+  "title": "audit_events operator_feedback_received payload — numeric fields use strings (match budget_threshold_crossed)",
+  "type": "object",
+  "required": ["body_preview", "grapheme_count"],
+  "additionalProperties": true,
+  "properties": {
+    "body_preview": { "type": "string", "maxLength": 256 },
+    "grapheme_count": { "type": "string" },
+    "client_message_id": { "type": "string", "format": "uuid" }
+  }
+}

@@ -5,13 +5,13 @@ defmodule Kiln.Audit.SchemaRegistry do
 
   Rationale: `Kiln.Audit.append/1` is on the hot path for every state
   transition in every run. Loading, parsing, and building a JSV root for
-  22 schemas on each call would be wasteful. Because the schema files are
+  every schema on each call would be wasteful. Because the schema files are
   versioned alongside source code, compiling them into a module attribute
   at build time gives `fetch/1` zero file IO and zero JSV build cost at
   runtime.
 
   The schemas directory is an `@external_resource` so mix recompiles this
-  module whenever any of the 22 JSON files change — no stale cache.
+  module whenever any taxonomy JSON file changes — no stale cache.
 
   If a JSON file is missing (e.g. mid-implementation of a future kind),
   `fetch/1` returns `{:error, :schema_missing}` and `Kiln.Audit.append/1`

@@ -31,6 +31,7 @@ defmodule Kiln.Application do
   def start(_type, _args) do
     :ok = Limits.load!()
     :ok = Kiln.AgentTickerRateLimiter.ensure_table()
+    :ok = Kiln.OperatorNudgeLimiter.ensure_table()
 
     opts = [strategy: :one_for_one, name: Kiln.Supervisor]
 

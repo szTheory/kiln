@@ -18,8 +18,8 @@ defmodule Kiln.Audit.EventKindTest do
   ]
 
   describe "values/0" do
-    test "contains exactly 36 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 2 P8 + 1 P18)" do
-      assert length(EventKind.values()) == 36
+    test "contains exactly 38 kinds (22 P1 + 3 P2 D-85 + 8 P3 D-145 + 2 P8 + 1 P18 + 2 P19)" do
+      assert length(EventKind.values()) == 38
     end
 
     test "every element is an atom" do
@@ -38,16 +38,20 @@ defmodule Kiln.Audit.EventKindTest do
       end
     end
 
-    test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms; P8 appends last" do
+    test "preserves append-only ordering: P2 D-85 atoms precede P3 D-145 atoms; P19 appends last" do
       # After Phase 3: the last 8 kinds before any Phase-8 tail MUST be the D-145
       # additions. Phase 8 appends `:spec_draft_promoted` then `:follow_up_drafted`.
       values = EventKind.values()
-      assert List.last(values) == :budget_threshold_crossed
+      assert List.last(values) == :post_mortem_snapshot_stored
+      assert Enum.at(values, -2) == :operator_feedback_received
+      assert Enum.at(values, -3) == :budget_threshold_crossed
 
-      last_p3_block = values |> Enum.drop(-3) |> Enum.take(-8)
+      last_p3_block = values |> Enum.drop(-5) |> Enum.take(-8)
       assert last_p3_block == @p3_new_kinds
 
-      three_before_p3_block = values |> Enum.take(-14) |> Enum.take(3)
+      idx = Enum.find_index(values, &(&1 == :orphan_container_swept))
+      assert is_integer(idx) and idx >= 3
+      three_before_p3_block = Enum.slice(values, (idx - 3)..(idx - 1))
 
       assert three_before_p3_block == [
                :stage_input_rejected,

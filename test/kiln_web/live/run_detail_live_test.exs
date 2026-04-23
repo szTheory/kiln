@@ -48,6 +48,22 @@ defmodule KilnWeb.RunDetailLiveTest do
     assert render(view) =~ "Bundle last 60 minutes"
   end
 
+  test "merged run shows post-mortem panel", %{conn: conn} do
+    run = RunFactory.insert(:run, state: :merged, workflow_id: "wf_post_mortem_lv")
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#post-mortem-panel")
+  end
+
+  test "active run shows operator nudge composer", %{conn: conn} do
+    run = RunFactory.insert(:run, state: :planning, workflow_id: "wf_nudge_lv")
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#operator-nudge-form")
+  end
+
   test "merged run shows File as follow-up and creates inbox draft", %{conn: conn} do
     run = RunFactory.insert(:run, state: :merged, workflow_id: "wf_follow_up_lv")
 

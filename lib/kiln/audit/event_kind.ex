@@ -3,7 +3,7 @@ defmodule Kiln.Audit.EventKind do
   Single source of truth for the `audit_events.event_kind` taxonomy
   (D-07, D-08, D-85, D-145, D-106).
 
-  The list declared here is the authoritative 36-value enum (22 shipped in
+  The list declared here is the authoritative 38-value enum (22 shipped in
   Phase 1; 3 added in Phase 2 per D-85: `:stage_input_rejected`,
   `:artifact_written`, `:integrity_violation`; 8 added in Phase 3 per D-145:
   `:orphan_container_swept`, `:dtu_contract_drift_detected`,
@@ -62,6 +62,10 @@ defmodule Kiln.Audit.EventKind do
 
   Phase 18 COST-02 — `:budget_threshold_crossed` records soft budget
   threshold crossings (advisory; run continues).
+
+  Phase 19 FEEDBACK-01 / SELF-01 — `:operator_feedback_received` stores a
+  bounded operator nudge; `:post_mortem_snapshot_stored` optionally echoes
+  post-mortem materialization to the audit ledger.
   """
 
   @kinds [
@@ -108,7 +112,10 @@ defmodule Kiln.Audit.EventKind do
     :spec_draft_promoted,
     :follow_up_drafted,
     # Phase 18 COST-02 — append only, never reorder.
-    :budget_threshold_crossed
+    :budget_threshold_crossed,
+    # Phase 19 — append only, never reorder.
+    :operator_feedback_received,
+    :post_mortem_snapshot_stored
   ]
 
   @doc """

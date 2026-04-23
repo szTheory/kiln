@@ -89,6 +89,29 @@ defmodule Kiln.Stages.StageWorkerTest do
   end
 
   describe "happy path — valid planning stage input" do
+    test "planning stub notes consumed operator nudges in artifact body",
+         %{run: run, stage_run: sr, correlation_id: cid} do
+      for i <- 1..2 do
+        assert {:ok, _} =
+                 Audit.append(%{
+                   event_kind: :operator_feedback_received,
+                   run_id: run.id,
+                   correlation_id: cid,
+                   payload: %{
+                     "body_preview" => "nudge #{i}",
+                     "grapheme_count" => "8"
+                   }
+                 })
+      end
+
+      args = job_args(run, sr, valid_planning_input(run, sr))
+      assert :ok = perform_job(StageWorker, args)
+
+      assert {:ok, art} = Artifacts.get(sr.id, "planning.md")
+      body = Artifacts.read!(art)
+      assert body =~ "operator_nudges_consumed: 2"
+    end
+
     test "transitions run :planning → :coding; writes artifact; completes op",
          %{run: run, stage_run: sr} do
       args = job_args(run, sr, valid_planning_input(run, sr))

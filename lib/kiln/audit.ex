@@ -33,7 +33,7 @@ defmodule Kiln.Audit do
   succeeds. Returns `{:error, {:audit_payload_invalid, details}}` when
   the payload fails schema validation (no DB write),
   `{:error, {:unknown_event_kind, kind}}` when the kind is outside the
-  22-value taxonomy, `{:error, {:audit_schema_missing, kind}}` when the
+  taxonomy, `{:error, {:audit_schema_missing, kind}}` when the
   per-kind JSON schema isn't loadable, and `{:error, changeset}` if the
   Ecto changeset fails (e.g. missing required fields).
 

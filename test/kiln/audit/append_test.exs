@@ -334,4 +334,22 @@ defmodule Kiln.AuditTest do
       "source_run_id" => Ecto.UUID.generate(),
       "idempotency_key" => "follow_up_draft:stub:correlation"
     }
+
+  defp minimal_payload_for(:budget_threshold_crossed),
+    do: %{
+      "pct" => "50",
+      "cap_usd" => "1",
+      "spent_usd" => "0.5",
+      "threshold_name" => "soft"
+    }
+
+  defp minimal_payload_for(:operator_feedback_received),
+    do: %{"body_preview" => "hi", "grapheme_count" => "2"}
+
+  defp minimal_payload_for(:post_mortem_snapshot_stored),
+    do: %{
+      "schema_version" => "1",
+      "source_watermark" => "2020-01-01T00:00:00Z",
+      "run_id" => Ecto.UUID.generate() |> to_string()
+    }
 end

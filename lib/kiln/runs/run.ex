@@ -98,6 +98,11 @@ defmodule Kiln.Runs.Run do
     # Phase 6 — last GitHub delivery snapshot (PR refs + checks summary) for GIT-03.
     field(:github_delivery_snapshot, :map, default: %{})
 
+    # Phase 19 — last consumed `operator_feedback_received` audit id (FEEDBACK-01).
+    field(:operator_nudge_last_audit_id, :binary_id)
+
+    has_one(:post_mortem, Kiln.Runs.PostMortem, foreign_key: :run_id)
+
     timestamps(type: :utc_datetime_usec)
   end
 
@@ -112,7 +117,8 @@ defmodule Kiln.Runs.Run do
     :stuck_signal_window,
     :escalation_reason,
     :escalation_detail,
-    :github_delivery_snapshot
+    :github_delivery_snapshot,
+    :operator_nudge_last_audit_id
   ]
 
   @doc """
@@ -175,4 +181,13 @@ defmodule Kiln.Runs.Run do
   """
   @spec active_states() :: [atom(), ...]
   def active_states, do: @active_states
+
+  @doc """
+  Narrow changeset for Phase 19 operator-nudge consumption cursor updates.
+  """
+  @spec nudge_cursor_changeset(t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()
+  def nudge_cursor_changeset(run, attrs) do
+    run
+    |> cast(attrs, [:operator_nudge_last_audit_id])
+  end
 end
