@@ -86,5 +86,17 @@ Plans:
 - [x] 999.2-02 — `KilnWeb.OperatorChromeHook` (assigns + 5s refresh)
 - [x] 999.2-03 — `Layouts.app` chrome + LiveView tests
 
+### Phase 999.3: Immersive code graph visualization and Kiln-native microcopy (BACKLOG)
+
+**Goal:** Explore a **web-native, highly intuitive code understanding surface** for Kiln that lets operators and builders visually inspect and navigate code, relationships, and system behavior without dropping into raw file trees first. Prefer **HTML/CSS/JS-native** approaches where possible (including D3-class graphing or other lightweight browser visualization), with richer rendering options only if they materially improve clarity. In parallel, raise the quality bar for **toast notifications and operator-facing UX microcopy** so status updates feel clear, persona-aware, and distinctly **Kiln-native** rather than generic programmer text.
+
+**Requirements:** TBD (promote with `/gsd-review-backlog`).
+
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ---
 *Milestone v0.4.0 opened: 2026-04-23*
