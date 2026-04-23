@@ -17,7 +17,7 @@ Close **honest merge-authority** documentation (**DOCS-08**), finish **Nyquist /
 
 ## Phases (v0.4.0)
 
-- [ ] **Phase 22: Merge authority & operator docs** — DOCS-08 — README + `PROJECT.md` merge-authority matrix; aligns with Phase 12 partial self-check reality.
+- [x] **Phase 22: Merge authority & operator docs** — DOCS-08 — README + `PROJECT.md` merge-authority matrix; aligns with Phase 12 partial self-check reality — completed 2026-04-23.
 - [ ] **Phase 23: Nyquist / VALIDATION closure** — NYQ-01 — Phases 14/16/17/19 validation files: compliant or explicit waiver.
 - [ ] **Phase 24: Template → run UAT smoke** — UAT-03 — LiveView (or integration) test + VERIFICATION command citation.
 

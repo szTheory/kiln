@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.4.0
 milestone_name: — Trust, docs & validation closure
-status: executing
-last_updated: "2026-04-23T02:05:47.668Z"
-last_activity: 2026-04-23 — `/gsd-execute-phase 22` (in progress)
+status: ready_to_plan
+last_updated: "2026-04-23T02:15:00.000Z"
+last_activity: 2026-04-23 — Phase 22 complete (DOCS-08); advance to Phase 23
 progress:
   total_phases: 24
-  completed_phases: 23
+  completed_phases: 24
   total_plans: 100
-  completed_plans: 99
-  percent: 99
+  completed_plans: 100
+  percent: 100
 ---
 
 # Project State
@@ -23,18 +23,18 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-**Phase:** 22 — Merge authority & operator docs  
-**Plan:** 22-01  
-**Status:** Executing (`22-01-PLAN.md` — DOCS-08)  
-**Last activity:** 2026-04-23 — `/gsd-execute-phase 22`
+**Phase:** 23 — Nyquist / VALIDATION closure  
+**Plan:** Not started  
+**Status:** Ready to plan (`NYQ-01`)  
+**Last activity:** 2026-04-23 — Phase 22 verified (`22-VERIFICATION.md`)
 
 ## Current focus
 
 **Milestone v0.4.0 — Phases 22–24** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md)
 
-Ship **DOCS-08** (merge authority honesty), **NYQ-01** (validation closure or waivers), **UAT-03** (template → run smoke).
+Phase **22** complete (**DOCS-08**). Next: **NYQ-01** (validation closure or waivers), then **UAT-03** (template → run smoke).
 
-**Next command:** **`/gsd-execute-phase 22`** — README + `.planning/PROJECT.md` merge authority (DOCS-08).
+**Next command:** **`/gsd-discuss-phase 23`** (recommended) or **`/gsd-plan-phase 23`** — Nyquist / `VALIDATION.md` closure.
 
 ## Milestone note
 

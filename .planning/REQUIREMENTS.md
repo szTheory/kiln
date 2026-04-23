@@ -11,7 +11,7 @@ Prior milestones remain validated; see `.planning/milestones/v0.3.0-REQUIREMENTS
 
 ### Documentation & process
 
-- [ ] **DOCS-08**: **`README.md`** and **`PROJECT.md`** include a single **merge authority** table: which commands must be green in **CI** before merge vs which are optional local smoke when Postgres/OTel/fixtures are absent; references **`12-01-SUMMARY.md`** Self-Check PARTIAL honestly (no “green locally” fiction).
+- [x] **DOCS-08**: **`README.md`** and **`PROJECT.md`** include a single **merge authority** table: which commands must be green in **CI** before merge vs which are optional local smoke when Postgres/OTel/fixtures are absent; references **`12-01-SUMMARY.md`** Self-Check PARTIAL honestly (no “green locally” fiction). — **Complete 2026-04-23** (`22-VERIFICATION.md`).
 
 ### Planning hygiene (Nyquist)
 
@@ -39,11 +39,11 @@ Prior milestones remain validated; see `.planning/milestones/v0.3.0-REQUIREMENTS
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCS-08 | Phase 22 | Pending |
+| DOCS-08 | Phase 22 | Complete |
 | NYQ-01 | Phase 23 | Pending |
 | UAT-03 | Phase 24 | Pending |
 
-**Coverage:** v0.4.0 requirements: **3** — mapped: **3** — unmapped: **0** — complete: **0** — pending: **3**.
+**Coverage:** v0.4.0 requirements: **3** — mapped: **3** — unmapped: **0** — complete: **1** — pending: **2**.
 
 ---
 *Requirements opened: 2026-04-23 — `/gsd-new-milestone` v0.4.0*

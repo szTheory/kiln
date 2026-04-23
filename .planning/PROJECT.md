@@ -36,12 +36,12 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **REPL-01** — Read-only run timeline / replay MVP — **Validated in Phase 16: read-only-run-replay** (2026-04-22).
 - [x] **COST-01**, **COST-02** — Advisory cost hints + budget threshold alerts — **Validated in Phase 18: cost-hints-budget-alerts** (2026-04-22).
 - [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, archived **`.planning/milestones/v0.3.0-REQUIREMENTS.md`**) (2026-04-22).
+- [x] **DOCS-08** — Merge authority SSOT in `.planning/PROJECT.md` (`## Merge authority`) + compact README pointer to `#merge-authority`; Phase 12 `12-01-SUMMARY.md` cited for local PARTIAL vs CI — **Validated in Phase 22: merge-authority-operator-docs** (2026-04-23).
 
 ### Active (v0.4.0)
 
 Tracked in [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for the open milestone:
 
-- [ ] **DOCS-08** — Merge authority matrix (README + `PROJECT.md`).
 - [ ] **NYQ-01** — Nyquist compliant **or** explicit waiver for phases 14/16/17/19 `VALIDATION.md` files.
 - [ ] **UAT-03** — Template → run LiveView smoke + cited verification command.
 
@@ -172,4 +172,4 @@ CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-23 — opened v0.4.0 (`/gsd-new-milestone`): Phases 22–24, fresh `REQUIREMENTS.md`*
+*Last updated: 2026-04-23 — Phase 22 (DOCS-08): `## Merge authority` + README pointer; `REQUIREMENTS.md` / `ROADMAP.md` advanced*

@@ -1,10 +1,11 @@
 ---
 phase: 22
 slug: merge-authority-operator-docs
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-22
+updated: 2026-04-23
 ---
 
 # Phase 22 — Validation Strategy
@@ -38,8 +39,8 @@ created: 2026-04-22
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 22-01-01 | 01 | 1 | DOCS-08 | T-22-01 / — | No misleading “local = merge” claims | grep | `grep -q '12-01-SUMMARY' .planning/PROJECT.md` | ✅ | ⬜ pending |
-| 22-01-02 | 01 | 1 | DOCS-08 | T-22-02 / — | README links SSOT; no duplicate authoritative table | grep | `grep -qE '\\.planning/PROJECT\\.md#merge-authority' README.md` | ✅ | ⬜ pending |
+| 22-01-01 | 01 | 1 | DOCS-08 | T-22-01 / — | No misleading “local = merge” claims | grep | `grep -q '12-01-SUMMARY' .planning/PROJECT.md` | ✅ | ✅ green |
+| 22-01-02 | 01 | 1 | DOCS-08 | T-22-02 / — | README links SSOT; no duplicate authoritative table | grep | `grep -qE '\\.planning/PROJECT\\.md#merge-authority' README.md` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -61,11 +62,11 @@ created: 2026-04-22
 
 ## Validation Sign-Off
 
-- [ ] All tasks have grep-verifiable acceptance criteria
-- [ ] Sampling continuity: doc tasks each have automated grep
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter after execute-phase
+- [x] All tasks have grep-verifiable acceptance criteria
+- [x] Sampling continuity: doc tasks each have automated grep
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter after execute-phase
 
-**Approval:** pending
+**Approval:** signed off 2026-04-23 (`22-VERIFICATION.md` passed)
