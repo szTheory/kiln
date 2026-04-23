@@ -1,10 +1,11 @@
 ---
 phase: 24
 slug: template-run-uat-smoke
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-04-23
+reviewed_at: 2026-04-23T18:52:28Z
 ---
 
 # Phase 24 — UI Design Contract
@@ -138,6 +139,7 @@ Out of scope:
 - Keep the existing pattern: `kiln-eyebrow` over `kiln-h1`, one-sentence supporting copy below.
 - Header remains border-led, not shadow-led: `border-b border-base-300 pb-4`.
 - Supporting copy stays muted (`text-base-content/60`) and one sentence long.
+- On `/templates/:template_id`, the primary focal point is the template title and adjacent primary action row; after promotion, the success panel becomes the primary visual anchor.
 
 ### Primary action row
 
@@ -246,11 +248,11 @@ This command proves the narrow `/templates` to `/runs/:id` happy path only. It d
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-23
