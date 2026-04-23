@@ -27,6 +27,8 @@
 
 **This audit file** is for **rationale**, **drift history** (findings table), and **edge cases** (e.g. why there is no `app` service). **Optional orchestration** is documented only in **README** (pointer: [Optional: Just recipes](../../README.md#optional-just-recipes-local-orchestration)); the **`justfile`** wraps **`compose.yaml`**, **`KILN_DB_ROLE=kiln_owner mix setup`**, and **`test/integration/first_run.sh`** — not a second command matrix here. Do not fork a competing quick-start; patch README + compose when reality changes, then summarize the “why” here if needed.
 
+**Phase 21 (optional Dev Container):** operators who want a **reproducible Linux toolchain** with **Docker + editor** can use the checked-in [`.devcontainer/`](../../.devcontainer/) plus README [Optional: Dev Container](../../README.md#optional-dev-container-minimal-host-installs) — same **Compose data plane** and **DooD** constraints as host Phoenix; no duplicate command matrix in this audit (rationale-first SSOT per **D-2117**).
+
 ## References
 
 - [`compose.yaml`](../../compose.yaml)  

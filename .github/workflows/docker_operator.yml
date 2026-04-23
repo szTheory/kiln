@@ -1,0 +1,34 @@
+name: Docker operator drift
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "compose.yaml"
+      - ".devcontainer/**"
+      - "priv/dtu/**"
+      - "**/Dockerfile"
+      - ".github/workflows/docker_operator.yml"
+  push:
+    branches: [main]
+    paths:
+      - "compose.yaml"
+      - ".devcontainer/**"
+      - "priv/dtu/**"
+      - "**/Dockerfile"
+      - ".github/workflows/docker_operator.yml"
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * 1"
+
+jobs:
+  docker-operator:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: docker compose config (quiet)
+        run: docker compose -f compose.yaml config --quiet
+
+      - name: docker compose build dtu
+        run: docker compose -f compose.yaml build dtu
