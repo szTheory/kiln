@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
-status: unknown
-last_updated: "2026-04-23T00:39:06.392Z"
+status: ready_to_plan
+last_updated: "2026-04-23T00:59:22.925Z"
 progress:
   total_phases: 23
-  completed_phases: 21
-  total_plans: 95
-  completed_plans: 95
+  completed_phases: 22
+  total_plans: 97
+  completed_plans: 97
   percent: 100
 ---
 
@@ -22,16 +22,11 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current focus
 
-**Phase 21 — Containerized local operator DX** — **Context gathered** (ready for planning)
+**Phase 19 — Post-mortems & soft feedback** — next open v0.3.0 slice per [ROADMAP](ROADMAP.md) (Phases 19–20 still in flight).
 
-All handoff text that survives **`/clear`** lives in:
+**Phase 21 (Containerized local operator DX)** — **complete** (2026-04-23). Artifacts: [`.devcontainer/`](../.devcontainer/), [`.github/workflows/docker_operator.yml`](../.github/workflows/docker_operator.yml), [`21-VERIFICATION.md`](phases/21-containerized-local-operator-dx/21-VERIFICATION.md).
 
-- [.planning/ROADMAP.md](ROADMAP.md) — Phase 21 row + phase details
-- [.planning/phases/21-containerized-local-operator-dx/21-BRIEF.md](phases/21-containerized-local-operator-dx/21-BRIEF.md) — intent, anchors, gray-area seeds
-- [.planning/phases/21-containerized-local-operator-dx/21-CONTEXT.md](phases/21-containerized-local-operator-dx/21-CONTEXT.md) — locked implementation decisions
-- [.planning/phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md](phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md) — discuss audit trail
-
-**Next command:** **`/gsd-plan-phase 21`**
+**Next command:** **`/gsd-discuss-phase 19`** (or **`/gsd-execute-phase 19`** if plans exist)
 
 ## Milestone note
 

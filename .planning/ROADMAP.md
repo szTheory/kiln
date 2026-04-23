@@ -23,7 +23,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 - [x] **Phase 18: Cost hints & budget alerts** — COST-01, COST-02 — advisory + threshold notifications. (completed 2026-04-22)
 - [ ] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail.
 - [ ] **Phase 20: Phase 19 verification & planning SSOT** — SELF-01, FEEDBACK-01 — formal `19-VERIFICATION.md` + REQUIREMENTS/ROADMAP alignment per milestone audit.
-- [ ] **Phase 21: Containerized local operator DX** — LOCAL / operator ergonomics — optional Docker-first dev stack (Compose app and/or devcontainer) revisiting Phase 12 “host Phoenix only” default; see `21-BRIEF.md`.
+- [x] **Phase 21: Containerized local operator DX** — LOCAL / operator ergonomics — optional Docker-first dev stack (Compose app and/or devcontainer) revisiting Phase 12 “host Phoenix only” default; see `21-BRIEF.md`. (completed 2026-04-23)
 
 **Parking / decimals:** Use **999.x** only for ad-hoc backlog execution; no decimal insert planned for v0.3.0 launch.
 
@@ -106,7 +106,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 
 **Canonical refs (seed):** `CLAUDE.md` (SEC-01), `lib/kiln_web/live/provider_health_live.ex`, `.cursor/plans/GB dogfood note backlog-6d919cbd.plan.md` (intent note; do not treat as executable spec).
 
-**Plans:** 3/3 plans complete
+**Plans:** 2/2 plans complete
 
 Plans:
 
