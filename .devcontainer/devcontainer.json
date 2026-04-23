@@ -1,0 +1,24 @@
+{
+  "name": "Kiln (dev)",
+  "build": {
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "workspaceFolder": "/workspaces/kiln",
+  "mounts": [
+    "source=kiln-devcontainer-deps,target=${containerWorkspaceFolder}/deps,type=volume",
+    "source=kiln-devcontainer-build,target=${containerWorkspaceFolder}/_build,type=volume"
+  ],
+  "containerEnv": {
+    "MIX_ENV": "dev",
+    "KILN_DEV_BIND_ALL": "1",
+    "DATABASE_URL": "ecto://kiln:kiln_dev@host.docker.internal:5432/kiln_dev",
+    "DATABASE_VERIFIER_URL": "ecto://kiln_verifier:kiln_dev_verifier@host.docker.internal:5432/kiln_dev"
+  },
+  "postCreateCommand": "mix deps.get",
+  "customizations": {
+    "vscode": {
+      "extensions": ["JakeBecker.elixir-ls"]
+    }
+  }
+}
