@@ -3,6 +3,7 @@ phase: 19-post-mortems-soft-feedback
 plan: "02"
 subsystem: database
 tags: [ecto, post-mortem, runs]
+requirements-completed: [SELF-01]
 ---
 
 ## Self-Check: PASSED

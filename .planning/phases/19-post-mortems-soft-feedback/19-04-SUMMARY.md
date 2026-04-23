@@ -3,6 +3,7 @@ phase: 19-post-mortems-soft-feedback
 plan: "04"
 subsystem: api
 tags: [operator, audit, ets, telemetry]
+requirements-completed: [FEEDBACK-01]
 ---
 
 ## Self-Check: PASSED

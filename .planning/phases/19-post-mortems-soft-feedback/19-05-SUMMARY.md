@@ -3,6 +3,9 @@ phase: 19-post-mortems-soft-feedback
 plan: "05"
 subsystem: ui
 tags: [liveview, stages, operator-nudge]
+requirements-completed:
+  - SELF-01
+  - FEEDBACK-01
 ---
 
 ## Self-Check: PASSED

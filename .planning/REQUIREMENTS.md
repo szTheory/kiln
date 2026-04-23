@@ -22,8 +22,8 @@ Scope is **ordered A → B → C** in **bite-sized** phases (continuing roadmap 
 
 - [x] **COST-01**: **Cost optimization hints** — advisory text when a cheaper model tier is likely safe given recent stage outcomes (never overrides scenario oracle or caps).
 - [x] **COST-02**: **Budget alerts** at configured thresholds (e.g. 50% / 80% / 100% of per-run cap) surfaced in UI + existing notification path where applicable.
-- [ ] **SELF-01**: Every **merged** run emits a **structured post-mortem** artifact (tokens/$ by stage/role, retries, `requested_model` vs `actual_model_used`, scenario verdict trail, block reasons).
-- [ ] **FEEDBACK-01**: Operator can send a **one-line soft nudge** during a run; persisted as **`operator_feedback_received`** audit event; **non-blocking** (does not add approval gates; UAT-02 unchanged).
+- [x] **SELF-01**: Every **merged** run emits a **structured post-mortem** artifact (tokens/$ by stage/role, retries, `requested_model` vs `actual_model_used`, scenario verdict trail, block reasons).
+- [x] **FEEDBACK-01**: Operator can send a **one-line soft nudge** during a run; persisted as **`operator_feedback_received`** audit event; **non-blocking** (does not add approval gates; UAT-02 unchanged).
 
 ## Deferred (same IDs, not in v0.3.0)
 
@@ -50,10 +50,10 @@ Scope is **ordered A → B → C** in **bite-sized** phases (continuing roadmap 
 | ONB-01 | Phase 17 | Complete |
 | COST-01 | Phase 18 | Complete |
 | COST-02 | Phase 18 | Complete |
-| SELF-01 | Phase 20 | Pending |
-| FEEDBACK-01 | Phase 20 | Pending |
+| SELF-01 | Phase 19 | Complete |
+| FEEDBACK-01 | Phase 19 | Complete |
 
-**Coverage:** v0.3.0 requirements: **9** — mapped: **9** — unmapped: **0** — complete: **7** — pending: **2** (gap closure tracked in Phase 20 per `.planning/v0.3.0-MILESTONE-AUDIT.md`).
+**Coverage:** v0.3.0 requirements: **9** — mapped: **9** — unmapped: **0** — complete: **9** — pending: **0**.
 
 ---
 *Requirements defined: 2026-04-22 — `/gsd-new-milestone` v0.3.0*

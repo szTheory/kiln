@@ -21,7 +21,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 - [x] **Phase 16: Read-only run replay** — REPL-01 — timeline scrub over persisted audit/checkpoint data (MVP). (completed 2026-04-22)
 - [x] **Phase 17: Template library & onboarding specs** — WFE-01, ONB-01 — `priv` (or agreed) template packs + UI to start from template. (completed 2026-04-22)
 - [x] **Phase 18: Cost hints & budget alerts** — COST-01, COST-02 — advisory + threshold notifications. (completed 2026-04-22)
-- [ ] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail.
+- [x] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail. (completed 2026-04-22)
 - [ ] **Phase 20: Phase 19 verification & planning SSOT** — SELF-01, FEEDBACK-01 — formal `19-VERIFICATION.md` + REQUIREMENTS/ROADMAP alignment per milestone audit.
 - [x] **Phase 21: Containerized local operator DX** — LOCAL / operator ergonomics — optional Docker-first dev stack (Compose app and/or devcontainer) revisiting Phase 12 “host Phoenix only” default; see `21-BRIEF.md`. (completed 2026-04-23)
 

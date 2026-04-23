@@ -3,6 +3,7 @@ phase: 19-post-mortems-soft-feedback
 plan: "03"
 subsystem: infra
 tags: [oban, post-mortem, transitions]
+requirements-completed: [SELF-01]
 ---
 
 ## Self-Check: PASSED

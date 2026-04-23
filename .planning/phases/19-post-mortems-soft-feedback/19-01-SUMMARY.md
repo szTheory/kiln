@@ -3,6 +3,7 @@ phase: 19-post-mortems-soft-feedback
 plan: "01"
 subsystem: database
 tags: [audit, json-schema, migration]
+requirements-completed: [FEEDBACK-01]
 ---
 
 ## Self-Check: PASSED
