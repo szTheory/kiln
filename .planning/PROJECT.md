@@ -35,11 +35,15 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **PARA-02** — Run comparison view — **Validated in Phase 15: run-comparison** (2026-04-22).
 - [x] **REPL-01** — Read-only run timeline / replay MVP — **Validated in Phase 16: read-only-run-replay** (2026-04-22).
 - [x] **COST-01**, **COST-02** — Advisory cost hints + budget threshold alerts — **Validated in Phase 18: cost-hints-budget-alerts** (2026-04-22).
-- [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, `REQUIREMENTS.md`) (2026-04-22).
+- [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, archived **`.planning/milestones/v0.3.0-REQUIREMENTS.md`**) (2026-04-22).
 
-### Active
+### Active (v0.4.0)
 
-None — v0.3.0 shipped. Run **`/gsd-new-milestone`** to add the next milestone’s requirement IDs and phase cuts.
+Tracked in [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for the open milestone:
+
+- [ ] **DOCS-08** — Merge authority matrix (README + `PROJECT.md`).
+- [ ] **NYQ-01** — Nyquist compliant **or** explicit waiver for phases 14/16/17/19 `VALIDATION.md` files.
+- [ ] **UAT-03** — Template → run LiveView smoke + cited verification command.
 
 ### Out of Scope
 
@@ -117,18 +121,27 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Next milestone (not opened)
+## Current Milestone: v0.4.0 — Trust, docs & validation closure
 
-Use **`/gsd-new-milestone`** to capture the next version’s requirements, traceability, and phase list. Prior `.planning/phases/` directories remain historical execution records.
+**Goal:** After v0.3.0 feature velocity, make **merge authority**, **Nyquist posture**, and **template→run regression** explicit so solo operators and CI share the same truth.
+
+**Target features:**
+
+- **DOCS-08** — README + `PROJECT.md` merge-authority matrix (CI vs optional local smoke).
+- **NYQ-01** — Close or formally waive Nyquist gaps on Phases **14 / 16 / 17 / 19** validation artifacts.
+- **UAT-03** — One LiveView journey: built-in template → run (stable selectors) with verification citation.
+
+**Planning notes:** Phase directories **22+** will be created under `.planning/phases/` when `/gsd-discuss-phase` / `/gsd-plan-phase` runs; prior phase trees remain historical records.
 
 ## Current State (as of 2026-04-23)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
 - **v0.3.0 (Phases 14–21)** — **Shipped**; tag **`v0.3.0`**; archives `.planning/milestones/v0.3.0-ROADMAP.md`, `v0.3.0-REQUIREMENTS.md`, `v0.3.0-MILESTONE-AUDIT.md`. Execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21) with **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate; host Phoenix + Compose remains canonical.
+- **v0.4.0 (Phases 22–24)** — **Open** — trust/docs/Nyquist/UAT slice; living [ROADMAP.md](ROADMAP.md) + [REQUIREMENTS.md](REQUIREMENTS.md).
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
 - **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 ---
-*Last updated: 2026-04-23 after v0.3.0 milestone close (archived roadmap + requirements; root `REQUIREMENTS.md` removed until next milestone)*
+*Last updated: 2026-04-23 — opened v0.4.0 (`/gsd-new-milestone`): Phases 22–24, fresh `REQUIREMENTS.md`*

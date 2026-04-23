@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-23 — **Post v0.3.0 close** (next: **`/gsd-new-milestone`**)
+**Updated:** 2026-04-23 — **Milestone v0.4.0** (Phases **22–24**)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -9,9 +9,44 @@
 - ✅ **v0.1.0** — Phases **1–9** + parking **999.1** — [.planning/milestones/v0.1.0.md](milestones/v0.1.0.md)
 - ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md)
 - ✅ **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–21** (shipped 2026-04-23) — [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md)
-- 📋 **Next** — Run **`/gsd-new-milestone`** to open the next version (fresh `REQUIREMENTS.md` + roadmap scope).
+- 🚧 **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [REQUIREMENTS.md](REQUIREMENTS.md)
 
-## Phases
+## Overview (v0.4.0)
+
+Close **honest merge-authority** documentation (**DOCS-08**), finish **Nyquist / VALIDATION** posture for the v0.3.0 phases that still showed **`partial`** (**NYQ-01**), and add **one automated operator journey** from template selection into a run (**UAT-03**). Small phases so each stays reviewable.
+
+## Phases (v0.4.0)
+
+- [ ] **Phase 22: Merge authority & operator docs** — DOCS-08 — README + `PROJECT.md` merge-authority matrix; aligns with Phase 12 partial self-check reality.
+- [ ] **Phase 23: Nyquist / VALIDATION closure** — NYQ-01 — Phases 14/16/17/19 validation files: compliant or explicit waiver.
+- [ ] **Phase 24: Template → run UAT smoke** — UAT-03 — LiveView (or integration) test + VERIFICATION command citation.
+
+**Parking / decimals:** Continue using **999.x** only for ad-hoc backlog execution off the integer roadmap.
+
+## Phase details (v0.4.0 — summary)
+
+### Phase 22: Merge authority & operator docs
+**Goal:** Operators and contributors share one explicit understanding of what **CI** must prove vs what is optional locally.  
+**Requirements:** DOCS-08  
+**Success criteria (observable):**
+1. `README.md` and `PROJECT.md` contain the same merge-authority table (or README links to `PROJECT.md` as SSOT with one table).
+2. Phase 12 “PARTIAL self-check” is referenced so local green is not implied where unsupported.
+
+### Phase 23: Nyquist / VALIDATION closure
+**Goal:** No v0.3.0 phase remains silently **`nyquist_compliant: false`** without a recorded decision.  
+**Requirements:** NYQ-01  
+**Success criteria:**
+1. Each targeted `*-VALIDATION.md` is updated with compliant=true **or** a dated waiver block listing owner.
+2. `REQUIREMENTS.md` traceability row for NYQ-01 moves to Complete when VERIFICATION passes.
+
+### Phase 24: Template → run UAT smoke
+**Goal:** Automated regression cover for the **template → run** path the operator relies on for first success.  
+**Requirements:** UAT-03  
+**Success criteria:**
+1. Test exercises UI with stable selectors (ids) from the template flow.
+2. `24-VERIFICATION.md` (or phase-agreed name) cites the exact `mix test …` line run in CI.
+
+## Phases (shipped — reference)
 
 <details>
 <summary>✅ v0.3.0 (Phases 14–21) — SHIPPED 2026-04-23</summary>
@@ -25,13 +60,9 @@
 - [x] **Phase 20: Phase 19 verification & planning SSOT** — completed 2026-04-23
 - [x] **Phase 21: Containerized local operator DX** — LOCAL — completed 2026-04-23
 
-**Forensic detail:** [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) (full pre-close roadmap copy).
+**Forensic detail:** [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md).
 
 </details>
-
-### Next milestone
-
-_No integer phases opened._ Planning starts with **`/gsd-new-milestone`**.
 
 ## Parking slot (reference — shipped)
 
@@ -56,4 +87,4 @@ Plans:
 - [x] 999.2-03 — `Layouts.app` chrome + LiveView tests
 
 ---
-*Living roadmap post v0.3.0 close: 2026-04-23*
+*Milestone v0.4.0 opened: 2026-04-23*

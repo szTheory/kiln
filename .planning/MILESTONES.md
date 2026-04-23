@@ -2,6 +2,13 @@
 
 Living summary of shipped versions. Detailed phase history lives under `.planning/milestones/` and `.planning/phases/`.
 
+## v0.4.0 — Trust, docs & validation closure
+
+**Status:** In progress (opened 2026-04-23)  
+**Phases:** 22–24 — see [.planning/ROADMAP.md](ROADMAP.md) · [.planning/REQUIREMENTS.md](REQUIREMENTS.md)
+
+**Intent:** **DOCS-08** merge-authority matrix, **NYQ-01** Nyquist closure or explicit waivers (phases 14/16/17/19), **UAT-03** template→run LiveView smoke with verification citation.
+
 ## v0.3.0 — Scale → templates → operator intelligence
 
 **Shipped:** 2026-04-23  
