@@ -1,10 +1,11 @@
 ---
 phase: 14
 slug: fair-parallel-runs
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-22
+updated: 2026-04-23
 ---
 
 # Phase 14 — Validation Strategy
@@ -65,12 +66,12 @@ created: 2026-04-22
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or documented grep gates
-- [ ] No 3 consecutive tasks without automated verify
-- [ ] No watch-mode flags in commands
-- [ ] `nyquist_compliant: true` set after wave 2 green
+- [x] All tasks have `<automated>` verify or documented grep gates
+- [x] No 3 consecutive tasks without automated verify
+- [x] No watch-mode flags in commands
+- [x] `nyquist_compliant: true` set after wave 2 green
 
-**Approval:** pending
+**Approval:** signed off 2026-04-23 (`14-VERIFICATION.md`, `14-01-SUMMARY.md`, `14-02-SUMMARY.md`, `14-03-SUMMARY.md` per D-2318)
 
 ---
 

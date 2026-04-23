@@ -273,12 +273,12 @@ assert has_element?(view, "#templates-start-run")
 | A2 | New `data-testid` hooks would be unnecessary sprawl for this flow. | Don't Hand-Roll | Low — the source already has the required ids. |
 | A3 | Requiring repo queries inside the UI smoke would indicate the test has expanded beyond the intended slice. | Common Pitfalls | Low — this is a planning heuristic, not a contract fact. |
 
-## Open Questions
+## Resolved Questions
 
-1. **What exact readiness setup contract should Phase 24 standardize inside `TemplatesLiveTest`?**
-   - What we know: The test must satisfy `OnboardingGate`, and the repo already supports both persisted readiness flags (`OperatorReadiness.mark_step/2`) and an env bypass (`KILN_SKIP_OPERATOR_READINESS=1`). [VERIFIED: codebase grep]
-   - What's unclear: Whether the planner should prefer DB-backed readiness setup for per-test isolation or env bypass for brevity. [VERIFIED: codebase grep]
-   - Recommendation: Prefer DB-backed readiness setup in the test module and run the module `async: false` so the regression uses the same app contract as production routing while avoiding process-global env leakage. [VERIFIED: codebase grep]
+1. **Readiness setup contract for `TemplatesLiveTest`**
+   - Decision: Standardize on DB-backed readiness setup inside `test/kiln_web/live/templates_live_test.exs` by capturing the current `Kiln.OperatorReadiness.current_state/0`, marking `:anthropic`, `:github`, and `:docker` true with `OperatorReadiness.mark_step/2` before `live/2`, restoring the prior booleans in `on_exit`, and running the module `async: false`. [VERIFIED: codebase grep]
+   - Rejected alternative: Do not use the `KILN_SKIP_OPERATOR_READINESS=1` env bypass for Phase 24 because it sidesteps the real routing contract and introduces process-global leakage risk. [VERIFIED: codebase grep]
+   - Planning impact: The plan can now treat readiness setup as resolved implementation guidance rather than an open design choice. [VERIFIED: codebase grep]
 
 ## Environment Availability
 

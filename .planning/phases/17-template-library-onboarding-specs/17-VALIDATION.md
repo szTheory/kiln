@@ -1,10 +1,11 @@
 ---
 phase: 17
 slug: template-library-onboarding-specs
-status: draft
-nyquist_compliant: false
+status: complete
+nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-22
+updated: 2026-04-23
 ---
 
 # Phase 17 — Validation Strategy
@@ -65,8 +66,8 @@ created: 2026-04-22
 
 ## Validation Sign-Off
 
-- [ ] All tasks have grep- or test-verifiable acceptance criteria
-- [ ] Sampling continuity: no long stretches without `mix test`
-- [ ] `nyquist_compliant: true` set in frontmatter when execution completes
+- [x] All tasks have grep- or test-verifiable acceptance criteria
+- [x] Sampling continuity: no long stretches without `mix test`
+- [x] `nyquist_compliant: true` set in frontmatter when execution completes
 
-**Approval:** pending
+**Approval:** signed off 2026-04-23 (`17-VERIFICATION.md`, `17-01-SUMMARY.md`, `17-03-SUMMARY.md` per D-2319)

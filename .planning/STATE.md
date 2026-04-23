@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.4.0
-milestone_name: — Trust, docs & validation closure
-status: ready_to_plan
-last_updated: "2026-04-23T02:15:00.000Z"
-last_activity: 2026-04-23 — Phase 22 complete (DOCS-08); advance to Phase 23
+milestone: none
+milestone_name: Planning next milestone
+status: completed
+last_updated: "2026-04-23T20:00:00Z"
+last_activity: 2026-04-23 — v0.4.0 archived
 progress:
-  total_phases: 24
+  total_phases: 27
   completed_phases: 24
-  total_plans: 100
-  completed_plans: 100
+  total_plans: 98
+  completed_plans: 103
   percent: 100
 ---
 
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-**Phase:** 23 — Nyquist / VALIDATION closure  
-**Plan:** Not started  
-**Status:** Ready to plan (`NYQ-01`)  
-**Last activity:** 2026-04-23 — Phase 22 verified (`22-VERIFICATION.md`)
+**Phase:** 24 — Template → run UAT smoke  
+**Plan:** Complete  
+**Status:** No active milestone
+**Last activity:** 2026-04-23 — v0.4.0 archived
 
 ## Current focus
 
-**Milestone v0.4.0 — Phases 22–24** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md)
+**Planning next milestone** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md)
 
-Phase **22** complete (**DOCS-08**). Next: **NYQ-01** (validation closure or waivers), then **UAT-03** (template → run smoke).
+Last shipped milestone: **v0.4.0 — Phases 22–24** (**DOCS-08**, **NYQ-01**, **UAT-03**).
 
-**Next command:** **`/gsd-discuss-phase 23`** (recommended) or **`/gsd-plan-phase 23`** — Nyquist / `VALIDATION.md` closure.
+**Next command:** **`/gsd-new-milestone`** — define the next requirements slice and resume integer phase planning at **25**.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 continues **integer phase numbering** from **22**.
+v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. The next milestone should continue integer phase numbering from **25**.
 
 ## Session continuity (recent CONTEXT files)
 
@@ -50,6 +50,6 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 continues **integer phase nu
 
 **Last backlog execution:** 999.2 — shipped 2026-04-22.
 
-**Last phase execution:** 21 (containerized local operator DX) — completed 2026-04-23.
+**Last phase execution:** 24 (Template -> run UAT smoke) — completed 2026-04-23.
 
-**Planned Phase:** 22 (Merge authority & operator docs) — 1 plans — 2026-04-23T02:02:43.165Z
+**Planned Phase:** 24 (Template → run UAT smoke) — completed 2026-04-23

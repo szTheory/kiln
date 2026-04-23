@@ -365,12 +365,12 @@ Source: exact waiver block locked in Phase 23 context. [VERIFIED: .planning/phas
 |---|-------|---------|---------------|
 | None | No assumed claims remain; all recommendations above were tied to repo artifacts or local tool audits. [VERIFIED: codebase grep] | n/a | n/a |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Can Phase 16 be reframed to compliant without a waiver?** [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md]
+1. **Can Phase 16 be reframed to compliant without a waiver?** [RESOLVED: No for Phase 23 planning.] [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md]
    - What we know: `16-VERIFICATION.md` is passed, but `16-VALIDATION.md` still lists a manual-only “Range slider debounce feel” check. [VERIFIED: .planning/phases/16-read-only-run-replay/16-VERIFICATION.md] [VERIFIED: .planning/phases/16-read-only-run-replay/16-VALIDATION.md]
-   - What's unclear: whether that note can be rewritten as non-blocking operator guidance without weakening the honesty standard. [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md]
-   - Recommendation: Default the plan to a narrow waiver and only switch to compliant if the planner can produce exact replacement wording that keeps the artifact factually stronger, not merely cleaner. [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md]
+   - Resolution: The residual note remains a manual-only operator-judgment caveat, and the locked context explicitly forbids marking the phase compliant while that caveat still reads as blocking. Phase 23 should therefore plan an inline waiver rather than a compliant rewrite. [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md] [VERIFIED: .planning/phases/16-read-only-run-replay/16-VALIDATION.md]
+   - Planning consequence: Plan 01 should close Phase 16 with the exact D-2313 waiver block, and Plan 02 should verify that waiver shape before any SSOT update. [VERIFIED: .planning/phases/23-nyquist-validation-closure/23-CONTEXT.md] [VERIFIED: .planning/ROADMAP.md]
 
 ## Environment Availability
 

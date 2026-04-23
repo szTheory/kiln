@@ -1,7 +1,17 @@
 defmodule KilnWeb.TemplatesLiveTest do
-  use KilnWeb.ConnCase, async: true
+  use KilnWeb.ConnCase, async: false
 
   import Phoenix.LiveViewTest
+
+  alias Kiln.OperatorReadiness
+
+  setup do
+    assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
+    assert {:ok, _} = OperatorReadiness.mark_step(:github, true)
+    assert {:ok, _} = OperatorReadiness.mark_step(:docker, true)
+
+    :ok
+  end
 
   test "catalog lists at least three template cards", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/templates")
@@ -26,8 +36,7 @@ defmodule KilnWeb.TemplatesLiveTest do
     |> form("#template-use-form-hello-kiln")
     |> render_submit()
 
-    html = render(view)
-    assert html =~ "Spec promoted"
+    assert has_element?(view, "#templates-success-panel")
     assert has_element?(view, "#templates-start-run")
   end
 
@@ -47,5 +56,9 @@ defmodule KilnWeb.TemplatesLiveTest do
 
     assert {:error, {:live_redirect, %{to: to}}} = result
     assert to =~ "/runs/"
+
+    {:ok, run_view, _html} = follow_redirect(result, conn)
+
+    assert has_element?(run_view, "#run-detail")
   end
 end

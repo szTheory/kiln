@@ -134,7 +134,7 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `just smoke` | `bash test/integration/first_run.sh` (same SSOT as **Integration smoke**) |
 | `just dev-deps` | `db-up`, then prints a one-line reminder to start **`mix phx.server`** in another shell |
 | `just planning-gates` | `script/planning_gates.sh` — CI-parity **`mix check`** only (defaults match `.github/workflows/ci.yml`; Postgres must be reachable) |
-| `just shift-left` | `script/shift_left_verify.sh` — **`mix check`** then **`test/integration/first_run.sh`** (Docker + `/health`; full shift-left in one shot) |
+| `just shift-left` | `script/shift_left_verify.sh` — **`mix check`**, **`test/integration/first_run.sh`**, then **`mix kiln.e2e`** (full local mirror of CI acceptance) |
 | `just precommit` | `script/precommit.sh` — same env defaults as CI when `.env` is missing; then **`mix precommit`** (`templates.verify` + `mix check`) |
 | `just before-plan-phase 12` | Runs **`shift-left`**, then prints **`/gsd-plan-phase 12 --gaps`** for GSD gap closure |
 
@@ -164,6 +164,8 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `docker compose up -d db` | Yes (local) | No (Actions uses a service container instead of compose) |
 | `mix check` on push / PR | N/A | Yes (`.github/workflows/ci.yml`) |
 | `mix check` + boot checks | N/A | Yes on `main`; tag pushes run the **tag vs `mix.exs` version** gate |
+| `bash test/integration/first_run.sh` / `mix integration.first_run` | N/A | Yes (`integration-smoke` job) |
+| `mix kiln.e2e` / `mix shift_left.verify` UI path | N/A | Yes (`e2e` job; local `shift-left` mirrors CI) |
 
 ## Traces (local, OBS-02)
 
@@ -202,7 +204,7 @@ Header comments in `test/integration/first_run.sh` match this README: **asdf is 
 
 ## Integration & e2e
 
-Three layers of UI verification ship in CI on every PR (goal: zero human verification for the Phase reskin):
+Three layers of UI verification ship in CI on every PR. For UI flows covered here, this stack is the acceptance oracle; routine human UAT is not part of phase closure:
 
 1. **`mix check`** — includes `test/kiln_web/live/route_smoke_test.exs` (every LiveView route boots + no retired Phase-reskin tokens in rendered HTML) and `mix kiln.ui.lint` (static grep gate on `lib/kiln_web/**` and `assets/css/app.css`).
 2. **`bash test/integration/first_run.sh`** — Compose DB + host Phoenix + `/health` contract.
@@ -218,6 +220,8 @@ just e2e-ui             # Playwright watch UI
 ```
 
 Env escape hatches: `SHIFT_LEFT_SKIP_INTEGRATION=1` (step 1 only), `SHIFT_LEFT_SKIP_E2E=1` (steps 1+2).
+
+Use `$gsd-verify-work` only for typed exceptions the automation cannot cover yet: first-time auth, credentials, budget approvals, third-party blockers, or other explicitly documented human-only checks.
 
 ## Running migrations
 
