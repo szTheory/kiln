@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: — Scale → templates → operator intelligence
 status: planning
-last_updated: "2026-04-22T23:25:38.281Z"
-last_activity: 2026-04-22
+last_updated: "2026-04-22T00:00:00Z"
+last_activity: 2026-04-22 — Phase 21 scaffolded; discuss queued
 progress:
   total_phases: 21
-  completed_phases: 20
-  total_plans: 90
+  completed_phases: 18
+  total_plans: 95
   completed_plans: 90
-  percent: 100
+  percent: 0
 ---
 
 # Project State
@@ -21,41 +21,29 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
-**Current focus:** Phase 19 — Post-mortems & soft feedback (context ready)
+## Current focus
 
-## Current Position
+**Phase 21 — Containerized local operator DX** — **Discuss queued**
 
-Phase: 19
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-22
+All handoff text that survives **`/clear`** lives in:
 
-Progress: v0.3.0 roadmap in flight — see ROADMAP for per-phase completion.
+- [.planning/ROADMAP.md](ROADMAP.md) — Phase 21 row + phase details
+- [.planning/phases/21-containerized-local-operator-dx/21-BRIEF.md](phases/21-containerized-local-operator-dx/21-BRIEF.md) — intent, anchors, gray-area seeds
+- [.planning/phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md](phases/21-containerized-local-operator-dx/21-DISCUSSION-LOG.md) — append during discuss
 
-## Accumulated Context
+**Next command:** **`/gsd-discuss-phase 21`**
 
-Prior milestone velocity and decision log: see **Accumulated Context** history in git for pre-2026-04-22 `STATE.md` snapshots if needed. No `MILESTONE-CONTEXT.md` was consumed (none present).
+After discuss: **`/gsd-plan-phase 21`** (requires **`21-CONTEXT.md`**).
 
-**Note:** `gsd-sdk query phases.clear` was **not** run — it would delete existing `.planning/phases/**` history; phase numbering continues from **14**.
+## Milestone note
 
-## Session Continuity
+**Phases 19–20** may still be in flight on the roadmap (post-mortems + audit SSOT). Phase **21** is an **additive** slice for Docker-first local DX; execution order is a **project choice** (finish 19–20 first vs parallelize).
 
-Phase 19 discuss complete (parallel subagent research, one-shot synthesis): [.planning/phases/19-post-mortems-soft-feedback/19-CONTEXT.md](phases/19-post-mortems-soft-feedback/19-CONTEXT.md).
+## Session continuity (recent CONTEXT files)
 
-Phase 18 discuss complete (auto-recs + research): [.planning/phases/18-cost-hints-budget-alerts/18-CONTEXT.md](phases/18-cost-hints-budget-alerts/18-CONTEXT.md).
+- Phase 19: [.planning/phases/19-post-mortems-soft-feedback/19-CONTEXT.md](phases/19-post-mortems-soft-feedback/19-CONTEXT.md)
+- Phase 18: [.planning/phases/18-cost-hints-budget-alerts/18-CONTEXT.md](phases/18-cost-hints-budget-alerts/18-CONTEXT.md)
+- Phase 17: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md)
+- Phase 12 (prior local Docker DX): [.planning/phases/12-local-docker-dx/](phases/12-local-docker-dx/)
 
-Phase 17 discuss complete: [.planning/phases/17-template-library-onboarding-specs/17-CONTEXT.md](phases/17-template-library-onboarding-specs/17-CONTEXT.md) (parallel research synthesis → locked decisions).
-
-Phase 16 (REPL-01) executed: summaries and `16-VERIFICATION.md` under [.planning/phases/16-read-only-run-replay/](phases/16-read-only-run-replay/).
-
-Phase 16 context: [.planning/phases/16-read-only-run-replay/16-CONTEXT.md](phases/16-read-only-run-replay/16-CONTEXT.md)
-
-Phase 15 context: [.planning/phases/15-run-comparison/15-CONTEXT.md](phases/15-run-comparison/15-CONTEXT.md)
-
-Prior execution reference: [.planning/phases/14-fair-parallel-runs/14-CONTEXT.md](phases/14-fair-parallel-runs/14-CONTEXT.md)
-
-Next: **`/gsd-plan-phase 19`** — Post-mortems & soft feedback (research + tasks; `19-CONTEXT.md` ready).
-
-**Last backlog execution:** 999.2 (Operator demo vs live mode and provider readiness UX) — shipped 2026-04-22.
-
-**Planned Phase:** 19 (Post-mortems & soft feedback) — context gathered 2026-04-22
+**Last backlog execution:** 999.2 — shipped 2026-04-22.

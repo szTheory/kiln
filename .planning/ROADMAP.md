@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-22 — **Milestone v0.3.0** (Phases **14–20**)
+**Updated:** 2026-04-22 — **Milestone v0.3.0** (Phases **14–21**)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -8,11 +8,11 @@
 
 - ✅ **v0.1.0** — Phases **1–9** + parking **999.1** — [.planning/milestones/v0.1.0.md](milestones/v0.1.0.md)
 - ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md)
-- 🚧 **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–20** — requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
+- 🚧 **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–21** — requirements: [REQUIREMENTS.md](REQUIREMENTS.md)
 
 ## Overview (v0.3.0)
 
-Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (template library + vetted onboarding specs), then **C** (cost hints, budget alerts, post-mortems, soft feedback) as **small** vertical slices so each phase stays reviewable. Phase directories are **not** reset; numbering continues from v0.2.0.
+Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (template library + vetted onboarding specs), then **C** (cost hints, budget alerts, post-mortems, soft feedback) as **small** vertical slices so each phase stays reviewable. **Phase 21** adds an optional **container-first local operator** path (dogfood) without resetting prior phase directories. Numbering continues from v0.2.0.
 
 ## Phases (v0.3.0)
 
@@ -23,6 +23,7 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 - [x] **Phase 18: Cost hints & budget alerts** — COST-01, COST-02 — advisory + threshold notifications. (completed 2026-04-22)
 - [ ] **Phase 19: Post-mortems & soft feedback** — SELF-01, FEEDBACK-01 — merged-run artifact + non-blocking operator nudge with audit trail.
 - [ ] **Phase 20: Phase 19 verification & planning SSOT** — SELF-01, FEEDBACK-01 — formal `19-VERIFICATION.md` + REQUIREMENTS/ROADMAP alignment per milestone audit.
+- [ ] **Phase 21: Containerized local operator DX** — LOCAL / operator ergonomics — optional Docker-first dev stack (Compose app and/or devcontainer) revisiting Phase 12 “host Phoenix only” default; see `21-BRIEF.md`.
 
 **Parking / decimals:** Use **999.x** only for ad-hoc backlog execution; no decimal insert planned for v0.3.0 launch.
 
@@ -78,6 +79,16 @@ Ship **A** (multi-run fairness, comparison, read-only replay), then **B** (templ
 1. `.planning/phases/19-post-mortems-soft-feedback/19-VERIFICATION.md` exists, lists SELF-01 / FEEDBACK-01 must-haves, cites commands run, and records `status: passed` when green.
 2. Phase 19 plan SUMMARY frontmatter lists `requirements-completed` for SELF-01 and FEEDBACK-01 where applicable.
 3. `REQUIREMENTS.md` checkboxes and traceability table match phase verification outcomes; `ROADMAP.md` marks Phase 19 complete when verification passes.
+
+### Phase 21: Containerized local operator DX
+**Goal:** Ship an **optional**, **documented** path so a solo operator can run Kiln from **Docker-centric tooling** (minimal host installs beyond Docker / the IDE), without abandoning today’s **Compose data plane** (`db`, `dtu`, optional OTel). Revisit **Phase 12** / **LOCAL-DX-AUDIT** decisions only where this phase explicitly supersedes them.  
+**Requirements:** TBD — likely amends **LOCAL-01** / extends **LOCAL-DX-01** via `PROJECT.md` + README after discuss locks scope.  
+**Pre-discuss handoff:** [.planning/phases/21-containerized-local-operator-dx/21-BRIEF.md](phases/21-containerized-local-operator-dx/21-BRIEF.md) (intent + anchors; **not** a substitute for `21-CONTEXT.md`).  
+**Success criteria (draft — refine after discuss):**
+1. One **canonical** documented flow (README-level): cold clone → containers → **UI reachable** (default `http://localhost:4000` or documented port) with **setup/migrate** commands spelled out.
+2. **Sandbox stages** remain viable: document how **`docker` CLI** from the Kiln process works when Kiln runs **inside** a container (networks, DTU on `kiln-sandbox`, no forbidden socket mounts **into sandbox workloads** per project constraints).
+3. **CI or integration smoke** proves the new path does not regress (exact gate chosen in plan).
+4. Existing **host Phoenix + `justfile`** path stays supported unless discuss explicitly deprecates (unlikely in v0.3.0).
 
 ---
 
