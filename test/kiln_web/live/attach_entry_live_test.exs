@@ -69,9 +69,10 @@ defmodule KilnWeb.AttachEntryLiveTest do
     refute html =~ "Create draft PR"
   end
 
-  test "submitting an unsafe local repo renders blocked remediation instead of a false ready state", %{
-    conn: conn
-  } do
+  test "submitting an unsafe local repo renders blocked remediation instead of a false ready state",
+       %{
+         conn: conn
+       } do
     repo_root =
       make_git_repo!("kiln_attach_live_blocked",
         origin: "https://github.com/owner/live-blocked.git"
@@ -107,7 +108,11 @@ defmodule KilnWeb.AttachEntryLiveTest do
 
   defp make_git_repo!(name, opts) do
     repo_root =
-      Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive, :monotonic])}")
+      Path.join(
+        System.tmp_dir!(),
+        "#{name}_#{System.os_time(:microsecond)}_#{System.unique_integer([:positive, :monotonic])}"
+      )
+
     File.mkdir_p!(repo_root)
 
     {_, 0} = System.cmd("git", ["init", "--quiet", "--initial-branch=main", repo_root])

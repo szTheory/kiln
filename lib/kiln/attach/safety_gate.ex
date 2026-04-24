@@ -61,7 +61,11 @@ defmodule Kiln.Attach.SafetyGate do
     end
   end
 
-  defp ensure_clean_repo(%Source{kind: :local_path, canonical_root: path} = source, hydrated, opts) do
+  defp ensure_clean_repo(
+         %Source{kind: :local_path, canonical_root: path} = source,
+         hydrated,
+         opts
+       ) do
     with :ok <- ensure_clean_path(path, :source_repo, source, hydrated, opts),
          :ok <- ensure_branch_path(path, :source_repo, source, hydrated, opts) do
       :ok
@@ -160,45 +164,34 @@ defmodule Kiln.Attach.SafetyGate do
   end
 
   defp dirty_worktree(scope, source, hydrated) do
-    label =
-      case scope do
-        :source_repo -> "source repo"
-        :attached_workspace -> "managed attach workspace"
-        :github_cli -> "GitHub CLI"
-      end
-
     %{
       status: :blocked,
       code: :dirty_worktree,
       scope: scope,
-      title: "Uncommitted changes found in the #{label}",
-      message: "Kiln refuses to mark this attached repo ready while the #{label} is dirty.",
+      title: "Uncommitted changes found in the #{repo_scope_label(scope)}",
+      message:
+        "Kiln refuses to mark this attached repo ready while the #{repo_scope_label(scope)} is dirty.",
       why: "Later branch and PR work must start from a clean, inspectable git state.",
       probe: "git status --porcelain",
-      next_action:
-        "Commit, stash, or discard the pending changes, then re-run attach readiness.",
+      next_action: "Commit, stash, or discard the pending changes, then re-run attach readiness.",
       workspace_path: hydrated.workspace_path,
       repo_slug: repo_slug(source)
     }
   end
 
   defp detached_head(scope, source, hydrated) do
-    label =
-      case scope do
-        :source_repo -> "source repo"
-        :attached_workspace -> "managed attach workspace"
-        :github_cli -> "GitHub CLI"
-      end
-
     %{
       status: :blocked,
       code: :detached_head,
       scope: scope,
-      title: "Detached HEAD found in the #{label}",
-      message: "Kiln refuses to continue while the #{label} is not on a branch.",
-      why: "The next phase needs a stable base branch before it can create a bounded work branch.",
+      title: "Detached HEAD found in the #{repo_scope_label(scope)}",
+      message:
+        "Kiln refuses to continue while the #{repo_scope_label(scope)} is not on a branch.",
+      why:
+        "The next phase needs a stable base branch before it can create a bounded work branch.",
       probe: "git symbolic-ref --short HEAD",
-      next_action: "Check out the branch that should receive the future draft PR, then re-run attach readiness.",
+      next_action:
+        "Check out the branch that should receive the future draft PR, then re-run attach readiness.",
       workspace_path: hydrated.workspace_path,
       repo_slug: repo_slug(source)
     }
@@ -214,8 +207,10 @@ defmodule Kiln.Attach.SafetyGate do
       code: :github_auth_missing,
       scope: :github_cli,
       title: "GitHub CLI authentication is not ready",
-      message: "Kiln refuses to advertise this repo as ready until GitHub CLI access is confirmed.",
-      why: "Phase 31 will need authenticated GitHub access to push a branch and open a draft PR safely.",
+      message:
+        "Kiln refuses to advertise this repo as ready until GitHub CLI access is confirmed.",
+      why:
+        "Phase 31 will need authenticated GitHub access to push a branch and open a draft PR safely.",
       probe: github_item.probe,
       next_action: github_item.next_action,
       workspace_path: hydrated.workspace_path,
@@ -229,14 +224,19 @@ defmodule Kiln.Attach.SafetyGate do
       code: :github_remote_missing,
       scope: :source_repo,
       title: "GitHub remote topology is missing",
-      message: "Kiln found a repo, but it does not have the GitHub remote information needed for later push and draft PR work.",
-      why: "The next phase must know which GitHub repo and base branch it is targeting before any git mutation starts.",
+      message:
+        "Kiln found a repo, but it does not have the GitHub remote information needed for later push and draft PR work.",
+      why:
+        "The next phase must know which GitHub repo and base branch it is targeting before any git mutation starts.",
       probe: "git remote get-url origin",
       next_action: "Add a GitHub origin remote for this repo, then re-run attach readiness.",
       workspace_path: hydrated.workspace_path,
       repo_slug: repo_slug(source)
     }
   end
+
+  defp repo_scope_label(:source_repo), do: "source repo"
+  defp repo_scope_label(:attached_workspace), do: "managed attach workspace"
 
   defp repo_slug(%Source{repo_identity: %{slug: slug}}), do: slug
   defp repo_slug(_source), do: "unknown"
@@ -283,7 +283,10 @@ defmodule Kiln.Attach.SafetyGate do
   end
 
   defp parse_owner_repo(path) do
-    case String.trim(path) |> String.trim("/") |> String.replace_suffix(".git", "") |> String.split("/") do
+    case String.trim(path)
+         |> String.trim("/")
+         |> String.replace_suffix(".git", "")
+         |> String.split("/") do
       [owner, repo] when owner != "" and repo != "" ->
         {:ok,
          %{

@@ -44,7 +44,8 @@ defmodule Kiln.Attach do
     )
   end
 
-  @spec preflight_workspace(Source.t(), WorkspaceManager.result(), keyword()) :: preflight_result()
+  @spec preflight_workspace(Source.t(), WorkspaceManager.result(), keyword()) ::
+          preflight_result()
   def preflight_workspace(%Source{} = source, %WorkspaceManager{} = hydrated, opts \\ []) do
     SafetyGate.evaluate(source, hydrated, opts)
   end

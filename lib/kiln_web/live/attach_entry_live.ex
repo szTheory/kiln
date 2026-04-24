@@ -372,7 +372,8 @@ defmodule KilnWeb.AttachEntryLive do
     case Attach.resolve_source(source_input) do
       {:ok, resolved_source} ->
         with {:ok, hydrated} <- Attach.hydrate_workspace(resolved_source, opts),
-             {:ok, _attached_repo} <- Attach.create_or_update_attached_repo(resolved_source, hydrated),
+             {:ok, _attached_repo} <-
+               Attach.create_or_update_attached_repo(resolved_source, hydrated),
              {:ok, ready} <- Attach.preflight_workspace(resolved_source, hydrated, opts) do
           socket
           |> assign(:form, to_form(params, as: :attach_source))

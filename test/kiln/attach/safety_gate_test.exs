@@ -124,7 +124,9 @@ defmodule Kiln.Attach.SafetyGateTest do
 
       assert blocked.code == :github_auth_missing
       assert blocked.probe == "gh auth status"
-      assert blocked.next_action == "Run gh auth login (or equivalent) on this machine, then re-verify."
+
+      assert blocked.next_action ==
+               "Run gh auth login (or equivalent) on this machine, then re-verify."
     end
 
     test "blocks local repos without a GitHub remote topology for later push and draft PR work" do
@@ -215,6 +217,9 @@ defmodule Kiln.Attach.SafetyGateTest do
   end
 
   defp temp_path(name) do
-    Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+    Path.join(
+      System.tmp_dir!(),
+      "#{name}_#{System.os_time(:microsecond)}_#{System.unique_integer([:positive, :monotonic])}"
+    )
   end
 end
