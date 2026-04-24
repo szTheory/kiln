@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Kiln.Attach.ProveTest do
 
   @task Mix.Tasks.Kiln.Attach.Prove
 
-  test "delegates the three locked attach proof layers in order" do
+  test "delegates the six locked attach proof layers in order" do
     parent = self()
 
     Application.put_env(
@@ -20,34 +20,20 @@ defmodule Mix.Tasks.Kiln.Attach.ProveTest do
       Application.delete_env(:kiln, :kiln_attach_prove_cmd_runner)
     end)
 
+    expected_layers = [
+      ["env", "MIX_ENV=test", "mix", "test", "test/integration/github_delivery_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/delivery_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/continuity_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/safety_gate_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/brownfield_preflight_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln_web/live/attach_entry_live_test.exs"]
+    ]
+
     assert :ok = @task.run([])
 
-    assert_received {:cmd_run,
-                     [
-                       "env",
-                       "MIX_ENV=test",
-                       "mix",
-                       "test",
-                       "test/integration/github_delivery_test.exs"
-                     ]}
-
-    assert_received {:cmd_run,
-                     [
-                       "env",
-                       "MIX_ENV=test",
-                       "mix",
-                       "test",
-                       "test/kiln/attach/safety_gate_test.exs"
-                     ]}
-
-    assert_received {:cmd_run,
-                     [
-                       "env",
-                       "MIX_ENV=test",
-                       "mix",
-                       "test",
-                       "test/kiln_web/live/attach_entry_live_test.exs"
-                     ]}
+    Enum.each(expected_layers, fn args ->
+      assert_receive {:cmd_run, ^args}
+    end)
 
     refute_received {:cmd_run, _}
   end
@@ -69,12 +55,21 @@ defmodule Mix.Tasks.Kiln.Attach.ProveTest do
       Application.delete_env(:kiln, :kiln_attach_prove_cmd_runner)
     end)
 
+    expected_layers = [
+      ["env", "MIX_ENV=test", "mix", "test", "test/integration/github_delivery_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/delivery_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/continuity_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/safety_gate_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/brownfield_preflight_test.exs"],
+      ["env", "MIX_ENV=test", "mix", "test", "test/kiln_web/live/attach_entry_live_test.exs"]
+    ]
+
     assert :ok = @task.run([])
     assert :ok = @task.run([])
 
-    for _ <- 1..6 do
-      assert_received {:cmd_run, _}
-    end
+    Enum.each(expected_layers ++ expected_layers, fn args ->
+      assert_receive {:cmd_run, ^args}
+    end)
 
     refute_received {:cmd_run, _}
   end

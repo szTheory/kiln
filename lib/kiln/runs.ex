@@ -364,6 +364,38 @@ defmodule Kiln.Runs do
   @spec get(Ecto.UUID.t()) :: Run.t() | nil
   def get(id), do: Repo.get(Run, id)
 
+  @spec get_for_attached_repo(Ecto.UUID.t(), Ecto.UUID.t()) :: Run.t() | nil
+  def get_for_attached_repo(attached_repo_id, run_id)
+      when is_binary(attached_repo_id) and is_binary(run_id) do
+    from(r in Run,
+      where: r.id == ^run_id and r.attached_repo_id == ^attached_repo_id,
+      left_join: revision in SpecRevision,
+      on: revision.id == r.spec_revision_id,
+      left_join: spec in Spec,
+      on: spec.id == r.spec_id,
+      preload: [spec_revision: revision, spec: spec]
+    )
+    |> Repo.one()
+  end
+
+  @spec list_recent_for_attached_repo(Ecto.UUID.t(), keyword()) :: [Run.t()]
+  def list_recent_for_attached_repo(attached_repo_id, opts \\ [])
+      when is_binary(attached_repo_id) do
+    limit = Keyword.get(opts, :limit, 5)
+
+    from(r in Run,
+      where: r.attached_repo_id == ^attached_repo_id,
+      order_by: [desc: r.inserted_at],
+      left_join: revision in SpecRevision,
+      on: revision.id == r.spec_revision_id,
+      left_join: spec in Spec,
+      on: spec.id == r.spec_id,
+      preload: [spec_revision: revision, spec: spec],
+      limit: ^limit
+    )
+    |> Repo.all()
+  end
+
   @doc """
   Returns every run whose state is NOT terminal (i.e. in the six
   active states `:queued`, `:planning`, `:coding`, `:testing`,

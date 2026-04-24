@@ -9,6 +9,7 @@ defmodule Kiln.Attach.DeliveryTest do
   alias Kiln.Factory.StageRun, as: StageRunFactory
   alias Kiln.Repo
   alias Kiln.Runs
+  alias Kiln.Specs
   alias Kiln.GitHub.{OpenPRWorker, PushWorker}
 
   setup do
@@ -35,7 +36,29 @@ defmodule Kiln.Attach.DeliveryTest do
       })
       |> Repo.insert!()
 
-    run = RunFactory.insert(:run, state: :coding)
+    {:ok, spec} = Specs.create_spec(%{title: "Attached request"})
+
+    {:ok, revision} =
+      Specs.create_revision(spec, %{
+        body: "# Attach request\n\nScope this draft PR handoff.\n",
+        attached_repo_id: attached_repo.id,
+        request_kind: :feature,
+        change_summary: "Render compact PR handoff from durable attached request",
+        acceptance_criteria: [
+          "Reviewer sees scoped summary and acceptance criteria.",
+          "Verification section cites the owning proof command."
+        ],
+        out_of_scope: ["Do not widen into repo-wide proof gates."]
+      })
+
+    run =
+      RunFactory.insert(:run,
+        state: :coding,
+        attached_repo_id: attached_repo.id,
+        spec_id: spec.id,
+        spec_revision_id: revision.id
+      )
+
     stage = StageRunFactory.insert(:stage_run, run_id: run.id)
 
     {:ok, attached_repo: attached_repo, run: run, stage: stage, workspace_path: workspace_path}
@@ -85,6 +108,9 @@ defmodule Kiln.Attach.DeliveryTest do
     assert stored["attach"]["base_branch"] == "main"
     assert stored["pr"]["head"] == branch
     assert stored["pr"]["draft"] == true
+
+    assert stored["pr"]["title"] =~
+             "Feature: Render compact PR handoff from durable attached request"
   end
 
   test "enqueues frozen push and draft PR jobs from persisted attached repo facts", %{
@@ -118,9 +144,53 @@ defmodule Kiln.Attach.DeliveryTest do
       }
     )
 
-    assert prepared.pr_args["body"] =~ "Kiln opened this as a draft attached-repo PR."
-    assert prepared.pr_args["body"] =~ "Run: `#{run.id}`"
-    assert prepared.pr_args["body"] =~ "Repo: `owner/repo-name`"
+    body = prepared.pr_args["body"]
+
+    assert body =~ "## Summary"
+    assert body =~ "Feature: Render compact PR handoff from durable attached request"
+    assert body =~ "## Acceptance criteria"
+    assert body =~ "- Reviewer sees scoped summary and acceptance criteria."
+    assert body =~ "## Out of scope"
+    assert body =~ "- Do not widen into repo-wide proof gates."
+    assert body =~ "## Verification"
+    assert body =~ "MIX_ENV=test mix kiln.attach.prove"
+    assert body =~ "test/kiln/attach/continuity_test.exs"
+    assert body =~ "## Branch context"
+    assert body =~ "- Branch: `#{prepared.pr_args["head"]}`"
+    assert body =~ "- Base branch: `main`"
+    assert body =~ "kiln-run: #{run.id}"
+    assert length(Regex.scan(~r/kiln-run:/, body)) == 1
+    refute body =~ "Attached repo:"
+    refute body =~ "attached_repo_id"
+  end
+
+  test "omits out of scope section when no bounded exclusions are stored", %{
+    attached_repo: attached_repo
+  } do
+    {:ok, spec} = Specs.create_spec(%{title: "Attached request without exclusions"})
+
+    {:ok, revision} =
+      Specs.create_revision(spec, %{
+        body: "# Attach request\n\nNo exclusions.\n",
+        attached_repo_id: attached_repo.id,
+        request_kind: :bugfix,
+        change_summary: "Narrow PR handoff without out of scope items",
+        acceptance_criteria: ["Reviewer sees a compact bugfix handoff."],
+        out_of_scope: []
+      })
+
+    run =
+      RunFactory.insert(:run,
+        state: :coding,
+        attached_repo_id: attached_repo.id,
+        spec_id: spec.id,
+        spec_revision_id: revision.id
+      )
+
+    stage = StageRunFactory.insert(:stage_run, run_id: run.id)
+
+    assert {:ok, prepared} = Attach.prepare_delivery(run.id, attached_repo.id, stage.id)
+    refute prepared.pr_args["body"] =~ "## Out of scope"
   end
 
   defp make_git_repo!(name) do

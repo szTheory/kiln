@@ -37,6 +37,81 @@ defmodule Kiln.Specs do
     |> Repo.one()
   end
 
+  @spec get_open_attached_draft(Ecto.UUID.t(), Ecto.UUID.t()) :: SpecDraft.t() | nil
+  def get_open_attached_draft(attached_repo_id, draft_id)
+      when is_binary(attached_repo_id) and is_binary(draft_id) do
+    from(d in SpecDraft,
+      where:
+        d.id == ^draft_id and d.attached_repo_id == ^attached_repo_id and
+          d.source == :attached_repo_intake and d.inbox_state == :open
+    )
+    |> Repo.one()
+  end
+
+  @spec latest_open_attached_draft(Ecto.UUID.t()) :: SpecDraft.t() | nil
+  def latest_open_attached_draft(attached_repo_id) when is_binary(attached_repo_id) do
+    from(d in SpecDraft,
+      where:
+        d.attached_repo_id == ^attached_repo_id and d.source == :attached_repo_intake and
+          d.inbox_state == :open,
+      order_by: [desc: d.inserted_at],
+      limit: 1
+    )
+    |> Repo.one()
+  end
+
+  @spec list_open_attached_drafts(Ecto.UUID.t(), keyword()) :: [SpecDraft.t()]
+  def list_open_attached_drafts(attached_repo_id, opts \\ []) when is_binary(attached_repo_id) do
+    limit = Keyword.get(opts, :limit, 5)
+
+    from(d in SpecDraft,
+      where:
+        d.attached_repo_id == ^attached_repo_id and d.source == :attached_repo_intake and
+          d.inbox_state == :open,
+      order_by: [desc: d.inserted_at],
+      limit: ^limit
+    )
+    |> Repo.all()
+  end
+
+  @spec latest_promoted_attached_request(Ecto.UUID.t()) ::
+          %{spec: Spec.t(), revision: SpecRevision.t()} | nil
+  def latest_promoted_attached_request(attached_repo_id) when is_binary(attached_repo_id) do
+    from(r in SpecRevision,
+      join: s in Spec,
+      on: s.id == r.spec_id,
+      where: r.attached_repo_id == ^attached_repo_id,
+      order_by: [desc: r.inserted_at],
+      preload: [spec: s],
+      limit: 1
+    )
+    |> Repo.one()
+    |> case do
+      %SpecRevision{spec: %Spec{} = spec} = revision -> %{spec: spec, revision: revision}
+      nil -> nil
+    end
+  end
+
+  @spec list_recent_promoted_attached_requests(Ecto.UUID.t(), keyword()) ::
+          [%{spec: Spec.t(), revision: SpecRevision.t()}]
+  def list_recent_promoted_attached_requests(attached_repo_id, opts \\ [])
+      when is_binary(attached_repo_id) do
+    limit = Keyword.get(opts, :limit, 5)
+
+    from(r in SpecRevision,
+      join: s in Spec,
+      on: s.id == r.spec_id,
+      where: r.attached_repo_id == ^attached_repo_id,
+      order_by: [desc: r.inserted_at],
+      preload: [spec: s],
+      limit: ^limit
+    )
+    |> Repo.all()
+    |> Enum.map(fn %SpecRevision{spec: %Spec{} = spec} = revision ->
+      %{spec: spec, revision: revision}
+    end)
+  end
+
   @spec create_spec(map()) :: {:ok, Spec.t()} | {:error, Ecto.Changeset.t()}
   def create_spec(attrs) do
     %Spec{}

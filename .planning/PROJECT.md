@@ -157,9 +157,9 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 ## Next Milestone Setup
 
-Active milestone: **`v0.7.0 — PR-sized brownfield execution`**
+Active milestone: **`vNext`**
 
-Next command: `/gsd-plan-phase 32`
+Next command: `/gsd-new-milestone`
 
 ## Merge authority
 
@@ -206,6 +206,12 @@ CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **
 <summary>Archived pre-close milestone framing</summary>
 
 The pre-close v0.6.0 planning narrative focused on turning the first believable local run into the first believable real-project workflow. That framing has now been fulfilled and archived under `.planning/milestones/v0.6.0-ROADMAP.md` and `.planning/milestones/v0.6.0-REQUIREMENTS.md`.
+
+</details>
+
+---
+*Last updated: 2026-04-24 — opened v0.7.0 PR-sized brownfield execution*
+se v0.6.0 planning narrative focused on turning the first believable local run into the first believable real-project workflow. That framing has now been fulfilled and archived under `.planning/milestones/v0.6.0-ROADMAP.md` and `.planning/milestones/v0.6.0-REQUIREMENTS.md`.
 
 </details>
 

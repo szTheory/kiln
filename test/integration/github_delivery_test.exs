@@ -14,6 +14,7 @@ defmodule Kiln.Integration.GithubDeliveryTest do
   alias Kiln.Factory.Run, as: RunFactory
   alias Kiln.Factory.StageRun, as: StageRunFactory
   alias Kiln.GitHub.{OpenPRWorker, PushWorker}
+  alias Kiln.Specs
 
   setup do
     cid = Ecto.UUID.generate()
@@ -114,11 +115,7 @@ defmodule Kiln.Integration.GithubDeliveryTest do
     assert after_count == before
   end
 
-  test "attached repo happy path freezes branch then performs push and draft PR delivery", %{
-    run: run
-  } do
-    stage = StageRunFactory.insert(:stage_run, run_id: run.id)
-
+  test "attached repo happy path freezes branch then performs push and draft PR delivery" do
     workspace_path =
       Path.join(System.tmp_dir!(), "kiln_delivery_repo_#{System.unique_integer([:positive])}")
 
@@ -144,6 +141,31 @@ defmodule Kiln.Integration.GithubDeliveryTest do
         base_branch: "main"
       })
       |> Repo.insert!()
+
+    {:ok, spec} = Specs.create_spec(%{title: "Attached request integration proof"})
+
+    {:ok, revision} =
+      Specs.create_revision(spec, %{
+        body: "# Attach request\n\nIntegration coverage.\n",
+        attached_repo_id: attached_repo.id,
+        request_kind: :feature,
+        change_summary: "Synchronize draft PR verification citations with owning proof layers",
+        acceptance_criteria: [
+          "Draft PR body cites exact delegated proof layers.",
+          "Snapshot replay preserves identical PR body."
+        ],
+        out_of_scope: ["Do not add repository-wide proof commands."]
+      })
+
+    run =
+      RunFactory.insert(:run,
+        state: :verifying,
+        attached_repo_id: attached_repo.id,
+        spec_id: spec.id,
+        spec_revision_id: revision.id
+      )
+
+    stage = StageRunFactory.insert(:stage_run, run_id: run.id)
 
     sha_local = String.duplicate("b", 40)
 
@@ -184,5 +206,20 @@ defmodule Kiln.Integration.GithubDeliveryTest do
     assert stored["attach"]["branch"] == prepared.pr_args["head"]
     assert stored["pr"]["head"] == prepared.pr_args["head"]
     assert stored["pr"]["draft"] == true
+    assert stored["pr"]["title"] =~ "Feature: Synchronize draft PR verification citations"
+    assert stored["pr"]["body"] == prepared.pr_args["body"]
+    assert stored["pr"]["body"] =~ "## Summary"
+    assert stored["pr"]["body"] =~ "## Acceptance criteria"
+    assert stored["pr"]["body"] =~ "## Verification"
+    assert stored["pr"]["body"] =~ "MIX_ENV=test mix kiln.attach.prove"
+    assert stored["pr"]["body"] =~ "test/integration/github_delivery_test.exs"
+    assert stored["pr"]["body"] =~ "test/kiln/attach/delivery_test.exs"
+    assert stored["pr"]["body"] =~ "test/kiln/attach/continuity_test.exs"
+    assert stored["pr"]["body"] =~ "test/kiln/attach/safety_gate_test.exs"
+    assert stored["pr"]["body"] =~ "test/kiln/attach/brownfield_preflight_test.exs"
+    assert stored["pr"]["body"] =~ "test/kiln_web/live/attach_entry_live_test.exs"
+    assert stored["pr"]["body"] =~ "## Branch context"
+    refute stored["pr"]["body"] =~ "Attached repo:"
+    refute stored["pr"]["body"] =~ "attached_repo_id"
   end
 end

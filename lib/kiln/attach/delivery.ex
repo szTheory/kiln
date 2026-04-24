@@ -7,8 +7,19 @@ defmodule Kiln.Attach.Delivery do
   alias Kiln.Attach.AttachedRepo
   alias Kiln.Git
   alias Kiln.GitHub.{OpenPRWorker, PushWorker}
+  alias Kiln.Repo
   alias Kiln.Runs
   alias Kiln.Runs.Run
+  alias Kiln.Specs.SpecRevision
+
+  @verification_proof_layers [
+    "test/integration/github_delivery_test.exs",
+    "test/kiln/attach/delivery_test.exs",
+    "test/kiln/attach/continuity_test.exs",
+    "test/kiln/attach/safety_gate_test.exs",
+    "test/kiln/attach/brownfield_preflight_test.exs",
+    "test/kiln_web/live/attach_entry_live_test.exs"
+  ]
 
   @type prepared :: %{
           snapshot: map(),
@@ -47,11 +58,11 @@ defmodule Kiln.Attach.Delivery do
     end
   end
 
-  defp fetch_run(%Run{} = run), do: {:ok, run}
+  defp fetch_run(%Run{} = run), do: {:ok, Repo.preload(run, :spec_revision)}
 
   defp fetch_run(run_id) when is_binary(run_id) do
     case Runs.get(run_id) do
-      %Run{} = run -> {:ok, run}
+      %Run{} = run -> {:ok, Repo.preload(run, :spec_revision)}
       nil -> {:error, :run_not_found}
     end
   end
@@ -96,8 +107,8 @@ defmodule Kiln.Attach.Delivery do
            "branch" => branch,
            "expected_remote_sha" => Git.missing_remote_sha(),
            "local_commit_sha" => local_commit_sha,
-           "title" => draft_pr_title(attached_repo, run.id),
-           "body" => draft_pr_body(attached_repo, run.id, branch, base_branch)
+           "title" => draft_pr_title(attached_repo, run),
+           "body" => draft_pr_body(attached_repo, run, branch, base_branch)
          },
          {:ok, _run} <- Runs.promote_github_snapshot(run.id, frozen_snapshot_fragment(frozen)) do
       {:ok, frozen}
@@ -181,33 +192,77 @@ defmodule Kiln.Attach.Delivery do
     "kiln/attach/#{slug}-r#{short_run_id(run_id)}"
   end
 
-  defp draft_pr_title(attached_repo, run_id) do
-    "draft: #{attached_repo.repo_name}: attached repo update (#{short_run_id(run_id)})"
+  defp draft_pr_title(attached_repo, %Run{} = run) do
+    case summary_line(run.spec_revision) do
+      nil ->
+        "draft: #{attached_repo.repo_name}: attached repo update (#{short_run_id(run.id)})"
+
+      line ->
+        "draft: #{line} (#{short_run_id(run.id)})"
+    end
   end
 
-  defp draft_pr_body(attached_repo, run_id, branch, base_branch) do
-    """
-    Kiln opened this as a draft attached-repo PR.
-
-    ## Why
-    - Keep attached-repo delivery bounded to one conservative draft PR.
-
-    ## What changed
-    - Repo: `#{attached_repo.repo_slug}`
-    - Branch: `#{branch}`
-    - Base branch: `#{base_branch}`
-
-    ## Verification
-    - Attach workspace was marked ready before delivery.
-    - This PR stays draft-first for operator inspection.
-
-    ## Kiln context
-    - Run: `#{run_id}`
-    - Attached repo: `#{attached_repo.id}`
-
-    kiln-run: #{run_id}
-    """
+  defp draft_pr_body(attached_repo, %Run{} = run, branch, base_branch) do
+    [
+      "## Summary",
+      summary_line(run.spec_revision) || "Update attached repository `#{attached_repo.repo_slug}`",
+      "",
+      "## Acceptance criteria",
+      acceptance_criteria_lines(run.spec_revision),
+      out_of_scope_lines(run.spec_revision),
+      verification_lines(),
+      "",
+      "## Branch context",
+      "- Branch: `#{branch}`",
+      "- Base branch: `#{base_branch}`",
+      "",
+      "kiln-run: #{run.id}"
+    ]
+    |> List.flatten()
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join("\n")
   end
+
+  defp acceptance_criteria_lines(%SpecRevision{acceptance_criteria: criteria})
+       when is_list(criteria) and criteria != [] do
+    Enum.map(criteria, &"- #{&1}")
+  end
+
+  defp acceptance_criteria_lines(_revision),
+    do: ["- Review implementation against requested scope."]
+
+  defp out_of_scope_lines(%SpecRevision{out_of_scope: items})
+       when is_list(items) and items != [] do
+    ["", "## Out of scope" | Enum.map(items, &"- #{&1}")]
+  end
+
+  defp out_of_scope_lines(_revision), do: []
+
+  defp verification_lines do
+    [
+      "",
+      "## Verification",
+      "- `MIX_ENV=test mix kiln.attach.prove`",
+      "- Delegated proof layers:",
+      Enum.map(@verification_proof_layers, &"  - `#{&1}`")
+    ]
+  end
+
+  defp summary_line(%SpecRevision{request_kind: kind, change_summary: summary})
+       when kind in [:feature, :bugfix] and is_binary(summary) do
+    trimmed = String.trim(summary)
+
+    if trimmed == "" do
+      nil
+    else
+      "#{request_kind_label(kind)}: #{trimmed}"
+    end
+  end
+
+  defp summary_line(_revision), do: nil
+
+  defp request_kind_label(:feature), do: "Feature"
+  defp request_kind_label(:bugfix), do: "Bugfix"
 
   defp short_run_id(run_id), do: run_id |> String.replace("-", "") |> binary_part(0, 8)
 end

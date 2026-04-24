@@ -2,6 +2,33 @@
 
 Living summary of shipped versions. Detailed phase history lives under `.planning/milestones/` and `.planning/phases/`.
 
+## v0.7.0 — PR-sized brownfield execution
+
+**Shipped:** 2026-04-24  
+**Phases:** 32–35 (**4** phases, **11** plans)  
+**Archives:** [v0.7.0-ROADMAP.md](milestones/v0.7.0-ROADMAP.md) · [v0.7.0-REQUIREMENTS.md](milestones/v0.7.0-REQUIREMENTS.md)  
+**Tag:** `v0.7.0`
+
+**What shipped**
+
+1. **Bounded attached intake** — WORK-01 introduced structured request contracts (Summary, Acceptance Criteria, Out-of-Scope) frozen into spec revisions for clear brownfield boundaries.
+2. **Repo-centric continuity** — CONT-01 added explicit usage metadata and recency tracking to attached repos, enabling seamless repeat-work context.
+3. **Advisory brownfield preflight** — SAFE-01 / SAFE-02 implemented typed findings (fatal/warning/info) and safety guardrails to detect conflicts before git mutation.
+4. **Reviewer-first draft PRs** — TRUST-04 / UAT-06 optimized GitHub delivery to derive review-ready titles and bodies from durable request facts and proof citations.
+
+## v0.6.0 — Attach existing repo first
+
+**Shipped:** 2026-04-24  
+**Phases:** 29–31 (**3** phases, **8** plans)  
+**Archives:** [v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md) · [v0.6.0-REQUIREMENTS.md](milestones/v0.6.0-REQUIREMENTS.md) · [v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md)  
+**Tag:** `v0.6.0`
+
+**What shipped**
+
+1. **Attach discovery** — ATTACH-01 brought "Attach existing repo" as a first-class discovery path to onboarding and start surfaces.
+2. **Managed workspace hydration** — ATTACH-02 / ATTACH-03 established the single-repo attach resolution and conservative hydration boundary.
+3. **Draft-PR trust ramp** — TRUST-01 / TRUST-02 / TRUST-03 / GIT-05 / UAT-05 added frozen branch push, draft PR delivery, and the owning `mix kiln.attach.prove` command for attached-repo validation.
+
 ## v0.5.0 — Local first success
 
 **Shipped:** 2026-04-24  

@@ -31,6 +31,8 @@ defmodule Kiln.Attach.AttachedRepo do
     field(:clone_url, :string)
     field(:default_branch, :string)
     field(:base_branch, :string)
+    field(:last_selected_at, :utc_datetime_usec)
+    field(:last_run_started_at, :utc_datetime_usec)
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -53,7 +55,9 @@ defmodule Kiln.Attach.AttachedRepo do
     :canonical_repo_root,
     :remote_url,
     :clone_url,
-    :default_branch
+    :default_branch,
+    :last_selected_at,
+    :last_run_started_at
   ]
 
   @spec changeset(t() | Ecto.Changeset.t(), map()) :: Ecto.Changeset.t()

@@ -260,12 +260,13 @@ end
 | A3 | Loading `SpecRevision` inside the delivery seam is the cleanest implementation route. | Common Pitfalls / Pattern 1 | The existing run preload path may already expose the needed fields in a cleaner way. |
 | A4 | Reviewer trust will drift immediately if PR citations and delegated proof layers diverge. | Anti-Patterns / Common Pitfalls | The implementation could still work technically, but the product contract would become misleading. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Has Phase 34 already landed its final proof file split before Phase 35 planning starts?**
-   - What we know: `STATE.md` still shows Phase 34 as executing, while the repo already contains `test/kiln/attach/brownfield_preflight_test.exs` and `/attach` warning coverage. [VERIFIED: .planning/STATE.md] [VERIFIED: codebase grep]
-   - What's unclear: whether the planner should rely on current filenames as stable, or re-check after Phase 34 closes. [ASSUMED]
-   - Recommendation: Reconfirm the delegated proof filenames immediately before locking the Phase 35 plan so the PR citations and proof task stay aligned. [ASSUMED]
+   - Resolution: yes for planning purposes. The repo already contains the concrete Phase 34 proof files `test/kiln/attach/brownfield_preflight_test.exs` and `test/kiln_web/live/attach_entry_live_test.exs`, so Phase 35 can lock against those exact filenames. `STATE.md` still lags Phase 34 execution state, but the file-level proof surface is present and reviewable in the workspace. [VERIFIED: .planning/STATE.md] [VERIFIED: codebase grep]
+
+2. **Which continuity proof file should be treated as canonical for Phase 35?**
+   - Resolution: `test/kiln/attach/continuity_test.exs` is the canonical continuity proof layer for Phase 35 because it proves the attach-side continuity contract the operator actually relies on: target precedence, same-repo isolation, recent-repo ordering, and run-backed carry-forward. `test/kiln/runs/attached_continuity_test.exs` remains a useful lower-level run query test, but it is not the primary reviewer-facing continuity claim surface for the owning proof command. [VERIFIED: codebase grep]
 
 ## Environment Availability
 
@@ -306,7 +307,7 @@ end
 ### Wave 0 Gaps
 - [ ] Update `test/kiln/attach/delivery_test.exs` to assert the final PR-body contract, including omission of raw `attached_repo_id`. [ASSUMED]
 - [ ] Update `test/mix/tasks/kiln.attach.prove_test.exs` whenever the delegated layer list changes so the owning command stays authoritative. [VERIFIED: codebase grep]
-- [ ] Reconcile `mix kiln.attach.prove` with `UAT-06` wording by delegating explicit continuity and brownfield-preflight coverage if the existing three-file list is judged insufficient after Phase 34 closes. [ASSUMED]
+- [ ] Reconcile `mix kiln.attach.prove` with `UAT-06` wording by delegating explicit continuity coverage through `test/kiln/attach/continuity_test.exs` plus representative brownfield-preflight coverage through `test/kiln/attach/brownfield_preflight_test.exs`. [ASSUMED]
 
 ## Security Domain
 

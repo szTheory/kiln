@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **Active milestone v0.7.0**
+**Updated:** 2026-04-24 — **Active milestone vNext**
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -12,74 +12,24 @@
 - ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
 - ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
 - ✅ **v0.6.0 — Attach existing repo first** — Phases **29–31** — [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md) · [v0.6.0-REQUIREMENTS.md](milestones/v0.6.0-REQUIREMENTS.md) · [v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md)
-- 🚧 **v0.7.0 — PR-sized brownfield execution** — Phases **32–35** — active milestone
+- ✅ **v0.7.0 — PR-sized brownfield execution** — Phases **32–35** — [.planning/milestones/v0.7.0-ROADMAP.md](milestones/v0.7.0-ROADMAP.md) · [v0.7.0-REQUIREMENTS.md](milestones/v0.7.0-REQUIREMENTS.md)
+- 🚧 **vNext** — Next milestone goals TBD — [PROJECT.md](PROJECT.md)
 
 ## Current posture
 
-`v0.7.0` is now open from the shipped `v0.6.0` baseline. The milestone focuses on turning attached-repo support into a normal ongoing workflow for the solo operator: one bounded feature or bugfix request on one existing repo should become one reviewable draft PR with clear proof and fewer rediscovery costs on repeat runs.
+`v0.7.0` is shipped on 2026-04-24. Kiln now supports a repeatable, bounded brownfield loop on attached repos with continuity and safety guardrails.
 
-## Active milestone
+<details>
+<summary>✅ v0.7.0 (Phases 32–35) — SHIPPED 2026-04-24</summary>
 
-### v0.7.0 — PR-sized brownfield execution
+- [x] **Phase 32: PR-sized attached-repo intake** — WORK-01 — completed 2026-04-24
+- [x] **Phase 33: Repeat-run continuity on attached repos** — CONT-01 — completed 2026-04-24
+- [x] **Phase 34: Brownfield preflight and narrowing guardrails** — SAFE-01, SAFE-02 — completed 2026-04-24
+- [x] **Phase 35: Draft PR handoff and owning proof** — TRUST-04, UAT-06 — completed 2026-04-24
 
-**Goal:** Make Kiln feel like a credible teammate on one attached repo by turning bounded brownfield work into a repeatable issue-to-draft-PR loop.
+**Scope summary:** structured bounded intake contracts, repo-scoped continuity recency, advisory brownfield preflight findings, and reviewer-first draft PR delivery built from durable request facts.
 
-**Requirements in scope:** `WORK-01`, `CONT-01`, `SAFE-01`, `SAFE-02`, `TRUST-04`, `UAT-06`.
-
-### Phase 32: PR-sized attached-repo intake
-
-**Goal**: Reframe attached work as one bounded feature or bugfix request with explicit acceptance framing instead of an open-ended continuation ask.
-**Depends on**: Phase 31
-**Requirements**: `WORK-01`
-**Plans**: 3 plans
-
-Plans:
-
-- [x] 32-01-PLAN.md — define the bounded attached-request contract and persist it across draft and promotion
-- [x] 32-02-PLAN.md — add the attach-aware run launcher with durable run/request linkage
-- [x] 32-03-PLAN.md — wire `/attach` to collect bounded requests and start attached runs
-
-### Phase 33: Repeat-run continuity on attached repos
-
-**Goal**: Make the second and third runs on one attached repo feel native by reusing workspace, repo, and trust context safely.
-**Depends on**: Phase 32
-**Requirements**: `CONT-01`
-**Plans**: 3 plans
-
-Plans:
-
-- [x] 33-01-PLAN.md — build the continuity read model and recent-repo metadata over attached repos, requests, and runs
-- [x] 33-02-PLAN.md — make `/attach` route-backed for known attached repos with a continuity card and visible carry-forward
-- [x] 33-03-PLAN.md — rewire repeat-run launch through fresh readiness checks and continuity-aware same-repo start behavior
-
-### Phase 34: Brownfield preflight and narrowing guardrails
-
-**Goal**: Detect likely repo-state conflicts or scope collisions before coding and give the operator concrete remediation or narrowing guidance.
-**Depends on**: Phase 33
-**Requirements**: `SAFE-01`, `SAFE-02`
-**Plans**: 3 plans
-
-Plans:
-
-- [ ] 34-01-PLAN.md — create the attach-side advisory brownfield preflight boundary and typed report contract
-- [ ] 34-02-PLAN.md — add same-repo overlap and open-PR heuristics plus attach-side pre-start integration
-- [ ] 34-03-PLAN.md — add `/attach` warning and narrowing UX with proof that warnings stay advisory
-
-### Phase 35: Draft PR handoff and owning proof
-
-**Goal**: Tighten the attached-repo draft PR output so the operator receives a reviewable handoff with scoped summary, proof, and milestone-owning verification coverage.
-**Depends on**: Phase 34
-**Requirements**: `TRUST-04`, `UAT-06`
-**Plans**: 2 plans
-
-Plans:
-
-- [ ] 35-01-PLAN.md — lock the frozen reviewer-facing PR handoff contract from durable attached-request fields and exact proof citations
-- [ ] 35-02-PLAN.md — keep `mix kiln.attach.prove` as the sole owner while making Phase 35 continuity and brownfield coverage literal
-
-## Latest shipped milestone
-
-**v0.6.0 — Attach existing repo first** shipped on 2026-04-24 with phases **29–31**. Archive: [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md).
+</details>
 
 <details>
 <summary>✅ v0.6.0 (Phases 29–31) — SHIPPED 2026-04-24</summary>

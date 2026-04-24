@@ -1,10 +1,15 @@
 defmodule Mix.Tasks.Kiln.Attach.Prove do
   @moduledoc """
-  Proves attached-repo delivery by delegating three locked proof layers in order:
+  Runs the sole owning proof command for attached draft-PR handoff.
 
-    1. hermetic attach delivery happy path
-    2. refusal-path safety gate coverage
-    3. focused `/attach` LiveView truth-surface coverage
+  Delegates six locked proof layers in order:
+
+    1. draft PR delivery integration proof
+    2. delivery body seam contract proof
+    3. attached continuity proof
+    4. safety gate refusal coverage
+    5. brownfield preflight warning coverage
+    6. `/attach` LiveView truth-surface coverage
   """
   use Mix.Task
 
@@ -12,7 +17,10 @@ defmodule Mix.Tasks.Kiln.Attach.Prove do
 
   @proof_layers [
     ["env", "MIX_ENV=test", "mix", "test", "test/integration/github_delivery_test.exs"],
+    ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/delivery_test.exs"],
+    ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/continuity_test.exs"],
     ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/safety_gate_test.exs"],
+    ["env", "MIX_ENV=test", "mix", "test", "test/kiln/attach/brownfield_preflight_test.exs"],
     ["env", "MIX_ENV=test", "mix", "test", "test/kiln_web/live/attach_entry_live_test.exs"]
   ]
 
