@@ -98,10 +98,18 @@ defmodule KilnWeb.RouteSmokeTest do
             "/workflows",
             "/costs",
             "/providers",
+            "/settings",
             "/audit"
           ] do
         assert_route_renders_cleanly(conn, path)
       end
+    end
+
+    test "templates index keeps the first-run hero visible", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/templates")
+
+      assert has_element?(view, "#templates-first-run-hero")
+      assert has_element?(view, "#template-card-hello-kiln")
     end
   end
 
@@ -118,6 +126,12 @@ defmodule KilnWeb.RouteSmokeTest do
 
     test "template detail (hello-kiln is seeded from priv)", %{conn: conn} do
       assert_route_renders_cleanly(conn, "/templates/hello-kiln")
+    end
+
+    test "template detail still renders the next-steps surface", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/templates/hello-kiln")
+
+      assert has_element?(view, "#template-detail-next-steps")
     end
 
     test "workflow detail", %{conn: conn, workflow_id: wf_id} do
