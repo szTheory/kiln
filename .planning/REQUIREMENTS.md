@@ -9,7 +9,8 @@ This milestone converts first believable local success into first real-project u
 
 ### Entry and workspace selection
 
-- [ ] **ATTACH-01**: Operator can choose an attach-to-existing path from onboarding and template/start surfaces, with clear framing for when to use attach versus built-in greenfield templates.
+- [x] **ATTACH-01
+**: Operator can choose an attach-to-existing path from onboarding and template/start surfaces, with clear framing for when to use attach versus built-in greenfield templates.
 - [ ] **ATTACH-02**: Attach flow accepts a local repo path, existing local clone, or GitHub URL and validates that the target resolves to one usable repository before execution starts.
 - [ ] **ATTACH-03**: Kiln creates or reuses one writable workspace for the attached repository and scopes work to one bounded feature or bugfix branch without introducing multi-root, fork, or clone-to-stack behavior.
 
@@ -53,7 +54,7 @@ This milestone converts first believable local success into first real-project u
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ATTACH-01 | Phase 29 | Pending |
+| ATTACH-01 | Phase 29 | Complete |
 | ATTACH-02 | Phase 30 | Pending |
 | ATTACH-03 | Phase 30 | Pending |
 | TRUST-01 | Phase 31 | Pending |
@@ -62,7 +63,7 @@ This milestone converts first believable local success into first real-project u
 | GIT-05 | Phase 31 | Pending |
 | UAT-05 | Phase 31 | Pending |
 
-**Coverage:** v0.6.0 requirements: **8** — mapped: **8** — unmapped: **0** — complete: **0** — pending: **8**.
+**Coverage:** v0.6.0 requirements: **8** — mapped: **8** — unmapped: **0** — complete: **1** — pending: **7**.
 
 ---
 *Requirements opened: 2026-04-24 — `/gsd-new-milestone` v0.6.0*

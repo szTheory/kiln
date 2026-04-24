@@ -16,7 +16,7 @@
 
 ### v0.6.0 — Attach existing repo first
 
-**Status:** Planned
+**Status:** In progress
 **Phases:** 29-31
 **Total Plans:** 7
 
@@ -34,7 +34,7 @@ v0.6.0 turns the first believable local run into the first believable real-proje
 
 Plans:
 
-- [ ] `29-01-PLAN.md` — add attach-vs-template branching to onboarding and start surfaces
+- [x] `29-01-PLAN.md` — add attach-vs-template branching to onboarding and start surfaces
 - [ ] `29-02-PLAN.md` — align operator copy and flow guidance around greenfield vs attach entry points
 
 **Details:**

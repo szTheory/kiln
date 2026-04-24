@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
 milestone: v0.6.0
-milestone_name: Attach existing repo first
-status: planning
-last_updated: "2026-04-24T15:30:00.000Z"
-last_activity: 2026-04-24 -- milestone v0.6.0 opened for attach-to-existing planning
+milestone_name: — Attach existing repo first
+status: executing
+last_updated: "2026-04-24T09:30:27.903Z"
+last_activity: 2026-04-24 -- Completed Phase 29 Plan 01 execution
 progress:
-  total_phases: 31
-  completed_phases: 28
-  total_plans: 117
-  completed_plans: 110
-  percent: 94
+  total_phases: 6
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 4
+  percent: 80
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: 29 planned
-Plan: —
-Status: Milestone opened; ready for Phase 29 planning
-Last activity: 2026-04-24 -- opened v0.6.0 Attach existing repo first
+Phase: 29 — EXECUTING
+Plan: 2 of 2
+Status: Executing Phase 29
+Last activity: 2026-04-24 -- Completed Phase 29 Plan 01 execution
 
 ## Current focus
 
@@ -34,7 +34,7 @@ Active milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROA
 
 Last shipped phase: **28 — First-run proof runtime closure** (**UAT-04**).
 
-**Next command:** **`/gsd-plan-phase 29`** — plan the attach entry surfaces phase.
+**Next command:** **`/gsd-execute-phase 29`** — continue the remaining attach entry surfaces plan.
 
 ## Milestone note
 
@@ -55,8 +55,12 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 **Last phase execution:** 26 (First live template run) — completed 2026-04-24.
 **Last phase execution:** 27 (Local first-run proof) — completed 2026-04-24 and later superseded for requirement ownership.
 **Last phase execution:** 28 (First-run proof runtime closure) — completed 2026-04-24.
+**Last phase execution:** 29-01 (Attach entry surfaces) — completed 2026-04-24.
 
 ## Accumulated Context
+
+- `29-01` established `/attach` as a route-backed orientation surface with attach-specific ids and honest Phase 30 boundary copy.
+- `29-01` kept `hello-kiln` as the single recommended first proof path while adding attach discovery on `/onboarding` and `/templates`.
 
 ## Deferred Items
 
