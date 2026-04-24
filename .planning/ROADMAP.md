@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **No active milestone** (v0.5.0 shipped)
+**Updated:** 2026-04-24 — **Active milestone: v0.6.0 Attach existing repo first**
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -12,9 +12,81 @@
 - ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
 - ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
 
+## Active milestone
+
+### v0.6.0 — Attach existing repo first
+
+**Status:** Planned
+**Phases:** 29-31
+**Total Plans:** 7
+
+#### Overview
+
+v0.6.0 turns the first believable local run into the first believable real-project workflow. Instead of expanding outward into remote control, CLI/API, or deploy automation, this milestone narrows on one higher-leverage job for the current solo-operator persona: point Kiln at one existing repository, let it work on a bounded branch, and inspect a conservative draft PR.
+
+#### Phases
+
+##### Phase 29: Attach entry surfaces
+
+**Goal**: Make attach-to-existing a first-class first-use path instead of an implied advanced workflow hidden behind greenfield-only onboarding.
+**Depends on**: Phase 28
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] `29-01-PLAN.md` — add attach-vs-template branching to onboarding and start surfaces
+- [ ] `29-02-PLAN.md` — align operator copy and flow guidance around greenfield vs attach entry points
+
+**Details:**
+Phase 29 introduces the product-level choice that this milestone is about: operators should see, from onboarding onward, that Kiln can either start from a built-in template or attach to one existing repository. The phase keeps the current demo/template path intact while making the attach path honest, explicit, and clearly scoped to real-project work.
+
+##### Phase 30: Attach workspace hydration and safety gates
+
+**Goal**: Resolve one attached repository into a safe, usable writable workspace before any coding run mutates git state.
+**Depends on**: Phase 29
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] `30-01-PLAN.md` — accept and validate local-path or GitHub-URL attach sources
+- [ ] `30-02-PLAN.md` — hydrate or reuse one writable attached workspace with run-scoped metadata
+- [ ] `30-03-PLAN.md` — refuse dirty, detached, or missing-prerequisite repo states with explicit remediation
+
+**Details:**
+Phase 30 handles the brownfield mechanics that the current greenfield-first flow never needed. Kiln must be able to resolve one repository, confirm it is usable, materialize or reuse the right local workspace, and stop early when the repo is unsafe to touch. This phase deliberately excludes multi-root, fork, and clone-to-stack behavior.
+
+##### Phase 31: Draft PR trust ramp and attach proof
+
+**Goal**: Carry the attached repo through branch, push, and draft PR orchestration, then close the milestone with explicit automated proof coverage.
+**Depends on**: Phase 30
+**Plans**: 2 plans
+
+Plans:
+
+- [ ] `31-01-PLAN.md` — add run-scoped branch + draft PR orchestration for attached repos
+- [ ] `31-02-PLAN.md` — add attach happy-path and refusal-case proof coverage and reconcile planning SSOT
+
+**Details:**
+Phase 31 turns the attach flow into the intended trust posture: Kiln still works autonomously, but first attached-repo runs land as conservative draft PRs rather than pretending real repositories should behave like built-in templates. The phase also adds the owning proof command and milestone verification coverage for both success and refusal paths.
+
+#### Milestone summary
+
+**Key decisions:**
+
+- `v0.6.0` prioritizes attach-to-existing over remote ops, CLI/API work, deploy automation, or backlog cleanup.
+- First attached-repo runs default to branch + draft PR without adding synchronous approval gates.
+- The first attach milestone is single-repo only; fork, clone-to-stack, multi-root, and reference-repo behavior remain deferred.
+- Attach enters through onboarding and template/start surfaces because that is where usefulness is judged first.
+
+**Issues deferred:**
+
+- `999.4` planning/validation debt cleanup remains backlog work unless the attach milestone proves blocked by it.
+- Read-only external reference repos remain a separate follow-on capability.
+- Remote operator control plane, deploy/publish flows, and deeper brownfield workspace shapes remain deferred beyond `v0.6.0`.
+
 ## Current posture
 
-No active milestone is open. Start the next slice with `/gsd-new-milestone` so `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md` can be reopened around a fresh goal instead of carrying forward stale execution detail.
+An active milestone is now open. The next planning loop should start at **Phase 29** and keep the milestone narrow enough to prove attached-repo usefulness before widening into adjacent roadmap themes.
 
 ## Latest shipped milestone
 
@@ -96,4 +168,4 @@ Plans:
 - [ ] TBD (promote with `/gsd-review-backlog` when ready)
 
 ---
-*Milestone v0.5.0 archived: 2026-04-24*
+*Milestone v0.6.0 opened: 2026-04-24*

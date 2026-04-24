@@ -1,0 +1,68 @@
+# Requirements: Kiln — Milestone v0.6.0
+
+**Defined:** 2026-04-24  
+**Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
+
+This milestone converts first believable local success into first real-project usefulness. After v0.5.0 proved one trustworthy local run, v0.6.0 narrows the next gap into one focused job: a solo operator should be able to point Kiln at one existing repository, let it work on a bounded feature or bugfix branch, and inspect a conservative draft PR instead of being forced through a greenfield-only story.
+
+## v0.6.0 Requirements
+
+### Entry and workspace selection
+
+- [ ] **ATTACH-01**: Operator can choose an attach-to-existing path from onboarding and template/start surfaces, with clear framing for when to use attach versus built-in greenfield templates.
+- [ ] **ATTACH-02**: Attach flow accepts a local repo path, existing local clone, or GitHub URL and validates that the target resolves to one usable repository before execution starts.
+- [ ] **ATTACH-03**: Kiln creates or reuses one writable workspace for the attached repository and scopes work to one bounded feature or bugfix branch without introducing multi-root, fork, or clone-to-stack behavior.
+
+### Safety and trust ramp
+
+- [ ] **TRUST-01**: First attached-repo runs default to creating a branch and opening a draft PR against the attached repo's upstream rather than behaving like the existing greenfield-first path.
+- [ ] **TRUST-02**: Kiln refuses dirty worktrees, detached HEADs, and missing push/PR prerequisites with explicit remediation guidance instead of mutating repo state or failing late in the run.
+- [ ] **TRUST-03**: Attached-repo execution preserves bounded autonomy: no synchronous approval gate is introduced, but the operator gets a conservative inspection point through the draft PR before merge.
+
+### Git and proof
+
+- [ ] **GIT-05**: Attached-repo runs can push the run-scoped branch and open a draft PR through the existing git/gh integration using repo metadata captured by the attach flow.
+- [ ] **UAT-05**: The repository contains one explicit automated proof path for attach existing repo happy path and refusal cases, and the owning verification command is cited in the milestone artifacts.
+
+## vNext / Deferred
+
+### Brownfield expansions
+
+- **ATTACH-04**: Attach flow supports multi-root or monorepo-shaped workspaces.
+- **FORK-01**: Operator can fork an upstream repo and continue work on the fork as a first-class Kiln flow.
+- **PORT-01**: Kiln can clone intent from one stack into a new repo in another stack.
+
+### Adjacent leverage
+
+- **REF-01**: Read-only external reference repos can be attached as context alongside the working repo.
+- **REMOTE-01**: Operator can check and nudge runs from a remote device or host.
+- **DELIVERY-01**: Kiln deploys or publishes successful outputs rather than stopping at merged PRs.
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Bundling `999.4` planning debt cleanup into this milestone | Valuable but lower leverage than making Kiln useful on a real repo; keep it as backlog unless attach work proves blocked |
+| Fork-and-continue in the first attach milestone | Higher trust and git-remote complexity than needed for the common single-repo use case |
+| Clone-to-different-stack workflows | Migration quality and attribution concerns make this a separate future milestone |
+| Multi-root or monorepo attach | Too much workspace and safety complexity for the first brownfield slice |
+| Remote operator control plane | Real-project usefulness on the current host is a better next step than remote supervision |
+| Read-only external reference repos in the same milestone | Useful follow-on, but not required to prove that Kiln can work directly on one existing repo |
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ATTACH-01 | Phase 29 | Pending |
+| ATTACH-02 | Phase 30 | Pending |
+| ATTACH-03 | Phase 30 | Pending |
+| TRUST-01 | Phase 31 | Pending |
+| TRUST-02 | Phase 30 | Pending |
+| TRUST-03 | Phase 31 | Pending |
+| GIT-05 | Phase 31 | Pending |
+| UAT-05 | Phase 31 | Pending |
+
+**Coverage:** v0.6.0 requirements: **8** — mapped: **8** — unmapped: **0** — complete: **0** — pending: **8**.
+
+---
+*Requirements opened: 2026-04-24 — `/gsd-new-milestone` v0.6.0*

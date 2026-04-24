@@ -20,11 +20,14 @@ Accepted close debt remains planning/artifact debt rather than milestone-scope p
 
 ## Next Milestone Goals
 
-No next milestone is active yet.
+**Current milestone:** `v0.6.0 — Attach existing repo first`
 
-- Run `/gsd-new-milestone` to define the next milestone before reopening `REQUIREMENTS.md`.
-- Use the shipped v0.5.0 state as the new baseline rather than carrying forward stale active requirement checklists.
-- Triage accepted close debt early if the next milestone depends on clean planning routing or historical validation posture.
+This milestone turns "Kiln completed one believable local run" into "Kiln can help on my real project." The primary job is attach-to-existing for one repo: a solo operator should be able to point Kiln at an existing codebase, let it work on a bounded feature or bugfix branch, and inspect a conservative draft PR instead of being forced through a greenfield-only flow.
+
+**Target features:**
+- First-class attach-to-existing entry in onboarding and template/start surfaces
+- Single-repo workspace validation and hydration from local path or GitHub URL
+- Conservative trust ramp for attached repos: branch + draft PR by default, with loud refusal on unsafe repo state
 
 ## Requirements
 
@@ -32,7 +35,9 @@ No next milestone is active yet.
 
 <!-- Current scope. Building toward these. -->
 
-- No active milestone requirements are open. Start the next scope with `/gsd-new-milestone`, which will recreate `REQUIREMENTS.md` for the next shipped slice.
+- [ ] **ATTACH-01**, **ATTACH-02**, **ATTACH-03** — make attach-to-existing a first-class single-repo path from onboarding through workspace hydration
+- [ ] **TRUST-01**, **TRUST-02**, **TRUST-03** — default attached repos to conservative draft-PR behavior and refuse unsafe repo states loudly
+- [ ] **GIT-05**, **UAT-05** — carry attached repos through branch + draft PR orchestration and close the milestone with explicit automated proof coverage
 
 ### Validated
 
@@ -122,6 +127,10 @@ No next milestone is active yet.
 | **Adaptive model routing** with automatic 429/5xx fallback + recorded `actual_model_used` | Avoids Fabro-class silent-fallback cost/quality drift; makes quota/rate-limit visible, not hidden | — Pending |
 | **Opinionated model-profile presets** per software-type scenario; switchable per run/stage | Good defaults are the difference between "it works out of the box" and "another config nightmare"; stays switchable so operators keep control | — Pending |
 | Bump Elixir/OTP baseline to **1.19.5 / 28.1+** per STACK research | Current stable as of April 2026; Phoenix 1.8 generators assume it; starting one major behind on day one is avoidable cost | — Pending |
+| **v0.6.0 prioritizes attach-to-existing over remote ops, CLI/API work, or deploy automation** | Real-project usefulness is the shortest path from demo credibility to everyday value for the current solo-operator persona | — Pending |
+| **First attached-repo runs use branch + draft PR as the default trust ramp** | Conservative output is more useful than another approval architecture and preserves bounded autonomy without pretending attached repos are the same as greenfield templates | — Pending |
+| **v0.6.0 attach scope is single repo only** | Single-repo attach captures most brownfield value with materially less workspace and trust-model complexity than fork, clone-to-stack, or multi-root support | — Pending |
+| **Attach enters through onboarding/templates first, not an advanced-only spec flow** | The first-use boundary is where operators decide whether Kiln is useful on real work; hiding attach behind advanced drafting would blunt the milestone's leverage | — Pending |
 
 ## Evolution
 
@@ -143,11 +152,11 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 ## Next Milestone Setup
 
-**Current milestone:** none
+**Current milestone:** `v0.6.0 — Attach existing repo first`
 
-Define the next milestone before opening new execution work. `REQUIREMENTS.md` has been archived with v0.5.0, so the next planning loop should start by reopening milestone scope and success criteria rather than jumping straight to a numbered phase.
+`REQUIREMENTS.md` and `ROADMAP.md` are now reopened around the attach-only slice. Continue phase numbering from the shipped baseline rather than resetting, and leave the accepted v0.5.0 planning debt in backlog unless it blocks the attach milestone directly.
 
-**Next command:** `/gsd-new-milestone`
+**Next command:** `/gsd-plan-phase 29`
 
 ## Merge authority
 
@@ -197,4 +206,4 @@ The pre-close v0.5.0 planning narrative focused on collapsing the distance betwe
 </details>
 
 ---
-*Last updated: 2026-04-24 — archived milestone v0.5.0 Local first success*
+*Last updated: 2026-04-24 — opened milestone v0.6.0 Attach existing repo first*

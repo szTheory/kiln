@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: Awaiting next milestone definition
-status: idle
-last_updated: "2026-04-24T08:33:18.929Z"
-last_activity: 2026-04-24 -- v0.5.0 archived with accepted deferred items
+milestone: v0.6.0
+milestone_name: Attach existing repo first
+status: planning
+last_updated: "2026-04-24T15:30:00.000Z"
+last_activity: 2026-04-24 -- milestone v0.6.0 opened for attach-to-existing planning
 progress:
   total_phases: 31
   completed_phases: 28
-  total_plans: 110
+  total_plans: 117
   completed_plans: 110
-  percent: 100
+  percent: 94
 ---
 
 # Project State
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: none
-Plan: none
-Status: Waiting for next milestone definition
-Last activity: 2026-04-24 -- archived v0.5.0 Local first success
+Phase: 29 planned
+Plan: —
+Status: Milestone opened; ready for Phase 29 planning
+Last activity: 2026-04-24 -- opened v0.6.0 Attach existing repo first
 
 ## Current focus
 
-No milestone is currently active. The latest shipped slice is **v0.5.0 — Local first success** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [MILESTONES.md](MILESTONES.md)
+Active milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md) · [PROJECT.md](PROJECT.md)
 
 Last shipped phase: **28 — First-run proof runtime closure** (**UAT-04**).
 
-**Next command:** **`/gsd-new-milestone`** — define the next milestone and reopen `REQUIREMENTS.md`.
+**Next command:** **`/gsd-plan-phase 29`** — plan the attach entry surfaces phase.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 now joins the archive set and leaves integer phase numbering ready for the next milestone when defined. **999.3** and **999.4** remain backlog work.
+v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 is the latest shipped baseline, and v0.6.0 reopens integer phase numbering with attach-to-existing as the next product slice. **999.3** and **999.4** remain backlog work outside the active milestone.
 
 ## Session continuity (recent CONTEXT files)
 
