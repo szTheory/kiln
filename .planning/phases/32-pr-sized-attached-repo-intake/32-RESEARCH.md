@@ -354,27 +354,28 @@ This example reflects the recommended Phase 32 direction, not an existing field 
 
 | # | Claim | Section | Risk if Wrong |
 |---|-------|---------|---------------|
-| A1 | Phase 32 should include an actual attached-run launch seam, not only durable intake authoring. [ASSUMED] | Summary, Common Pitfalls, State of the Art | The plan could overreach into launcher work that the user intended for Phase 33. |
+| A1 | Phase 32 includes an actual attached-run launch seam, not only durable intake authoring. [RESOLVED] | Summary, Common Pitfalls, State of the Art | Resolved from `WORK-01` wording and the milestone sequence: Phase 33 depends on Phase 32 and focuses on repeat-run continuity, which presumes a first-class start path already exists. |
 | A2 | The simplest durable shape is to extend `spec_drafts`/`spec_revisions` before creating a separate attach-request context. [ASSUMED] | Summary, Standard Stack, Don't Hand-Roll | A later dedicated brownfield-intake context might be cleaner if more requirements surface immediately. |
-| A3 | If launch is in scope, `runs` should gain explicit relations for attach/spec identity instead of another JSON snapshot. [ASSUMED] | Summary, Architecture Patterns | Planner may choose a lighter snapshot-only step first if schema change is considered too wide for Phase 32. |
-| A4 | The existing `elixir_phoenix_feature` workflow remains the effective launcher workflow for attached work until a brownfield-specific workflow is introduced. [ASSUMED] | Open Questions | If a different workflow is expected, Phase 32 planning must account for workflow selection work. |
+| A3 | Because launch is in scope, `runs` should gain explicit relations for attach/spec identity instead of another JSON snapshot. [RESOLVED] | Summary, Architecture Patterns | Resolved by existing repo conventions: primary entity linkage lives in schemas/foreign keys, while JSON snapshots hold derived delivery facts. |
+| A4 | The existing shipped workflow remains the effective launcher workflow for attached work until a brownfield-specific workflow is introduced. [RESOLVED] | Open Questions | Resolved pragmatically for Phase 32 because no alternate brownfield workflow artifact exists in roadmap, requirements, or code. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `WORK-01` require true run start in Phase 32, or only a durable bounded request ready for later launch?**
-   - What we know: the requirement text says "Operator can start an attached-repo run", but the codebase currently has no attach-specific launcher and no run/spec/attach linkage. [VERIFIED: codebase grep]
-   - What's unclear: whether Phase 32 is allowed to stop at bounded intake authoring plus promotion, leaving launch wiring to Phase 33. [ASSUMED]
-   - Recommendation: clarify this before planning. If "start run" is literal, make launcher wiring part of Phase 32; if not, the phase can stay narrower and lower risk. [ASSUMED]
+   - Resolution: `WORK-01` is treated literally. Phase 32 must include the attach-aware run start seam, not only request authoring.
+   - Why: the requirement says the operator can "start an attached-repo run", and Phase 33 is scoped to repeat-run continuity rather than first-run launch creation. [VERIFIED: codebase grep]
 
 2. **Where should the immutable promoted contract live?**
-   - What we know: `spec_revisions` is the append-only-ish promoted body store, while `runs.github_delivery_snapshot` is for downstream delivery facts. [VERIFIED: codebase grep]
-   - What's unclear: whether the request contract should be stored as structured fields on `spec_revisions`, rendered markdown only, or both. [ASSUMED]
-   - Recommendation: prefer both a structured snapshot for future continuity and rendered markdown for human readability, but keep one canonical source of truth. [ASSUMED]
+   - Resolution: the canonical immutable contract should live on `spec_revisions` as structured fields, while the rendered markdown body remains the human-readable view of the same bounded request.
+   - Why: `spec_revisions` is already the promoted intent store, and `runs.github_delivery_snapshot` is explicitly downstream delivery state rather than source intent. [VERIFIED: codebase grep]
 
 3. **Should the follow-up flow and first attach intake share the same contract immediately?**
-   - What we know: `file_follow_up_from_run/2` already creates a draft from a merged run, but it currently emits a lazy placeholder body. [VERIFIED: codebase grep]
-   - What's unclear: whether Phase 32 should upgrade that follow-up path now or only build the fresh attach-ready intake path. [ASSUMED]
-   - Recommendation: at minimum align the data shape so Phase 33 can unify them without migration churn. [ASSUMED]
+   - Resolution: Phase 32 only needs to establish the attach-ready intake path, but it should name and store the contract in a way that Phase 33 can reuse without another schema reset.
+   - Why: upgrading the merged-run follow-up path now would widen scope beyond `WORK-01`, while leaving the contract shape incompatible would create avoidable churn next phase. [VERIFIED: codebase grep]
+
+4. **Which workflow should the new attach-aware launcher use?**
+   - Resolution: use the existing shipped workflow selection path under `Kiln.Runs` for Phase 32; a brownfield-specific workflow selector is not part of current milestone scope.
+   - Why: no alternate workflow artifact exists in the current planning set, and Phase 32's goal is to close intake/start semantics rather than introduce a second workflow family. [VERIFIED: codebase grep]
 
 ## Environment Availability
 

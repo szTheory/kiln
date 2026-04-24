@@ -31,11 +31,13 @@
 **Goal**: Reframe attached work as one bounded feature or bugfix request with explicit acceptance framing instead of an open-ended continuation ask.
 **Depends on**: Phase 31
 **Requirements**: `WORK-01`
-**Plans**: 0 plans
+**Plans**: 3 plans
 
 Plans:
 
-- [ ] TBD during `/gsd-plan-phase 32`
+- [x] 32-01-PLAN.md — define the bounded attached-request contract and persist it across draft and promotion
+- [x] 32-02-PLAN.md — add the attach-aware run launcher with durable run/request linkage
+- [x] 32-03-PLAN.md — wire `/attach` to collect bounded requests and start attached runs
 
 ### Phase 33: Repeat-run continuity on attached repos
 

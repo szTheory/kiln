@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.7.0
 milestone_name: — PR-sized brownfield execution
-status: active
-last_updated: "2026-04-24T18:30:00.000Z"
-last_activity: 2026-04-24 -- Milestone v0.7.0 started from the v0.6.0 attached-repo baseline
+status: ready_to_plan
+last_updated: "2026-04-24T15:19:08.994Z"
+last_activity: 2026-04-24 -- Phase 32 execution started
 progress:
-  total_phases: 4
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 7
+  completed_phases: 2
+  total_plans: 6
+  completed_plans: 3
+  percent: 29
 ---
 
 # Project State
@@ -23,9 +23,9 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements for milestone v0.7.0
+Phase: 999.2
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-04-24
 
 ## Current focus
@@ -76,3 +76,5 @@ Items acknowledged and deferred at milestone close on 2026-04-24:
 |----------|------|--------|
 | todo | `2026-04-24-review-orphan-phase-03-worktree-residue.md` | acknowledged at v0.5.0 close and accepted again at v0.6.0 close |
 | repo | spawned role-process sandbox ownership noise during repo-wide test execution | observed during v0.6.0 audit and accepted as non-blocking tech debt |
+
+**Planned Phase:** 32 (PR-sized attached-repo intake) — 3 plans — 2026-04-24T15:17:40.525Z
