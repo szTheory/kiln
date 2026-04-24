@@ -312,6 +312,45 @@ defmodule KilnWeb.TemplatesLive do
             </div>
           </section>
 
+          <section
+            id="templates-start-choice"
+            class="grid gap-4 rounded-xl border border-base-300 bg-base-200 p-5 lg:grid-cols-[1.1fr_0.9fr]"
+          >
+            <article class="rounded-xl border border-base-300 bg-base-100/50 p-5">
+              <p class="kiln-eyebrow">Built-in templates</p>
+              <h2 class="kiln-h2 mt-2">Fastest way to learn Kiln or prove the first run</h2>
+              <p class="mt-2 text-sm text-base-content/70">
+                Keep the `hello-kiln` path as the recommended first proof, then use the broader catalog once one believable run exists.
+              </p>
+            </article>
+
+            <article
+              id="templates-attach-module"
+              class="rounded-xl border border-base-300 bg-base-100/50 p-5"
+            >
+              <p class="kiln-eyebrow">Attach existing repo</p>
+              <h2 class="kiln-h2 mt-2">Real-project path for bounded work on one codebase</h2>
+              <p class="mt-2 text-sm text-base-content/70">
+                Supports a local path, an existing clone, or a GitHub URL. Validation and workspace safety checks happen in the next step.
+              </p>
+              <p class="kiln-meta mt-3">
+                Attach does not replace the demo/template journey and does not imply that repo validation has already happened.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-3 text-sm">
+                <.link
+                  id="templates-attach-existing-repo"
+                  navigate={~p"/attach"}
+                  class="btn btn-primary btn-sm"
+                >
+                  Attach existing repo
+                </.link>
+                <.link navigate={~p"/onboarding"} class="link link-primary">
+                  Return to setup
+                </.link>
+              </div>
+            </article>
+          </section>
+
           <section aria-label="Template catalog" class="grid gap-4 md:grid-cols-2">
             <%= for t <- catalog_templates(@templates) do %>
               <article

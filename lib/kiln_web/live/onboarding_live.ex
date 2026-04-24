@@ -201,6 +201,9 @@ defmodule KilnWeb.OnboardingLive do
             <p class="kiln-body mt-2 text-sm">
               This scenario points to a vetted starting surface instead of asking you to invent a blank first run.
             </p>
+            <p id="onboarding-attach-path-note" class="kiln-meta mt-3">
+              Attach existing repo is the real-project branch for operators who already have code and want bounded work on one codebase.
+            </p>
             <div class="mt-4 flex flex-col gap-3">
               <.link
                 id="onboarding-start-from-template"
@@ -208,6 +211,13 @@ defmodule KilnWeb.OnboardingLive do
                 class="btn btn-primary"
               >
                 Open recommended template
+              </.link>
+              <.link
+                id="onboarding-attach-existing-repo"
+                navigate={~p"/attach"}
+                class="btn border border-base-300 bg-base-100 text-base-content hover:border-primary"
+              >
+                Attach existing repo
               </.link>
               <.link id="onboarding-continue-runs" navigate={~p"/"} class="link link-primary">
                 Open run board
