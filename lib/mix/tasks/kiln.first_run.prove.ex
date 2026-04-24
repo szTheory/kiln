@@ -17,11 +17,20 @@ defmodule Mix.Tasks.Kiln.FirstRun.Prove do
 
   @impl Mix.Task
   def run(_args) do
-    runner().("integration.first_run", [])
-    runner().("test", @focused_liveview_files)
+    run_task("integration.first_run", [])
+    run_task("test", @focused_liveview_files)
   end
 
   defp runner do
     Process.get(:kiln_first_run_prove_runner, &Mix.Task.run/2)
+  end
+
+  defp reenabler do
+    Process.get(:kiln_first_run_prove_reenabler, &Mix.Task.reenable/1)
+  end
+
+  defp run_task(task, args) do
+    reenabler().(task)
+    runner().(task, args)
   end
 end
