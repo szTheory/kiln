@@ -652,8 +652,10 @@ defmodule KilnWeb.AttachEntryLive do
         socket
         |> assign(:request_form, request_form(params))
         |> assign(:request_error, %{
-          message: "Kiln cannot start the attached run until provider credentials are configured.",
-          remediation: "Open provider health or settings, add the missing credential reference, and resubmit."
+          message:
+            "Kiln cannot start the attached run until provider credentials are configured.",
+          remediation:
+            "Open provider health or settings, add the missing credential reference, and resubmit."
         })
         |> assign(:request_started_run, nil)
 
@@ -662,7 +664,8 @@ defmodule KilnWeb.AttachEntryLive do
         |> assign(:request_form, request_form(params))
         |> assign(:request_error, %{
           message: "Kiln could not start the attached run.",
-          remediation: "Review the request details, then retry once the blocking issue is resolved."
+          remediation:
+            "Review the request details, then retry once the blocking issue is resolved."
         })
         |> assign(:request_started_run, nil)
     end
@@ -691,7 +694,11 @@ defmodule KilnWeb.AttachEntryLive do
   end
 
   defp promote_attached_request_draft(draft_id) do
-    fun = Keyword.get(attach_runtime_opts(), :promote_draft_fn, fn id, opts -> Specs.promote_draft(id, opts) end)
+    fun =
+      Keyword.get(attach_runtime_opts(), :promote_draft_fn, fn id, opts ->
+        Specs.promote_draft(id, opts)
+      end)
+
     fun.(draft_id, [])
   end
 

@@ -87,7 +87,9 @@ defmodule KilnWeb.AttachEntryLiveTest do
     refute has_element?(view, "#attach-run-started")
   end
 
-  test "submitting a vague attached request stays on the form with validation errors", %{conn: conn} do
+  test "submitting a vague attached request stays on the form with validation errors", %{
+    conn: conn
+  } do
     repo_root =
       make_git_repo!("kiln_attach_live_invalid_request",
         origin: "https://github.com/owner/live-invalid-request.git"
@@ -143,7 +145,11 @@ defmodule KilnWeb.AttachEntryLiveTest do
          %{
            draft: %SpecDraft{id: draft_id},
            spec: %Spec{id: "spec-123"},
-           revision: %SpecRevision{id: "rev-123", spec_id: "spec-123", attached_repo_id: "attached-123"}
+           revision: %SpecRevision{
+             id: "rev-123",
+             spec_id: "spec-123",
+             attached_repo_id: "attached-123"
+           }
          }}
       end,
       start_for_attached_request_fn: fn promoted_request, attached_repo_id, opts ->
@@ -180,14 +186,20 @@ defmodule KilnWeb.AttachEntryLiveTest do
       |> render_submit()
 
     assert_receive {:intake_called, "attached-123", attrs}
+
     assert attrs["acceptance_criteria"] == [
              "Ready state shows one bounded request form.",
              "Valid submit starts one attached run.",
              ""
            ]
+
     assert attrs["out_of_scope"] == ["Repeat-run continuity", "Draft PR handoff polish", "   "]
     assert_receive {:promote_called, "draft-123", _opts}
-    assert_receive {:start_called, %{spec: %Spec{id: "spec-123"}, revision: %SpecRevision{id: "rev-123"}}, "attached-123", _opts}
+
+    assert_receive {:start_called,
+                    %{spec: %Spec{id: "spec-123"}, revision: %SpecRevision{id: "rev-123"}},
+                    "attached-123", _opts}
+
     assert has_element?(view, "#attach-run-started")
     refute has_element?(view, "#attach-request-form")
     assert html =~ "run-123"
@@ -241,7 +253,9 @@ defmodule KilnWeb.AttachEntryLiveTest do
     workspace_root = Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
     File.mkdir_p!(workspace_root)
 
-    Application.put_env(:kiln, :attach_live_runtime_opts,
+    Application.put_env(
+      :kiln,
+      :attach_live_runtime_opts,
       Keyword.merge(
         [
           workspace_root: workspace_root,
