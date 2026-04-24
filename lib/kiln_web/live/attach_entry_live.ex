@@ -6,7 +6,10 @@ defmodule KilnWeb.AttachEntryLive do
   use KilnWeb, :live_view
 
   alias Kiln.Attach
+  alias Kiln.Attach.IntakeRequest
   alias Kiln.OperatorSetup
+  alias Kiln.Runs
+  alias Kiln.Specs
 
   @impl true
   def mount(_params, _session, socket) do
@@ -15,10 +18,14 @@ defmodule KilnWeb.AttachEntryLive do
      |> assign(:page_title, "Attach existing repo")
      |> assign(:resolution_state, :untouched)
      |> assign(:attach_ready, nil)
+     |> assign(:attached_repo, nil)
      |> assign(:attach_blocked, nil)
      |> assign(:resolved_source, nil)
      |> assign(:source_error, nil)
-     |> assign(:form, to_form(%{"source" => ""}, as: :attach_source))}
+     |> assign(:request_error, nil)
+     |> assign(:request_started_run, nil)
+     |> assign(:form, to_form(%{"source" => ""}, as: :attach_source))
+     |> assign(:request_form, request_form(%{}))}
   end
 
   @impl true
@@ -38,6 +45,19 @@ defmodule KilnWeb.AttachEntryLive do
     source = Map.get(params, "source", "")
 
     {:noreply, submit_attach(socket, params, source)}
+  end
+
+  @impl true
+  def handle_event("validate_request", %{"attach_request" => params}, socket) do
+    {:noreply,
+     socket
+     |> assign(:request_form, request_form(params, action: :validate))
+     |> assign(:request_error, nil)}
+  end
+
+  @impl true
+  def handle_event("submit_request", %{"attach_request" => params}, socket) do
+    {:noreply, submit_request(socket, params)}
   end
 
   @impl true
@@ -217,6 +237,145 @@ defmodule KilnWeb.AttachEntryLive do
                       <dd class="break-all">{@attach_ready.remote_url}</dd>
                     </div>
                   </dl>
+
+                  <%= if @request_started_run do %>
+                    <div
+                      id="attach-run-started"
+                      class="space-y-3 rounded-xl border border-success/30 bg-success/10 p-4"
+                    >
+                      <p class="kiln-eyebrow text-success">Run started</p>
+                      <h4 class="text-base font-semibold text-base-content">
+                        Kiln started one bounded attached-repo run.
+                      </h4>
+                      <p class="text-sm text-base-content/80">
+                        Run id: <span class="font-mono">{@request_started_run.id}</span>
+                      </p>
+                    </div>
+                  <% else %>
+                    <div class="rounded-xl border border-base-300 bg-base-100/80 p-4">
+                      <div class="space-y-2">
+                        <p class="kiln-eyebrow">Bounded request</p>
+                        <h4 class="text-base font-semibold text-base-content">
+                          Start one PR-sized feature or bugfix run
+                        </h4>
+                        <p class="text-sm text-base-content/70">
+                          Define one bounded outcome, what done looks like, and what stays out of scope.
+                        </p>
+                      </div>
+
+                      <%= if @request_error do %>
+                        <div
+                          id="attach-request-error"
+                          class="mt-4 rounded-lg border border-warning/30 bg-warning/10 p-3 text-sm text-base-content/80"
+                        >
+                          <p class="font-medium text-base-content">{@request_error.message}</p>
+                          <p class="mt-1">{@request_error.remediation}</p>
+                        </div>
+                      <% end %>
+
+                      <.form
+                        for={@request_form}
+                        id="attach-request-form"
+                        class="mt-4 space-y-4"
+                        phx-change="validate_request"
+                        phx-submit="submit_request"
+                      >
+                        <.input
+                          field={@request_form[:request_kind]}
+                          id="attach-request-kind"
+                          type="select"
+                          label="Request kind"
+                          options={[Feature: "feature", Bugfix: "bugfix"]}
+                          prompt="Choose one"
+                        />
+
+                        <.input
+                          field={@request_form[:title]}
+                          id="attach-request-title"
+                          type="text"
+                          label="Title"
+                          placeholder="Tighten attach success flow"
+                        />
+
+                        <.input
+                          field={@request_form[:change_summary]}
+                          id="attach-request-summary"
+                          type="textarea"
+                          label="Change summary"
+                          placeholder="Describe the bounded change this run should deliver."
+                        />
+
+                        <div class="space-y-3">
+                          <div>
+                            <label class="label mb-1 block text-sm font-medium text-base-content">
+                              Acceptance criteria
+                            </label>
+                            <p class="text-sm text-base-content/60">
+                              List the concrete outcomes this run must satisfy.
+                            </p>
+                          </div>
+
+                          <div class="grid gap-3">
+                            <%= for index <- 1..3 do %>
+                              <input
+                                id={"attach-request-acceptance-#{index}"}
+                                type="text"
+                                name="attach_request[acceptance_criteria][]"
+                                value={request_list_value(@request_form[:acceptance_criteria], index)}
+                                class="input w-full"
+                                placeholder={"Acceptance criterion #{index}"}
+                              />
+                            <% end %>
+                          </div>
+
+                          <%= for error <- @request_form[:acceptance_criteria].errors do %>
+                            <p class="text-sm text-error">{translate_error(error)}</p>
+                          <% end %>
+                        </div>
+
+                        <div class="space-y-3">
+                          <div>
+                            <label class="label mb-1 block text-sm font-medium text-base-content">
+                              Out of scope
+                            </label>
+                            <p class="text-sm text-base-content/60">
+                              Record what this run should explicitly avoid.
+                            </p>
+                          </div>
+
+                          <div class="grid gap-3">
+                            <%= for index <- 1..3 do %>
+                              <input
+                                id={"attach-request-out-of-scope-#{index}"}
+                                type="text"
+                                name="attach_request[out_of_scope][]"
+                                value={request_list_value(@request_form[:out_of_scope], index)}
+                                class="input w-full"
+                                placeholder={"Out of scope item #{index}"}
+                              />
+                            <% end %>
+                          </div>
+
+                          <%= for error <- @request_form[:out_of_scope].errors do %>
+                            <p class="text-sm text-error">{translate_error(error)}</p>
+                          <% end %>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                          <p class="kiln-meta">
+                            Kiln uses the ready attached repo already held on the server.
+                          </p>
+                          <button
+                            id="attach-request-submit"
+                            type="submit"
+                            class="btn btn-primary transition-transform duration-150 hover:-translate-y-0.5"
+                          >
+                            Start run
+                          </button>
+                        </div>
+                      </.form>
+                    </div>
+                  <% end %>
                 </div>
               <% :blocked -> %>
                 <div id="attach-blocked" class="space-y-4">
@@ -341,9 +500,13 @@ defmodule KilnWeb.AttachEntryLive do
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :resolved)
     |> assign(:attach_ready, nil)
+    |> assign(:attached_repo, nil)
     |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, resolved_source)
     |> assign(:source_error, nil)
+    |> assign(:request_form, request_form(%{}))
+    |> assign(:request_error, nil)
+    |> assign(:request_started_run, nil)
   end
 
   defp assign_resolution(socket, params, {:error, source_error}) do
@@ -351,9 +514,13 @@ defmodule KilnWeb.AttachEntryLive do
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :error)
     |> assign(:attach_ready, nil)
+    |> assign(:attached_repo, nil)
     |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, nil)
     |> assign(:source_error, source_error)
+    |> assign(:request_form, request_form(%{}))
+    |> assign(:request_error, nil)
+    |> assign(:request_started_run, nil)
   end
 
   defp reset_resolution(socket, params) do
@@ -361,9 +528,13 @@ defmodule KilnWeb.AttachEntryLive do
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :untouched)
     |> assign(:attach_ready, nil)
+    |> assign(:attached_repo, nil)
     |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, nil)
     |> assign(:source_error, nil)
+    |> assign(:request_form, request_form(%{}))
+    |> assign(:request_error, nil)
+    |> assign(:request_started_run, nil)
   end
 
   defp submit_attach(socket, params, source_input) do
@@ -372,25 +543,33 @@ defmodule KilnWeb.AttachEntryLive do
     case Attach.resolve_source(source_input) do
       {:ok, resolved_source} ->
         with {:ok, hydrated} <- Attach.hydrate_workspace(resolved_source, opts),
-             {:ok, _attached_repo} <-
-               Attach.create_or_update_attached_repo(resolved_source, hydrated),
+             {:ok, attached_repo} <-
+               create_or_update_attached_repo(resolved_source, hydrated),
              {:ok, ready} <- Attach.preflight_workspace(resolved_source, hydrated, opts) do
           socket
           |> assign(:form, to_form(params, as: :attach_source))
           |> assign(:resolution_state, :ready)
           |> assign(:attach_ready, ready)
+          |> assign(:attached_repo, attached_repo)
           |> assign(:attach_blocked, nil)
           |> assign(:resolved_source, resolved_source)
           |> assign(:source_error, nil)
+          |> assign(:request_form, request_form(%{}))
+          |> assign(:request_error, nil)
+          |> assign(:request_started_run, nil)
         else
           {:blocked, blocked} ->
             socket
             |> assign(:form, to_form(params, as: :attach_source))
             |> assign(:resolution_state, :blocked)
             |> assign(:attach_ready, nil)
+            |> assign(:attached_repo, nil)
             |> assign(:attach_blocked, blocked)
             |> assign(:resolved_source, resolved_source)
             |> assign(:source_error, nil)
+            |> assign(:request_form, request_form(%{}))
+            |> assign(:request_error, nil)
+            |> assign(:request_started_run, nil)
 
           {:error, %Ecto.Changeset{} = changeset} ->
             assign_resolution(socket, params, {:error, attached_repo_error(changeset)})
@@ -424,6 +603,122 @@ defmodule KilnWeb.AttachEntryLive do
 
   defp attach_runtime_opts do
     Application.get_env(:kiln, :attach_live_runtime_opts, [])
+  end
+
+  defp request_form(params, opts \\ []) do
+    params
+    |> request_changeset()
+    |> Map.put(:action, Keyword.get(opts, :action))
+    |> to_form(as: :attach_request)
+  end
+
+  defp request_changeset(params) do
+    IntakeRequest.changeset(%IntakeRequest{}, params)
+  end
+
+  defp submit_request(%{assigns: %{attached_repo: nil}} = socket, params) do
+    socket
+    |> assign(:request_form, request_form(params, action: :validate))
+    |> assign(:request_error, %{
+      message: "Resolve one attached repo before starting a bounded request.",
+      remediation: "Return to the source form, then re-run the ready-state flow."
+    })
+  end
+
+  defp submit_request(%{assigns: %{attached_repo: attached_repo}} = socket, params) do
+    with {:ok, draft} <- create_attached_request_draft(attached_repo.id, params),
+         {:ok, promoted_request} <- promote_attached_request_draft(draft.id),
+         {:ok, run} <- start_attached_request_run(promoted_request, attached_repo.id) do
+      socket
+      |> assign(:request_form, request_form(%{}))
+      |> assign(:request_error, nil)
+      |> assign(:request_started_run, run)
+    else
+      {:error, %Ecto.Changeset{} = changeset} ->
+        changeset = Map.put(changeset, :action, :insert)
+
+        socket
+        |> assign(:request_form, to_form(changeset, as: :attach_request))
+        |> assign(:request_error, nil)
+        |> assign(:request_started_run, nil)
+
+      {:blocked, blocked} ->
+        socket
+        |> assign(:request_form, request_form(params))
+        |> assign(:request_error, blocked_request_error(blocked))
+        |> assign(:request_started_run, nil)
+
+      {:error, :missing_api_key} ->
+        socket
+        |> assign(:request_form, request_form(params))
+        |> assign(:request_error, %{
+          message: "Kiln cannot start the attached run until provider credentials are configured.",
+          remediation: "Open provider health or settings, add the missing credential reference, and resubmit."
+        })
+        |> assign(:request_started_run, nil)
+
+      {:error, _reason} ->
+        socket
+        |> assign(:request_form, request_form(params))
+        |> assign(:request_error, %{
+          message: "Kiln could not start the attached run.",
+          remediation: "Review the request details, then retry once the blocking issue is resolved."
+        })
+        |> assign(:request_started_run, nil)
+    end
+  end
+
+  defp request_list_value(field, index) do
+    field.value
+    |> List.wrap()
+    |> Enum.at(index - 1, "")
+  end
+
+  defp create_or_update_attached_repo(resolved_source, hydrated) do
+    fun =
+      Keyword.get(
+        attach_runtime_opts(),
+        :create_or_update_attached_repo_fn,
+        &Attach.create_or_update_attached_repo/2
+      )
+
+    fun.(resolved_source, hydrated)
+  end
+
+  defp create_attached_request_draft(attached_repo_id, params) do
+    fun = Keyword.get(attach_runtime_opts(), :intake_fn, &Kiln.Attach.Intake.create_draft/2)
+    fun.(attached_repo_id, params)
+  end
+
+  defp promote_attached_request_draft(draft_id) do
+    fun = Keyword.get(attach_runtime_opts(), :promote_draft_fn, fn id, opts -> Specs.promote_draft(id, opts) end)
+    fun.(draft_id, [])
+  end
+
+  defp start_attached_request_run(promoted_request, attached_repo_id) do
+    fun =
+      Keyword.get(
+        attach_runtime_opts(),
+        :start_for_attached_request_fn,
+        &Runs.start_for_attached_request/3
+      )
+
+    fun.(promoted_request, attached_repo_id, [])
+  end
+
+  defp blocked_request_error(%{blocker: blocker}) do
+    %{
+      message: "Kiln cannot start the attached run until operator setup is complete.",
+      remediation:
+        "Resolve #{blocker.label} in settings or provider health, then resubmit this bounded request."
+    }
+  end
+
+  defp blocked_request_error(_blocked) do
+    %{
+      message: "Kiln cannot start the attached run yet.",
+      remediation: "Resolve the blocking setup issue, then resubmit this bounded request."
+    }
   end
 
   defp source_kind_label(:local_path), do: "Local path"

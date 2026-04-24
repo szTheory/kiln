@@ -3,8 +3,9 @@ defmodule KilnWeb.AttachEntryLiveTest do
 
   import Phoenix.LiveViewTest
 
-  alias Kiln.Specs.{Spec, SpecDraft, SpecRevision}
+  alias Kiln.Attach.AttachedRepo
   alias Kiln.Runs.Run
+  alias Kiln.Specs.{Spec, SpecDraft, SpecRevision}
 
   setup do
     Application.delete_env(:kiln, :attach_live_runtime_opts)
@@ -128,6 +129,9 @@ defmodule KilnWeb.AttachEntryLiveTest do
     parent = self()
 
     configure_attach_runtime!("kiln_attach_live_valid_request_runtime",
+      create_or_update_attached_repo_fn: fn _resolved_source, _hydrated ->
+        {:ok, %AttachedRepo{id: "attached-123"}}
+      end,
       intake_fn: fn attached_repo_id, attrs ->
         send(parent, {:intake_called, attached_repo_id, attrs})
         {:ok, %SpecDraft{id: "draft-123"}}
