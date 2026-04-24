@@ -44,33 +44,38 @@ Plans:
 **Goal**: Make the second and third runs on one attached repo feel native by reusing workspace, repo, and trust context safely.
 **Depends on**: Phase 32
 **Requirements**: `CONT-01`
-**Plans**: 0 plans
+**Plans**: 3 plans
 
 Plans:
 
-- [ ] TBD during `/gsd-plan-phase 33`
+- [x] 33-01-PLAN.md — build the continuity read model and recent-repo metadata over attached repos, requests, and runs
+- [x] 33-02-PLAN.md — make `/attach` route-backed for known attached repos with a continuity card and visible carry-forward
+- [x] 33-03-PLAN.md — rewire repeat-run launch through fresh readiness checks and continuity-aware same-repo start behavior
 
 ### Phase 34: Brownfield preflight and narrowing guardrails
 
 **Goal**: Detect likely repo-state conflicts or scope collisions before coding and give the operator concrete remediation or narrowing guidance.
 **Depends on**: Phase 33
 **Requirements**: `SAFE-01`, `SAFE-02`
-**Plans**: 0 plans
+**Plans**: 3 plans
 
 Plans:
 
-- [ ] TBD during `/gsd-plan-phase 34`
+- [ ] 34-01-PLAN.md — create the attach-side advisory brownfield preflight boundary and typed report contract
+- [ ] 34-02-PLAN.md — add same-repo overlap and open-PR heuristics plus attach-side pre-start integration
+- [ ] 34-03-PLAN.md — add `/attach` warning and narrowing UX with proof that warnings stay advisory
 
 ### Phase 35: Draft PR handoff and owning proof
 
 **Goal**: Tighten the attached-repo draft PR output so the operator receives a reviewable handoff with scoped summary, proof, and milestone-owning verification coverage.
 **Depends on**: Phase 34
 **Requirements**: `TRUST-04`, `UAT-06`
-**Plans**: 0 plans
+**Plans**: 2 plans
 
 Plans:
 
-- [ ] TBD during `/gsd-plan-phase 35`
+- [ ] 35-01-PLAN.md — lock the frozen reviewer-facing PR handoff contract from durable attached-request fields and exact proof citations
+- [ ] 35-02-PLAN.md — keep `mix kiln.attach.prove` as the sole owner while making Phase 35 continuity and brownfield coverage literal
 
 ## Latest shipped milestone
 
