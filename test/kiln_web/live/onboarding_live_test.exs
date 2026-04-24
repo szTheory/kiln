@@ -18,15 +18,19 @@ defmodule KilnWeb.OnboardingLiveTest do
   end
 
   test "renders wizard shell", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/onboarding")
+    {:ok, view, html} = live(conn, ~p"/onboarding")
     assert render(view) =~ "Set up Kiln"
     assert has_element?(view, "#onboarding-wizard")
     assert has_element?(view, "#onboarding-next-path")
     assert has_element?(view, "#onboarding-scenarios")
     assert has_element?(view, "#onboarding-scenario-detail")
     assert has_element?(view, "#onboarding-start-from-template")
+    assert has_element?(view, "#onboarding-attach-existing-repo")
+    assert has_element?(view, "#onboarding-attach-path-note")
     assert has_element?(view, "#onboarding-continue-runs")
     assert render(view) =~ "Explore without paying for providers first"
+    assert html =~ ~s(href="/attach")
+    refute html =~ "scenario=/attach"
   end
 
   test "scenario selection updates the detail panel", %{conn: conn} do

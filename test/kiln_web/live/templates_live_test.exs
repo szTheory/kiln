@@ -29,14 +29,20 @@ defmodule KilnWeb.TemplatesLiveTest do
     :ok
   end
 
-  test "catalog lists at least three template cards", %{conn: conn} do
-    {:ok, view, _html} = live(conn, ~p"/templates")
+  test "catalog lists at least three template cards and exposes attach as a peer start path",
+       %{conn: conn} do
+    {:ok, view, html} = live(conn, ~p"/templates")
 
     assert has_element?(view, "#templates-first-run-hero")
     assert has_element?(view, "#templates-first-run-hero #template-card-hello-kiln")
+    assert has_element?(view, "#templates-start-choice")
+    assert has_element?(view, "#templates-attach-module")
+    assert has_element?(view, "#templates-attach-existing-repo")
     assert has_element?(view, "#template-card-hello-kiln")
     assert has_element?(view, "#template-card-gameboy-vertical-slice")
     assert has_element?(view, "#template-card-markdown-spec-stub")
+    assert html =~ "Attach existing repo"
+    assert html =~ ~s(href="/attach")
   end
 
   test "scenario guidance stays secondary to the hello-kiln first-run hero", %{conn: conn} do
@@ -44,6 +50,7 @@ defmodule KilnWeb.TemplatesLiveTest do
 
     assert has_element?(view, "#templates-scenario-banner")
     assert has_element?(view, "#templates-first-run-hero")
+    assert has_element?(view, "#templates-start-choice")
     refute has_element?(view, "#templates-scenario-banner", "Recommended template:")
     assert has_element?(view, "#template-role-gameboy-vertical-slice")
     assert has_element?(view, "#template-role-markdown-spec-stub")
