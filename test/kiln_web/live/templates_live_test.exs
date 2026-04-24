@@ -152,5 +152,6 @@ defmodule KilnWeb.TemplatesLiveTest do
 
     assert has_element?(view, "#templates-start-run-form")
     assert has_element?(view, "#templates-start-run:not([disabled])")
+    assert has_element?(view, "#templates-start-run-guidance")
   end
 end
