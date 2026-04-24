@@ -106,7 +106,8 @@ defmodule Kiln.Runs do
   """
   @spec create_for_attached_request(promoted_attached_request(), Ecto.UUID.t()) ::
           {:ok, Run.t()}
-          | {:error, Ecto.Changeset.t() | :invalid_attached_request | {:workflow_load_failed, term()}}
+          | {:error,
+             Ecto.Changeset.t() | :invalid_attached_request | {:workflow_load_failed, term()}}
   def create_for_attached_request(
         %{spec: %Spec{} = spec, revision: %SpecRevision{} = revision},
         attached_repo_id

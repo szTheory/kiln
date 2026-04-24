@@ -40,7 +40,9 @@ defmodule Kiln.Integration.AttachedRepoIntakeTest do
     assert {:ok, promoted_request} = Specs.promote_draft(draft.id)
 
     assert {:ok, run} =
-             Runs.start_for_attached_request(promoted_request, attached_repo.id, return_to: "/attach")
+             Runs.start_for_attached_request(promoted_request, attached_repo.id,
+               return_to: "/attach"
+             )
 
     stored = Repo.get!(Run, run.id)
 
@@ -56,10 +58,14 @@ defmodule Kiln.Integration.AttachedRepoIntakeTest do
     promoted_request = promoted_attached_request_fixture(attached_repo.id)
 
     assert {:ok, first_run} =
-             Runs.start_for_attached_request(promoted_request, attached_repo.id, return_to: "/attach")
+             Runs.start_for_attached_request(promoted_request, attached_repo.id,
+               return_to: "/attach"
+             )
 
     assert {:ok, second_run} =
-             Runs.start_for_attached_request(promoted_request, attached_repo.id, return_to: "/attach")
+             Runs.start_for_attached_request(promoted_request, attached_repo.id,
+               return_to: "/attach"
+             )
 
     linked_runs =
       from(r in Run,
@@ -74,8 +80,7 @@ defmodule Kiln.Integration.AttachedRepoIntakeTest do
     unlinked_runs =
       from(r in Run,
         where: r.id in ^[first_run.id, second_run.id],
-        where:
-          is_nil(r.attached_repo_id) or is_nil(r.spec_id) or is_nil(r.spec_revision_id)
+        where: is_nil(r.attached_repo_id) or is_nil(r.spec_id) or is_nil(r.spec_revision_id)
       )
       |> Repo.all()
 
@@ -88,7 +93,8 @@ defmodule Kiln.Integration.AttachedRepoIntakeTest do
              Intake.create_draft(attached_repo_id, %{
                "request_kind" => "bugfix",
                "title" => "Keep attach linkage on repeat starts",
-               "change_summary" => "Repeated launches must stay linked to the same promoted request.",
+               "change_summary" =>
+                 "Repeated launches must stay linked to the same promoted request.",
                "acceptance_criteria" => ["run linkage stays explicit"]
              })
 
@@ -104,7 +110,8 @@ defmodule Kiln.Integration.AttachedRepoIntakeTest do
       repo_slug: "jon/kiln",
       canonical_input: "/tmp/kiln",
       canonical_repo_root: "/tmp/kiln",
-      source_fingerprint: "local_path:/tmp/kiln-integration-#{System.unique_integer([:positive])}",
+      source_fingerprint:
+        "local_path:/tmp/kiln-integration-#{System.unique_integer([:positive])}",
       workspace_key: "workspace-integration-#{System.unique_integer([:positive])}",
       workspace_path: "/tmp/kiln-workspace",
       base_branch: "main"

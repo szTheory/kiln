@@ -46,7 +46,9 @@ defmodule Kiln.Runs.AttachedRequestStartTest do
               blocker: %{id: :anthropic, href: "/settings#settings-item-anthropic"},
               settings_target: "/settings?return_to=%2Fattach#settings-item-anthropic"
             }} =
-             Runs.start_for_attached_request(promoted_request, attached_repo.id, return_to: "/attach")
+             Runs.start_for_attached_request(promoted_request, attached_repo.id,
+               return_to: "/attach"
+             )
   end
 
   test "create_for_attached_request/2 loads the shipped workflow and records its checksum" do
