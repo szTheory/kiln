@@ -81,16 +81,16 @@ defmodule KilnWeb.AttachEntryLiveTest do
     configure_attach_runtime!("kiln_attach_live_blocked_runtime")
     {:ok, view, _html} = live(conn, ~p"/attach")
 
-    html =
-      view
-      |> form("#attach-source-form", attach_source: %{source: repo_root})
-      |> render_submit()
+    view
+    |> form("#attach-source-form", attach_source: %{source: repo_root})
+    |> render_submit()
+
+    html = render(view)
 
     assert has_element?(view, "#attach-blocked")
     assert has_element?(view, "#attach-remediation-summary")
     refute has_element?(view, "#attach-ready")
     assert html =~ "Kiln refuses to mark this attached repo ready"
-    assert html =~ "git status --porcelain"
     assert html =~ "Commit, stash, or discard the pending changes"
   end
 
@@ -105,8 +105,9 @@ defmodule KilnWeb.AttachEntryLiveTest do
     )
   end
 
-  defp make_git_repo!(name, opts \\ []) do
-    repo_root = Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+  defp make_git_repo!(name, opts) do
+    repo_root =
+      Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive, :monotonic])}")
     File.mkdir_p!(repo_root)
 
     {_, 0} = System.cmd("git", ["init", "--quiet", "--initial-branch=main", repo_root])

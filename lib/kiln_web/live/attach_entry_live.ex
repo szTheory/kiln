@@ -6,6 +6,7 @@ defmodule KilnWeb.AttachEntryLive do
   use KilnWeb, :live_view
 
   alias Kiln.Attach
+  alias Kiln.OperatorSetup
 
   @impl true
   def mount(_params, _session, socket) do
@@ -13,6 +14,8 @@ defmodule KilnWeb.AttachEntryLive do
      socket
      |> assign(:page_title, "Attach existing repo")
      |> assign(:resolution_state, :untouched)
+     |> assign(:attach_ready, nil)
+     |> assign(:attach_blocked, nil)
      |> assign(:resolved_source, nil)
      |> assign(:source_error, nil)
      |> assign(:form, to_form(%{"source" => ""}, as: :attach_source))}
@@ -34,7 +37,7 @@ defmodule KilnWeb.AttachEntryLive do
   def handle_event("resolve_source", %{"attach_source" => params}, socket) do
     source = Map.get(params, "source", "")
 
-    {:noreply, assign_resolution(socket, params, Attach.resolve_source(source))}
+    {:noreply, submit_attach(socket, params, source)}
   end
 
   @impl true
@@ -184,6 +187,79 @@ defmodule KilnWeb.AttachEntryLive do
                     Next plan: prepare the writable workspace and apply safety gates. This step only resolves identity.
                   </p>
                 </div>
+              <% :ready -> %>
+                <div id="attach-ready" class="space-y-4">
+                  <div id="attach-ready-summary" class="space-y-3">
+                    <p class="kiln-eyebrow text-success">Ready state</p>
+                    <h3 class="text-base font-semibold text-base-content">
+                      Attach ready for the next branch and draft PR phase
+                    </h3>
+                    <p class="text-sm text-base-content/70">
+                      Workspace hydration succeeded and the conservative safety preflight passed. Kiln can hand this repo forward without pretending a blocked repo is ready.
+                    </p>
+                  </div>
+
+                  <dl class="space-y-2 text-sm text-base-content/80">
+                    <div>
+                      <dt class="font-medium text-base-content">Repo target</dt>
+                      <dd>{@attach_ready.repo_slug}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-medium text-base-content">Workspace path</dt>
+                      <dd class="break-all">{@attach_ready.workspace_path}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-medium text-base-content">Base branch</dt>
+                      <dd>{@attach_ready.base_branch}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-medium text-base-content">Remote</dt>
+                      <dd class="break-all">{@attach_ready.remote_url}</dd>
+                    </div>
+                  </dl>
+                </div>
+              <% :blocked -> %>
+                <div id="attach-blocked" class="space-y-4">
+                  <div class="space-y-3">
+                    <p class="kiln-eyebrow text-warning">Blocked state</p>
+                    <h3 class="text-base font-semibold text-base-content">
+                      {@attach_blocked.title}
+                    </h3>
+                    <p class="text-sm text-base-content/70">
+                      {@attach_blocked.message}
+                    </p>
+                    <p class="kiln-meta">
+                      {@attach_blocked.why}
+                    </p>
+                  </div>
+
+                  <div
+                    id="attach-remediation-summary"
+                    class="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-4"
+                  >
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-warning">
+                        Probe
+                      </p>
+                      <p class="kiln-mono mt-1 text-sm" phx-no-curly-interpolation>
+                        {@attach_blocked.probe}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-warning">
+                        Next action
+                      </p>
+                      <p class="mt-1 text-sm text-base-content/80">
+                        {@attach_blocked.next_action}
+                      </p>
+                    </div>
+                    <%= if target = blocked_help_target(@attach_blocked) do %>
+                      <.link navigate={target} class="link link-primary">
+                        Open the matching setup step
+                      </.link>
+                    <% end %>
+                  </div>
+                </div>
               <% :error -> %>
                 <div id="attach-source-error" class="space-y-3">
                   <p class="kiln-eyebrow text-warning">Validation feedback</p>
@@ -264,6 +340,8 @@ defmodule KilnWeb.AttachEntryLive do
     socket
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :resolved)
+    |> assign(:attach_ready, nil)
+    |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, resolved_source)
     |> assign(:source_error, nil)
   end
@@ -272,6 +350,8 @@ defmodule KilnWeb.AttachEntryLive do
     socket
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :error)
+    |> assign(:attach_ready, nil)
+    |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, nil)
     |> assign(:source_error, source_error)
   end
@@ -280,8 +360,69 @@ defmodule KilnWeb.AttachEntryLive do
     socket
     |> assign(:form, to_form(params, as: :attach_source))
     |> assign(:resolution_state, :untouched)
+    |> assign(:attach_ready, nil)
+    |> assign(:attach_blocked, nil)
     |> assign(:resolved_source, nil)
     |> assign(:source_error, nil)
+  end
+
+  defp submit_attach(socket, params, source_input) do
+    opts = attach_runtime_opts()
+
+    case Attach.resolve_source(source_input) do
+      {:ok, resolved_source} ->
+        with {:ok, hydrated} <- Attach.hydrate_workspace(resolved_source, opts),
+             {:ok, _attached_repo} <- Attach.create_or_update_attached_repo(resolved_source, hydrated),
+             {:ok, ready} <- Attach.preflight_workspace(resolved_source, hydrated, opts) do
+          socket
+          |> assign(:form, to_form(params, as: :attach_source))
+          |> assign(:resolution_state, :ready)
+          |> assign(:attach_ready, ready)
+          |> assign(:attach_blocked, nil)
+          |> assign(:resolved_source, resolved_source)
+          |> assign(:source_error, nil)
+        else
+          {:blocked, blocked} ->
+            socket
+            |> assign(:form, to_form(params, as: :attach_source))
+            |> assign(:resolution_state, :blocked)
+            |> assign(:attach_ready, nil)
+            |> assign(:attach_blocked, blocked)
+            |> assign(:resolved_source, resolved_source)
+            |> assign(:source_error, nil)
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            assign_resolution(socket, params, {:error, attached_repo_error(changeset)})
+
+          {:error, error} when is_map(error) ->
+            assign_resolution(socket, params, {:error, error})
+        end
+
+      {:error, source_error} ->
+        assign_resolution(socket, params, {:error, source_error})
+    end
+  end
+
+  defp blocked_help_target(%{code: :github_auth_missing}) do
+    OperatorSetup.checklist()
+    |> Enum.find(&(&1.id == :github))
+    |> OperatorSetup.settings_target()
+  end
+
+  defp blocked_help_target(_blocked), do: nil
+
+  defp attached_repo_error(_changeset) do
+    %{
+      code: :attach_persistence_failed,
+      field: :source,
+      input: "",
+      message: "Kiln could not persist the attached repo metadata.",
+      remediation: "Check the database state, then retry attach readiness."
+    }
+  end
+
+  defp attach_runtime_opts do
+    Application.get_env(:kiln, :attach_live_runtime_opts, [])
   end
 
   defp source_kind_label(:local_path), do: "Local path"
