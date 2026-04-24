@@ -268,9 +268,17 @@ defmodule Kiln.Specs do
     |> Repo.insert()
   end
 
-  defp insert_revision_from_draft(%Spec{id: spec_id}, %SpecDraft{body: body}) do
+  defp insert_revision_from_draft(%Spec{id: spec_id}, %SpecDraft{} = draft) do
     %SpecRevision{}
-    |> SpecRevision.changeset(%{spec_id: spec_id, body: body})
+    |> SpecRevision.changeset(%{
+      spec_id: spec_id,
+      body: draft.body,
+      attached_repo_id: draft.attached_repo_id,
+      request_kind: draft.request_kind,
+      change_summary: draft.change_summary,
+      acceptance_criteria: draft.acceptance_criteria,
+      out_of_scope: draft.out_of_scope
+    })
     |> Repo.insert()
   end
 

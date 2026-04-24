@@ -34,7 +34,7 @@ defmodule Kiln.Attach.Intake do
     %{
       title: request_attrs.title,
       body: render_body(request_attrs),
-      source: :freeform,
+      source: :attached_repo_intake,
       attached_repo_id: attached_repo_id,
       request_kind: request_attrs.request_kind,
       change_summary: request_attrs.change_summary,
