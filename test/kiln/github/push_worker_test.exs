@@ -68,4 +68,38 @@ defmodule Kiln.GitHub.PushWorkerTest do
     assert {:ok, :completed} = perform_job(PushWorker, args)
     assert {:ok, :already_done} = perform_job(PushWorker, args)
   end
+
+  test "git_push allows creating a missing remote branch for attached repo delivery", %{
+    args: args
+  } do
+    sha_local = args["local_commit_sha"]
+
+    {:ok, counter} = Agent.start_link(fn -> 0 end)
+
+    runner = fn
+      ["ls-remote", _, "refs/heads/kiln/attach/test-r12345678"], _opts ->
+        n =
+          Agent.get_and_update(counter, fn x ->
+            {x, x + 1}
+          end)
+
+        if n == 0 do
+          {:ok, ""}
+        else
+          {:ok, "#{sha_local}\trefs/heads/kiln/attach/test-r12345678\n"}
+        end
+
+      ["push", _, "refs/heads/kiln/attach/test-r12345678"], _opts ->
+        {:ok, ""}
+    end
+
+    Application.put_env(:kiln, Kiln.GitHub.PushWorker, git_runner: runner)
+
+    create_args =
+      args
+      |> Map.put("refspec", "refs/heads/kiln/attach/test-r12345678")
+      |> Map.put("expected_remote_sha", String.duplicate("0", 40))
+
+    assert {:ok, :completed} = perform_job(PushWorker, create_args)
+  end
 end

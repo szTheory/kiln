@@ -6,6 +6,7 @@ defmodule Kiln.Attach do
   import Ecto.Query
 
   alias Kiln.Attach.AttachedRepo
+  alias Kiln.Attach.Delivery
   alias Kiln.Attach.SafetyGate
   alias Kiln.Attach.Source
   alias Kiln.Attach.WorkspaceManager
@@ -15,6 +16,7 @@ defmodule Kiln.Attach do
   @type hydrate_result :: {:ok, WorkspaceManager.result()} | {:error, WorkspaceManager.error()}
   @type persist_result :: {:ok, AttachedRepo.t()} | {:error, Ecto.Changeset.t()}
   @type preflight_result :: SafetyGate.result()
+  @type delivery_result :: {:ok, Delivery.prepared()} | {:error, term()}
 
   @spec resolve_source(String.t(), keyword()) :: resolve_result()
   def resolve_source(raw_input, opts \\ []) when is_binary(raw_input) do
@@ -65,6 +67,28 @@ defmodule Kiln.Attach do
       %AttachedRepo{} = attached_repo -> {:ok, attached_repo}
       nil -> {:error, :not_found}
     end
+  end
+
+  @spec prepare_delivery(
+          Kiln.Runs.Run.t() | Ecto.UUID.t(),
+          Ecto.UUID.t(),
+          Ecto.UUID.t(),
+          keyword()
+        ) ::
+          delivery_result()
+  def prepare_delivery(run_or_id, attached_repo_id, stage_id, opts \\ []) do
+    Delivery.prepare(run_or_id, attached_repo_id, stage_id, opts)
+  end
+
+  @spec enqueue_delivery(
+          Kiln.Runs.Run.t() | Ecto.UUID.t(),
+          Ecto.UUID.t(),
+          Ecto.UUID.t(),
+          keyword()
+        ) ::
+          delivery_result()
+  def enqueue_delivery(run_or_id, attached_repo_id, stage_id, opts \\ []) do
+    Delivery.enqueue_delivery(run_or_id, attached_repo_id, stage_id, opts)
   end
 
   defp attached_repo_attrs(source, hydrated) do

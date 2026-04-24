@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v0.6.0
 milestone_name: — Attach existing repo first
-status: verifying
-last_updated: "2026-04-24T12:29:18.526Z"
-last_activity: 2026-04-24
+status: shipped
+last_updated: "2026-04-24T17:40:00.000Z"
+last_activity: 2026-04-24 -- Milestone v0.6.0 archived and tagged after attach delivery and proof closure
 progress:
   total_phases: 6
   completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 10
   percent: 100
 ---
 
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: 31
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: milestone close-out
+Plan: Archived
+Status: Milestone v0.6.0 shipped — ready for next milestone definition
 Last activity: 2026-04-24
 
 ## Current focus
 
-Active milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md) · [PROJECT.md](PROJECT.md)
+Latest shipped milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md)
 
-Last shipped phase: **30 — Attach workspace hydration and safety gates** (**ATTACH-02, ATTACH-03, TRUST-02**).
+Last shipped phase: **31 — Draft PR trust ramp and attach proof** (**TRUST-01, TRUST-03, GIT-05, UAT-05**).
 
-**Next command:** **`/gsd-execute-phase 31`** — begin draft PR trust ramp and attach proof.
+**Next command:** **`/gsd-new-milestone`** — define the next shipped slice from the v0.6.0 baseline.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 is the latest shipped baseline, and v0.6.0 reopens integer phase numbering with attach-to-existing as the next product slice. **999.3** and **999.4** remain backlog work outside the active milestone.
+v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 established the first believable local run, and v0.6.0 shipped the first believable attach-to-existing workflow. **999.3** and **999.4** remain backlog work outside any active milestone.
 
 ## Session continuity (recent CONTEXT files)
 
@@ -64,6 +64,9 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 - `29-01` established `/attach` as a route-backed orientation surface with attach-specific ids and honest Phase 30 boundary copy.
 - `29-01` kept `hello-kiln` as the single recommended first proof path while adding attach discovery on `/onboarding` and `/templates`.
 - `29-02` aligned the operator-facing templates-vs-attach story across `/onboarding`, `/templates`, and `/attach`, and added browser proof for the onboarding-to-attach handoff plus `/attach` route coverage.
+- `31-01` added frozen run-scoped attach delivery over persisted attached-repo facts, plus durable push and draft-PR worker payloads.
+- `31-02` added `mix kiln.attach.prove` as the owning proof command and aligned milestone artifacts around that exact verification path.
+- `v0.6.0` shipped attach discovery, managed brownfield hydration, conservative draft-PR delivery, and one milestone-owning proof path.
 
 ## Deferred Items
 
@@ -71,4 +74,5 @@ Items acknowledged and deferred at milestone close on 2026-04-24:
 
 | Category | Item | Status |
 |----------|------|--------|
-| todo | `2026-04-24-review-orphan-phase-03-worktree-residue.md` | acknowledged at v0.5.0 close |
+| todo | `2026-04-24-review-orphan-phase-03-worktree-residue.md` | acknowledged at v0.5.0 close and accepted again at v0.6.0 close |
+| repo | spawned role-process sandbox ownership noise during repo-wide test execution | observed during v0.6.0 audit and accepted as non-blocking tech debt |

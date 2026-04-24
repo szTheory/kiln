@@ -12,22 +12,22 @@ That single promise is what the whole system must deliver. Every design tradeoff
 
 ## Current State
 
-**Shipped version:** `v0.5.0` on 2026-04-24
+**Shipped version:** `v0.6.0` on 2026-04-24
 
-Kiln now has one believable local-first path from readiness to a real live run. `/settings` is the canonical readiness and remediation surface, `hello-kiln` is the single recommended first live template, blocked launches route back to the first missing setup step, and `mix kiln.first_run.prove` now closes the repository-level proof under the intended runtime role.
+Kiln now has one believable brownfield path from first-use discovery to a conservative real-project output. Operators can discover `Attach existing repo` from onboarding and start surfaces, resolve one local path or GitHub URL into a managed writable workspace, refuse unsafe repo states before mutation, and carry a ready attached repo through frozen branch push plus draft PR orchestration.
 
-Accepted close debt remains planning/artifact debt rather than milestone-scope product failure: Phase 26 still has historical verification residue, Phase 27 remains historical/non-compliant for Nyquist purposes, and one orphan Phase 03 worktree todo was deferred at close.
+Accepted close debt remains non-blocking rather than milestone-scope product failure: one orphan Phase 03 worktree todo is still deferred, and repo-wide test execution still emits sandbox ownership noise from spawned role processes even when `mix kiln.attach.prove` and `bash script/precommit.sh` finish green.
 
 ## Next Milestone Goals
 
-**Current milestone:** `v0.6.0 — Attach existing repo first`
+No new milestone is open yet.
 
-This milestone turns "Kiln completed one believable local run" into "Kiln can help on my real project." The primary job is attach-to-existing for one repo: a solo operator should be able to point Kiln at an existing codebase, let it work on a bounded feature or bugfix branch, and inspect a conservative draft PR instead of being forced through a greenfield-only flow.
+The next milestone should be chosen explicitly rather than inferred from backlog order. The current options are to promote cleanup debt such as `999.4`, promote product exploration such as `999.3`, or define a new milestone around the next highest-leverage capability with `/gsd-new-milestone`.
 
-**Target features:**
-- First-class attach-to-existing entry in onboarding and template/start surfaces
-- Single-repo workspace validation and hydration from local path or GitHub URL
-- Conservative trust ramp for attached repos: branch + draft PR by default, with loud refusal on unsafe repo state
+**Candidate directions:**
+- Clean up planning/validation debt so milestone routing and historical verification stay trustworthy
+- Extend brownfield usefulness with adjacent capabilities such as reference repos, fork flows, or deeper workspace shapes
+- Re-open broader operator leverage work only after attach-to-existing has been absorbed
 
 ## Requirements
 
@@ -35,9 +35,7 @@ This milestone turns "Kiln completed one believable local run" into "Kiln can he
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] **ATTACH-01**, **ATTACH-02**, **ATTACH-03** — make attach-to-existing a first-class single-repo path from onboarding through workspace hydration
-- [ ] **TRUST-01**, **TRUST-02**, **TRUST-03** — default attached repos to conservative draft-PR behavior and refuse unsafe repo states loudly
-- [ ] **GIT-05**, **UAT-05** — carry attached repos through branch + draft PR orchestration and close the milestone with explicit automated proof coverage
+- None. Open the next milestone with `/gsd-new-milestone`.
 
 ### Validated
 
@@ -69,6 +67,9 @@ This milestone turns "Kiln completed one believable local run" into "Kiln can he
 - [x] **SETUP-01**, **SETUP-02**, **DOCS-09** — Local readiness and documentation SSOT validated in **Phase 25: local-live-readiness-ssot** (2026-04-23).
 - [x] **LIVE-01**, **LIVE-02**, **LIVE-03** — First recommended live template run and proof-first run-detail flow validated in **Phase 26: first-live-template-run** (2026-04-24).
 - [x] **UAT-04** — Repository-level local first-run proof validated in **Phase 28: first-run-proof-runtime-closure** (2026-04-24).
+- [x] **ATTACH-01**, **ATTACH-02**, **ATTACH-03** — Attach-to-existing is now a first-class single-repo path from operator entry surfaces through managed workspace hydration — validated across **Phases 29–30** (2026-04-24).
+- [x] **TRUST-01**, **TRUST-02**, **TRUST-03** — Attached repos now refuse unsafe states early and default to branch + draft PR trust ramp without synchronous approval gates — validated across **Phases 30–31** (2026-04-24).
+- [x] **GIT-05**, **UAT-05** — Attached-repo branch push plus draft PR delivery and owning proof command `mix kiln.attach.prove` validated in **Phase 31: draft-pr-trust-ramp-and-attach-proof** (2026-04-24).
 
 ### Out of Scope
 
@@ -127,10 +128,10 @@ This milestone turns "Kiln completed one believable local run" into "Kiln can he
 | **Adaptive model routing** with automatic 429/5xx fallback + recorded `actual_model_used` | Avoids Fabro-class silent-fallback cost/quality drift; makes quota/rate-limit visible, not hidden | — Pending |
 | **Opinionated model-profile presets** per software-type scenario; switchable per run/stage | Good defaults are the difference between "it works out of the box" and "another config nightmare"; stays switchable so operators keep control | — Pending |
 | Bump Elixir/OTP baseline to **1.19.5 / 28.1+** per STACK research | Current stable as of April 2026; Phoenix 1.8 generators assume it; starting one major behind on day one is avoidable cost | — Pending |
-| **v0.6.0 prioritizes attach-to-existing over remote ops, CLI/API work, or deploy automation** | Real-project usefulness is the shortest path from demo credibility to everyday value for the current solo-operator persona | — Pending |
-| **First attached-repo runs use branch + draft PR as the default trust ramp** | Conservative output is more useful than another approval architecture and preserves bounded autonomy without pretending attached repos are the same as greenfield templates | — Pending |
-| **v0.6.0 attach scope is single repo only** | Single-repo attach captures most brownfield value with materially less workspace and trust-model complexity than fork, clone-to-stack, or multi-root support | — Pending |
-| **Attach enters through onboarding/templates first, not an advanced-only spec flow** | The first-use boundary is where operators decide whether Kiln is useful on real work; hiding attach behind advanced drafting would blunt the milestone's leverage | — Pending |
+| **v0.6.0 prioritizes attach-to-existing over remote ops, CLI/API work, or deploy automation** | Real-project usefulness is the shortest path from demo credibility to everyday value for the current solo-operator persona | ✓ Shipped in v0.6.0 |
+| **First attached-repo runs use branch + draft PR as the default trust ramp** | Conservative output is more useful than another approval architecture and preserves bounded autonomy without pretending attached repos are the same as greenfield templates | ✓ Shipped in v0.6.0 |
+| **v0.6.0 attach scope is single repo only** | Single-repo attach captures most brownfield value with materially less workspace and trust-model complexity than fork, clone-to-stack, or multi-root support | ✓ Shipped in v0.6.0 |
+| **Attach enters through onboarding/templates first, not an advanced-only spec flow** | The first-use boundary is where operators decide whether Kiln is useful on real work; hiding attach behind advanced drafting would blunt the milestone's leverage | ✓ Shipped in v0.6.0 |
 
 ## Evolution
 
@@ -152,11 +153,9 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 ## Next Milestone Setup
 
-**Current milestone:** `v0.6.0 — Attach existing repo first`
+No milestone is currently open.
 
-`REQUIREMENTS.md` and `ROADMAP.md` are now reopened around the attach-only slice. Continue phase numbering from the shipped baseline rather than resetting, and leave the accepted v0.5.0 planning debt in backlog unless it blocks the attach milestone directly.
-
-**Next command:** `/gsd-plan-phase 29`
+Use `/gsd-new-milestone` to define the next slice, requirements, and roadmap updates from the new shipped baseline `v0.6.0`.
 
 ## Merge authority
 
@@ -194,16 +193,17 @@ CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **
 - **v0.3.0 (Phases 14–21)** — **Shipped**; tag **`v0.3.0`**; archives `.planning/milestones/v0.3.0-ROADMAP.md`, `v0.3.0-REQUIREMENTS.md`, `v0.3.0-MILESTONE-AUDIT.md`. Execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21) with **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate; host Phoenix + Compose remains canonical.
 - **v0.4.0 (Phases 22–24)** — **Shipped**; tag **`v0.4.0`**; archives `.planning/milestones/v0.4.0-ROADMAP.md`, `v0.4.0-REQUIREMENTS.md`, and `v0.4.0-MILESTONE-AUDIT.md`. Scope: merge-authority SSOT, Nyquist closure for carried-over partial validations, and the template -> run LiveView regression.
 - **v0.5.0 (Phases 25–28)** — **Shipped**; tag **`v0.5.0`**; archives `.planning/milestones/v0.5.0-ROADMAP.md`, `v0.5.0-REQUIREMENTS.md`, and `v0.5.0-MILESTONE-AUDIT.md`. Scope: readiness/remediation SSOT, one recommended first local live template, backend launch preflight with `/settings` recovery, and rerun-backed repository first-run proof closure.
+- **v0.6.0 (Phases 29–31)** — **Shipped**; tag **`v0.6.0`**; archives `.planning/milestones/v0.6.0-ROADMAP.md`, `v0.6.0-REQUIREMENTS.md`, and `v0.6.0-MILESTONE-AUDIT.md`. Scope: attach discovery on first-use surfaces, single-repo attach resolution and managed hydration, draft-PR-first attached-repo delivery, and owning proof command `mix kiln.attach.prove`.
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
-- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** still means CI + Postgres-backed workstation remain merge authority for `mix check`. v0.5.0 also closed with accepted planning debt around Phase 26/27 historical artifacts and one deferred orphan-worktree todo.
+- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** still means CI + Postgres-backed workstation remain merge authority for `mix check`. v0.5.0 closed with accepted planning debt around Phase 26/27 historical artifacts and one deferred orphan-worktree todo; v0.6.0 closes with that todo still deferred plus noisy sandbox ownership logs during repo-wide test execution.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
 <details>
 <summary>Archived pre-close milestone framing</summary>
 
-The pre-close v0.5.0 planning narrative focused on collapsing the distance between "Kiln looks promising" and "Kiln completed one real local run for me." That framing has now been fulfilled and archived under `.planning/milestones/v0.5.0-ROADMAP.md` and `.planning/milestones/v0.5.0-REQUIREMENTS.md`.
+The pre-close v0.6.0 planning narrative focused on turning the first believable local run into the first believable real-project workflow. That framing has now been fulfilled and archived under `.planning/milestones/v0.6.0-ROADMAP.md` and `.planning/milestones/v0.6.0-REQUIREMENTS.md`.
 
 </details>
 
 ---
-*Last updated: 2026-04-24 — opened milestone v0.6.0 Attach existing repo first*
+*Last updated: 2026-04-24 — shipped v0.6.0 Attach existing repo first*
