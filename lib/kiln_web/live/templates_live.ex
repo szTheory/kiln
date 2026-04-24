@@ -22,12 +22,13 @@ defmodule KilnWeb.TemplatesLive do
      |> assign(:page_title, "Templates")
      |> assign(:templates, templates)
      |> assign(:first_run_template, first_run_template(templates))
-     |> assign(:selected, nil)
-     |> assign(:setup_summary, OperatorSetup.summary())
-     |> assign(:last_promoted, nil)
-     |> assign(:use_busy?, false)
-     |> assign(:start_busy?, false)
-     |> assign(:edit_first_busy?, false)}
+      |> assign(:selected, nil)
+      |> assign(:setup_summary, OperatorSetup.summary())
+      |> assign(:last_promoted, nil)
+      |> assign(:return_to_path, nil)
+      |> assign(:use_busy?, false)
+      |> assign(:start_busy?, false)
+      |> assign(:edit_first_busy?, false)}
   end
 
   @impl true
@@ -53,6 +54,7 @@ defmodule KilnWeb.TemplatesLive do
      socket
      |> assign(:page_title, page_title)
      |> assign(:operator_demo_scenario, scenario)
+     |> assign(:return_to_path, return_to_path(socket.assigns.live_action, params, scenario))
      |> assign(:setup_summary, OperatorSetup.summary())}
   end
 
@@ -127,12 +129,19 @@ defmodule KilnWeb.TemplatesLive do
 
     case socket.assigns.last_promoted do
       %{spec: spec, template_id: ^id} ->
-        case Runs.create_for_promoted_template(spec, id) do
+        case Runs.start_for_promoted_template(spec, id, return_to: socket.assigns.return_to_path) do
           {:ok, run} ->
             {:noreply,
              socket
              |> assign(:start_busy?, false)
              |> push_navigate(to: ~p"/runs/#{run.id}")}
+
+          {:blocked, %{settings_target: settings_target}} ->
+            {:noreply,
+             socket
+             |> assign(:start_busy?, false)
+             |> put_flash(:error, "Live start blocked — fix the first missing settings step.")
+             |> push_navigate(to: settings_target)}
 
           {:error, %Ecto.Changeset{}} ->
             {:noreply,
@@ -186,7 +195,7 @@ defmodule KilnWeb.TemplatesLive do
               Template browsing is available, live execution is not ready yet
             </h2>
             <p class="kiln-body mt-2 text-sm">
-              You can still inspect templates and choose your path, but Kiln should not pretend a real live run will succeed until the local checklist is complete.
+              You can still inspect templates and apply one. Start run now uses the real backend preflight and will point you to the first missing settings step until the checklist is complete.
             </p>
             <div class="mt-4 flex flex-wrap gap-3 text-sm">
               <.link navigate={~p"/settings"} class="btn btn-primary btn-sm">
@@ -398,7 +407,7 @@ defmodule KilnWeb.TemplatesLive do
                 <button
                   type="submit"
                   class="btn btn-sm btn-primary"
-                  disabled={@use_busy? or live_disconnected?(@operator_runtime_mode, @setup_summary)}
+                  disabled={@use_busy?}
                 >
                   {use_label(@operator_runtime_mode, @setup_summary, @use_busy?)}
                 </button>
@@ -422,10 +431,10 @@ defmodule KilnWeb.TemplatesLive do
                 class="rounded border border-warning/60 bg-warning/10 p-4 text-sm"
               >
                 <p class="font-semibold">
-                  Live mode needs configuration before this template can become a real run
+                  Live mode still needs setup before this template can complete a real run
                 </p>
                 <p class="mt-2 text-base-content/70">
-                  Finish the local checklist first, then come back here to promote the template and start the run.
+                  You can still apply the template and attempt Start run. If a live requirement is missing, Kiln will route you to the exact settings step that needs attention.
                 </p>
                 <div class="mt-3 flex flex-wrap gap-3">
                   <.link navigate={~p"/settings"} class="btn btn-primary btn-sm">
@@ -453,9 +462,7 @@ defmodule KilnWeb.TemplatesLive do
                     type="submit"
                     id="templates-start-run"
                     class="btn btn-sm btn-primary"
-                    disabled={
-                      @start_busy? or live_disconnected?(@operator_runtime_mode, @setup_summary)
-                    }
+                    disabled={@start_busy?}
                   >
                     {start_label(@operator_runtime_mode, @setup_summary, @start_busy?)}
                   </button>
@@ -479,11 +486,9 @@ defmodule KilnWeb.TemplatesLive do
   defp live_disconnected?(:live, %{ready?: false}), do: true
   defp live_disconnected?(_, _), do: false
 
-  defp use_label(:live, %{ready?: false}, _busy), do: "Configure live mode first"
   defp use_label(_, _, true), do: "Applying…"
   defp use_label(_, _, false), do: "Use template"
 
-  defp start_label(:live, %{ready?: false}, _busy), do: "Configure live mode first"
   defp start_label(_, _, true), do: "Starting…"
   defp start_label(_, _, false), do: "Start run"
 
@@ -510,6 +515,12 @@ defmodule KilnWeb.TemplatesLive do
 
   defp template_path(id, nil), do: ~p"/templates/#{id}"
   defp template_path(id, scenario), do: ~p"/templates/#{id}?scenario=#{scenario.id}"
+
+  defp return_to_path(:show, %{"template_id" => id}, scenario) when is_binary(id) and id != "" do
+    template_path(id, scenario)
+  end
+
+  defp return_to_path(_, _, _), do: nil
 
   defp resolve_scenario(nil, fallback), do: fallback || DemoScenarios.default()
   defp resolve_scenario("", fallback), do: fallback || DemoScenarios.default()

@@ -20,6 +20,7 @@ defmodule Kiln.Runs do
   import Ecto.Changeset, only: [change: 2]
 
   alias Kiln.Repo
+  alias Kiln.Blockers.BlockedError
   alias Kiln.OperatorSetup
   alias Kiln.Runs.{Compare, Run}
   alias Kiln.Runs.RunDirector
@@ -102,7 +103,8 @@ defmodule Kiln.Runs do
   @spec start_for_promoted_template(Spec.t(), String.t(), keyword()) ::
           {:ok, Run.t()}
           | {:blocked, template_start_blocked()}
-          | {:error, Ecto.Changeset.t() | :unknown_template | {:workflow_load_failed, term()}}
+          | {:error,
+             Ecto.Changeset.t() | :unknown_template | :missing_api_key | {:workflow_load_failed, term()}}
   def start_for_promoted_template(%Spec{} = spec, template_id, opts \\ [])
       when is_binary(template_id) do
     case OperatorSetup.first_blocker() do
@@ -116,15 +118,26 @@ defmodule Kiln.Runs do
 
   defp do_start_for_promoted_template(%Spec{} = spec, template_id, opts) do
     with {:ok, run} <- create_for_promoted_template(spec, template_id) do
-      case RunDirector.start_run(run.id) do
-        {:ok, started_run} ->
-          {:ok, started_run}
+      try do
+        case RunDirector.start_run(run.id) do
+          {:ok, started_run} ->
+            {:ok, started_run}
 
-        {:error, :factory_not_ready} ->
-          _ = Repo.delete(run)
+          {:error, :factory_not_ready} ->
+            _ = Repo.delete(run)
 
-          blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
-          {:blocked, blocked_start(blocker, template_id, opts)}
+            blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
+            {:blocked, blocked_start(blocker, template_id, opts)}
+        end
+      rescue
+        error in [BlockedError] ->
+          case error do
+            %BlockedError{reason: :missing_api_key} ->
+              {:error, :missing_api_key}
+
+            _ ->
+              reraise error, __STACKTRACE__
+          end
       end
     end
   end
