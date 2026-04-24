@@ -160,6 +160,16 @@ case System.get_env("KILN_DB_ROLE") do
   role -> config :kiln, Kiln.Repo, parameters: [role: role]
 end
 
+case System.get_env("KILN_ATTACH_WORKSPACE_ROOT") do
+  root when is_binary(root) and root != "" ->
+    expanded = Path.expand(root)
+    config :kiln, :attach_workspace_root, expanded
+    config :kiln, :github_workspace_root, expanded
+
+  _ ->
+    :ok
+end
+
 # Phase 999.2: optional operator runtime mode override (demo vs live UI only).
 case System.get_env("KILN_OPERATOR_RUNTIME_MODE") do
   v when v in [nil, ""] ->

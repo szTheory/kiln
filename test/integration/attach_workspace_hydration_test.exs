@@ -68,6 +68,11 @@ defmodule Kiln.Integration.AttachWorkspaceHydrationTest do
     run_git_in_dir(["remote", "get-url", "origin"], cd)
   end
 
+  defp git_runner(["rev-parse", "--show-toplevel"], opts) do
+    cd = Keyword.fetch!(opts, :cd)
+    run_git_in_dir(["rev-parse", "--show-toplevel"], cd)
+  end
+
   defp run_git_in_dir(argv, cd) do
     {output, status} = System.cmd("git", argv, cd: cd, stderr_to_stdout: true)
 

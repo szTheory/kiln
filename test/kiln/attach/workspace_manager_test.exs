@@ -23,7 +23,7 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
       assert String.starts_with?(created.workspace_path, Path.expand(workspace_root))
       assert created.managed_root == Path.expand(workspace_root)
       assert created.source_kind == :local_path
-      assert created.remote_url == source_repo
+      assert created.remote_url == source.canonical_root
       assert created.base_branch == "main"
       assert git_repo?(created.workspace_path)
 
@@ -48,7 +48,7 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
       assert {:ok, hydrated} =
                WorkspaceManager.hydrate(source,
                  workspace_root: workspace_root,
-                 git_runner: &git_runner/2
+                 git_runner: &github_git_runner/2
                )
 
       assert hydrated.status == :created
@@ -140,6 +140,15 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
     cd = Keyword.fetch!(opts, :cd)
     run_git_in_dir(["rev-parse", "--show-toplevel"], cd)
   end
+
+  defp github_git_runner(["clone", source, destination], _opts) do
+    File.mkdir_p!(destination)
+    run_git!(["init", "--initial-branch=main", destination])
+    run_git!(["-C", destination, "remote", "add", "origin", source])
+    {:ok, ""}
+  end
+
+  defp github_git_runner(argv, opts), do: git_runner(argv, opts)
 
   defp run_git_in_dir(argv, cd) do
     {output, status} = System.cmd("git", argv, cd: cd, stderr_to_stdout: true)

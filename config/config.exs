@@ -12,6 +12,8 @@ config :kiln,
   generators: [timestamp_type: :utc_datetime, binary_id: true],
   # Phase 999.2: operator shell labels demo vs live; overridden in dev/test/runtime.
   operator_runtime_mode: :live,
+  attach_workspace_root: Path.expand("../var/attach_workspaces", __DIR__),
+  github_workspace_root: Path.expand("../var/attach_workspaces", __DIR__),
   # Plan 06 / D-32: BootChecks.run!/0 reads :kiln, :env at runtime to
   # decide which secrets are required (prod/dev differ). `Mix.env()` is
   # evaluated here at COMPILE time — `config/*.exs` files are part of
