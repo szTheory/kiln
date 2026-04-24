@@ -4,6 +4,7 @@ defmodule KilnWeb.TemplatesLiveTest do
   import Phoenix.LiveViewTest
 
   alias Kiln.OperatorReadiness
+  alias Kiln.Secrets
 
   setup do
     prior = Application.get_env(:kiln, :operator_runtime_mode)
@@ -19,6 +20,11 @@ defmodule KilnWeb.TemplatesLiveTest do
     assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
     assert {:ok, _} = OperatorReadiness.mark_step(:github, true)
     assert {:ok, _} = OperatorReadiness.mark_step(:docker, true)
+    :ok = Secrets.put(:anthropic_api_key, "test-key")
+
+    on_exit(fn ->
+      :ok = Secrets.put(:anthropic_api_key, nil)
+    end)
 
     :ok
   end
@@ -88,6 +94,37 @@ defmodule KilnWeb.TemplatesLiveTest do
     assert has_element?(run_view, "#run-detail")
   end
 
+  test "blocked start routes to the first missing settings anchor with template return context",
+       %{conn: conn} do
+    Application.put_env(:kiln, :operator_runtime_mode, :live, persistent: false)
+
+    {:ok, view, _html} = live(conn, ~p"/templates/hello-kiln")
+
+    view
+    |> form("#template-use-form-hello-kiln")
+    |> render_submit()
+
+    assert has_element?(view, "#templates-start-run-form")
+
+    assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, false)
+    assert {:ok, _} = OperatorReadiness.mark_step(:docker, false)
+
+    result =
+      view
+      |> form("#templates-start-run-form")
+      |> render_submit()
+
+    assert {:error, {:live_redirect, %{to: to}}} = result
+
+    assert to ==
+             "/settings?return_to=%2Ftemplates%2Fhello-kiln%3Fscenario%3Dsolo-founder-fast-proof&template_id=hello-kiln#settings-item-anthropic"
+
+    {:ok, settings_view, _html} = follow_redirect(result, conn)
+
+    assert has_element?(settings_view, "#settings-return-context")
+    assert has_element?(settings_view, "#settings-return-to-template")
+  end
+
   test "live mode with missing setup shows disconnected state", %{conn: conn} do
     Application.put_env(:kiln, :operator_runtime_mode, :live, persistent: false)
     assert {:ok, _} = OperatorReadiness.mark_step(:docker, false)
@@ -96,6 +133,24 @@ defmodule KilnWeb.TemplatesLiveTest do
 
     assert has_element?(view, "#templates-live-hero")
     assert has_element?(view, "#template-live-disconnected-state")
-    assert render(view) =~ "Configure live mode first"
+    assert render(view) =~ "route you to the exact settings step"
+  end
+
+  test "live guidance remains visible without disabling the real start-run path", %{conn: conn} do
+    Application.put_env(:kiln, :operator_runtime_mode, :live, persistent: false)
+    assert {:ok, _} = OperatorReadiness.mark_step(:docker, false)
+
+    {:ok, view, _html} = live(conn, ~p"/templates/hello-kiln")
+
+    assert has_element?(view, "#template-live-disconnected-state")
+    assert has_element?(view, "#template-use-form-hello-kiln button:not([disabled])")
+    refute has_element?(view, "#settings-item-anthropic")
+
+    view
+    |> form("#template-use-form-hello-kiln")
+    |> render_submit()
+
+    assert has_element?(view, "#templates-start-run-form")
+    assert has_element?(view, "#templates-start-run:not([disabled])")
   end
 end
