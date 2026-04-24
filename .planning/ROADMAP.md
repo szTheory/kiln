@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **Milestone v0.5.0** (Phases **25–26** shipped; Phase **27** planned)
+**Updated:** 2026-04-24 — **Milestone v0.5.0** (Phases **25–26** shipped; Phases **27–28** planned)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -10,7 +10,7 @@
 - ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md) · [v0.2.0-REQUIREMENTS.md](milestones/v0.2.0-REQUIREMENTS.md)
 - ✅ **v0.3.0 — Scale -> templates -> operator intelligence** — Phases **14–21** — [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md)
 - ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
-- 🚧 **v0.5.0 — Local first success** — Phases **25–27** — [REQUIREMENTS.md](REQUIREMENTS.md)
+- 🚧 **v0.5.0 — Local first success** — Phases **25–28** — [REQUIREMENTS.md](REQUIREMENTS.md)
 
 ## Overview (v0.5.0)
 
@@ -20,7 +20,8 @@ Collapse the distance between "Kiln looks promising" and "Kiln completed one rea
 
 - [x] **Phase 25: Local live readiness SSOT** — SETUP-01, SETUP-02, DOCS-09 — completed 2026-04-23
 - [x] **Phase 26: First live template run** — LIVE-01, LIVE-02, LIVE-03 — completed 2026-04-24
-- [ ] **Phase 27: Local first-run proof** — UAT-04
+- [ ] **Phase 27: Local first-run proof** — initial proof-command slice; superseded by audit-backed closure in Phase 28
+- [ ] **Phase 28: First-run proof runtime closure** — UAT-04
 
 **Parking / decimals:** Keep using **999.x** only for ad-hoc backlog execution outside the integer milestone flow. **999.3** stays parked during v0.5.0.
 
@@ -46,10 +47,31 @@ Collapse the distance between "Kiln looks promising" and "Kiln completed one rea
 
 ### Phase 27: Local first-run proof
 **Goal:** Leave the milestone with one explicit, repeatable proof that the local operator journey works end to end.  
-**Requirements:** UAT-04  
+**Requirements:** Superseded by Phase 28 after the milestone audit contradicted the original proof claim.  
+**Plans:** 1 plan
+
+Plans:
+- [ ] `27-01-PLAN.md` — Add the dedicated first-run proof command, one small setup-ready story seam, and exact verification citation
+
+**Audit status:** The wrapper command and focused LiveView seam landed, but the 2026-04-24 milestone audit re-ran `mix kiln.first_run.prove` and found the delegated `integration.first_run` layer still fails before `/health` because the runtime DB role cannot access `oban_jobs`. Phase 28 owns the reopened requirement closure.
+
 **Success criteria:**
 1. The repository contains one automated proof path for setup-ready operator flow -> first live run.
 2. The phase verification artifact cites the exact command used to prove the path.
+
+### Phase 28: First-run proof runtime closure
+**Goal:** Close the real repository-level first-run proof gap by fixing the integration boot contract, rerunning the owning proof command end to end, and reconciling the contradicted milestone artifacts.  
+**Requirements:** UAT-04  
+**Gap Closure:** Closes the v0.5.0 milestone audit requirement, integration, and flow gaps around `mix kiln.first_run.prove`.  
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD — plan with `$gsd-plan-phase 28`
+
+**Success criteria:**
+1. `mix kiln.first_run.prove` completes successfully from the repository root and reaches the expected `/health` confirmation inside the delegated integration layer.
+2. The runtime/app-start contract no longer fails on `oban_jobs` permissions during the proof path.
+3. `27-VERIFICATION.md`, `ROADMAP.md`, and `REQUIREMENTS.md` agree on the final proof status after the rerun.
 
 <details>
 <summary>✅ v0.4.0 (Phases 22–24) — SHIPPED 2026-04-23</summary>
@@ -113,4 +135,4 @@ Plans:
 - [ ] TBD (promote with `/gsd-review-backlog` when ready)
 
 ---
-*Milestone v0.5.0 updated: 2026-04-24 after Phase 26 closure*
+*Milestone v0.5.0 updated: 2026-04-24 after milestone audit gap planning*

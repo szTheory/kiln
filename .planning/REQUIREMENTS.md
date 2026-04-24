@@ -21,7 +21,7 @@ This milestone optimizes for the first believable local success. Kiln already ha
 
 ### Automated proof
 
-- [ ] **UAT-04**: The repository contains one explicit automated proof path for setup-ready operator flow -> first live run, and the exact verification command is cited in the phase verification artifact.
+- [ ] **UAT-04**: The repository contains one explicit automated proof path for setup-ready operator flow -> first live run, and the exact verification command is cited in the phase verification artifact. Reopened by the v0.5.0 milestone audit and reassigned to Phase 28 for runtime-proof closure.
 
 ## vNext / Deferred
 
@@ -49,7 +49,7 @@ This milestone optimizes for the first believable local success. Kiln already ha
 | LIVE-01 | Phase 26 (`26-01-PLAN.md`, `26-03-PLAN.md`) | Complete |
 | LIVE-02 | Phase 26 (`26-02-PLAN.md`, `26-03-PLAN.md`) | Complete |
 | LIVE-03 | Phase 26 (`26-01-PLAN.md`, `26-02-PLAN.md`, `26-03-PLAN.md`) | Complete |
-| UAT-04 | Phase 27 | Pending |
+| UAT-04 | Phase 28 | Pending |
 
 **Coverage:**
 - v0.5.0 requirements: 7 total
@@ -58,4 +58,4 @@ This milestone optimizes for the first believable local success. Kiln already ha
 
 ---
 *Requirements defined: 2026-04-23*
-*Last updated: 2026-04-24 after Phase 26 closure*
+*Last updated: 2026-04-24 after milestone audit gap planning*
