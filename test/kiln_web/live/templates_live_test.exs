@@ -72,7 +72,20 @@ defmodule KilnWeb.TemplatesLiveTest do
     assert has_element?(view, "#templates-watch-hint")
   end
 
-  test "start run navigates to run detail", %{conn: conn} do
+  test "setup-ready return path resumes hello-kiln and lands on run detail", %{conn: conn} do
+    {:ok, settings_view, _html} =
+      live(
+        conn,
+        "/settings?return_to=%2Ftemplates%2Fhello-kiln&template_id=hello-kiln#settings-item-anthropic"
+      )
+
+    assert has_element?(settings_view, "#settings-return-context")
+
+    assert has_element?(
+             settings_view,
+             "#settings-return-to-template[href=\"/templates/hello-kiln\"]"
+           )
+
     {:ok, view, _html} = live(conn, ~p"/templates/hello-kiln")
 
     view
@@ -92,6 +105,9 @@ defmodule KilnWeb.TemplatesLiveTest do
     {:ok, run_view, _html} = follow_redirect(result, conn)
 
     assert has_element?(run_view, "#run-detail")
+    assert has_element?(run_view, "#run-detail-overview")
+    assert has_element?(run_view, "#run-detail-current-state")
+    assert has_element?(run_view, "#run-detail-next-action")
   end
 
   test "blocked start routes to the first missing settings anchor with template return context",
