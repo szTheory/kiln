@@ -45,6 +45,38 @@ test.describe("onboarding wizard", () => {
     );
   });
 
+  test("attach existing repo stays explicit and lands on /attach without mutating scenario state", async ({
+    page,
+    kiln,
+  }) => {
+    await kiln.goto("/onboarding");
+
+    await page.locator("#scenario-card-operator-triage-readiness").click();
+    await expect(page).toHaveURL(/scenario=operator-triage-readiness/);
+    await expect(page.locator("#onboarding-attach-existing-repo")).toBeVisible();
+    await expect(page.locator("#onboarding-attach-path-note")).toContainText(
+      "local path, an existing clone, or a GitHub URL"
+    );
+    await expect(page.locator("#operator-scenario-select")).toHaveValue(
+      "operator-triage-readiness"
+    );
+    await expect(page.locator("#onboarding-attach-existing-repo")).toHaveAttribute(
+      "href",
+      "/attach"
+    );
+
+    await Promise.all([
+      page.waitForURL("**/attach"),
+      page.locator("#onboarding-attach-existing-repo").click(),
+    ]);
+
+    await expect(page.locator("#attach-entry-root")).toBeVisible();
+    await expect(page.locator("#attach-entry-hero")).toContainText(
+      "Attach existing repo"
+    );
+    expect(page.url()).not.toContain("scenario=");
+  });
+
   test("live readiness checks stay interactive", async ({
     page,
     kiln,
