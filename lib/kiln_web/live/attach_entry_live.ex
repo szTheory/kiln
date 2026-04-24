@@ -626,7 +626,8 @@ defmodule KilnWeb.AttachEntryLive do
   end
 
   defp submit_request(%{assigns: %{attached_repo: attached_repo}} = socket, params) do
-    with {:ok, draft} <- create_attached_request_draft(attached_repo.id, params),
+    with :ok <- preflight_attached_request_start(),
+         {:ok, draft} <- create_attached_request_draft(attached_repo.id, params),
          {:ok, promoted_request} <- promote_attached_request_draft(draft.id),
          {:ok, run} <- start_attached_request_run(promoted_request, attached_repo.id) do
       socket
@@ -711,6 +712,17 @@ defmodule KilnWeb.AttachEntryLive do
       )
 
     fun.(promoted_request, attached_repo_id, [])
+  end
+
+  defp preflight_attached_request_start do
+    fun =
+      Keyword.get(
+        attach_runtime_opts(),
+        :preflight_attached_request_start_fn,
+        &Runs.preflight_attached_request_start/0
+      )
+
+    fun.()
   end
 
   defp blocked_request_error(%{blocker: blocker}) do

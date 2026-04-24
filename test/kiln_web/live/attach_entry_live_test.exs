@@ -205,6 +205,77 @@ defmodule KilnWeb.AttachEntryLiveTest do
     assert html =~ "run-123"
   end
 
+  test "blocked attach start stays on the form without persisting duplicate request records", %{
+    conn: conn
+  } do
+    repo_root =
+      make_git_repo!("kiln_attach_live_blocked_request",
+        origin: "https://github.com/owner/live-blocked-request.git"
+      )
+
+    parent = self()
+
+    configure_attach_runtime!("kiln_attach_live_blocked_request_runtime",
+      create_or_update_attached_repo_fn: fn _resolved_source, _hydrated ->
+        {:ok, %AttachedRepo{id: "attached-123"}}
+      end,
+      preflight_attached_request_start_fn: fn ->
+        {:blocked,
+         %{
+           reason: :factory_not_ready,
+           blocker: %{label: "Anthropic API key"},
+           settings_target: "/settings#settings-item-anthropic"
+         }}
+      end,
+      intake_fn: fn attached_repo_id, attrs ->
+        send(parent, {:intake_called, attached_repo_id, attrs})
+        {:ok, %SpecDraft{id: "draft-123"}}
+      end,
+      promote_draft_fn: fn draft_id, opts ->
+        send(parent, {:promote_called, draft_id, opts})
+
+        {:ok,
+         %{
+           draft: %SpecDraft{id: draft_id},
+           spec: %Spec{id: "spec-123"},
+           revision: %SpecRevision{id: "rev-123"}
+         }}
+      end
+    )
+
+    {:ok, view, _html} = live(conn, ~p"/attach")
+
+    view
+    |> form("#attach-source-form", attach_source: %{source: repo_root})
+    |> render_submit()
+
+    request_params = %{
+      request_kind: "feature",
+      title: "Retry-safe blocked launch",
+      change_summary: "Do not persist drafts before the run can start.",
+      acceptance_criteria: ["Blocked submit stays in place.", "", ""],
+      out_of_scope: ["Draft PR polish", "", ""]
+    }
+
+    html =
+      view
+      |> form("#attach-request-form", attach_request: request_params)
+      |> render_submit()
+
+    assert has_element?(view, "#attach-request-form")
+    refute has_element?(view, "#attach-run-started")
+    assert html =~ "operator setup is complete"
+    refute_receive {:intake_called, _, _}
+    refute_receive {:promote_called, _, _}
+
+    view
+    |> form("#attach-request-form", attach_request: request_params)
+    |> render_submit()
+
+    refute_receive {:intake_called, _, _}
+    refute_receive {:promote_called, _, _}
+  end
+
   test "submitting an unsupported source renders typed remediation feedback", %{conn: conn} do
     {:ok, view, _html} = live(conn, ~p"/attach")
 
@@ -260,7 +331,8 @@ defmodule KilnWeb.AttachEntryLiveTest do
         [
           workspace_root: workspace_root,
           git_runner: &git_runner/2,
-          gh_runner: &gh_runner_ready/2
+          gh_runner: &gh_runner_ready/2,
+          preflight_attached_request_start_fn: fn -> :ok end
         ],
         extra_opts
       )

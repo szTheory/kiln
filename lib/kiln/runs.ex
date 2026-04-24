@@ -24,6 +24,7 @@ defmodule Kiln.Runs do
   alias Kiln.OperatorSetup
   alias Kiln.Runs.{Compare, Run}
   alias Kiln.Runs.RunDirector
+  alias Kiln.Secrets
   alias Kiln.Specs.{Spec, SpecRevision}
   alias Kiln.Templates
   alias Kiln.Workflows
@@ -162,6 +163,24 @@ defmodule Kiln.Runs do
   Returns the same typed blocked outcome as template starts when operator setup
   is missing, while keeping attach identity on the run row.
   """
+  @spec preflight_attached_request_start() ::
+          :ok | {:blocked, template_start_blocked()} | {:error, :missing_api_key}
+  def preflight_attached_request_start do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        case attached_request_missing_provider_keys() do
+          [] ->
+            :ok
+
+          _missing ->
+            {:error, :missing_api_key}
+        end
+
+      blocker ->
+        {:blocked, blocked_start(blocker, nil, [])}
+    end
+  end
+
   @spec start_for_attached_request(promoted_attached_request(), Ecto.UUID.t(), keyword()) ::
           {:ok, Run.t()}
           | {:blocked, template_start_blocked()}
@@ -202,6 +221,7 @@ defmodule Kiln.Runs do
         error in [BlockedError] ->
           case error do
             %BlockedError{reason: :missing_api_key} ->
+              _ = Repo.delete(run)
               {:error, :missing_api_key}
 
             _ ->
@@ -228,6 +248,7 @@ defmodule Kiln.Runs do
         error in [BlockedError] ->
           case error do
             %BlockedError{reason: :missing_api_key} ->
+              _ = Repo.delete(run)
               {:error, :missing_api_key}
 
             _ ->
@@ -277,6 +298,56 @@ defmodule Kiln.Runs do
 
   defp caps_snapshot_from_compiled_graph(%CompiledGraph{caps: caps}) when is_map(caps) do
     Jason.decode!(Jason.encode!(caps))
+  end
+
+  defp attached_request_missing_provider_keys do
+    case load_attached_request_workflow(%SpecRevision{request_kind: :feature}) do
+      {:ok, %CompiledGraph{} = cg} ->
+        cg.model_profile
+        |> required_provider_keys_for_profile()
+        |> Enum.reject(&Secrets.present?/1)
+        |> Enum.uniq()
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
+  defp required_provider_keys_for_profile(profile) when is_binary(profile) do
+    roles =
+      case Enum.find(Kiln.ModelRegistry.all_presets(), &(Atom.to_string(&1) == profile)) do
+        nil -> %{}
+        preset -> Kiln.ModelRegistry.resolve(preset)
+      end
+
+    roles
+    |> Map.values()
+    |> Enum.map(&model_id_from_role_spec/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&provider_key_for_model/1)
+  end
+
+  defp model_id_from_role_spec(model) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{model: model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{"model" => model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(_), do: nil
+
+  defp provider_key_for_model("claude-" <> _), do: :anthropic_api_key
+  defp provider_key_for_model("gpt-" <> _), do: :openai_api_key
+  defp provider_key_for_model("gemini-" <> _), do: :google_api_key
+
+  defp provider_key_for_model(model) when is_binary(model) do
+    cond do
+      String.contains?(model, "sonnet") or String.contains?(model, "haiku") or
+          String.contains?(model, "opus") ->
+        :anthropic_api_key
+
+      String.contains?(model, "llama") or String.contains?(model, "ollama") ->
+        :ollama_host
+
+      true ->
+        :anthropic_api_key
+    end
   end
 
   @doc """

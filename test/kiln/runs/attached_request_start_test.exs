@@ -5,6 +5,7 @@ defmodule Kiln.Runs.AttachedRequestStartTest do
   alias Kiln.Attach.Intake
   alias Kiln.OperatorReadiness
   alias Kiln.Runs
+  alias Kiln.Runs.Run
   alias Kiln.Secrets
   alias Kiln.Specs
 
@@ -61,6 +62,19 @@ defmodule Kiln.Runs.AttachedRequestStartTest do
     assert String.length(run.workflow_checksum) == 64
     assert {:ok, checksum} = Runs.workflow_checksum(run.id)
     assert checksum == run.workflow_checksum
+  end
+
+  test "start_for_attached_request/3 deletes the queued run when provider credentials are missing" do
+    attached_repo = attached_repo_fixture()
+    promoted_request = promoted_attached_request_fixture(attached_repo.id)
+    count_before = Repo.aggregate(Run, :count)
+
+    :ok = Secrets.put(:anthropic_api_key, nil)
+
+    assert {:error, :missing_api_key} =
+             Runs.start_for_attached_request(promoted_request, attached_repo.id)
+
+    assert Repo.aggregate(Run, :count) == count_before
   end
 
   defp promoted_attached_request_fixture(attached_repo_id) do
