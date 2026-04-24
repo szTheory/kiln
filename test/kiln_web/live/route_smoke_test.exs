@@ -93,6 +93,7 @@ defmodule KilnWeb.RouteSmokeTest do
       for path <- [
             "/onboarding",
             "/",
+            "/attach",
             "/templates",
             "/inbox",
             "/workflows",
