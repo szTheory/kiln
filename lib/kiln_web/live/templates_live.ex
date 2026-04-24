@@ -270,7 +270,7 @@ defmodule KilnWeb.TemplatesLive do
                   <span class="font-medium text-base-content">Indicative cost (USD):</span>
                   {t.cost_hint}
                   <span class="block pt-1">
-                  Actual usage varies with model, retries, and spec changes.
+                    Actual usage varies with model, retries, and spec changes.
                   </span>
                 </p>
                 <div class="mt-4 flex flex-wrap gap-2">
