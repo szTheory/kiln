@@ -6,6 +6,7 @@ defmodule Kiln.Attach do
   import Ecto.Query
 
   alias Kiln.Attach.AttachedRepo
+  alias Kiln.Attach.SafetyGate
   alias Kiln.Attach.Source
   alias Kiln.Attach.WorkspaceManager
   alias Kiln.Repo
@@ -13,6 +14,7 @@ defmodule Kiln.Attach do
   @type resolve_result :: {:ok, Source.t()} | {:error, Source.error()}
   @type hydrate_result :: {:ok, WorkspaceManager.result()} | {:error, WorkspaceManager.error()}
   @type persist_result :: {:ok, AttachedRepo.t()} | {:error, Ecto.Changeset.t()}
+  @type preflight_result :: SafetyGate.result()
 
   @spec resolve_source(String.t(), keyword()) :: resolve_result()
   def resolve_source(raw_input, opts \\ []) when is_binary(raw_input) do
@@ -40,6 +42,11 @@ defmodule Kiln.Attach do
       conflict_target: :source_fingerprint,
       returning: true
     )
+  end
+
+  @spec preflight_workspace(Source.t(), WorkspaceManager.result(), keyword()) :: preflight_result()
+  def preflight_workspace(%Source{} = source, %WorkspaceManager{} = hydrated, opts \\ []) do
+    SafetyGate.evaluate(source, hydrated, opts)
   end
 
   @spec get_attached_repo(Ecto.UUID.t()) :: {:ok, AttachedRepo.t()} | {:error, :not_found}
