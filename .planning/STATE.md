@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.6.0
 milestone_name: — Attach existing repo first
-status: executing
-last_updated: "2026-04-24T09:30:27.903Z"
-last_activity: 2026-04-24 -- Completed Phase 29 Plan 01 execution
+status: verifying
+last_updated: "2026-04-24T09:39:30.782Z"
+last_activity: 2026-04-24
 progress:
   total_phases: 6
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_plans: 5
+  percent: 100
 ---
 
 # Project State
@@ -23,18 +23,18 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: 29 — EXECUTING
-Plan: 2 of 2
-Status: Executing Phase 29
-Last activity: 2026-04-24 -- Completed Phase 29 Plan 01 execution
+Phase: 29 — COMPLETE
+Plan: 2 of 2 complete
+Status: Phase 29 complete
+Last activity: 2026-04-24
 
 ## Current focus
 
 Active milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md) · [PROJECT.md](PROJECT.md)
 
-Last shipped phase: **28 — First-run proof runtime closure** (**UAT-04**).
+Last shipped phase: **29 — Attach entry surfaces** (**ATTACH-01**).
 
-**Next command:** **`/gsd-execute-phase 29`** — continue the remaining attach entry surfaces plan.
+**Next command:** **`/gsd-execute-phase 30`** — begin attach workspace hydration and safety gates.
 
 ## Milestone note
 
@@ -56,11 +56,13 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 **Last phase execution:** 27 (Local first-run proof) — completed 2026-04-24 and later superseded for requirement ownership.
 **Last phase execution:** 28 (First-run proof runtime closure) — completed 2026-04-24.
 **Last phase execution:** 29-01 (Attach entry surfaces) — completed 2026-04-24.
+**Last phase execution:** 29-02 (Attach entry surfaces) — completed 2026-04-24.
 
 ## Accumulated Context
 
 - `29-01` established `/attach` as a route-backed orientation surface with attach-specific ids and honest Phase 30 boundary copy.
 - `29-01` kept `hello-kiln` as the single recommended first proof path while adding attach discovery on `/onboarding` and `/templates`.
+- `29-02` aligned the operator-facing templates-vs-attach story across `/onboarding`, `/templates`, and `/attach`, and added browser proof for the onboarding-to-attach handoff plus `/attach` route coverage.
 
 ## Deferred Items
 

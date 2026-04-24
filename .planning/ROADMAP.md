@@ -35,7 +35,7 @@ v0.6.0 turns the first believable local run into the first believable real-proje
 Plans:
 
 - [x] `29-01-PLAN.md` — add attach-vs-template branching to onboarding and start surfaces
-- [ ] `29-02-PLAN.md` — align operator copy and flow guidance around greenfield vs attach entry points
+- [x] `29-02-PLAN.md` — align operator copy and flow guidance around greenfield vs attach entry points
 
 **Details:**
 Phase 29 introduces the product-level choice that this milestone is about: operators should see, from onboarding onward, that Kiln can either start from a built-in template or attach to one existing repository. The phase keeps the current demo/template path intact while making the attach path honest, explicit, and clearly scoped to real-project work.
