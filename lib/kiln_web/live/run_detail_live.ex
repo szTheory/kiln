@@ -300,6 +300,8 @@ defmodule KilnWeb.RunDetailLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div id="run-detail" class="space-y-6">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-base-300 pb-4">
@@ -354,6 +356,56 @@ defmodule KilnWeb.RunDetailLive do
             <.link class="link link-primary text-sm" navigate={~p"/"}>← Runs</.link>
           </div>
         </div>
+
+        <section id="run-detail-overview" class="grid gap-3 xl:grid-cols-4">
+          <article class="rounded-xl border border-base-300 bg-base-200 p-4">
+            <p class="kiln-eyebrow">First proof after launch</p>
+            <p id="run-detail-current-state" class="kiln-h2 mt-2">
+              {run_state_summary(@run)}
+            </p>
+            <p class="kiln-body mt-2 text-sm text-base-content/70">
+              You land on this run first after <span class="font-medium text-base-content">Start run</span>.
+              State {pretty_state(@run.state)} confirms the run exists now, before you switch to any broader watch surface.
+            </p>
+          </article>
+          <article class="rounded-xl border border-base-300 bg-base-200 p-4">
+            <p class="kiln-eyebrow">What needs you</p>
+            <p id="run-detail-next-action" class="kiln-body mt-2 text-sm text-base-content/70">
+              {operator_next_action(@run)}
+            </p>
+          </article>
+          <article class="rounded-xl border border-base-300 bg-base-200 p-4">
+            <p class="kiln-eyebrow">Recent evidence</p>
+            <p id="run-detail-recent-evidence" class="kiln-body mt-2 text-sm text-base-content/70">
+              {recent_evidence_copy(@run, @latest_by_stage)}
+            </p>
+            <p
+              id="run-detail-transition-timing"
+              class="kiln-mono mt-3 text-[11px] uppercase tracking-[0.18em] text-base-content/55"
+            >
+              {transition_timing_copy(@run, @latest_by_stage)}
+            </p>
+          </article>
+          <article
+            id="run-detail-broader-watch"
+            class="rounded-xl border border-base-300 bg-base-200 p-4"
+          >
+            <p class="kiln-eyebrow">Broader watch surface</p>
+            <p class="kiln-h2 mt-2">Run board second</p>
+            <p class="kiln-body mt-2 text-sm text-base-content/70">
+              The <span class="font-medium text-base-content">Run board</span> is the balcony for scanning many runs.
+              Stay here for the first proof of life, then switch there when you want broader monitoring.
+            </p>
+            <div class="mt-3 flex flex-wrap gap-3 text-sm">
+              <.link navigate={~p"/"} class="link link-primary">
+                Open run board
+              </.link>
+              <.link navigate={templates_path(@operator_demo_scenario)} class="link link-primary">
+                Revisit template guidance
+              </.link>
+            </div>
+          </article>
+        </section>
 
         <%= if @run.state == :merged do %>
           <section id="post-mortem-panel" class="card card-bordered bg-base-200 border-base-300">
@@ -426,7 +478,10 @@ defmodule KilnWeb.RunDetailLive do
         <section class="card card-bordered bg-base-200 border-base-300">
           <div class="card-body p-5">
             <h2 class="kiln-eyebrow">Stages</h2>
-            <ol class="mt-3 flex flex-wrap gap-2">
+            <p class="kiln-meta mt-2">
+              Choose a stage to inspect evidence. The latest known stage state is shown inline.
+            </p>
+            <ol class="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
               <%= for wid <- @graph_ids do %>
                 <li>
                   <button
@@ -434,13 +489,24 @@ defmodule KilnWeb.RunDetailLive do
                     phx-click="pick_stage"
                     phx-value-wid={wid}
                     class={[
-                      "btn btn-xs kiln-mono",
-                      selected_wid?(@selected_stage_run, wid) && "btn-primary",
+                      "flex w-full items-start justify-between rounded-lg border p-3 text-left transition-colors",
+                      selected_wid?(@selected_stage_run, wid) && "border-primary bg-primary/10",
                       !selected_wid?(@selected_stage_run, wid) &&
-                        "btn-ghost border border-base-300 hover:border-primary"
+                        "border-base-300 bg-base-100 hover:border-primary"
                     ]}
                   >
-                    {wid}
+                    <div>
+                      <div class="kiln-mono text-xs text-base-content">{wid}</div>
+                      <div class="mt-1 text-xs text-base-content/60">
+                        {stage_state_hint(@latest_by_stage, wid)}
+                      </div>
+                    </div>
+                    <span class={[
+                      "kiln-chip shrink-0",
+                      stage_state_chip_class(@latest_by_stage, wid)
+                    ]}>
+                      {stage_state_label(@latest_by_stage, wid)}
+                    </span>
                   </button>
                 </li>
               <% end %>
@@ -781,10 +847,102 @@ defmodule KilnWeb.RunDetailLive do
 
   defp short(uuid), do: uuid |> to_string() |> String.slice(0, 8)
 
+  defp pretty_state(state),
+    do: state |> to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp run_state_summary(%Run{state: :queued}), do: "Waiting to start"
+  defp run_state_summary(%Run{state: :planning}), do: "Planning the work"
+  defp run_state_summary(%Run{state: :coding}), do: "Editing code"
+  defp run_state_summary(%Run{state: :testing}), do: "Running checks"
+  defp run_state_summary(%Run{state: :verifying}), do: "Verifying outcomes"
+  defp run_state_summary(%Run{state: :blocked}), do: "Blocked on operator input"
+  defp run_state_summary(%Run{state: :merged}), do: "Merged successfully"
+  defp run_state_summary(%Run{state: :failed}), do: "Stopped in failure"
+  defp run_state_summary(%Run{state: :escalated}), do: "Escalated for review"
+
+  defp operator_next_action(%Run{state: :blocked}),
+    do:
+      "Open the unblock panel below. Kiln is waiting for a resume decision before work can continue."
+
+  defp operator_next_action(%Run{state: :merged}),
+    do: "Review the post-mortem or file a follow-up if this run uncovered another useful slice."
+
+  defp operator_next_action(%Run{state: state}) when state in [:failed, :escalated],
+    do:
+      "Inspect the stage list and event panes to see where the run stopped and what evidence was captured."
+
+  defp operator_next_action(_),
+    do:
+      "No immediate intervention is required. Keep watching the current stage or the run board for the next transition."
+
+  defp recent_evidence_copy(_run, latest_by_stage) do
+    case most_recent_stage_run(latest_by_stage) do
+      %StageRun{} = stage_run ->
+        "Latest stage evidence: #{stage_run.workflow_stage_id} is #{pretty_state(stage_run.state) |> String.downcase()}. Open that stage below for diff, logs, events, or chatter."
+
+      nil ->
+        "No stage evidence is recorded yet. This run record is still the first proof seam because Kiln created it and marked the current lifecycle state."
+    end
+  end
+
+  defp transition_timing_copy(run, latest_by_stage) do
+    last_transition_at =
+      case most_recent_stage_run(latest_by_stage) do
+        %StageRun{updated_at: %DateTime{} = updated_at} -> updated_at
+        %StageRun{inserted_at: %DateTime{} = inserted_at} -> inserted_at
+        _ -> run.updated_at || run.inserted_at
+      end
+
+    "Run created #{format_dt(run.inserted_at)}. Last transition #{format_dt(last_transition_at)}."
+  end
+
+  defp most_recent_stage_run(latest_by_stage) when map_size(latest_by_stage) == 0, do: nil
+
+  defp most_recent_stage_run(latest_by_stage) do
+    latest_by_stage
+    |> Map.values()
+    |> Enum.max_by(fn stage_run -> stage_run.updated_at || stage_run.inserted_at end, DateTime)
+  end
+
+  defp format_dt(%DateTime{} = dt), do: Calendar.strftime(dt, "%Y-%m-%d %H:%M:%S UTC")
+  defp format_dt(_), do: "not recorded"
+
+  defp stage_state_label(latest_by_stage, wid) do
+    case Map.get(latest_by_stage, wid) do
+      %StageRun{state: state} -> pretty_state(state)
+      _ -> "Waiting"
+    end
+  end
+
+  defp stage_state_hint(latest_by_stage, wid) do
+    case Map.get(latest_by_stage, wid) do
+      %StageRun{state: :succeeded} -> "Latest attempt finished cleanly"
+      %StageRun{state: :failed} -> "Latest attempt ended in failure"
+      %StageRun{state: :running} -> "Stage is active now"
+      %StageRun{state: :pending} -> "Queued behind earlier work"
+      %StageRun{state: state} -> "Latest attempt is #{pretty_state(state) |> String.downcase()}"
+      _ -> "No stage run recorded yet"
+    end
+  end
+
+  defp stage_state_chip_class(latest_by_stage, wid) do
+    case Map.get(latest_by_stage, wid) do
+      %StageRun{state: :succeeded} -> "kiln-chip--ok"
+      %StageRun{state: :failed} -> "kiln-chip--fail"
+      %StageRun{state: :running} -> "kiln-chip--live"
+      %StageRun{state: :pending} -> "kiln-chip--warn"
+      %StageRun{} -> nil
+      _ -> nil
+    end
+  end
+
   defp run_stage_slot(state) do
     case Enum.find_index(Run.states(), &(&1 == state)) do
       nil -> 0
       i -> i + 1
     end
   end
+
+  defp templates_path(nil), do: ~p"/templates"
+  defp templates_path(scenario), do: ~p"/templates?scenario=#{scenario.id}"
 end
