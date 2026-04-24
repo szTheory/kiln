@@ -1,13 +1,40 @@
 defmodule KilnWeb.AttachEntryLive do
   @moduledoc """
-  Phase 29 attach orientation surface at `/attach`.
+  Attach source intake surface at `/attach`.
   """
 
   use KilnWeb, :live_view
 
+  alias Kiln.Attach
+
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, :page_title, "Attach existing repo")}
+    {:ok,
+     socket
+     |> assign(:page_title, "Attach existing repo")
+     |> assign(:resolution_state, :untouched)
+     |> assign(:resolved_source, nil)
+     |> assign(:source_error, nil)
+     |> assign(:form, to_form(%{"source" => ""}, as: :attach_source))}
+  end
+
+  @impl true
+  def handle_event("validate_source", %{"attach_source" => params}, socket) do
+    source = Map.get(params, "source", "")
+
+    {:noreply,
+     if String.trim(source) == "" do
+       reset_resolution(socket, params)
+     else
+       assign_resolution(socket, params, Attach.validate_source(source))
+     end}
+  end
+
+  @impl true
+  def handle_event("resolve_source", %{"attach_source" => params}, socket) do
+    source = Map.get(params, "source", "")
+
+    {:noreply, assign_resolution(socket, params, Attach.resolve_source(source))}
   end
 
   @impl true
@@ -30,7 +57,7 @@ defmodule KilnWeb.AttachEntryLive do
             Built-in templates are the fastest way to learn Kiln or prove the first run. Attach existing repo is the real-project path for bounded work on one codebase you already own.
           </p>
           <p class="kiln-meta mt-3 max-w-3xl">
-            Supports a local path, an existing clone, or a GitHub URL. Validation and workspace safety checks happen in the next step.
+            Supports a local path, an existing clone, or a GitHub URL. Resolve the source here, then hand the next plan one canonical repo identity for writable workspace prep.
           </p>
           <div class="mt-4 flex flex-wrap gap-3 text-sm">
             <.link navigate={~p"/templates"} class="btn btn-primary btn-sm">
@@ -66,6 +93,112 @@ defmodule KilnWeb.AttachEntryLive do
           </article>
         </section>
 
+        <section
+          id="attach-source-panel"
+          class="grid gap-4 rounded-2xl border border-base-300 bg-base-200 p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]"
+        >
+          <div class="space-y-4">
+            <div>
+              <p class="kiln-eyebrow">Resolve source</p>
+              <h2 class="kiln-h2 mt-2">Confirm the repo entry before workspace hydration</h2>
+              <p class="kiln-body mt-2 text-sm">
+                Submit one source and Kiln will normalize it into the repo identity that later attach plans can reuse. No clone, branch creation, or workspace mutation happens here.
+              </p>
+            </div>
+
+            <.form
+              for={@form}
+              id="attach-source-form"
+              class="space-y-4"
+              phx-change="validate_source"
+              phx-submit="resolve_source"
+            >
+              <.input
+                field={@form[:source]}
+                id="attach-source-input"
+                type="text"
+                label="Repo source"
+                placeholder="/Users/operator/project or https://github.com/owner/repo"
+              />
+
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  id="attach-source-submit"
+                  type="submit"
+                  class="btn btn-primary transition-transform duration-150 hover:-translate-y-0.5"
+                >
+                  Resolve source
+                </button>
+                <p class="kiln-meta">
+                  Supports a local path, an existing clone, or a GitHub URL.
+                </p>
+              </div>
+            </.form>
+          </div>
+
+          <div class="rounded-xl border border-base-300 bg-base-100/70 p-4">
+            <%= case @resolution_state do %>
+              <% :untouched -> %>
+                <div id="attach-source-untouched" class="space-y-3">
+                  <p class="kiln-eyebrow">Current state</p>
+                  <h3 class="text-base font-semibold text-base-content">Waiting for one repo source</h3>
+                  <p class="text-sm text-base-content/70">
+                    Enter a local path, an existing clone, or a GitHub URL to verify that Kiln can identify one repo cleanly before any workspace step starts.
+                  </p>
+                </div>
+              <% :resolved -> %>
+                <div id="attach-source-resolved" class="space-y-3">
+                  <p class="kiln-eyebrow">Current state</p>
+                  <h3 class="text-base font-semibold text-base-content">
+                    Source ready for workspace hydration
+                  </h3>
+                  <dl class="space-y-2 text-sm text-base-content/80">
+                    <div>
+                      <dt class="font-medium text-base-content">Source kind</dt>
+                      <dd>{source_kind_label(@resolved_source.kind)}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-medium text-base-content">Repo identity</dt>
+                      <dd>{@resolved_source.repo_identity.slug}</dd>
+                    </div>
+                    <div>
+                      <dt class="font-medium text-base-content">Submitted source</dt>
+                      <dd class="break-all">{@resolved_source.input}</dd>
+                    </div>
+                    <%= if @resolved_source.canonical_root do %>
+                      <div>
+                        <dt class="font-medium text-base-content">Canonical root</dt>
+                        <dd class="break-all">{@resolved_source.canonical_root}</dd>
+                      </div>
+                    <% end %>
+                    <%= if @resolved_source.remote_metadata.url do %>
+                      <div>
+                        <dt class="font-medium text-base-content">Canonical remote</dt>
+                        <dd class="break-all">{@resolved_source.remote_metadata.url}</dd>
+                      </div>
+                    <% end %>
+                  </dl>
+                  <p class="kiln-meta">
+                    Next plan: prepare the writable workspace and apply safety gates. This step only resolves identity.
+                  </p>
+                </div>
+              <% :error -> %>
+                <div id="attach-source-error" class="space-y-3">
+                  <p class="kiln-eyebrow text-warning">Validation feedback</p>
+                  <h3 class="text-base font-semibold text-base-content">
+                    {@source_error.message}
+                  </h3>
+                  <p class="text-sm text-base-content/70">
+                    {@source_error.remediation}
+                  </p>
+                  <p class="kiln-meta break-all">
+                    Input: {@source_error.input}
+                  </p>
+                </div>
+            <% end %>
+          </div>
+        </section>
+
         <section class="grid gap-4 lg:grid-cols-[1fr_1fr]">
           <article class="rounded-xl border border-base-300 bg-base-200 p-5">
             <p class="kiln-eyebrow">What attach means</p>
@@ -80,12 +213,12 @@ defmodule KilnWeb.AttachEntryLive do
 
           <article id="attach-next-step" class="rounded-xl border border-base-300 bg-base-200 p-5">
             <p class="kiln-eyebrow">What happens next</p>
-            <h2 class="kiln-h2 mt-2">Phase 30 adds repo validation and workspace safety</h2>
+            <h2 class="kiln-h2 mt-2">The next attach plan prepares the workspace</h2>
             <p class="kiln-body mt-2 text-sm">
-              Validation and workspace safety checks happen in the next step. That includes resolving the source, confirming the repo is attachable, and preparing the conservative workspace flow before Kiln acts on your code.
+              This screen resolves the repo source and returns one canonical identity. The next plan prepares the writable workspace and enforces the conservative safety gates before Kiln acts on your code.
             </p>
             <p class="kiln-meta mt-3">
-              Phase 29 does not probe the repo, hydrate a workspace, check dirty worktrees, or mutate git state.
+              No workspace hydration, dirty-worktree refusal, branch creation, or PR flow happens yet.
             </p>
           </article>
         </section>
@@ -124,4 +257,31 @@ defmodule KilnWeb.AttachEntryLive do
     </Layouts.app>
     """
   end
+
+  defp assign_resolution(socket, params, {:ok, resolved_source}) do
+    socket
+    |> assign(:form, to_form(params, as: :attach_source))
+    |> assign(:resolution_state, :resolved)
+    |> assign(:resolved_source, resolved_source)
+    |> assign(:source_error, nil)
+  end
+
+  defp assign_resolution(socket, params, {:error, source_error}) do
+    socket
+    |> assign(:form, to_form(params, as: :attach_source))
+    |> assign(:resolution_state, :error)
+    |> assign(:resolved_source, nil)
+    |> assign(:source_error, source_error)
+  end
+
+  defp reset_resolution(socket, params) do
+    socket
+    |> assign(:form, to_form(params, as: :attach_source))
+    |> assign(:resolution_state, :untouched)
+    |> assign(:resolved_source, nil)
+    |> assign(:source_error, nil)
+  end
+
+  defp source_kind_label(:local_path), do: "Local path"
+  defp source_kind_label(:github_url), do: "GitHub URL"
 end
