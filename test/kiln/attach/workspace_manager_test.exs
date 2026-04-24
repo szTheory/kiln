@@ -91,6 +91,68 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
     end
   end
 
+  describe "attached repo persistence" do
+    test "persists canonical attached repo metadata for a hydrated local source" do
+      source_repo = make_git_repo!("kiln_attach_persist_local")
+      workspace_root = temp_path("kiln_attach_persist_root")
+      File.mkdir_p!(workspace_root)
+
+      source = local_source!(source_repo)
+
+      {:ok, hydrated} =
+        WorkspaceManager.hydrate(source,
+          workspace_root: workspace_root,
+          git_runner: &git_runner/2
+        )
+
+      assert {:ok, attached_repo} = Attach.create_or_update_attached_repo(source, hydrated)
+      assert {:ok, fetched} = Attach.get_attached_repo(attached_repo.id)
+      assert {:ok, by_key} = Attach.get_attached_repo_by_workspace_key(hydrated.workspace_key)
+
+      assert fetched.id == attached_repo.id
+      assert by_key.id == attached_repo.id
+      assert attached_repo.source_kind == :local_path
+      assert attached_repo.repo_provider == :local
+      assert attached_repo.repo_slug == source.repo_identity.slug
+      assert attached_repo.repo_name == source.repo_identity.name
+      assert attached_repo.repo_owner == nil
+      assert attached_repo.repo_host == nil
+      assert attached_repo.canonical_input == source.canonical_input
+      assert attached_repo.canonical_repo_root == source.canonical_root
+      assert attached_repo.workspace_key == hydrated.workspace_key
+      assert attached_repo.workspace_path == hydrated.workspace_path
+      assert attached_repo.remote_url == hydrated.remote_url
+      assert attached_repo.clone_url == nil
+      assert attached_repo.default_branch == hydrated.base_branch
+      assert attached_repo.base_branch == hydrated.base_branch
+    end
+
+    test "updates the existing attached repo row instead of duplicating repo identity" do
+      source_repo = make_git_repo!("kiln_attach_persist_update")
+      workspace_root = temp_path("kiln_attach_persist_update_root")
+      File.mkdir_p!(workspace_root)
+
+      source = local_source!(source_repo)
+
+      {:ok, hydrated} =
+        WorkspaceManager.hydrate(source,
+          workspace_root: workspace_root,
+          git_runner: &git_runner/2
+        )
+
+      assert {:ok, first} = Attach.create_or_update_attached_repo(source, hydrated)
+
+      updated_hydrated = %{hydrated | base_branch: "release/test", workspace_path: hydrated.workspace_path}
+
+      assert {:ok, second} = Attach.create_or_update_attached_repo(source, updated_hydrated)
+
+      assert second.id == first.id
+      assert second.base_branch == "release/test"
+      assert second.workspace_key == hydrated.workspace_key
+      assert second.workspace_path == hydrated.workspace_path
+    end
+  end
+
   defp local_source!(repo_root) do
     {:ok, source} = Attach.resolve_source(repo_root)
     source
