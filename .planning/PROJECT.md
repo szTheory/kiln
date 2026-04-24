@@ -18,16 +18,15 @@ Kiln now has one believable brownfield path from first-use discovery to a conser
 
 Accepted close debt remains non-blocking rather than milestone-scope product failure: one orphan Phase 03 worktree todo is still deferred, and repo-wide test execution still emits sandbox ownership noise from spawned role processes even when `mix kiln.attach.prove` and `bash script/precommit.sh` finish green.
 
-## Next Milestone Goals
+## Current Milestone: v0.7.0 PR-sized brownfield execution
 
-No new milestone is open yet.
+**Goal:** Turn attached-repo work into a normal daily-driver loop where a solo operator can hand Kiln one bounded feature or bugfix request and receive a trustable draft PR that fits the repo.
 
-The next milestone should be chosen explicitly rather than inferred from backlog order. The current options are to promote cleanup debt such as `999.4`, promote product exploration such as `999.3`, or define a new milestone around the next highest-leverage capability with `/gsd-new-milestone`.
-
-**Candidate directions:**
-- Clean up planning/validation debt so milestone routing and historical verification stay trustworthy
-- Extend brownfield usefulness with adjacent capabilities such as reference repos, fork flows, or deeper workspace shapes
-- Re-open broader operator leverage work only after attach-to-existing has been absorbed
+**Target features:**
+- PR-sized attached-repo intake with bounded acceptance framing instead of a vague freeform continuation request
+- Repeat-run continuity on one attached repo so second and third runs feel native rather than re-attached
+- Early conflict and drift detection for branch overlap, unsafe repo state, and likely scope collisions before coding begins
+- Draft PR output that explains the scoped change, cites proof, and feels reviewable as a normal feature or bugfix handoff
 
 ## Requirements
 
@@ -35,7 +34,12 @@ The next milestone should be chosen explicitly rather than inferred from backlog
 
 <!-- Current scope. Building toward these. -->
 
-- None. Open the next milestone with `/gsd-new-milestone`.
+- [ ] **WORK-01**: Operator can start an attached-repo run from one bounded feature or bugfix request with enough acceptance framing for Kiln to treat the work as one PR-sized unit instead of an open-ended continuation ask.
+- [ ] **CONT-01**: Repeat runs on the same attached repo reuse the known repo/workspace context and previous trust/setup facts so the operator does not have to rediscover the attach flow each time.
+- [ ] **SAFE-01**: Before coding starts, Kiln detects and surfaces unsafe or conflicting brownfield conditions such as dirty repo state, unclear target/base branch, overlapping open PRs, or likely scope collisions.
+- [ ] **SAFE-02**: When brownfield preflight finds a non-fatal issue, Kiln provides explicit remediation or narrowing guidance so the operator can re-scope the run without guessing.
+- [ ] **TRUST-04**: Attached-repo runs produce a draft PR handoff that includes a scoped summary, proof or verification citations, and enough repo-fitting context for the operator to review the result as a normal feature or bugfix PR.
+- [ ] **UAT-06**: The repository contains one explicit automated proof path for PR-sized attached-repo continuation, including repeat-run continuity plus representative refusal or warning cases for brownfield preflight.
 
 ### Validated
 
@@ -153,9 +157,9 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 ## Next Milestone Setup
 
-No milestone is currently open.
+Active milestone: **`v0.7.0 — PR-sized brownfield execution`**
 
-Use `/gsd-new-milestone` to define the next slice, requirements, and roadmap updates from the new shipped baseline `v0.6.0`.
+Next command: `/gsd-plan-phase 32`
 
 ## Merge authority
 
@@ -206,4 +210,4 @@ The pre-close v0.6.0 planning narrative focused on turning the first believable 
 </details>
 
 ---
-*Last updated: 2026-04-24 — shipped v0.6.0 Attach existing repo first*
+*Last updated: 2026-04-24 — opened v0.7.0 PR-sized brownfield execution*

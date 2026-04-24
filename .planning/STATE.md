@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.6.0
-milestone_name: — Attach existing repo first
-status: shipped
-last_updated: "2026-04-24T17:40:00.000Z"
-last_activity: 2026-04-24 -- Milestone v0.6.0 archived and tagged after attach delivery and proof closure
+milestone: v0.7.0
+milestone_name: — PR-sized brownfield execution
+status: active
+last_updated: "2026-04-24T18:30:00.000Z"
+last_activity: 2026-04-24 -- Milestone v0.7.0 started from the v0.6.0 attached-repo baseline
 progress:
-  total_phases: 6
-  completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
-  percent: 100
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: milestone close-out
-Plan: Archived
-Status: Milestone v0.6.0 shipped — ready for next milestone definition
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for milestone v0.7.0
 Last activity: 2026-04-24
 
 ## Current focus
 
-Latest shipped milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md)
+Active milestone: **v0.7.0 — PR-sized brownfield execution** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [REQUIREMENTS.md](REQUIREMENTS.md)
 
-Last shipped phase: **31 — Draft PR trust ramp and attach proof** (**TRUST-01, TRUST-03, GIT-05, UAT-05**).
+Immediate next phase: **32 — PR-sized attached-repo intake** (`WORK-01`).
 
-**Next command:** **`/gsd-new-milestone`** — define the next shipped slice from the v0.6.0 baseline.
+**Next command:** **`/gsd-plan-phase 32`** — plan the first phase of the new milestone.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 established the first believable local run, and v0.6.0 shipped the first believable attach-to-existing workflow. **999.3** and **999.4** remain backlog work outside any active milestone.
+`v0.7.0` keeps the brownfield center of gravity from `v0.6.0` but changes the proof target: the operator JTBD is now a repeatable issue-to-draft-PR loop on one attached repo, not simply a first believable attach flow. `999.3` and `999.4` remain backlog work outside the active milestone.
 
 ## Session continuity (recent CONTEXT files)
 

@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **No active milestone**
+**Updated:** 2026-04-24 — **Active milestone v0.7.0**
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -12,10 +12,63 @@
 - ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
 - ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
 - ✅ **v0.6.0 — Attach existing repo first** — Phases **29–31** — [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md) · [v0.6.0-REQUIREMENTS.md](milestones/v0.6.0-REQUIREMENTS.md) · [v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md)
+- 🚧 **v0.7.0 — PR-sized brownfield execution** — Phases **32–35** — active milestone
 
 ## Current posture
 
-No active milestone is open. `v0.6.0` shipped on 2026-04-24 and the next workflow step is to choose whether to promote backlog work or open the next milestone with `/gsd-new-milestone`.
+`v0.7.0` is now open from the shipped `v0.6.0` baseline. The milestone focuses on turning attached-repo support into a normal ongoing workflow for the solo operator: one bounded feature or bugfix request on one existing repo should become one reviewable draft PR with clear proof and fewer rediscovery costs on repeat runs.
+
+## Active milestone
+
+### v0.7.0 — PR-sized brownfield execution
+
+**Goal:** Make Kiln feel like a credible teammate on one attached repo by turning bounded brownfield work into a repeatable issue-to-draft-PR loop.
+
+**Requirements in scope:** `WORK-01`, `CONT-01`, `SAFE-01`, `SAFE-02`, `TRUST-04`, `UAT-06`.
+
+### Phase 32: PR-sized attached-repo intake
+
+**Goal**: Reframe attached work as one bounded feature or bugfix request with explicit acceptance framing instead of an open-ended continuation ask.
+**Depends on**: Phase 31
+**Requirements**: `WORK-01`
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD during `/gsd-plan-phase 32`
+
+### Phase 33: Repeat-run continuity on attached repos
+
+**Goal**: Make the second and third runs on one attached repo feel native by reusing workspace, repo, and trust context safely.
+**Depends on**: Phase 32
+**Requirements**: `CONT-01`
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD during `/gsd-plan-phase 33`
+
+### Phase 34: Brownfield preflight and narrowing guardrails
+
+**Goal**: Detect likely repo-state conflicts or scope collisions before coding and give the operator concrete remediation or narrowing guidance.
+**Depends on**: Phase 33
+**Requirements**: `SAFE-01`, `SAFE-02`
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD during `/gsd-plan-phase 34`
+
+### Phase 35: Draft PR handoff and owning proof
+
+**Goal**: Tighten the attached-repo draft PR output so the operator receives a reviewable handoff with scoped summary, proof, and milestone-owning verification coverage.
+**Depends on**: Phase 34
+**Requirements**: `TRUST-04`, `UAT-06`
+**Plans**: 0 plans
+
+Plans:
+
+- [ ] TBD during `/gsd-plan-phase 35`
 
 ## Latest shipped milestone
 
@@ -110,4 +163,4 @@ Plans:
 - [ ] TBD (promote with `/gsd-review-backlog` when ready)
 
 ---
-*Latest shipped milestone: v0.6.0 on 2026-04-24*
+*Active milestone: v0.7.0 on 2026-04-24; latest shipped milestone: v0.6.0*
