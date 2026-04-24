@@ -53,6 +53,9 @@ defmodule Kiln.Runs.Run do
   @derive {Jason.Encoder,
            only: [
              :id,
+             :attached_repo_id,
+             :spec_id,
+             :spec_revision_id,
              :workflow_id,
              :workflow_version,
              :workflow_checksum,
@@ -71,6 +74,10 @@ defmodule Kiln.Runs.Run do
            ]}
 
   schema "runs" do
+    belongs_to(:attached_repo, Kiln.Attach.AttachedRepo, foreign_key: :attached_repo_id)
+    belongs_to(:spec, Kiln.Specs.Spec, foreign_key: :spec_id)
+    belongs_to(:spec_revision, Kiln.Specs.SpecRevision, foreign_key: :spec_revision_id)
+
     field(:workflow_id, :string)
     field(:workflow_version, :integer)
     # D-94: sha256 hex of compiled graph at run-start; rehydration asserts match
@@ -118,7 +125,10 @@ defmodule Kiln.Runs.Run do
     :escalation_reason,
     :escalation_detail,
     :github_delivery_snapshot,
-    :operator_nudge_last_audit_id
+    :operator_nudge_last_audit_id,
+    :attached_repo_id,
+    :spec_id,
+    :spec_revision_id
   ]
 
   @doc """
@@ -136,6 +146,9 @@ defmodule Kiln.Runs.Run do
     |> validate_required(@required)
     |> validate_inclusion(:state, @states)
     |> validate_format(:workflow_checksum, ~r/^[0-9a-f]{64}$/)
+    |> foreign_key_constraint(:attached_repo_id)
+    |> foreign_key_constraint(:spec_id)
+    |> foreign_key_constraint(:spec_revision_id)
     |> check_constraint(:state, name: :runs_state_check)
     |> check_constraint(:workflow_checksum, name: :runs_workflow_checksum_format)
   end

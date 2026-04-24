@@ -24,7 +24,7 @@ defmodule Kiln.Runs do
   alias Kiln.OperatorSetup
   alias Kiln.Runs.{Compare, Run}
   alias Kiln.Runs.RunDirector
-  alias Kiln.Specs.Spec
+  alias Kiln.Specs.{Spec, SpecRevision}
   alias Kiln.Templates
   alias Kiln.Workflows
   alias Kiln.Workflows.CompiledGraph
@@ -34,6 +34,13 @@ defmodule Kiln.Runs do
           blocker: OperatorSetup.checklist_item(),
           settings_target: String.t()
         }
+
+  @type promoted_attached_request :: %{
+          required(:spec) => Spec.t(),
+          required(:revision) => SpecRevision.t()
+        }
+
+  @attached_request_workflow_id "elixir_phoenix_feature"
 
   @doc """
   Insert a new run. The `state` field defaults to `:queued`; callers
@@ -94,6 +101,35 @@ defmodule Kiln.Runs do
   end
 
   @doc """
+  Inserts a queued run for one promoted attached request, preserving explicit
+  links back to the attached repo, spec, and promoted revision.
+  """
+  @spec create_for_attached_request(promoted_attached_request(), Ecto.UUID.t()) ::
+          {:ok, Run.t()}
+          | {:error, Ecto.Changeset.t() | :invalid_attached_request | {:workflow_load_failed, term()}}
+  def create_for_attached_request(
+        %{spec: %Spec{} = spec, revision: %SpecRevision{} = revision},
+        attached_repo_id
+      )
+      when is_binary(attached_repo_id) do
+    with :ok <- validate_attached_request(spec, revision, attached_repo_id),
+         {:ok, %CompiledGraph{} = cg} <- load_attached_request_workflow(revision) do
+      %{
+        attached_repo_id: attached_repo_id,
+        spec_id: spec.id,
+        spec_revision_id: revision.id,
+        workflow_id: cg.id,
+        workflow_version: cg.version,
+        workflow_checksum: Workflows.checksum(cg),
+        correlation_id: Ecto.UUID.generate(),
+        model_profile_snapshot: %{"profile" => cg.model_profile},
+        caps_snapshot: caps_snapshot_from_compiled_graph(cg)
+      }
+      |> create()
+    end
+  end
+
+  @doc """
   Creates and starts a live run from a promoted template.
 
   Returns a typed blocked outcome when the operator setup is still missing a
@@ -116,6 +152,35 @@ defmodule Kiln.Runs do
 
       blocker ->
         {:blocked, blocked_start(blocker, template_id, opts)}
+    end
+  end
+
+  @doc """
+  Creates and starts a live run from one promoted attached request.
+
+  Returns the same typed blocked outcome as template starts when operator setup
+  is missing, while keeping attach identity on the run row.
+  """
+  @spec start_for_attached_request(promoted_attached_request(), Ecto.UUID.t(), keyword()) ::
+          {:ok, Run.t()}
+          | {:blocked, template_start_blocked()}
+          | {:error,
+             Ecto.Changeset.t()
+             | :invalid_attached_request
+             | :missing_api_key
+             | {:workflow_load_failed, term()}}
+  def start_for_attached_request(
+        %{spec: %Spec{}, revision: %SpecRevision{}} = promoted_request,
+        attached_repo_id,
+        opts \\ []
+      )
+      when is_binary(attached_repo_id) do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        do_start_for_attached_request(promoted_request, attached_repo_id, opts)
+
+      blocker ->
+        {:blocked, blocked_start(blocker, nil, opts)}
     end
   end
 
@@ -145,6 +210,32 @@ defmodule Kiln.Runs do
     end
   end
 
+  defp do_start_for_attached_request(promoted_request, attached_repo_id, opts) do
+    with {:ok, run} <- create_for_attached_request(promoted_request, attached_repo_id) do
+      try do
+        case RunDirector.start_run(run.id) do
+          {:ok, started_run} ->
+            {:ok, started_run}
+
+          {:error, :factory_not_ready} ->
+            _ = Repo.delete(run)
+
+            blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
+            {:blocked, blocked_start(blocker, nil, opts)}
+        end
+      rescue
+        error in [BlockedError] ->
+          case error do
+            %BlockedError{reason: :missing_api_key} ->
+              {:error, :missing_api_key}
+
+            _ ->
+              reraise error, __STACKTRACE__
+          end
+      end
+    end
+  end
+
   defp blocked_start(blocker, template_id, opts) do
     %{
       reason: :factory_not_ready,
@@ -155,6 +246,32 @@ defmodule Kiln.Runs do
           template_id: template_id
         )
     }
+  end
+
+  defp validate_attached_request(%Spec{id: spec_id}, %SpecRevision{} = revision, attached_repo_id) do
+    cond do
+      is_nil(spec_id) or is_nil(revision.id) ->
+        {:error, :invalid_attached_request}
+
+      revision.spec_id != spec_id ->
+        {:error, :invalid_attached_request}
+
+      revision.attached_repo_id != attached_repo_id ->
+        {:error, :invalid_attached_request}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp load_attached_request_workflow(%SpecRevision{request_kind: _request_kind}) do
+    @attached_request_workflow_id
+    |> Templates.shipped_workflow_yaml_path()
+    |> Workflows.load()
+    |> case do
+      {:ok, %CompiledGraph{} = cg} -> {:ok, cg}
+      {:error, reason} -> {:error, {:workflow_load_failed, reason}}
+    end
   end
 
   defp caps_snapshot_from_compiled_graph(%CompiledGraph{caps: caps}) when is_map(caps) do
