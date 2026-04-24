@@ -20,11 +20,19 @@ defmodule Kiln.Runs do
   import Ecto.Changeset, only: [change: 2]
 
   alias Kiln.Repo
+  alias Kiln.OperatorSetup
   alias Kiln.Runs.{Compare, Run}
+  alias Kiln.Runs.RunDirector
   alias Kiln.Specs.Spec
   alias Kiln.Templates
   alias Kiln.Workflows
   alias Kiln.Workflows.CompiledGraph
+
+  @type template_start_blocked :: %{
+          reason: :factory_not_ready,
+          blocker: OperatorSetup.checklist_item(),
+          settings_target: String.t()
+        }
 
   @doc """
   Insert a new run. The `state` field defaults to `:queued`; callers
@@ -82,6 +90,55 @@ defmodule Kiln.Runs do
             {:error, {:workflow_load_failed, reason}}
         end
     end
+  end
+
+  @doc """
+  Creates and starts a live run from a promoted template.
+
+  Returns a typed blocked outcome when the operator setup is still missing a
+  deterministic first blocker, and otherwise delegates final start authority to
+  `RunDirector.start_run/1`.
+  """
+  @spec start_for_promoted_template(Spec.t(), String.t(), keyword()) ::
+          {:ok, Run.t()}
+          | {:blocked, template_start_blocked()}
+          | {:error, Ecto.Changeset.t() | :unknown_template | {:workflow_load_failed, term()}}
+  def start_for_promoted_template(%Spec{} = spec, template_id, opts \\ [])
+      when is_binary(template_id) do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        do_start_for_promoted_template(spec, template_id, opts)
+
+      blocker ->
+        {:blocked, blocked_start(blocker, template_id, opts)}
+    end
+  end
+
+  defp do_start_for_promoted_template(%Spec{} = spec, template_id, opts) do
+    with {:ok, run} <- create_for_promoted_template(spec, template_id) do
+      case RunDirector.start_run(run.id) do
+        {:ok, started_run} ->
+          {:ok, started_run}
+
+        {:error, :factory_not_ready} ->
+          _ = Repo.delete(run)
+
+          blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
+          {:blocked, blocked_start(blocker, template_id, opts)}
+      end
+    end
+  end
+
+  defp blocked_start(blocker, template_id, opts) do
+    %{
+      reason: :factory_not_ready,
+      blocker: blocker,
+      settings_target:
+        OperatorSetup.settings_target(blocker,
+          return_to: Keyword.get(opts, :return_to),
+          template_id: template_id
+        )
+    }
   end
 
   defp caps_snapshot_from_compiled_graph(%CompiledGraph{caps: caps}) when is_map(caps) do
