@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: Planning next milestone
-status: completed
-last_updated: "2026-04-23T20:00:00Z"
-last_activity: 2026-04-23 — v0.4.0 archived
+milestone: v0.5.0
+milestone_name: — Local first success
+status: executing
+last_updated: "2026-04-24T02:00:00Z"
+last_activity: 2026-04-24
 progress:
-  total_phases: 27
-  completed_phases: 24
-  total_plans: 98
-  completed_plans: 103
+  total_phases: 29
+  completed_phases: 26
+  total_plans: 104
+  completed_plans: 107
   percent: 100
 ---
 
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-**Phase:** 24 — Template → run UAT smoke  
-**Plan:** Complete  
-**Status:** No active milestone
-**Last activity:** 2026-04-23 — v0.4.0 archived
+Phase: 27 (local-first-run-proof) — READY
+Plan: not started
+Status: Ready to plan/execute Phase 27
+Last activity: 2026-04-24 -- Phase 26 shipped with targeted verification
 
 ## Current focus
 
-**Planning next milestone** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md)
+**v0.5.0 — Local First Success** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [REQUIREMENTS.md](REQUIREMENTS.md)
 
-Last shipped milestone: **v0.4.0 — Phases 22–24** (**DOCS-08**, **NYQ-01**, **UAT-03**).
+Last shipped phase: **26 — First live template run** (**LIVE-01**, **LIVE-02**, **LIVE-03**). Current milestone now moves to the explicit local first-run proof slice.
 
-**Next command:** **`/gsd-new-milestone`** — define the next requirements slice and resume integer phase planning at **25**.
+**Next command:** **`/gsd-plan-phase 27`** — plan the explicit local first-run proof slice.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. The next milestone should continue integer phase numbering from **25**.
+v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 continues integer phase numbering at **25** with **999.3** intentionally left in backlog.
 
 ## Session continuity (recent CONTEXT files)
 
@@ -52,4 +52,7 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 
 **Last phase execution:** 24 (Template -> run UAT smoke) — completed 2026-04-23.
 
-**Planned Phase:** 24 (Template → run UAT smoke) — completed 2026-04-23
+**Last phase execution:** 25 (Local live readiness SSOT) — completed 2026-04-23.
+**Last phase execution:** 26 (First live template run) — completed 2026-04-24.
+
+**Planned Phase:** 27 (Local first-run proof) — ready to plan
