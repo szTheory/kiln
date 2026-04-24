@@ -31,6 +31,7 @@ defmodule KilnWeb.Router do
       ] do
       live "/onboarding", OnboardingLive, :index
       live "/", RunBoardLive, :index
+      live "/attach", AttachEntryLive, :index
       live "/templates", TemplatesLive, :index
       live "/templates/:template_id", TemplatesLive, :show
       live "/inbox", InboxLive, :index
