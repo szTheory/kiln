@@ -18,19 +18,27 @@ defmodule Mix.Tasks.Kiln.FirstRun.Prove do
   @impl Mix.Task
   def run(_args) do
     run_task("integration.first_run", [])
-    run_task("test", @focused_liveview_files)
+    run_cmd(["env", "MIX_ENV=test", "mix", "test" | @focused_liveview_files])
   end
 
   defp runner do
-    Process.get(:kiln_first_run_prove_runner, &Mix.Task.run/2)
+    Application.get_env(:kiln, :kiln_first_run_prove_runner, &Mix.Task.run/2)
   end
 
   defp reenabler do
-    Process.get(:kiln_first_run_prove_reenabler, &Mix.Task.reenable/1)
+    Application.get_env(:kiln, :kiln_first_run_prove_reenabler, &Mix.Task.reenable/1)
   end
 
   defp run_task(task, args) do
     reenabler().(task)
     runner().(task, args)
+  end
+
+  defp cmd_runner do
+    Application.get_env(:kiln, :kiln_first_run_prove_cmd_runner, &Mix.Task.run("cmd", &1))
+  end
+
+  defp run_cmd(args) do
+    cmd_runner().(args)
   end
 end

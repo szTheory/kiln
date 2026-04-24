@@ -82,8 +82,8 @@ None - plan executed exactly as written.
 
 ## Issues Encountered
 
-- `mix test test/kiln_web/live/templates_live_test.exs test/kiln_web/live/run_detail_live_test.exs` passed, but emitted transient `DBConnection.ConnectionError` logs from background publishers while the suite still completed green.
-- `mix kiln.first_run.prove` and `bash script/precommit.sh` could not be completed end-to-end on this workstation because a pre-existing `test/integration/first_run.sh` -> `mix setup` process in the same worktree was already holding the shared build/deps path. I did not terminate the unrelated process.
+- Initial verification attempts were obscured by stale local `mix setup` / first-run processes and an expired Hex auth refresh prompt inside the shell-wrapped integration step.
+- The final fix was to make the shell-wrapped proof layers non-interactive and run the focused test layer via `MIX_ENV=test mix test ...`, after which `mix kiln.first_run.prove` completed successfully end to end.
 
 ## User Setup Required
 
@@ -92,4 +92,4 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - Phase 27 now has one explicit, auditable proof command and supporting artifacts for `UAT-04`.
-- Full workstation confirmation of `mix kiln.first_run.prove` and `bash script/precommit.sh` still depends on clearing the competing local `mix setup` / integration-smoke process before rerunning the same commands.
+- `mix kiln.first_run.prove` completes successfully on this workstation after the non-interactive shell-wrapper and focused-test environment fixes.

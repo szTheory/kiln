@@ -19,6 +19,6 @@ It is intentionally narrower than `mix shift_left.verify` and broader than a Liv
 This command is the Phase 27 proof for the setup-ready local first-run journey only.
 It does not claim to replace the broader merge-authority suite, `mix shift_left.verify`, or direct shell ownership of `test/integration/first_run.sh`.
 
-## Workstation Caveat
+## Execution Note
 
-During execution on 2026-04-24, `mix kiln.first_run.prove` was attempted but could not finish because another pre-existing `test/integration/first_run.sh` -> `mix setup` process in the same worktree was already holding the shared build/deps path. The Phase 27 owning command remains `mix kiln.first_run.prove`; clear the competing local process and rerun the same command for full end-to-end confirmation.
+Verified on 2026-04-24 with `mix kiln.first_run.prove`. The local topology layer reached `/health` with `status="ok"` and the focused LiveView layer passed the targeted `templates` and `run_detail` suites in `MIX_ENV=test`.

@@ -159,8 +159,12 @@ defmodule Kiln.MixProject do
       Mix.raise("missing #{script}")
     end
 
+    escaped_script = String.replace(script, "\"", "\\\"")
+
     Mix.shell().info("[integration.first_run] #{script}")
-    {output, status} = System.cmd("bash", [script], stderr_to_stdout: true)
+
+    {output, status} =
+      System.shell(~s(bash "#{escaped_script}"), stderr_to_stdout: true, close_stdin: true)
 
     if output != "", do: Mix.shell().info(String.trim_trailing(output))
 

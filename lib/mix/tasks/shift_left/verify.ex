@@ -20,9 +20,15 @@ defmodule Mix.Tasks.ShiftLeft.Verify do
       Mix.raise("shift_left.verify: missing #{script}")
     end
 
+    escaped_script = String.replace(script, "\"", "\\\"")
+
     Mix.shell().info("==> shift_left.verify: #{script}")
 
-    case System.cmd("bash", [script], cd: File.cwd!(), stderr_to_stdout: true) do
+    case System.shell(~s(bash "#{escaped_script}"),
+           cd: File.cwd!(),
+           stderr_to_stdout: true,
+           close_stdin: true
+         ) do
       {out, 0} ->
         if out != "", do: Mix.shell().info(String.trim_trailing(out))
         :ok
