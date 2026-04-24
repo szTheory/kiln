@@ -5,19 +5,21 @@ defmodule Kiln.Attach.SourceTest do
   describe "resolve_source/2" do
     test "resolves a local git repo path into the canonical source contract" do
       repo_root = make_git_repo!("kiln_attach_source_local")
+      canonical_root = canonical_root!(repo_root)
+      repo_name = Path.basename(canonical_root)
 
       assert {:ok,
               %{
                 kind: :local_path,
                 input: ^repo_root,
                 canonical_input: ^repo_root,
-                canonical_root: ^repo_root,
+                canonical_root: ^canonical_root,
                 repo_identity: %{
                   provider: :local,
                   host: nil,
                   owner: nil,
-                  name: "kiln_attach_source_local",
-                  slug: "kiln_attach_source_local"
+                  name: ^repo_name,
+                  slug: ^repo_name
                 },
                 remote_metadata: %{
                   url: nil,
@@ -30,14 +32,15 @@ defmodule Kiln.Attach.SourceTest do
 
     test "treats an existing clone path inside the repo as a local-path success path" do
       repo_root = make_git_repo!("kiln_attach_source_existing_clone")
+      canonical_root = canonical_root!(repo_root)
       nested_path = Path.join([repo_root, "lib", "nested"])
       File.mkdir_p!(nested_path)
 
-      assert {:ok, %{kind: :local_path, canonical_root: ^repo_root} = source} =
+      assert {:ok, %{kind: :local_path, canonical_root: ^canonical_root} = source} =
                Attach.resolve_source(nested_path)
 
       assert source.canonical_input == Path.expand(nested_path)
-      assert source.repo_identity.slug == "kiln_attach_source_existing_clone"
+      assert source.repo_identity.slug == Path.basename(canonical_root)
     end
 
     test "parses a github url into one owner/repo identity" do
@@ -103,5 +106,10 @@ defmodule Kiln.Attach.SourceTest do
 
   defp temp_path(name) do
     Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+  end
+
+  defp canonical_root!(path) do
+    {output, 0} = System.cmd("pwd", ["-P"], cd: path)
+    String.trim(output)
   end
 end
