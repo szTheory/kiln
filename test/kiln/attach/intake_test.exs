@@ -39,7 +39,12 @@ defmodule Kiln.Attach.IntakeTest do
                  "request_kind" => "feature",
                  "title" => "Add repo intake",
                  "change_summary" => "Capture a bounded request before launch.",
-                 "acceptance_criteria" => ["Shows required fields", "", "  ", "Persists the request"],
+                 "acceptance_criteria" => [
+                   "Shows required fields",
+                   "",
+                   "  ",
+                   "Persists the request"
+                 ],
                  "out_of_scope" => ["", "  ", "Repeat-run continuity"]
                })
 

@@ -41,6 +41,8 @@ defmodule Kiln.Repo.Migrations.AddAttachedRepoIntakeFields do
       )
     """)
 
+    # source IN includes attached_repo_intake for attached brownfield drafts.
+
     execute("""
     ALTER TABLE spec_drafts
       ADD CONSTRAINT spec_drafts_request_kind_values
@@ -55,7 +57,10 @@ defmodule Kiln.Repo.Migrations.AddAttachedRepoIntakeFields do
   end
 
   def down do
-    execute("ALTER TABLE spec_revisions DROP CONSTRAINT IF EXISTS spec_revisions_request_kind_values")
+    execute(
+      "ALTER TABLE spec_revisions DROP CONSTRAINT IF EXISTS spec_revisions_request_kind_values"
+    )
+
     execute("ALTER TABLE spec_drafts DROP CONSTRAINT IF EXISTS spec_drafts_request_kind_values")
     execute("ALTER TABLE spec_drafts DROP CONSTRAINT IF EXISTS spec_drafts_source_values")
 
