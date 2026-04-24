@@ -204,7 +204,8 @@ defmodule Kiln.Attach.WorkspaceManager do
     match?({:ok, _}, git_call(runner, ["rev-parse", "--show-toplevel"], cd: workspace_path))
   end
 
-  defp clone_source(%Source{kind: :local_path, canonical_root: canonical_root}), do: canonical_root
+  defp clone_source(%Source{kind: :local_path, canonical_root: canonical_root}),
+    do: canonical_root
 
   defp clone_source(%Source{kind: :github_url, remote_metadata: %{clone_url: clone_url}})
        when is_binary(clone_url),
@@ -220,7 +221,8 @@ defmodule Kiln.Attach.WorkspaceManager do
     end
   end
 
-  defp fallback_remote_url(%Source{kind: :local_path, canonical_root: canonical_root}), do: canonical_root
+  defp fallback_remote_url(%Source{kind: :local_path, canonical_root: canonical_root}),
+    do: canonical_root
 
   defp fallback_remote_url(%Source{remote_metadata: %{clone_url: clone_url}}), do: clone_url
 

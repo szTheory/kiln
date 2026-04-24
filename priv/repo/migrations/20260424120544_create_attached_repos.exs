@@ -57,10 +57,14 @@ defmodule Kiln.Repo.Migrations.CreateAttachedRepos do
     )
 
     create(
-      unique_index(:attached_repos, [:source_fingerprint], name: :attached_repos_source_fingerprint_idx)
+      unique_index(:attached_repos, [:source_fingerprint],
+        name: :attached_repos_source_fingerprint_idx
+      )
     )
 
-    create(unique_index(:attached_repos, [:workspace_key], name: :attached_repos_workspace_key_idx))
+    create(
+      unique_index(:attached_repos, [:workspace_key], name: :attached_repos_workspace_key_idx)
+    )
 
     create(index(:attached_repos, [:repo_slug], name: :attached_repos_repo_slug_idx))
 

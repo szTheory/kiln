@@ -142,7 +142,11 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
 
       assert {:ok, first} = Attach.create_or_update_attached_repo(source, hydrated)
 
-      updated_hydrated = %{hydrated | base_branch: "release/test", workspace_path: hydrated.workspace_path}
+      updated_hydrated = %{
+        hydrated
+        | base_branch: "release/test",
+          workspace_path: hydrated.workspace_path
+      }
 
       assert {:ok, second} = Attach.create_or_update_attached_repo(source, updated_hydrated)
 
@@ -170,7 +174,19 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
     run_git!(["init", "--initial-branch=main", repo_root])
     File.write!(Path.join(repo_root, "README.md"), "# #{name}\n")
     run_git!(["-C", repo_root, "add", "README.md"])
-    run_git!(["-C", repo_root, "-c", "user.name=Kiln Test", "-c", "user.email=test@example.com", "commit", "-m", "initial"])
+
+    run_git!([
+      "-C",
+      repo_root,
+      "-c",
+      "user.name=Kiln Test",
+      "-c",
+      "user.email=test@example.com",
+      "commit",
+      "-m",
+      "initial"
+    ])
+
     repo_root
   end
 
@@ -180,7 +196,8 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
   end
 
   defp git_runner(["clone", source, destination], _opts) do
-    {output, status} = System.cmd("git", ["clone", "--quiet", source, destination], stderr_to_stdout: true)
+    {output, status} =
+      System.cmd("git", ["clone", "--quiet", source, destination], stderr_to_stdout: true)
 
     case status do
       0 -> {:ok, output}
