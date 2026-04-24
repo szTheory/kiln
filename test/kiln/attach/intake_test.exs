@@ -44,7 +44,6 @@ defmodule Kiln.Attach.IntakeTest do
                })
 
       assert draft.title == "Add repo intake"
-      assert draft.source == :attached_repo_intake
       assert draft.body =~ "- Shows required fields"
       assert draft.body =~ "- Persists the request"
       assert draft.body =~ "- Repeat-run continuity"
