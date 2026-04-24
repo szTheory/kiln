@@ -44,13 +44,13 @@ Phase 29 introduces the product-level choice that this milestone is about: opera
 
 **Goal**: Resolve one attached repository into a safe, usable writable workspace before any coding run mutates git state.
 **Depends on**: Phase 29
-**Plans**: 3 plans
+**Plans**: 3/3 plans complete
 
 Plans:
 
-- [ ] `30-01-PLAN.md` — accept and validate local-path or GitHub-URL attach sources
-- [ ] `30-02-PLAN.md` — hydrate or reuse one writable attached workspace with run-scoped metadata
-- [ ] `30-03-PLAN.md` — refuse dirty, detached, or missing-prerequisite repo states with explicit remediation
+- [x] `30-01-PLAN.md` — accept and validate local-path or GitHub-URL attach sources
+- [x] `30-02-PLAN.md` — hydrate or reuse one writable attached workspace with run-scoped metadata
+- [x] `30-03-PLAN.md` — refuse dirty, detached, or missing-prerequisite repo states with explicit remediation
 
 **Details:**
 Phase 30 handles the brownfield mechanics that the current greenfield-first flow never needed. Kiln must be able to resolve one repository, confirm it is usable, materialize or reuse the right local workspace, and stop early when the repo is unsafe to touch. This phase deliberately excludes multi-root, fork, and clone-to-stack behavior.

@@ -32,9 +32,9 @@ Last activity: 2026-04-24
 
 Active milestone: **v0.6.0 — Attach existing repo first** — [ROADMAP.md](ROADMAP.md) · [REQUIREMENTS.md](REQUIREMENTS.md) · [PROJECT.md](PROJECT.md)
 
-Last shipped phase: **29 — Attach entry surfaces** (**ATTACH-01**).
+Last shipped phase: **30 — Attach workspace hydration and safety gates** (**ATTACH-02, ATTACH-03, TRUST-02**).
 
-**Next command:** **`/gsd-execute-phase 30`** — begin attach workspace hydration and safety gates.
+**Next command:** **`/gsd-execute-phase 31`** — begin draft PR trust ramp and attach proof.
 
 ## Milestone note
 
@@ -57,6 +57,7 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 **Last phase execution:** 28 (First-run proof runtime closure) — completed 2026-04-24.
 **Last phase execution:** 29-01 (Attach entry surfaces) — completed 2026-04-24.
 **Last phase execution:** 29-02 (Attach entry surfaces) — completed 2026-04-24.
+**Last phase execution:** 30 (Attach workspace hydration and safety gates) — completed 2026-04-24.
 
 ## Accumulated Context
 
