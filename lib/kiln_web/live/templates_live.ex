@@ -318,9 +318,9 @@ defmodule KilnWeb.TemplatesLive do
           >
             <article class="rounded-xl border border-base-300 bg-base-100/50 p-5">
               <p class="kiln-eyebrow">Built-in templates</p>
-              <h2 class="kiln-h2 mt-2">Fastest way to learn Kiln or prove the first run</h2>
+              <h2 class="kiln-h2 mt-2">Fastest way to learn Kiln or prove the first run.</h2>
               <p class="mt-2 text-sm text-base-content/70">
-                Keep the `hello-kiln` path as the recommended first proof, then use the broader catalog once one believable run exists.
+                Keep `hello-kiln` as the recommended first proof path, then use the broader catalog once one believable run exists.
               </p>
             </article>
 
@@ -329,7 +329,9 @@ defmodule KilnWeb.TemplatesLive do
               class="rounded-xl border border-base-300 bg-base-100/50 p-5"
             >
               <p class="kiln-eyebrow">Attach existing repo</p>
-              <h2 class="kiln-h2 mt-2">Real-project path for bounded work on one codebase</h2>
+              <h2 class="kiln-h2 mt-2">
+                Real-project path for bounded work on one codebase you already own.
+              </h2>
               <p class="mt-2 text-sm text-base-content/70">
                 Supports a local path, an existing clone, or a GitHub URL. Validation and workspace safety checks happen in the next step.
               </p>

@@ -27,7 +27,10 @@ defmodule KilnWeb.AttachEntryLive do
           <p class="kiln-eyebrow">Attach existing repo</p>
           <h1 class="kiln-h1 mt-2">{@page_title}</h1>
           <p class="kiln-body mt-3 max-w-3xl text-sm">
-            Real-project path for bounded work on one codebase you already own. Attach supports a local path, an existing clone, or a GitHub URL without pretending validation has already happened.
+            Built-in templates are the fastest way to learn Kiln or prove the first run. Attach existing repo is the real-project path for bounded work on one codebase you already own.
+          </p>
+          <p class="kiln-meta mt-3 max-w-3xl">
+            Supports a local path, an existing clone, or a GitHub URL. Validation and workspace safety checks happen in the next step.
           </p>
           <div class="mt-4 flex flex-wrap gap-3 text-sm">
             <.link navigate={~p"/templates"} class="btn btn-primary btn-sm">

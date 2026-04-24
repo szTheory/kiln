@@ -199,10 +199,10 @@ defmodule KilnWeb.OnboardingLive do
             <p class="kiln-eyebrow">Recommended next step</p>
             <h2 class="kiln-h2 mt-2">Open the matching template</h2>
             <p class="kiln-body mt-2 text-sm">
-              This scenario points to a vetted starting surface instead of asking you to invent a blank first run.
+              Built-in templates are still the fastest way to learn Kiln or prove the first run without inventing a blank start.
             </p>
             <p id="onboarding-attach-path-note" class="kiln-meta mt-3">
-              Attach existing repo is the real-project branch for operators who already have code and want bounded work on one codebase.
+              Attach existing repo is the real-project branch for bounded work on one codebase you already own. It supports a local path, an existing clone, or a GitHub URL, and validation plus workspace safety checks happen next.
             </p>
             <div class="mt-4 flex flex-col gap-3">
               <.link
