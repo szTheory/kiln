@@ -104,7 +104,10 @@ defmodule Kiln.Runs do
           {:ok, Run.t()}
           | {:blocked, template_start_blocked()}
           | {:error,
-             Ecto.Changeset.t() | :unknown_template | :missing_api_key | {:workflow_load_failed, term()}}
+             Ecto.Changeset.t()
+             | :unknown_template
+             | :missing_api_key
+             | {:workflow_load_failed, term()}}
   def start_for_promoted_template(%Spec{} = spec, template_id, opts \\ [])
       when is_binary(template_id) do
     case OperatorSetup.first_blocker() do

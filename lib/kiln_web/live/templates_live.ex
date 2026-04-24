@@ -22,13 +22,13 @@ defmodule KilnWeb.TemplatesLive do
      |> assign(:page_title, "Templates")
      |> assign(:templates, templates)
      |> assign(:first_run_template, first_run_template(templates))
-      |> assign(:selected, nil)
-      |> assign(:setup_summary, OperatorSetup.summary())
-      |> assign(:last_promoted, nil)
-      |> assign(:return_to_path, nil)
-      |> assign(:use_busy?, false)
-      |> assign(:start_busy?, false)
-      |> assign(:edit_first_busy?, false)}
+     |> assign(:selected, nil)
+     |> assign(:setup_summary, OperatorSetup.summary())
+     |> assign(:last_promoted, nil)
+     |> assign(:return_to_path, nil)
+     |> assign(:use_busy?, false)
+     |> assign(:start_busy?, false)
+     |> assign(:edit_first_busy?, false)}
   end
 
   @impl true
