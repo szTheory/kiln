@@ -141,7 +141,9 @@ defmodule KilnWeb.AttachEntryLive do
               <% :untouched -> %>
                 <div id="attach-source-untouched" class="space-y-3">
                   <p class="kiln-eyebrow">Current state</p>
-                  <h3 class="text-base font-semibold text-base-content">Waiting for one repo source</h3>
+                  <h3 class="text-base font-semibold text-base-content">
+                    Waiting for one repo source
+                  </h3>
                   <p class="text-sm text-base-content/70">
                     Enter a local path, an existing clone, or a GitHub URL to verify that Kiln can identify one repo cleanly before any workspace step starts.
                   </p>

@@ -2,6 +2,7 @@ defmodule Kiln.Attach.SourceTest do
   use Kiln.DataCase, async: true
 
   alias Kiln.Attach
+
   describe "resolve_source/2" do
     test "resolves a local git repo path into the canonical source contract" do
       repo_root = make_git_repo!("kiln_attach_source_local")

@@ -63,7 +63,10 @@ defmodule Kiln.Attach.Source do
     cond do
       input == "" ->
         {:error,
-         error(:blank_source, raw_input, "Enter a local path or GitHub URL.",
+         error(
+           :blank_source,
+           raw_input,
+           "Enter a local path or GitHub URL.",
            "Provide a local repo path, an existing clone, or a GitHub URL."
          )}
 
@@ -82,7 +85,10 @@ defmodule Kiln.Attach.Source do
     cond do
       not File.exists?(expanded) ->
         {:error,
-         error(:path_not_found, expanded, "Path does not exist on this machine.",
+         error(
+           :path_not_found,
+           expanded,
+           "Path does not exist on this machine.",
            "Check the path and try again, or attach via a GitHub URL."
          )}
 
@@ -117,13 +123,19 @@ defmodule Kiln.Attach.Source do
 
           {:error, :not_a_git_repo} ->
             {:error,
-             error(:not_a_git_repo, expanded, "Path exists but is not inside a git repository.",
+             error(
+               :not_a_git_repo,
+               expanded,
+               "Path exists but is not inside a git repository.",
                "Choose a local git repo, an existing clone, or a GitHub URL."
              )}
 
           {:error, _reason} ->
             {:error,
-             error(:source_resolution_failed, expanded, "Could not resolve the repository root.",
+             error(
+               :source_resolution_failed,
+               expanded,
+               "Could not resolve the repository root.",
                "Try a different path or use a GitHub URL."
              )}
         end
@@ -131,29 +143,29 @@ defmodule Kiln.Attach.Source do
   end
 
   defp resolve_github_url(input) do
-    with {:ok, %{owner: owner, repo: repo, canonical_url: canonical_url}} <-
-           parse_github_url(input) do
-      {:ok,
-       %__MODULE__{
-         kind: :github_url,
-         input: input,
-         canonical_input: canonical_url,
-         canonical_root: nil,
-         repo_identity: %{
-           provider: :github,
-           host: "github.com",
-           owner: owner,
-           name: repo,
-           slug: "#{owner}/#{repo}"
-         },
-         remote_metadata: %{
-           url: canonical_url,
-           clone_url: "#{canonical_url}.git",
-           default_branch: nil,
-           head_sha: nil
-         }
-       }}
-    else
+    case parse_github_url(input) do
+      {:ok, %{owner: owner, repo: repo, canonical_url: canonical_url}} ->
+        {:ok,
+         %__MODULE__{
+           kind: :github_url,
+           input: input,
+           canonical_input: canonical_url,
+           canonical_root: nil,
+           repo_identity: %{
+             provider: :github,
+             host: "github.com",
+             owner: owner,
+             name: repo,
+             slug: "#{owner}/#{repo}"
+           },
+           remote_metadata: %{
+             url: canonical_url,
+             clone_url: "#{canonical_url}.git",
+             default_branch: nil,
+             head_sha: nil
+           }
+         }}
+
       :error ->
         unsupported_source(input)
     end
@@ -161,7 +173,10 @@ defmodule Kiln.Attach.Source do
 
   defp unsupported_source(input) do
     {:error,
-     error(:unsupported_source, input, "Only local paths and GitHub URLs are supported right now.",
+     error(
+       :unsupported_source,
+       input,
+       "Only local paths and GitHub URLs are supported right now.",
        "Use a local repo path, an existing clone, or a GitHub URL."
      )}
   end
