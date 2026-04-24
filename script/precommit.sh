@@ -45,6 +45,10 @@ if [ "$MIX_ENV" = "test" ] && [ "${PRECOMMIT_PRESERVE_DATABASE_URL:-0}" != "1" ]
   # `.env` and the caller shell are usually the developer's dev DB
   # contract. Precommit runs under MIX_ENV=test, so keep those values for
   # non-DB vars but force the CI-parity test database by default.
+  # The restricted runtime role is correct for app boot, but `mix check`
+  # also creates/migrates the test database and must not inherit a
+  # persistent `KILN_DB_ROLE=kiln_app` from `.env`.
+  unset KILN_DB_ROLE
   export DATABASE_URL="$(derive_test_database_url "${DATABASE_URL:-}")"
   verifier_source_url="${DATABASE_VERIFIER_URL:-$(derive_verifier_source_url "$DATABASE_URL")}"
   export DATABASE_VERIFIER_URL="$(
@@ -56,5 +60,14 @@ fi
 export SECRET_KEY_BASE="${SECRET_KEY_BASE:-ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx}"
 export PHX_HOST="${PHX_HOST:-localhost}"
 export PORT="${PORT:-4000}"
+
+if [ "$MIX_ENV" = "test" ]; then
+  # Keep local gates aligned with CI rather than inheriting a stale
+  # developer-owned `kiln_test` schema_migrations table from earlier
+  # role-switch experiments.
+  env -u KILN_DB_ROLE mix ecto.drop --quiet >/dev/null 2>&1 || true
+  env -u KILN_DB_ROLE mix ecto.create --quiet >/dev/null
+  env -u KILN_DB_ROLE mix ecto.migrate --quiet >/dev/null
+fi
 
 exec mix precommit "$@"

@@ -344,17 +344,15 @@ assert has_element?(run_view, "#run-detail")
 | A2 | One small Phase 27-specific LiveView test may be needed to make the setup-ready `/settings` -> `/templates` -> `/runs/:id` story explicit. | Summary / Architecture Patterns | Medium — if existing files are judged sufficient, the planner can skip this slice; if not, omitting it leaves the proof story fuzzier than the requirement wording. |
 | A3 | A task-level unit test for the new Mix task is worth adding. | Recommended Project Structure / Validation | Low — the wrapper can still work without a dedicated task test, but delegation regressions become easier to miss. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Do the existing LiveView files already satisfy the setup-ready story, or should Phase 27 add one narrow story test?**
-   - What we know: current tests cover `/settings`, blocked return context, and successful `/templates` -> `/runs/:id` navigation separately. [VERIFIED: test/kiln_web/live/settings_live_test.exs] [VERIFIED: test/kiln_web/live/templates_live_test.exs]
-   - What's unclear: whether planners want one explicit stitched story for “setup-ready operator flow” beyond those separate seams. [ASSUMED]
-   - Recommendation: decide this early in planning; if yes, keep it to one file and one coherent happy-path narrative. [ASSUMED]
+   - Resolution: Phase 27 should add one narrow stitched story seam in the existing focused LiveView proof so the setup-ready path reads explicitly as `/settings` -> `/templates/hello-kiln` -> `Start run` -> `/runs/:id`. This stays within the locked scope because it clarifies one coherent happy path without introducing a new harness or broadening into browser E2E. [RESOLVED]
+   - Planning consequence: keep the work inside the existing LiveView test files unless a tiny helper seam is clearly cleaner than forcing a brand-new file. [RESOLVED]
 
 2. **Should the wrapper use `Mix.Task.run/2` directly or shell out to `mix` subcommands?**
-   - What we know: the repo already uses both alias-backed wrappers and shell-backed wrappers. [VERIFIED: mix.exs] [VERIFIED: lib/mix/tasks/shift_left/verify.ex]
-   - What's unclear: whether planner preference is stronger isolation via shelling out or tighter task reuse in-process. [ASSUMED]
-   - Recommendation: prefer `Mix.Task.run/2` if it stays simple and keeps output understandable; otherwise shell out once per delegated layer, but do not duplicate any bootstrap logic. [ASSUMED]
+   - Resolution: implement the wrapper with `Mix.Task.run/2` so the task remains a thin in-process delegator with no duplicated bootstrap logic and no additional shell orchestration. Shelling out would add unnecessary indirection for a command whose only job is to call two existing Mix-owned layers in order. [RESOLVED]
+   - Planning consequence: the task contract should be pinned by a focused task-level test that fails if the delegated command list or order drifts. [RESOLVED]
 
 ## Environment Availability
 

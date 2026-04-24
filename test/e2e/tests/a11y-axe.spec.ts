@@ -31,6 +31,7 @@ const A11Y_ROUTES: { name: string; path: string }[] = [
   { name: "workflows-show", path: `/workflows/${fixtureIds.workflow_id}` },
   { name: "costs", path: "/costs" },
   { name: "providers", path: "/providers" },
+  { name: "settings", path: "/settings" },
   { name: "audit", path: "/audit" },
   { name: "spec-editor", path: `/specs/${fixtureIds.spec_id}/edit` },
 ];

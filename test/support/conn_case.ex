@@ -8,6 +8,8 @@ defmodule KilnWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Kiln.OperatorReadiness
+
   using do
     quote do
       # The default endpoint for testing
@@ -24,6 +26,17 @@ defmodule KilnWeb.ConnCase do
 
   setup tags do
     Kiln.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+
+    readiness =
+      if tags[:operator_readiness] == :keep do
+        nil
+      else
+        assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
+        assert {:ok, _} = OperatorReadiness.mark_step(:github, true)
+        assert {:ok, _} = OperatorReadiness.mark_step(:docker, true)
+        :ready
+      end
+
+    {:ok, conn: Phoenix.ConnTest.build_conn(), operator_readiness: readiness}
   end
 end

@@ -10,7 +10,29 @@ Kiln is a **software dark factory** — an Elixir/Phoenix LiveView application t
 
 That single promise is what the whole system must deliver. Every design tradeoff defers to it.
 
+## Current State
+
+**Shipped version:** `v0.5.0` on 2026-04-24
+
+Kiln now has one believable local-first path from readiness to a real live run. `/settings` is the canonical readiness and remediation surface, `hello-kiln` is the single recommended first live template, blocked launches route back to the first missing setup step, and `mix kiln.first_run.prove` now closes the repository-level proof under the intended runtime role.
+
+Accepted close debt remains planning/artifact debt rather than milestone-scope product failure: Phase 26 still has historical verification residue, Phase 27 remains historical/non-compliant for Nyquist purposes, and one orphan Phase 03 worktree todo was deferred at close.
+
+## Next Milestone Goals
+
+No next milestone is active yet.
+
+- Run `/gsd-new-milestone` to define the next milestone before reopening `REQUIREMENTS.md`.
+- Use the shipped v0.5.0 state as the new baseline rather than carrying forward stale active requirement checklists.
+- Triage accepted close debt early if the next milestone depends on clean planning routing or historical validation posture.
+
 ## Requirements
+
+### Active
+
+<!-- Current scope. Building toward these. -->
+
+- No active milestone requirements are open. Start the next scope with `/gsd-new-milestone`, which will recreate `REQUIREMENTS.md` for the next shipped slice.
 
 ### Validated
 
@@ -39,6 +61,9 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **DOCS-08** — Merge authority SSOT in `.planning/PROJECT.md` (`## Merge authority`) + compact README pointer to `#merge-authority`; Phase 12 `12-01-SUMMARY.md` cited for local PARTIAL vs CI — **Validated in Phase 22: merge-authority-operator-docs** (2026-04-23).
 - [x] **NYQ-01** — Phases 14, 16, 17, and 19 now end with explicit Nyquist compliant or waiver posture — **Validated in Phase 23: nyquist-validation-closure** (2026-04-23).
 - [x] **UAT-03** — Template -> run LiveView smoke with stable ids and verification citation — **Validated in Phase 24: template-run-uat-smoke** (2026-04-23).
+- [x] **SETUP-01**, **SETUP-02**, **DOCS-09** — Local readiness and documentation SSOT validated in **Phase 25: local-live-readiness-ssot** (2026-04-23).
+- [x] **LIVE-01**, **LIVE-02**, **LIVE-03** — First recommended live template run and proof-first run-detail flow validated in **Phase 26: first-live-template-run** (2026-04-24).
+- [x] **UAT-04** — Repository-level local first-run proof validated in **Phase 28: first-run-proof-runtime-closure** (2026-04-24).
 
 ### Out of Scope
 
@@ -118,11 +143,11 @@ This document evolves at phase transitions and milestone boundaries.
 ---
 ## Next Milestone Setup
 
-No milestone is currently open. **v0.4.0** shipped on 2026-04-23 and its requirements, roadmap snapshot, and audit now live under `.planning/milestones/`.
+**Current milestone:** none
+
+Define the next milestone before opening new execution work. `REQUIREMENTS.md` has been archived with v0.5.0, so the next planning loop should start by reopening milestone scope and success criteria rather than jumping straight to a numbered phase.
 
 **Next command:** `/gsd-new-milestone`
-
-Use the next milestone to define the next requirements slice, keep integer phase numbering moving forward from **25**, and decide whether backlog item **999.3** should remain parked or be promoted into milestone scope.
 
 ## Merge authority
 
@@ -153,15 +178,23 @@ CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **
 
 **Phase 21** (optional devcontainer) stays documented in `README.md` **below** the canonical host quick start; it does **not** replace GitHub Actions as merge authority for PRs to **`main`**.
 
-## Current State (as of 2026-04-23)
+## Release History (as of 2026-04-24)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
 - **v0.3.0 (Phases 14–21)** — **Shipped**; tag **`v0.3.0`**; archives `.planning/milestones/v0.3.0-ROADMAP.md`, `v0.3.0-REQUIREMENTS.md`, `v0.3.0-MILESTONE-AUDIT.md`. Execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21) with **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate; host Phoenix + Compose remains canonical.
 - **v0.4.0 (Phases 22–24)** — **Shipped**; tag **`v0.4.0`**; archives `.planning/milestones/v0.4.0-ROADMAP.md`, `v0.4.0-REQUIREMENTS.md`, and `v0.4.0-MILESTONE-AUDIT.md`. Scope: merge-authority SSOT, Nyquist closure for carried-over partial validations, and the template -> run LiveView regression.
+- **v0.5.0 (Phases 25–28)** — **Shipped**; tag **`v0.5.0`**; archives `.planning/milestones/v0.5.0-ROADMAP.md`, `v0.5.0-REQUIREMENTS.md`, and `v0.5.0-MILESTONE-AUDIT.md`. Scope: readiness/remediation SSOT, one recommended first local live template, backend launch preflight with `/settings` recovery, and rerun-backed repository first-run proof closure.
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
-- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
+- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** still means CI + Postgres-backed workstation remain merge authority for `mix check`. v0.5.0 also closed with accepted planning debt around Phase 26/27 historical artifacts and one deferred orphan-worktree todo.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
+<details>
+<summary>Archived pre-close milestone framing</summary>
+
+The pre-close v0.5.0 planning narrative focused on collapsing the distance between "Kiln looks promising" and "Kiln completed one real local run for me." That framing has now been fulfilled and archived under `.planning/milestones/v0.5.0-ROADMAP.md` and `.planning/milestones/v0.5.0-REQUIREMENTS.md`.
+
+</details>
+
 ---
-*Last updated: 2026-04-23 — v0.4.0 archived and ready for `/gsd-new-milestone`*
+*Last updated: 2026-04-24 — archived milestone v0.5.0 Local first success*

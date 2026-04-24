@@ -393,7 +393,8 @@ defmodule KilnWeb.RunDetailLive do
             <p class="kiln-eyebrow">Broader watch surface</p>
             <p class="kiln-h2 mt-2">Run board second</p>
             <p class="kiln-body mt-2 text-sm text-base-content/70">
-              The <span class="font-medium text-base-content">Run board</span> is the balcony for scanning many runs.
+              The <span class="font-medium text-base-content">Run board</span>
+              is the balcony for scanning many runs.
               Stay here for the first proof of life, then switch there when you want broader monitoring.
             </p>
             <div class="mt-3 flex flex-wrap gap-3 text-sm">

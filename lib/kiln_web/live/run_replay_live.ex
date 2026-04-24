@@ -218,6 +218,8 @@ defmodule KilnWeb.RunReplayLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div id="run-replay" data-run-id={@run.id} class="space-y-6 text-base-content">
         <div class="flex flex-wrap items-end justify-between gap-4 border-b border-base-300 pb-4">

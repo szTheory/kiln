@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.5.0
-milestone_name: — Local first success
-status: planning
-last_updated: "2026-04-24T01:58:30.767Z"
-last_activity: 2026-04-24 -- Phase 26 shipped with targeted verification
+milestone: none
+milestone_name: Awaiting next milestone definition
+status: idle
+last_updated: "2026-04-24T08:33:18.929Z"
+last_activity: 2026-04-24 -- v0.5.0 archived with accepted deferred items
 progress:
-  total_phases: 29
-  completed_phases: 26
-  total_plans: 104
-  completed_plans: 109
+  total_phases: 31
+  completed_phases: 28
+  total_plans: 110
+  completed_plans: 110
   percent: 100
 ---
 
@@ -23,22 +23,22 @@ See: [.planning/PROJECT.md](PROJECT.md)
 
 ## Current Position
 
-Phase: 27 (local-first-run-proof) — READY
-Plan: not started
-Status: Ready to plan/execute Phase 27
-Last activity: 2026-04-24 -- Phase 26 shipped with targeted verification
+Phase: none
+Plan: none
+Status: Waiting for next milestone definition
+Last activity: 2026-04-24 -- archived v0.5.0 Local first success
 
 ## Current focus
 
-**v0.5.0 — Local First Success** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [REQUIREMENTS.md](REQUIREMENTS.md)
+No milestone is currently active. The latest shipped slice is **v0.5.0 — Local first success** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md) · [MILESTONES.md](MILESTONES.md)
 
-Last shipped phase: **26 — First live template run** (**LIVE-01**, **LIVE-02**, **LIVE-03**). Current milestone now moves to the explicit local first-run proof slice.
+Last shipped phase: **28 — First-run proof runtime closure** (**UAT-04**).
 
-**Next command:** **`/gsd-plan-phase 27`** — plan the explicit local first-run proof slice.
+**Next command:** **`/gsd-new-milestone`** — define the next milestone and reopen `REQUIREMENTS.md`.
 
 ## Milestone note
 
-v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 continues integer phase numbering at **25** with **999.3** intentionally left in backlog.
+v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**. v0.5.0 now joins the archive set and leaves integer phase numbering ready for the next milestone when defined. **999.3** and **999.4** remain backlog work.
 
 ## Session continuity (recent CONTEXT files)
 
@@ -51,8 +51,17 @@ v0.3.0 remains archived at tag **`v0.3.0`**. v0.4.0 shipped at tag **`v0.4.0`**.
 **Last backlog execution:** 999.2 — shipped 2026-04-22.
 
 **Last phase execution:** 24 (Template -> run UAT smoke) — completed 2026-04-23.
-
 **Last phase execution:** 25 (Local live readiness SSOT) — completed 2026-04-23.
 **Last phase execution:** 26 (First live template run) — completed 2026-04-24.
+**Last phase execution:** 27 (Local first-run proof) — completed 2026-04-24 and later superseded for requirement ownership.
+**Last phase execution:** 28 (First-run proof runtime closure) — completed 2026-04-24.
 
-**Planned Phase:** 27 (Local first-run proof) — ready to plan
+## Accumulated Context
+
+## Deferred Items
+
+Items acknowledged and deferred at milestone close on 2026-04-24:
+
+| Category | Item | Status |
+|----------|------|--------|
+| todo | `2026-04-24-review-orphan-phase-03-worktree-residue.md` | acknowledged at v0.5.0 close |

@@ -133,6 +133,8 @@ defmodule KilnWeb.AuditLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div id="audit-ledger" class="space-y-6 text-base-content">
         <div class="border-b border-base-300 pb-4">

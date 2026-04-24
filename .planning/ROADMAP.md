@@ -1,6 +1,6 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **Milestone v0.5.0** (Phases **25–26** shipped; Phases **27–28** planned)
+**Updated:** 2026-04-24 — **No active milestone** (v0.5.0 shipped)
 
 **Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
 
@@ -10,68 +10,15 @@
 - ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md) · [v0.2.0-REQUIREMENTS.md](milestones/v0.2.0-REQUIREMENTS.md)
 - ✅ **v0.3.0 — Scale -> templates -> operator intelligence** — Phases **14–21** — [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md)
 - ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
-- 🚧 **v0.5.0 — Local first success** — Phases **25–28** — [REQUIREMENTS.md](REQUIREMENTS.md)
+- ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
 
-## Overview (v0.5.0)
+## Current posture
 
-Collapse the distance between "Kiln looks promising" and "Kiln completed one real local run for me." This milestone treats the first believable local success path as the highest-leverage product risk: readiness must be explicit, the recommended first live run must be obvious, and one automated proof path must show that the journey actually works. Phase 25 now establishes `/settings` as the canonical live-readiness remediation surface while preserving host Phoenix + Compose as the primary local trial path.
+No active milestone is open. Start the next slice with `/gsd-new-milestone` so `PROJECT.md`, `REQUIREMENTS.md`, and `ROADMAP.md` can be reopened around a fresh goal instead of carrying forward stale execution detail.
 
-## Phases (v0.5.0)
+## Latest shipped milestone
 
-- [x] **Phase 25: Local live readiness SSOT** — SETUP-01, SETUP-02, DOCS-09 — completed 2026-04-23
-- [x] **Phase 26: First live template run** — LIVE-01, LIVE-02, LIVE-03 — completed 2026-04-24
-- [ ] **Phase 27: Local first-run proof** — initial proof-command slice; superseded by audit-backed closure in Phase 28
-- [ ] **Phase 28: First-run proof runtime closure** — UAT-04
-
-**Parking / decimals:** Keep using **999.x** only for ad-hoc backlog execution outside the integer milestone flow. **999.3** stays parked during v0.5.0.
-
-## Phase details (v0.5.0)
-
-### Phase 25: Local live readiness SSOT
-**Status:** Shipped 2026-04-23 via `25-01-PLAN.md`, `25-02-PLAN.md`, and `25-03-PLAN.md`  
-**Goal:** Make live readiness operational rather than informational so the operator can tell, from one surface, whether Kiln is ready for a real local run and what to fix next.  
-**Requirements:** SETUP-01, SETUP-02, DOCS-09  
-**Success criteria (observable):**
-1. Operator-facing readiness now shows the local prerequisites that matter for a live run without exposing secrets, using `/settings` as the canonical checklist.
-2. Missing prerequisites now produce direct remediation guidance and a recommended next action, and readiness-aware surfaces route recovery back to `/settings`.
-3. README and planning docs now describe one canonical local trial path, with host Phoenix + Compose still primary and the devcontainer explicitly secondary.
-
-### Phase 26: First live template run
-**Status:** Shipped 2026-04-24 via `26-01-PLAN.md`, `26-02-PLAN.md`, and `26-03-PLAN.md`  
-**Goal:** Turn the existing template/run surfaces into one trustworthy first live run path instead of making the operator guess where to start.  
-**Requirements:** LIVE-01, LIVE-02, LIVE-03  
-**Success criteria:**
-1. One built-in template is clearly presented as the recommended first local live run.
-2. Starting a live run performs a readiness preflight and routes the operator back to the missing prerequisite when blocked.
-3. Once ready, the operator can launch a believable local live run and see enough detail to confirm Kiln is actually operating.
-
-### Phase 27: Local first-run proof
-**Goal:** Leave the milestone with one explicit, repeatable proof that the local operator journey works end to end.  
-**Requirements:** Superseded by Phase 28 after the milestone audit contradicted the original proof claim.  
-**Plans:** 1 plan
-
-Plans:
-- [ ] `27-01-PLAN.md` — Add the dedicated first-run proof command, one small setup-ready story seam, and exact verification citation
-
-**Audit status:** The wrapper command and focused LiveView seam landed, but the 2026-04-24 milestone audit re-ran `mix kiln.first_run.prove` and found the delegated `integration.first_run` layer still fails before `/health` because the runtime DB role cannot access `oban_jobs`. Phase 28 owns the reopened requirement closure.
-
-**Success criteria:**
-1. The repository contains one automated proof path for setup-ready operator flow -> first live run.
-2. The phase verification artifact cites the exact command used to prove the path.
-
-### Phase 28: First-run proof runtime closure
-**Goal:** Close the real repository-level first-run proof gap by fixing the integration boot contract, rerunning the owning proof command end to end, and reconciling the contradicted milestone artifacts.  
-**Requirements:** UAT-04  
-**Gap Closure:** Closes the v0.5.0 milestone audit requirement, integration, and flow gaps around `mix kiln.first_run.prove`.  
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD — plan with `$gsd-plan-phase 28`
-
-**Success criteria:**
-1. `mix kiln.first_run.prove` completes successfully from the repository root and reaches the expected `/health` confirmation inside the delegated integration layer.
-2. The runtime/app-start contract no longer fails on `oban_jobs` permissions during the proof path.
-3. `27-VERIFICATION.md`, `ROADMAP.md`, and `REQUIREMENTS.md` agree on the final proof status after the rerun.
+**v0.5.0 — Local first success** shipped on 2026-04-24 with phases **25–28**. Archive: [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md).
 
 <details>
 <summary>✅ v0.4.0 (Phases 22–24) — SHIPPED 2026-04-23</summary>
@@ -122,6 +69,20 @@ Plans:
 - [x] 999.2-02 — `KilnWeb.OperatorChromeHook` (assigns + 5s refresh)
 - [x] 999.2-03 — `Layouts.app` chrome + LiveView tests
 
+### Phase 999.4: Planning state and validation debt cleanup (BACKLOG)
+
+**Goal:** Clean up the non-blocking artifact debt left after v0.5.0 closure so planning routing is trustworthy again, historical verification artifacts no longer imply stale failures, and the remaining orphan worktree residue is either incorporated deliberately or removed cleanly.
+
+**Requirements:** TBD (promote with `/gsd-review-backlog`).
+
+**Canonical refs (seed):** `.planning/milestones/v0.5.0-MILESTONE-AUDIT.md`, `.planning/STATE.md`, `.planning/phases/26-first-live-template-run/26-VERIFICATION.md`, `.planning/phases/26-first-live-template-run/deferred-items.md`, `.planning/phases/27-local-first-run-proof/27-VALIDATION.md`, `.planning/todos/pending/2026-04-24-review-orphan-phase-03-worktree-residue.md`.
+
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ### Phase 999.3: Immersive code graph visualization and Kiln-native microcopy (BACKLOG)
 
 **Goal:** Explore a **web-native, highly intuitive code understanding surface** for Kiln that lets operators and builders visually inspect and navigate code, relationships, and system behavior without dropping into raw file trees first. Prefer **HTML/CSS/JS-native** approaches where possible (including D3-class graphing or other lightweight browser visualization), with richer rendering options only if they materially improve clarity. In parallel, raise the quality bar for **toast notifications and operator-facing UX microcopy** so status updates feel clear, persona-aware, and distinctly **Kiln-native** rather than generic programmer text.
@@ -135,4 +96,4 @@ Plans:
 - [ ] TBD (promote with `/gsd-review-backlog` when ready)
 
 ---
-*Milestone v0.5.0 updated: 2026-04-24 after milestone audit gap planning*
+*Milestone v0.5.0 archived: 2026-04-24*

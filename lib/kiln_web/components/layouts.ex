@@ -49,6 +49,14 @@ defmodule KilnWeb.Layouts do
     doc:
       "Phase 999.2 provider snapshot rows (see `Kiln.ModelRegistry.provider_health_snapshots/0`)"
 
+  attr :operator_demo_scenario, :map,
+    default: nil,
+    doc: "Current first-use journey scenario from `OperatorChromeHook`"
+
+  attr :operator_demo_scenarios, :list,
+    default: [],
+    doc: "Available first-use journey scenarios from `OperatorChromeHook`"
+
   attr :chrome_mode, :atom,
     default: :full,
     values: [:full, :minimal],
@@ -70,36 +78,65 @@ defmodule KilnWeb.Layouts do
             <span class="kiln-brand-mark font-sans text-sm font-semibold tracking-tight">Kiln</span>
           </.link>
         </div>
-        <nav class="flex-none" aria-label="Operator">
-          <ul class="flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2">
-            <li>
-              <.link class="kiln-nav-link font-sans" navigate={~p"/workflows"}>Workflows</.link>
-            </li>
-            <li>
-              <.link class="kiln-nav-link font-sans" navigate={~p"/inbox"}>Inbox</.link>
-            </li>
-            <li>
-              <.link class="kiln-nav-link font-sans" navigate={~p"/costs"}>Costs</.link>
-            </li>
-            <li>
-              <.link class="kiln-nav-link font-sans" navigate={~p"/providers"}>Providers</.link>
-            </li>
-            <li>
-              <.link class="kiln-nav-link font-sans" navigate={~p"/audit"}>Audit</.link>
-            </li>
-            <li class="hidden sm:list-item">
-              <.link class="kiln-nav-link font-sans" navigate={~p"/ops/dashboard"}>
-                LiveDashboard
-              </.link>
-            </li>
-            <li class="hidden sm:list-item">
-              <.link class="kiln-nav-link font-sans" navigate={~p"/ops/oban"}>Oban</.link>
-            </li>
-            <li class="pl-1">
-              <.theme_toggle />
-            </li>
-          </ul>
-        </nav>
+        <div class="flex flex-none flex-wrap items-center justify-end gap-3">
+          <.operator_mode_control mode={@operator_runtime_mode} />
+          <.operator_scenario_control
+            scenario={@operator_demo_scenario}
+            scenarios={@operator_demo_scenarios}
+          />
+          <nav aria-label="Operator">
+            <ul class="flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2">
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/"}>Runs</.link>
+              </li>
+              <li>
+                <.link
+                  class="kiln-nav-link font-sans"
+                  navigate={templates_path(@operator_demo_scenario)}
+                >
+                  Start
+                </.link>
+              </li>
+              <li>
+                <.link
+                  class="kiln-nav-link font-sans"
+                  navigate={onboarding_path(@operator_demo_scenario)}
+                >
+                  Setup
+                </.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/inbox"}>Inbox</.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/workflows"}>Workflows</.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/costs"}>Costs</.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/providers"}>Providers</.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/settings"}>Settings</.link>
+              </li>
+              <li>
+                <.link class="kiln-nav-link font-sans" navigate={~p"/audit"}>Audit</.link>
+              </li>
+              <li class="hidden sm:list-item">
+                <.link class="kiln-nav-link font-sans" navigate={~p"/ops/dashboard"}>
+                  LiveDashboard
+                </.link>
+              </li>
+              <li class="hidden sm:list-item">
+                <.link class="kiln-nav-link font-sans" navigate={~p"/ops/oban"}>Oban</.link>
+              </li>
+              <li class="pl-1">
+                <.theme_toggle />
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
 
       <%= if @chrome_mode == :full do %>
@@ -222,4 +259,10 @@ defmodule KilnWeb.Layouts do
     </div>
     """
   end
+
+  defp onboarding_path(nil), do: ~p"/onboarding"
+  defp onboarding_path(scenario), do: ~p"/onboarding?scenario=#{scenario.id}"
+
+  defp templates_path(nil), do: ~p"/templates"
+  defp templates_path(scenario), do: ~p"/templates?scenario=#{scenario.id}"
 end

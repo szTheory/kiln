@@ -6,6 +6,7 @@ defmodule KilnWeb.ProviderHealthLive do
   use KilnWeb, :live_view
 
   alias Kiln.ModelRegistry
+  alias Kiln.OperatorSetup
 
   @default_poll_ms 5_000
 
@@ -17,6 +18,7 @@ defmodule KilnWeb.ProviderHealthLive do
       socket
       |> assign(:page_title, "Providers")
       |> assign(:poll_ms, poll_ms)
+      |> assign(:setup_summary, OperatorSetup.summary())
       |> assign(:snapshots, ModelRegistry.provider_health_snapshots())
 
     if connected?(socket) do
@@ -28,7 +30,10 @@ defmodule KilnWeb.ProviderHealthLive do
 
   @impl true
   def handle_params(_params, _uri, socket) do
-    {:noreply, assign(socket, :snapshots, ModelRegistry.provider_health_snapshots())}
+    {:noreply,
+     socket
+     |> assign(:setup_summary, OperatorSetup.summary())
+     |> assign(:snapshots, ModelRegistry.provider_health_snapshots())}
   end
 
   @impl true
@@ -37,6 +42,7 @@ defmodule KilnWeb.ProviderHealthLive do
 
     {:noreply,
      socket
+     |> assign(:setup_summary, OperatorSetup.summary())
      |> assign(:snapshots, ModelRegistry.provider_health_snapshots())}
   end
 
@@ -54,6 +60,8 @@ defmodule KilnWeb.ProviderHealthLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div id="provider-health" class="space-y-6">
         <div class="border-b border-base-300 pb-4">
@@ -63,6 +71,40 @@ defmodule KilnWeb.ProviderHealthLive do
             API presence and recent outcomes (poll every {@poll_ms |> div(1000)}s). Keys are never shown.
           </p>
         </div>
+
+        <section
+          id="provider-health-journey"
+          class="rounded-xl border border-base-300 bg-base-200 p-5"
+        >
+          <p class="kiln-eyebrow">Current journey</p>
+          <h2 class="kiln-h2 mt-2">{@operator_demo_scenario.title}</h2>
+          <p class="kiln-body mt-2 text-sm">
+            {journey_copy(@operator_demo_scenario)}
+          </p>
+        </section>
+
+        <%= if @operator_runtime_mode == :live and not @setup_summary.ready? do %>
+          <section
+            id="provider-health-live-hero"
+            class="rounded-xl border border-warning/60 bg-warning/10 p-5"
+          >
+            <p class="kiln-eyebrow">Disconnected live state</p>
+            <h2 class="kiln-h2 mt-2">
+              Provider health is visible, but live readiness is still incomplete
+            </h2>
+            <p class="kiln-body mt-2 text-sm">
+              This page can show provider presence and recent outcomes, but the rest of the live flow will keep pointing back to settings until the local essentials are ready.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-3 text-sm">
+              <.link navigate={~p"/settings"} class="btn btn-primary btn-sm">
+                Open settings checklist
+              </.link>
+              <.link navigate={~p"/onboarding"} class="link link-primary">
+                Return to onboarding
+              </.link>
+            </div>
+          </section>
+        <% end %>
 
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <%= for snap <- @snapshots do %>
@@ -164,4 +206,16 @@ defmodule KilnWeb.ProviderHealthLive do
 
   defp format_budget(nil), do: "—"
   defp format_budget(%Decimal{} = d), do: Decimal.to_string(d, :normal)
+
+  defp journey_copy(%{id: "operator-triage-readiness"}) do
+    "Use this page to confirm that provider presence, missing configuration, and degraded-state cues match the readiness story elsewhere in the shell."
+  end
+
+  defp journey_copy(%{id: "gameboy-first-project"}) do
+    "This page should make it obvious whether the Game Boy path is still demo-safe only or genuinely ready for live external work."
+  end
+
+  defp journey_copy(_) do
+    "This page should reassure a first-time operator that demo exploration is cheap while live readiness remains transparent and honest."
+  end
 end

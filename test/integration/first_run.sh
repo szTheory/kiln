@@ -87,8 +87,8 @@ done
 echo "[first_run] mix setup (KILN_DB_ROLE=kiln_owner for DDL)..."
 KILN_DB_ROLE=kiln_owner mix setup
 
-echo "[first_run] starting phx.server in background..."
-mix phx.server &
+echo "[first_run] starting phx.server in background as kiln_app..."
+KILN_DB_ROLE=kiln_app mix phx.server &
 SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
 

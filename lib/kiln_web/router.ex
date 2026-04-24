@@ -41,6 +41,7 @@ defmodule KilnWeb.Router do
       live "/workflows/:workflow_id", WorkflowLive, :show
       live "/costs", CostLive, :index
       live "/providers", ProviderHealthLive, :index
+      live "/settings", SettingsLive, :index
       live "/audit", AuditLive, :index
       live "/specs/:id/edit", SpecEditorLive, :edit
     end

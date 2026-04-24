@@ -14,6 +14,7 @@ defmodule KilnWeb.RunBoardLive do
 
   use KilnWeb, :live_view
 
+  alias Kiln.OperatorSetup
   alias Kiln.Runs
   alias Kiln.Runs.Run
 
@@ -40,7 +41,9 @@ defmodule KilnWeb.RunBoardLive do
     socket =
       socket
       |> assign(:page_title, "Runs")
+      |> assign(:setup_summary, OperatorSetup.summary())
       |> assign(:run_states, run_states)
+      |> assign(:state_counts, count_states(run_states))
       |> assign(:runs_empty?, runs == [])
       |> assign(:compare_baseline_id, nil)
       |> assign(:compare_candidate_id, nil)
@@ -84,7 +87,13 @@ defmodule KilnWeb.RunBoardLive do
       socket
       |> delete_from_old_stream(old, run)
       |> stream_insert(stream_for(run.state), run)
-      |> assign(:run_states, Map.put(socket.assigns.run_states, run.id, run.state))
+      |> then(fn acc ->
+        run_states = Map.put(acc.assigns.run_states, run.id, run.state)
+
+        acc
+        |> assign(:run_states, run_states)
+        |> assign(:state_counts, count_states(run_states))
+      end)
       |> assign(:runs_empty?, false)
 
     {:noreply, socket}
@@ -148,14 +157,65 @@ defmodule KilnWeb.RunBoardLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div id="run-board" class="space-y-6">
         <div class="border-b border-base-300 pb-4">
           <p class="kiln-eyebrow">Factory</p>
           <h1 class="kiln-h1 mt-1">Runs</h1>
           <p class="kiln-meta mt-1">
-            Active and terminal runs for this factory.
+            This is the default operator balcony: start from templates, watch active work here, then open run detail when you need proof.
           </p>
+          <div id="run-board-overview" class="mt-4 grid gap-3 lg:grid-cols-3">
+            <section class="rounded-xl border border-base-300 bg-base-200 p-4">
+              <p id="run-board-journey-title" class="kiln-eyebrow">
+                {journey_title(@operator_demo_scenario)}
+              </p>
+              <p class="kiln-body mt-2 text-sm text-base-content/70">
+                {journey_copy(@operator_demo_scenario, @operator_runtime_mode)}
+              </p>
+              <div class="mt-3 flex flex-wrap gap-3 text-sm">
+                <.link navigate={onboarding_path(@operator_demo_scenario)} class="link link-primary">
+                  Open setup
+                </.link>
+                <.link navigate={templates_path(@operator_demo_scenario)} class="link link-primary">
+                  Browse templates
+                </.link>
+              </div>
+            </section>
+            <section id="run-board-watch" class="rounded-xl border border-base-300 bg-base-200 p-4">
+              <p class="kiln-eyebrow">Factory now</p>
+              <dl class="mt-3 grid grid-cols-3 gap-3 text-sm">
+                <div>
+                  <dt class="kiln-meta">Active</dt>
+                  <dd class="kiln-h2 mt-1">{active_count(@state_counts)}</dd>
+                </div>
+                <div>
+                  <dt class="kiln-meta">Blocked</dt>
+                  <dd class={[
+                    "kiln-h2 mt-1",
+                    @state_counts.blocked > 0 && "text-warning"
+                  ]}>
+                    {@state_counts.blocked}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="kiln-meta">Finished</dt>
+                  <dd class="kiln-h2 mt-1">{finished_count(@state_counts)}</dd>
+                </div>
+              </dl>
+            </section>
+            <section
+              id="run-board-attention"
+              class="rounded-xl border border-base-300 bg-base-200 p-4"
+            >
+              <p class="kiln-eyebrow">Needs attention</p>
+              <p class="kiln-body mt-2 text-sm text-base-content/70">
+                {attention_copy(@state_counts)}
+              </p>
+            </section>
+          </div>
           <div
             id="compare-strip"
             class="card card-bordered bg-base-200 border-base-300 mt-4"
@@ -188,17 +248,48 @@ defmodule KilnWeb.RunBoardLive do
           </div>
         </div>
 
+        <%= if @operator_runtime_mode == :live and not @setup_summary.ready? do %>
+          <section
+            id="run-board-live-hero"
+            class="rounded-xl border border-warning/60 bg-warning/10 p-5"
+          >
+            <p class="kiln-eyebrow">Disconnected live state</p>
+            <h2 class="kiln-h2 mt-2">
+              You can monitor the balcony, but live execution is not ready yet
+            </h2>
+            <p class="kiln-body mt-2 text-sm">
+              The run board stays available for situational awareness. Starting a believable first live project still depends on completing the local settings checklist.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-3 text-sm">
+              <.link navigate={~p"/settings"} class="btn btn-primary btn-sm">
+                Open settings checklist
+              </.link>
+              <.link navigate={~p"/templates"} class="link link-primary">
+                Browse templates anyway
+              </.link>
+            </div>
+          </section>
+        <% end %>
+
         <%= if @runs_empty? do %>
           <section class="card card-bordered bg-base-200 border-base-300">
             <div class="card-body p-8">
               <h2 class="kiln-h2">No runs in flight</h2>
               <p class="kiln-body text-base-content/70 mt-2 max-w-xl">
-                Start a run from the workflow registry when you are ready. New activity appears here in real time.
+                New activity appears here in real time. The fastest first path is setup, then templates, then this board once a run is active.
               </p>
+              <div class="mt-4 flex flex-wrap gap-3 text-sm">
+                <.link navigate={onboarding_path(@operator_demo_scenario)} class="link link-primary">
+                  Verify setup
+                </.link>
+                <.link navigate={templates_path(@operator_demo_scenario)} class="link link-primary">
+                  Start from a template
+                </.link>
+              </div>
             </div>
           </section>
         <% else %>
-          <div class="grid gap-4 overflow-x-auto pb-4 lg:grid-cols-9">
+          <div id="run-board-lanes" class="grid gap-4 overflow-x-auto pb-4 lg:grid-cols-9">
             <section
               class="flex min-w-[10.5rem] flex-col gap-2 rounded-lg border border-base-300 bg-base-200 p-2.5"
               data-state="queued"
@@ -389,12 +480,14 @@ defmodule KilnWeb.RunBoardLive do
       assigns
       |> assign(:stages_done, stages_done)
       |> assign(:stages_total, stages_total)
+      |> assign(:state_label, pretty_state(assigns.run.state))
 
     ~H"""
-    <div class="truncate font-semibold text-primary" title={@run.id}>
-      {short_id(@run.id)}
+    <div class="truncate text-[11px] uppercase tracking-wide text-base-content/50" title={@run.id}>
+      Run {short_id(@run.id)}
     </div>
-    <div class="mt-1 truncate text-base-content/60">{@run.workflow_id}</div>
+    <div class="mt-1 truncate font-semibold text-primary">{@run.workflow_id}</div>
+    <div class="mt-1 text-[11px] text-base-content/60">{@state_label}</div>
     <div class="mt-2">
       <%!-- RunProgress (UI-08) --%>
       <.run_progress
@@ -404,7 +497,10 @@ defmodule KilnWeb.RunBoardLive do
         last_activity_at={@run.updated_at}
       />
     </div>
-    <div class="mt-2 flex gap-1">
+    <div class="mt-2 flex flex-wrap gap-1">
+      <.link navigate={~p"/runs/#{@run.id}"} class="btn btn-xs btn-primary">
+        Inspect
+      </.link>
       <button
         type="button"
         phx-click="pick_compare_slot"
@@ -426,6 +522,63 @@ defmodule KilnWeb.RunBoardLive do
     </div>
     """
   end
+
+  defp count_states(run_states) do
+    base = Map.new(Run.states(), &{&1, 0})
+
+    Enum.reduce(run_states, base, fn {_id, state}, acc ->
+      Map.update(acc, state, 1, &(&1 + 1))
+    end)
+  end
+
+  defp active_count(counts) do
+    counts.planning + counts.coding + counts.testing + counts.verifying
+  end
+
+  defp finished_count(counts) do
+    counts.merged + counts.failed + counts.escalated
+  end
+
+  defp attention_copy(%{blocked: blocked, escalated: escalated, failed: failed})
+       when blocked + escalated + failed == 0 do
+    "Nothing is asking for the operator right now. Keep this page open to watch progress as runs move."
+  end
+
+  defp attention_copy(%{blocked: blocked, escalated: escalated, failed: failed}) do
+    "Attention on #{blocked} blocked, #{failed} failed, and #{escalated} escalated runs. Open the affected run detail to see the exact stage and next action."
+  end
+
+  defp journey_title(%{title: title}), do: "Current journey: #{title}"
+  defp journey_title(_), do: "Start a run"
+
+  defp journey_copy(%{id: "solo-founder-fast-proof"}, :live) do
+    "You already know the fastest proof path. If setup is healthy, promote the smallest believable template and let the board become the balcony for your first live attempt."
+  end
+
+  defp journey_copy(%{id: "operator-triage-readiness"}, _mode) do
+    "Use this board to confirm the shell makes blocker states obvious after you check settings, provider health, and the first template path."
+  end
+
+  defp journey_copy(%{id: "gameboy-first-project"}, :live) do
+    "This is the best place to watch the Game Boy path once you leave demo safety. Verify setup first, then launch the vetted vertical slice instead of inventing a blank first project."
+  end
+
+  defp journey_copy(%{id: "gameboy-first-project"}, _mode) do
+    "If you are dogfooding soon, verify setup first and use the Game Boy vertical slice as the believable bridge from demo familiarity into a real project path."
+  end
+
+  defp journey_copy(_, _mode) do
+    "If you are dogfooding soon, verify setup first and use a vetted template instead of a blank first spec."
+  end
+
+  defp pretty_state(state),
+    do: state |> to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp onboarding_path(nil), do: ~p"/onboarding"
+  defp onboarding_path(scenario), do: ~p"/onboarding?scenario=#{scenario.id}"
+
+  defp templates_path(nil), do: ~p"/templates"
+  defp templates_path(scenario), do: ~p"/templates?scenario=#{scenario.id}"
 
   defp run_stage_slot(state) do
     case Enum.find_index(Run.states(), &(&1 == state)) do

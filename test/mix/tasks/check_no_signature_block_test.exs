@@ -42,37 +42,41 @@ defmodule Mix.Tasks.CheckNoSignatureBlockTest do
   end
 
   test "fails with shutdown-1 when a priv/workflows/*.yaml has a non-null signature" do
-    # Ship a minimally-valid shaped workflow whose only defect is the
-    # non-null `signature:` block. Plan 02-00 ships the analogous
-    # rejection fixture under test/support/fixtures/workflows/, but THAT
-    # path is out of scope for the gate's priv/workflows/*.yaml glob —
-    # we need a fresh file under priv/workflows/ for this test.
-    File.write!(@bogus_file, """
-    apiVersion: kiln.dev/v1
-    id: bogus
-    version: 1
-    metadata:
-      description: "test"
-    signature:
-      alg: sigstore
-      bundle: AAAA
-    spec:
-      caps:
-        max_retries: 3
-        max_tokens_usd: 1
-        max_elapsed_seconds: 60
-        max_stage_duration_seconds: 30
-      model_profile: elixir_lib
-      stages: []
-    """)
+    try do
+      # Ship a minimally-valid shaped workflow whose only defect is the
+      # non-null `signature:` block. Plan 02-00 ships the analogous
+      # rejection fixture under test/support/fixtures/workflows/, but THAT
+      # path is out of scope for the gate's priv/workflows/*.yaml glob —
+      # we need a fresh file under priv/workflows/ for this test.
+      File.write!(@bogus_file, """
+      apiVersion: kiln.dev/v1
+      id: bogus
+      version: 1
+      metadata:
+        description: "test"
+      signature:
+        alg: sigstore
+        bundle: AAAA
+      spec:
+        caps:
+          max_retries: 3
+          max_tokens_usd: 1
+          max_elapsed_seconds: 60
+          max_stage_duration_seconds: 30
+        model_profile: elixir_lib
+        stages: []
+      """)
 
-    result =
-      try do
-        CheckNoSignatureBlock.run([])
-      catch
-        :exit, reason -> {:exited, reason}
-      end
+      result =
+        try do
+          CheckNoSignatureBlock.run([])
+        catch
+          :exit, reason -> {:exited, reason}
+        end
 
-    assert {:exited, {:shutdown, 1}} = result
+      assert {:exited, {:shutdown, 1}} = result
+    after
+      File.rm(@bogus_file)
+    end
   end
 end

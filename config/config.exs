@@ -104,6 +104,8 @@ config :kiln, Oban,
      ]}
   ]
 
+config :oban_met, reporter: [auto_migrate: false]
+
 # LoggerJSON (D-45, D-46, D-47) — structured JSON logging with the six
 # mandatory metadata keys on every log line (OBS-01). Two parts:
 #

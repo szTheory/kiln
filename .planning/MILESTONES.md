@@ -2,6 +2,21 @@
 
 Living summary of shipped versions. Detailed phase history lives under `.planning/milestones/` and `.planning/phases/`.
 
+## v0.5.0 — Local first success
+
+**Shipped:** 2026-04-24  
+**Phases:** 25–28 (**4** phases, **8** plans, **17** recorded tasks)  
+**Archives:** [v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)  
+**Tag:** `v0.5.0`
+
+**What shipped**
+
+1. **Local readiness SSOT** — SETUP-01 / SETUP-02 / DOCS-09 made `/settings` the live-readiness and remediation authority, fixed false-ready defaults, and aligned the docs around one host-first local trial path.
+2. **First live run path** — LIVE-01 / LIVE-02 / LIVE-03 promoted `hello-kiln` into the single recommended first local run, moved launch preflight into the backend, and made `/runs/:id` the proof-first arrival surface.
+3. **Repository-level first-run proof** — Phase 27 introduced the owning `mix kiln.first_run.prove` command, and Phase 28 repaired the Oban/runtime seam so `UAT-04` now closes on rerun-backed repository evidence.
+
+**Milestone audit:** Ready to close with accepted tech debt on 2026-04-24. Known deferred items at close: 1 (see `STATE.md` Deferred Items).
+
 ## v0.4.0 — Trust, docs & validation closure
 
 **Shipped:** 2026-04-23  

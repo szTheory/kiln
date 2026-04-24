@@ -1,11 +1,20 @@
+---
+status: superseded
+phase: 27-local-first-run-proof
+verified: 2026-04-24
+superseded_by: 28-first-run-proof-runtime-closure
+requirements: []
+---
+
 # Phase 27 Verification
 
 ## Owning Proof Command
 
 `mix kiln.first_run.prove`
 
-Phase 27 cites this one command as the setup-ready local first-run proof for `UAT-04`.
-It is intentionally narrower than `mix shift_left.verify` and broader than a LiveView-only check.
+Phase 27 introduced this command, but it no longer owns `UAT-04` closure.
+Phase 28 reran the same command after the runtime-role repair and now carries the
+final verification authority.
 
 ## Delegated Layers
 
@@ -19,6 +28,10 @@ It is intentionally narrower than `mix shift_left.verify` and broader than a Liv
 This command is the Phase 27 proof for the setup-ready local first-run journey only.
 It does not claim to replace the broader merge-authority suite, `mix shift_left.verify`, or direct shell ownership of `test/integration/first_run.sh`.
 
-## Execution Note
+## Historical Note
 
-Verified on 2026-04-24 with `mix kiln.first_run.prove`. The local topology layer reached `/health` with `status="ok"` and the focused LiveView layer passed the targeted `templates` and `run_detail` suites in `MIX_ENV=test`.
+The command and focused LiveView seam landed in Phase 27. The original
+completion claim was later contradicted by the milestone audit, which found the
+delegated integration layer still failing on `oban_jobs` before `/health`.
+Phase 28 repaired that runtime seam and reran the same top-level command, so
+this artifact is retained as historical context only.

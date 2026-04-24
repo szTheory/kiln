@@ -33,6 +33,95 @@ defmodule KilnWeb.Components.OperatorChrome do
     """
   end
 
+  attr :mode, :atom, required: true
+
+  def operator_mode_control(assigns) do
+    mode_value =
+      case assigns.mode do
+        :live -> "live"
+        _ -> "demo"
+      end
+
+    assigns =
+      assigns
+      |> assign(:mode_value, mode_value)
+      |> assign(
+        :mode_form,
+        Phoenix.Component.to_form(%{"operator_mode" => mode_value}, as: :runtime_mode)
+      )
+
+    ~H"""
+    <.form
+      for={@mode_form}
+      id="operator-mode-form"
+      phx-change="operator:set_mode_form"
+      phx-hook="OperatorModeControl"
+      data-current-mode={@mode_value}
+      class="min-w-[12rem]"
+    >
+      <label for="operator-mode-select" class="kiln-status-numeric__label mb-1 block">
+        Runtime mode
+      </label>
+      <select
+        id="operator-mode-select"
+        name={@mode_form[:operator_mode].name}
+        class="select select-bordered h-10 w-full border-base-300 bg-base-100 text-sm"
+      >
+        <option value="demo" selected={@mode_value == "demo"}>Demo</option>
+        <option value="live" selected={@mode_value == "live"}>Live</option>
+      </select>
+    </.form>
+    """
+  end
+
+  attr :scenario, :map, default: nil
+  attr :scenarios, :list, default: []
+
+  def operator_scenario_control(%{scenario: nil} = assigns) do
+    ~H""
+  end
+
+  def operator_scenario_control(%{scenarios: []} = assigns) do
+    ~H""
+  end
+
+  def operator_scenario_control(assigns) do
+    assigns =
+      assigns
+      |> assign(
+        :scenario_form,
+        Phoenix.Component.to_form(%{"scenario_id" => assigns.scenario.id}, as: :journey)
+      )
+
+    ~H"""
+    <.form
+      for={@scenario_form}
+      id="operator-scenario-form"
+      phx-change="operator:set_scenario_form"
+      phx-hook="OperatorScenarioControl"
+      data-current-scenario={@scenario.id}
+      class="min-w-[15rem]"
+    >
+      <label for="operator-scenario-select" class="kiln-status-numeric__label mb-1 block">
+        Demo journey
+      </label>
+      <select
+        id="operator-scenario-select"
+        name={@scenario_form[:scenario_id].name}
+        class="select select-bordered h-10 w-full border-base-300 bg-base-100 text-sm"
+      >
+        <option
+          :for={scenario <- @scenarios}
+          value={scenario.id}
+          selected={scenario.id == @scenario.id}
+        >
+          {scenario.title}
+        </option>
+      </select>
+    </.form>
+    """
+  end
+
   attr :snapshots, :list, default: []
 
   def operator_config_presence(assigns) do
@@ -86,12 +175,16 @@ defmodule KilnWeb.Components.OperatorChrome do
   end
 
   attr :mode, :atom, required: true
+  attr :scenario, :map, default: nil
+  attr :scenarios, :list, default: []
   attr :snapshots, :list, default: []
 
   def operator_chrome(assigns) do
     ~H"""
     <div class="kiln-status-bar">
       <div class="kiln-status-bar__group">
+        <.operator_mode_control mode={@mode} />
+        <.operator_scenario_control scenario={@scenario} scenarios={@scenarios} />
         <.operator_mode_chip mode={@mode} />
         <.operator_config_presence snapshots={@snapshots} />
       </div>

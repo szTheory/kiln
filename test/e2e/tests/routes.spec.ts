@@ -1,7 +1,7 @@
 import { test, expect, loadFixtureIds } from "../fixtures/kiln";
 
 /**
- * All 14 LiveView routes from `KilnWeb.Router`'s `live_session :default`.
+ * All 15 LiveView routes from `KilnWeb.Router`'s `live_session :default`.
  *
  * Each is exercised with:
  *   - Mount + `data-phx-main` present + status < 400.
@@ -11,7 +11,7 @@ import { test, expect, loadFixtureIds } from "../fixtures/kiln";
  *
  * The matrix expands via the 4 projects in `playwright.config.ts`
  * (mobile-safari + desktop-chromium, each in light + dark), so in
- * practice this file produces 14 x 4 = 56 runs per `npx playwright test`.
+ * practice this file produces 15 x 4 = 60 runs per `npx playwright test`.
  */
 
 const RETIRED_TOKENS = [
@@ -45,6 +45,7 @@ const ROUTES: { name: string; path: string }[] = [
   { name: "workflows-show", path: `/workflows/${fixtureIds.workflow_id}` },
   { name: "costs", path: "/costs" },
   { name: "providers", path: "/providers" },
+  { name: "settings", path: "/settings" },
   { name: "audit", path: "/audit" },
   { name: "spec-editor", path: `/specs/${fixtureIds.spec_id}/edit` },
 ];

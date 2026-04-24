@@ -3,12 +3,12 @@ defmodule KilnWeb.OnboardingGateTest do
 
   alias Kiln.OperatorReadiness
 
-  test "redirects to onboarding when readiness is incomplete", %{conn: conn} do
+  test "does not redirect when readiness is incomplete", %{conn: conn} do
     assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, false)
 
     try do
       conn = get(conn, ~p"/")
-      assert redirected_to(conn) == "/onboarding"
+      assert html_response(conn, 200) =~ "Runs"
     after
       assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
     end

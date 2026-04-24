@@ -35,6 +35,7 @@ if [ -f .env ]; then
 fi
 
 export MIX_ENV=test
+unset KILN_DB_ROLE
 export DATABASE_URL="$(derive_test_database_url "${DATABASE_URL:-}")"
 verifier_source_url="${DATABASE_VERIFIER_URL:-$(derive_verifier_source_url "$DATABASE_URL")}"
 export DATABASE_VERIFIER_URL="$(
@@ -43,6 +44,10 @@ export DATABASE_VERIFIER_URL="$(
 export SECRET_KEY_BASE="${SECRET_KEY_BASE:-ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx}"
 export PHX_HOST="${PHX_HOST:-localhost}"
 export PORT="${PORT:-4000}"
+
+env -u KILN_DB_ROLE mix ecto.drop --quiet >/dev/null 2>&1 || true
+env -u KILN_DB_ROLE mix ecto.create --quiet >/dev/null
+env -u KILN_DB_ROLE mix ecto.migrate --quiet >/dev/null
 
 echo "[planning_gates] $(date -u +%Y-%m-%dT%H:%M:%SZ) MIX_ENV=test mix check (defaults match CI when vars unset)" >&2
 exec mix check

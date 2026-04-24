@@ -1,6 +1,8 @@
 ---
 phase: 27-local-first-run-proof
 plan: "01"
+status: superseded
+superseded_by: 28-first-run-proof-runtime-closure
 subsystem: testing
 tags: [mix, phoenix-liveview, verification, local-first, uat]
 requires:
@@ -31,7 +33,7 @@ key-decisions:
 patterns-established:
   - "Proof-owner wrapper tasks should cite one top-level command and list delegated layers underneath."
   - "Phase-owned LiveView proofs should assert stable route and DOM-id seams across readiness, launch, and run-detail boundaries."
-requirements-completed: [UAT-04]
+requirements-completed: []
 duration: 3m 28s
 completed: 2026-04-24
 ---
@@ -54,6 +56,7 @@ completed: 2026-04-24
 - Added a focused task test that pins the wrapper to `integration.first_run` first and the targeted LiveView files second.
 - Extended the focused LiveView proof so the setup-ready `/settings` return context resumes `hello-kiln` and lands on the stable run-detail shell.
 - Wrote `27-VERIFICATION.md` to cite only the top-level proof command while transparently listing its delegated subcommands.
+- Phase 28 later became the requirement-owning closure slice after the milestone audit found the delegated runtime boot still failing on `oban_jobs`.
 
 ## Task Commits
 
@@ -89,7 +92,7 @@ None - plan executed exactly as written.
 
 None - no external service configuration required.
 
-## Next Phase Readiness
+## Historical Outcome
 
-- Phase 27 now has one explicit, auditable proof command and supporting artifacts for `UAT-04`.
-- `mix kiln.first_run.prove` completes successfully on this workstation after the non-interactive shell-wrapper and focused-test environment fixes.
+- Phase 27 successfully introduced the explicit proof command and focused LiveView proof seam.
+- Final `UAT-04` closure moved to Phase 28 after the runtime-role repair and rerun.

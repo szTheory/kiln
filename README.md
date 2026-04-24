@@ -50,7 +50,7 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 - **asdf** (optional) — only if you manage Erlang/Elixir through `.tool-versions`. If you install Elixir another way, ensure `mix` is on your `PATH`; the integration script does **not** run `asdf install` for you.
 - **direnv** (optional) — convenient for loading `.env`; you can `set -a; source .env; set +a` instead.
 
-## Quick start (open `/onboarding` first)
+## Quick start (use `/settings` before your first live run)
 
 **Fastest path (one command):** from the repo root, run **`bash script/dev_up.sh`** (or **`just dev`** if you use [`just`](https://github.com/casey/just)) — starts Compose **Postgres**, runs **`mix setup`**, then **`mix phx.server`** in the foreground (Ctrl+C stops the server). Uses `.env` (creates from `.env.sample` if missing). Same host-port rules as below if `5432` is taken (`KILN_DB_HOST_PORT` + matching `DATABASE_URL`).
 
@@ -60,7 +60,7 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 2. **Database** — `docker compose up -d db` and wait until Postgres is healthy.
 3. **Migrations (owner role)** — `KILN_DB_ROLE=kiln_owner mix setup` (runs `ecto.create`, `ecto.migrate`, seeds, assets). Runtime sessions use the restricted `kiln_app` role by default.
 4. **Run the app** — `mix phx.server`.
-5. **Open first** — `http://localhost:4000/onboarding` (operator wizard; Phase 8 intake). The root `/` route shows the run board after onboarding completes.
+5. **Open the app** — `http://localhost:4000/onboarding` for the demo-first orientation, then `http://localhost:4000/settings` before your first real live run. `/settings` is the authoritative readiness checklist and remediation surface for local live mode.
 
 ### Digital Twin / sandbox mocks (DTU)
 
@@ -95,7 +95,8 @@ Use this as a **cold-clone** sanity pass (order matches the happy path above):
 - [ ] **Port 5432** — If another Postgres or container holds host `5432`, set **`KILN_DB_HOST_PORT`** (e.g. `5434`) in `.env` and point **`DATABASE_URL`** at the same host port; see **`.env.sample`** (see [`test/integration/first_run.sh`](test/integration/first_run.sh) error text).
 - [ ] **Migrations** — `KILN_DB_ROLE=kiln_owner mix setup` once (creates DB if needed, migrates, seeds, assets). Day-to-day runs leave `KILN_DB_ROLE` unset (`kiln_app`).
 - [ ] **App** — `mix phx.server` without `KILN_SKIP_BOOTCHECKS` (BootChecks must pass).
-- [ ] **Onboarding** — Open `/onboarding` first; complete the wizard or resolve typed blockers (API keys, Docker, `gh` when using GitHub automation).
+- [ ] **Orientation** — Open `/onboarding` first if you want the demo-first tour and scenario framing.
+- [ ] **Live readiness** — Open `/settings` before any real local live attempt; this is the canonical checklist for provider refs, `gh auth`, and Docker readiness.
 - [ ] **Sandbox work** — Before stages that hit mocks: `docker compose up -d dtu` (subsection above).
 - [ ] **Machine smoke (optional)** — `bash test/integration/first_run.sh` or `mix integration.first_run` — DB + migrate + boot + `/health` JSON (does not prove browser onboarding).
 - [ ] **Traces (optional)** — See **Traces (local)**; set `OTEL_EXPORTER_OTLP_ENDPOINT` only when collector/Jaeger are up.

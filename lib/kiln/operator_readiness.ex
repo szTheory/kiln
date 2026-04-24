@@ -25,7 +25,7 @@ defmodule Kiln.OperatorReadiness do
         r.anthropic_configured and r.github_cli_ok and r.docker_ok
 
       nil ->
-        true
+        false
     end
   end
 
@@ -42,11 +42,11 @@ defmodule Kiln.OperatorReadiness do
         :docker -> :docker_ok
       end
 
-    row = Repo.get!(ProbeRow, @singleton_id)
+    row = load_or_init_row()
 
     row
     |> change([{field, value}])
-    |> Repo.update()
+    |> Repo.insert_or_update()
   end
 
   @doc """
@@ -62,11 +62,7 @@ defmodule Kiln.OperatorReadiness do
           total: non_neg_integer()
         }
   def current_state do
-    row =
-      case Repo.get(ProbeRow, @singleton_id) do
-        %ProbeRow{} = r -> r
-        _ -> %ProbeRow{anthropic_configured: false, github_cli_ok: false, docker_ok: false}
-      end
+    row = load_or_init_row()
 
     flags = [row.anthropic_configured, row.github_cli_ok, row.docker_ok]
     verified = Enum.count(flags, & &1)
@@ -102,6 +98,21 @@ defmodule Kiln.OperatorReadiness do
     case System.cmd("docker", ["info"], stderr_to_stdout: true, env: []) do
       {_out, 0} -> true
       _ -> false
+    end
+  end
+
+  defp load_or_init_row do
+    case Repo.get(ProbeRow, @singleton_id) do
+      %ProbeRow{} = row ->
+        row
+
+      nil ->
+        %ProbeRow{
+          id: @singleton_id,
+          anthropic_configured: false,
+          github_cli_ok: false,
+          docker_ok: false
+        }
     end
   end
 end
