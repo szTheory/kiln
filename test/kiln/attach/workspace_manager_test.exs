@@ -243,6 +243,7 @@ defmodule Kiln.Attach.WorkspaceManagerTest do
   end
 
   defp temp_path(name) do
-    Path.join(System.tmp_dir!(), "#{name}_#{System.unique_integer([:positive])}")
+    unique_suffix = "#{System.os_time(:microsecond)}_#{System.unique_integer([:positive])}"
+    Path.join(System.tmp_dir!(), "#{name}_#{unique_suffix}")
   end
 end
