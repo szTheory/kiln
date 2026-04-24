@@ -470,6 +470,11 @@ defmodule KilnWeb.TemplatesLive do
                 <p class="mt-3 text-xs text-base-content/60" id="templates-watch-hint">
                   After the run starts, you land on run detail first. Use the main board after that for the wider queue view.
                 </p>
+                <%= if live_disconnected?(@operator_runtime_mode, @setup_summary) do %>
+                  <p id="templates-start-run-guidance" class="mt-2 text-xs text-base-content/60">
+                    Start run still performs the real backend preflight. If a live requirement is missing, Kiln routes you to the first settings step that needs attention.
+                  </p>
+                <% end %>
               </div>
             <% end %>
 
