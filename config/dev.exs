@@ -110,3 +110,10 @@ config :phoenix_live_view,
   debug_attributes: true,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
+
+# Sigra email delivery (dev) — adapter is set on the raw Swoosh.Mailer
+# module, not the Sigra.Mailer behaviour wrapper.
+config :kiln, Kiln.Mailer,
+  adapter: Swoosh.Adapters.Local
+
+config :swoosh, :api_client, false

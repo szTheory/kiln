@@ -163,4 +163,46 @@ config :phoenix, :json_library, Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
+
+# Sigra authentication
+config :kiln, :sigra,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator
+
+# Runtime keyword consumed by Sigra admin LiveViews (UsersIndexLive, etc.)
+# via Application.get_env/2 — keep in sync with Kiln.Operators.sigra_config/0.
+config :kiln, :sigra_config,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator,
+  session: [
+    store: Sigra.SessionStores.Ecto,
+    session_schema: Kiln.Operators.UserSession
+  ],
+  audit: [
+    audit_schema: nil
+  ]
+
+# Sigra worker runtime config (used by Oban workers)
+config :sigra,
+  otp_app: :kiln,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator,
+  email_module: Kiln.Operators.Emails,
+  mailer: Kiln.Operators.Mailer
+
+
+# Sigra passkeys
+config :kiln, :sigra_config,
+  passkeys: [
+    rp_id: "localhost",
+    rp_name: "Kiln",
+    origin: "http://localhost:4000",
+    timeout_ms: 60_000,
+    attestation: :none,
+    user_verification: :preferred,
+    ceremony_rate_limit: [limit: 5, window_ms: 60_000],
+    passkey_primary_enabled: true,
+    user_passkey_schema: Kiln.Operators.UserPasskey
+  ]
+
 import_config "#{config_env()}.exs"

@@ -59,9 +59,11 @@ defmodule Kiln.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:wax_, "~> 0.7"},
       # Phoenix + LV (LOCKED per D-01, STACK.md, LOCAL-02)
       {:phoenix, "~> 1.8.5"},
       {:phoenix_ecto, "~> 4.6"},
+      {:gettext, "~> 0.26"},
       {:ecto_sql, "~> 3.13"},
       {:postgrex, "~> 0.22"},
       {:phoenix_html, "~> 4.2"},
@@ -87,6 +89,8 @@ defmodule Kiln.MixProject do
       {:req, "~> 0.5"},
       {:finch, "~> 0.19"},
       {:anthropix, "~> 0.6"},
+      {:swoosh, "~> 1.18"},
+      {:sigra, "~> 0.2"},
 
       # Sandbox (Phase 3; D-115/D-120/D-154)
       # - muontrap: crash-safe `docker run` wrapper (supervised Port/cgroup child)
@@ -144,7 +148,7 @@ defmodule Kiln.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       # Shift-left: `mix check` + `test/integration/first_run.sh` (see `script/shift_left_verify.sh`).
       shift_left: ["shift_left.verify"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing", "cmd --cd assets npm install"],
       "assets.build": ["tailwind kiln", "esbuild kiln"],
       "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"],
       # Phase 10 / D-1005 — single SSOT: shell script only (no duplicated compose/migrate logic).

@@ -6,27 +6,25 @@ Kiln is a **software dark factory** — an Elixir/Phoenix LiveView application t
 
 ## Core Value
 
-**Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.**
+**Given a spec, Kiln ships working software — built, verified, merged, and deployed or published — with no human intervention. Safely, visibly, and durably.**
 
 That single promise is what the whole system must deliver. Every design tradeoff defers to it.
 
 ## Current State
 
-**Shipped version:** `v0.6.0` on 2026-04-24
+**Shipped version:** `v0.7.0` on 2026-04-24
 
-Kiln now has one believable brownfield path from first-use discovery to a conservative real-project output. Operators can discover `Attach existing repo` from onboarding and start surfaces, resolve one local path or GitHub URL into a managed writable workspace, refuse unsafe repo states before mutation, and carry a ready attached repo through frozen branch push plus draft PR orchestration.
+Kiln now supports a repeatable daily-driver loop for attached repositories, including PR-sized intake boundaries, advisory brownfield preflight, and proof-cited draft PR delivery.
 
-Accepted close debt remains non-blocking rather than milestone-scope product failure: one orphan Phase 03 worktree todo is still deferred, and repo-wide test execution still emits sandbox ownership noise from spawned role processes even when `mix kiln.attach.prove` and `bash script/precommit.sh` finish green.
+## Current Milestone: v0.8.0 Remote Factory & Autonomous Delivery
 
-## Current Milestone: v0.7.0 PR-sized brownfield execution
-
-**Goal:** Turn attached-repo work into a normal daily-driver loop where a solo operator can hand Kiln one bounded feature or bugfix request and receive a trustable draft PR that fits the repo.
+**Goal:** Transition Kiln from a local-only tool into a remote-capable factory that can autonomously merge, release, and verify deployments.
 
 **Target features:**
-- PR-sized attached-repo intake with bounded acceptance framing instead of a vague freeform continuation request
-- Repeat-run continuity on one attached repo so second and third runs feel native rather than re-attached
-- Early conflict and drift detection for branch overlap, unsafe repo state, and likely scope collisions before coding begins
-- Draft PR output that explains the scoped change, cites proof, and feels reviewable as a normal feature or bugfix handoff
+- **Remote Dashboard Access:** Secure single-operator auth (Passkey/Password) plus a remote-access deployment profile (Tailscale/Cloudflare).
+- **Autonomous Release Engine:** Auto-versioning from Conventional Commits and binary/library release via GitHub.
+- **SaaS Delivery & SRE Smoke:** Direct-to-provider deploys (Fly.io/Cloudflare) with post-deploy health checks and escalation.
+- **Production Secret Management:** Formalized handling of deploy and registry tokens via `persistent_term` + ENV.
 
 ## Requirements
 
@@ -34,17 +32,18 @@ Accepted close debt remains non-blocking rather than milestone-scope product fai
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] **WORK-01**: Operator can start an attached-repo run from one bounded feature or bugfix request with enough acceptance framing for Kiln to treat the work as one PR-sized unit instead of an open-ended continuation ask.
-- [ ] **CONT-01**: Repeat runs on the same attached repo reuse the known repo/workspace context and previous trust/setup facts so the operator does not have to rediscover the attach flow each time.
-- [ ] **SAFE-01**: Before coding starts, Kiln detects and surfaces unsafe or conflicting brownfield conditions such as dirty repo state, unclear target/base branch, overlapping open PRs, or likely scope collisions.
-- [ ] **SAFE-02**: When brownfield preflight finds a non-fatal issue, Kiln provides explicit remediation or narrowing guidance so the operator can re-scope the run without guessing.
-- [ ] **TRUST-04**: Attached-repo runs produce a draft PR handoff that includes a scoped summary, proof or verification citations, and enough repo-fitting context for the operator to review the result as a normal feature or bugfix PR.
-- [ ] **UAT-06**: The repository contains one explicit automated proof path for PR-sized attached-repo continuation, including repeat-run continuity plus representative refusal or warning cases for brownfield preflight.
+- [ ] **REMOTE-01**: Secure the Phoenix dashboard with single-operator Auth (Passkey or Password) for safe remote visibility.
+- [ ] **REMOTE-02**: Provide a `remote` Compose profile with a sidecar tunnel (Tailscale/Cloudflare) for mobile/laptop connectivity.
+- [ ] **DELIVER-01**: Kiln autonomously bumps versions and generates changelogs using Conventional Commits across attached-repo runs.
+- [ ] **DELIVER-02**: Kiln supports binary/library releases via `gh release` and registry publishers (`mix hex.publish`, etc.).
+- [ ] **DELIVER-03**: Kiln supports SaaS deployment (Fly.io/Cloudflare) and surfaces a clickable live URL on the run dashboard.
+- [ ] **DELIVER-04**: Post-deploy SRE smoke check: Kiln verifies health of the deployed service and escalates on failure.
 
 ### Validated
 
 <!-- Shipped and confirmed valuable. -->
 
+- [x] **WORK-01**, **CONT-01**, **SAFE-01**, **SAFE-02**, **TRUST-04**, **UAT-06** — Bounded attached-repo intake, continuity, preflight, and proof-first draft PRs — validated in **v0.7.0** (2026-04-24).
 - [x] **OBS-01**, **OBS-03** — validated in Phase 1 (Foundation & Durability Floor).
 - [x] **ORCH-01** Workflow definition format: YAML/JSON graph, versioned in git, schema-validated at load — validated in Phase 2 (Workflow Engine Core).
 - [x] **ORCH-02** Stage executor runs each stage in a supervised BEAM process with crash isolation — validated in Phase 2.
