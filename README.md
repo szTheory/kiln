@@ -6,6 +6,15 @@ Software dark factory written in Elixir/Phoenix LiveView. Given a spec, Kiln shi
 
 See `.planning/PROJECT.md` for the full vision and constraints.
 
+## First hour
+
+1. **Configure** — `cp .env.sample .env`, fill in `SECRET_KEY_BASE` (use `mix phx.gen.secret`)
+2. **Start** — `just dev` (or `bash script/dev_up.sh`) — starts Postgres, runs migrations, launches Phoenix
+3. **Open** — `http://localhost:4000` — lands on the onboarding flow
+4. **Before a live run** — visit `/settings` to connect LLM providers and GitHub auth
+
+> Need sandbox stages? Run `docker compose up -d dtu` in a second terminal after Phoenix boots.
+
 ## Fair scheduling
 
 Kiln’s **parallelism grain** for factory work is **per active run** at the

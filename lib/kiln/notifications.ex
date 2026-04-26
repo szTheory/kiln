@@ -188,9 +188,14 @@ defmodule Kiln.Notifications do
           body
         ]
 
-        case System.cmd("notify-send", args, stderr_to_stdout: true) do
-          {_out, 0} -> {:linux, :ok}
-          {err, code} -> {:linux, {:error, {code, err}}}
+        try do
+          case System.cmd("notify-send", args, stderr_to_stdout: true) do
+            {_out, 0} -> {:linux, :ok}
+            {err, code} -> {:linux, {:error, {code, err}}}
+          end
+        rescue
+          e in ErlangError when e.original == :enoent ->
+            {:linux, {:error, :notify_send_not_found}}
         end
 
       other ->
