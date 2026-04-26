@@ -49,22 +49,27 @@ defmodule KilnWeb.Components.UnblockPanel do
     ~H"""
     <section
       id="unblock-panel"
-      class="space-y-4 rounded border border-clay bg-char/80 p-4 text-bone"
+      class="card card-bordered border-warning bg-base-200"
       aria-label="Unblock"
     >
-      <h2 class="text-lg font-semibold text-bone">Run blocked</h2>
-      <div class="rounded border border-ash bg-iron/40 p-3">
-        <pre class="whitespace-pre-wrap font-mono text-xs text-bone phx-no-curly-interpolation">{@playbook_text}</pre>
+      <div class="card-body p-5 space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="badge badge-warning badge-soft">Blocked</span>
+          <h2 class="kiln-h2">Run blocked</h2>
+        </div>
+        <div class="rounded-md border border-base-300 bg-base-100 p-3">
+          <pre class="whitespace-pre-wrap kiln-mono text-xs phx-no-curly-interpolation">{@playbook_text}</pre>
+        </div>
+        <button
+          type="button"
+          id="unblock-retry-btn"
+          phx-click="unblock_retry"
+          phx-value-to="planning"
+          class="btn btn-sm btn-primary"
+        >
+          I fixed it — retry
+        </button>
       </div>
-      <button
-        type="button"
-        id="unblock-retry-btn"
-        phx-click="unblock_retry"
-        phx-value-to="planning"
-        class="rounded border border-ember px-4 py-2 text-sm font-semibold text-ember transition-colors hover:bg-ember/10"
-      >
-        I fixed it — retry
-      </button>
     </section>
     """
   end

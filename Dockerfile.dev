@@ -1,0 +1,23 @@
+# Development image — matches .tool-versions Elixir/OTP pins.
+# Used by the `app` service in compose.yaml so `docker compose up` needs no host Elixir.
+FROM hexpm/elixir:1.19.5-erlang-28.1.1-ubuntu-noble-20260410
+
+# inotify-tools: Phoenix live-reload file watching on Linux
+# nodejs/npm: asset pipeline (esbuild, tailwind)
+# openssl: used by docker_dev_start.sh to auto-generate SECRET_KEY_BASE if unset
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    git \
+    inotify-tools \
+    nodejs \
+    npm \
+    openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN mix local.hex --force --quiet && mix local.rebar --force --quiet
+
+EXPOSE 4000
+
+CMD ["bash", "script/docker_dev_start.sh"]

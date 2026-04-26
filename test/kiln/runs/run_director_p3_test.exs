@@ -3,9 +3,14 @@ defmodule Kiln.Runs.RunDirectorP3Test do
 
   alias Kiln.Blockers.BlockedError
   alias Kiln.Factory.Run, as: RunFactory
+  alias Kiln.OperatorReadiness
   alias Kiln.Runs.RunDirector
 
   setup do
+    assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
+    assert {:ok, _} = OperatorReadiness.mark_step(:github, true)
+    assert {:ok, _} = OperatorReadiness.mark_step(:docker, true)
+
     for key <- [:anthropic_api_key, :openai_api_key, :google_api_key, :ollama_host] do
       Kiln.Secrets.put(key, nil)
     end

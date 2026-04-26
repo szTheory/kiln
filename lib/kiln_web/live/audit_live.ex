@@ -133,11 +133,14 @@ defmodule KilnWeb.AuditLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
-      <div id="audit-ledger" class="space-y-6 text-bone">
-        <div class="border-b border-ash pb-4">
-          <h1 class="text-xl font-semibold">Audit</h1>
-          <p class="mt-1 text-sm text-[var(--color-smoke)]">
+      <div id="audit-ledger" class="space-y-6 text-base-content">
+        <div class="border-b border-base-300 pb-4">
+          <p class="kiln-eyebrow">Control</p>
+          <h1 class="kiln-h1 mt-1">Audit</h1>
+          <p class="mt-1 text-sm text-base-content/60">
             Read-only ledger (limit 500). Narrow filters when exporting mentally.
           </p>
         </div>
@@ -161,8 +164,8 @@ defmodule KilnWeb.AuditLive do
         </.form>
 
         <%= if @events_empty? do %>
-          <p class="text-sm text-[var(--color-smoke)]">No events match these filters</p>
-          <p class="text-xs text-[var(--color-smoke)]">
+          <p class="text-sm text-base-content/60">No events match these filters</p>
+          <p class="text-xs text-base-content/60">
             Widen the time range or clear filters. Audit data is read-only.
           </p>
         <% else %>
@@ -170,10 +173,10 @@ defmodule KilnWeb.AuditLive do
             <details
               :for={{id, ev} <- @streams.events}
               id={id}
-              class="rounded border border-ash bg-char/80 p-3 text-xs text-bone"
+              class="rounded border border-base-300 bg-base-200 p-3 text-xs text-base-content"
             >
               <summary class="cursor-pointer font-semibold">{inspect(ev.event_kind)}</summary>
-              <pre class="mt-2 overflow-x-auto text-[var(--color-smoke)] phx-no-curly-interpolation">{Jason.encode!(ev.payload, pretty: true)}</pre>
+              <pre class="mt-2 overflow-x-auto text-base-content/60 phx-no-curly-interpolation">{Jason.encode!(ev.payload, pretty: true)}</pre>
             </details>
           </div>
         <% end %>

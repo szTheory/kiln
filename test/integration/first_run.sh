@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # LOCAL-01 / VALIDATION.md behavior 42 — fresh-clone first-run smoke.
-# Not wired into `mix check` (requires Docker + jq + host Mix); run locally
-# when compose.yaml, mix setup aliases, or the Kiln.HealthPlug contract
-# changes. README **Integration smoke** names this path; optional
+# Not wired into `mix check` alone (requires Docker + jq + host Mix). It **is**
+# chained after `mix check` by `script/shift_left_verify.sh` (`just shift-left`,
+# `mix shift_left.verify`). README **Integration smoke** names this path; optional
 # `mix integration.first_run` delegates here in one step (D-1005).
 #
 # README alignment (Phase 9 / D-932): this script does **not** install
@@ -85,10 +85,26 @@ for _ in $(seq 1 30); do
 done
 
 echo "[first_run] mix setup (KILN_DB_ROLE=kiln_owner for DDL)..."
-KILN_DB_ROLE=kiln_owner mix setup
+# Mirror script/docker_dev_start.sh: try kiln_owner first; on a fresh
+# postgres the role doesn't exist yet, so fall back to the connecting
+# superuser to bootstrap roles via migration 002.
+SETUP_LOG=$(mktemp)
+if ! KILN_DB_ROLE=kiln_owner mix setup >"$SETUP_LOG" 2>&1; then
+  if grep -qE 'role "kiln_owner" does not exist|FATAL 22023' "$SETUP_LOG"; then
+    echo "[first_run]   first-time bootstrap — creating roles via migration..."
+    mix ecto.create 2>/dev/null || true
+    mix ecto.migrate
+    mix run priv/repo/seeds.exs
+  else
+    cat "$SETUP_LOG" >&2
+    rm -f "$SETUP_LOG"
+    exit 1
+  fi
+fi
+rm -f "$SETUP_LOG"
 
-echo "[first_run] starting phx.server in background..."
-mix phx.server &
+echo "[first_run] starting phx.server in background as kiln_app..."
+KILN_DB_ROLE=kiln_app mix phx.server &
 SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
 
@@ -107,7 +123,7 @@ echo "[first_run]   response: $RESP"
 echo "$RESP" | jq -e '.status == "ok"' >/dev/null
 echo "$RESP" | jq -e '.postgres == "up"' >/dev/null
 echo "$RESP" | jq -e '.oban == "up"' >/dev/null
-echo "$RESP" | jq -e '.contexts == 12' >/dev/null
+echo "$RESP" | jq -e '.contexts == 13' >/dev/null
 echo "$RESP" | jq -e '.version | type == "string"' >/dev/null
 
 echo "[first_run] OK — fresh-clone boot reached /health with all dependency fields green."

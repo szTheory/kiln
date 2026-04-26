@@ -82,6 +82,7 @@ defmodule Kiln.Application do
   def infra_children do
     [
       KilnWeb.Telemetry,
+      {Kiln.Vault, []},
       Kiln.Repo,
       {Phoenix.PubSub, name: Kiln.PubSub},
       {Kiln.FactorySummaryPublisher, []},
@@ -109,3 +110,6 @@ defmodule Kiln.Application do
     }
   end
 end
+
+# Add Kiln.Vault to your application supervision tree:
+# {Kiln.Vault, []}

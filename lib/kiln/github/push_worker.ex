@@ -78,6 +78,19 @@ defmodule Kiln.GitHub.PushWorker do
                 run_push(op, parsed, runner)
             end
 
+          {:error, :ls_remote_empty} ->
+            if parsed.expected_sha == Git.missing_remote_sha() do
+              run_push(op, parsed, runner)
+            else
+              _ =
+                fail_op(op, %{
+                  "reason" => "ls_remote_failed",
+                  "detail" => inspect(:ls_remote_empty)
+                })
+
+              {:error, {:ls_remote, :ls_remote_empty}}
+            end
+
           {:error, ls_reason} ->
             _ = fail_op(op, %{"reason" => "ls_remote_failed", "detail" => inspect(ls_reason)})
             {:error, {:ls_remote, ls_reason}}

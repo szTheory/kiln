@@ -1,0 +1,736 @@
+## This file is a PO Template file.
+##
+## "msgid"s here are often extracted from source code.
+## Add new messages manually only if they're dynamic
+## messages that can't be statically extracted.
+##
+## Run "mix gettext.extract" to bring this file up to
+## date. Leave "msgstr"s empty as changing them here has no
+## effect: edit them in PO (.po) files instead.
+#
+msgid ""
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:427
+#: lib/kiln/operators/emails.ex:435
+#, elixir-autogen, elixir-format
+msgid "A backup code was used to sign in to your %{app_name} account. You have %{remaining} of 8 backup codes remaining."
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:106
+#, elixir-autogen, elixir-format
+msgid "A new confirmation email has been sent."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:245
+#: lib/kiln/operators/emails.ex:270
+#, elixir-autogen, elixir-format
+msgid "A new passkey was added to your account."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:668
+#: lib/kiln/operators/emails.ex:676
+#, elixir-autogen, elixir-format
+msgid "Account Deleted"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:602
+#: lib/kiln/operators/emails.ex:617
+#, elixir-autogen, elixir-format
+msgid "Account Deletion Scheduled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:297
+#: lib/kiln/operators/emails.ex:312
+#, elixir-autogen, elixir-format
+msgid "Account Locked"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:659
+#, elixir-autogen, elixir-format
+msgid "Account deletion cancelled"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:47
+#, elixir-autogen, elixir-format
+msgid "Back to log in"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:424
+#: lib/kiln/operators/emails.ex:433
+#, elixir-autogen, elixir-format
+msgid "Backup Code Used"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:444
+#, elixir-autogen, elixir-format
+msgid "Backup code used to sign in"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:610
+#, elixir-autogen, elixir-format
+msgid "Cancel account deletion"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:538
+#, elixir-autogen, elixir-format
+msgid "Cancel email change"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:551
+#: lib/kiln/operators/emails.ex:623
+#, elixir-autogen, elixir-format
+msgid "Cancel via this link:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:305
+#: lib/kiln/operators/emails.ex:346
+#: lib/kiln/operators/emails.ex:463
+#, elixir-autogen, elixir-format
+msgid "Change your password"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:318
+#: lib/kiln/operators/emails.ex:356
+#: lib/kiln/operators/emails.ex:473
+#, elixir-autogen, elixir-format
+msgid "Change your password:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:608
+#: lib/kiln/operators/emails.ex:621
+#, elixir-autogen, elixir-format
+msgid "Changed your mind? You can cancel the deletion before the scheduled date."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:111
+#, elixir-autogen, elixir-format
+msgid "Click the link below to log in to your account. This link expires in 10 minutes."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:491
+#: lib/kiln/operators/emails.ex:506
+#, elixir-autogen, elixir-format
+msgid "Confirm Email Change"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:41
+#, elixir-autogen, elixir-format
+msgid "Confirm email"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:40
+#, elixir-autogen, elixir-format
+msgid "Confirm email address"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:496
+#, elixir-autogen, elixir-format
+msgid "Confirm new email address"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:84
+#, elixir-autogen, elixir-format
+msgid "Confirm new password"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:510
+#, elixir-autogen, elixir-format
+msgid "Confirm via this link:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:62
+#: lib/kiln_web/controllers/confirmation_html.ex:18
+#, elixir-autogen, elixir-format
+msgid "Confirm your email"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:519
+#, elixir-autogen, elixir-format
+msgid "Confirm your new email address"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:31
+#: lib/kiln_web/controllers/confirmation_html.ex:36
+#, elixir-autogen, elixir-format
+msgid "Confirmation code"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:81
+#, elixir-autogen, elixir-format
+msgid "Confirmation link expired"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:639
+#: lib/kiln/operators/emails.ex:648
+#, elixir-autogen, elixir-format
+msgid "Deletion Cancelled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:187
+#: lib/kiln/operators/emails.ex:206
+#: lib/kiln/operators/emails.ex:249
+#: lib/kiln/operators/emails.ex:272
+#: lib/kiln/operators/emails.ex:728
+#: lib/kiln/operators/emails.ex:747
+#, elixir-autogen, elixir-format
+msgid "Device:"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:51
+#, elixir-autogen, elixir-format
+msgid "Didn't receive a code?"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:35
+#, elixir-autogen, elixir-format
+msgid "Email"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:530
+#: lib/kiln/operators/emails.ex:545
+#, elixir-autogen, elixir-format
+msgid "Email Change Requested"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:569
+#: lib/kiln/operators/emails.ex:578
+#, elixir-autogen, elixir-format
+msgid "Email Updated"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:62
+#, elixir-autogen, elixir-format
+msgid "Email already confirmed"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:558
+#, elixir-autogen, elixir-format
+msgid "Email change requested for your account"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:20
+#, elixir-autogen, elixir-format
+msgid "Enter the 6-digit code we sent to your email, or check your inbox for a confirmation link."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:21
+#, elixir-autogen, elixir-format
+msgid "Enter your email and we'll send you a reset link."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:63
+#, elixir-autogen, elixir-format
+msgid "Enter your new password below."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:19
+#, elixir-autogen, elixir-format
+msgid "Forgot your password?"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:429
+#, elixir-autogen, elixir-format
+msgid "Generate new backup codes"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:437
+#, elixir-autogen, elixir-format
+msgid "Generate new backup codes:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:47
+#: lib/kiln/operators/emails.ex:80
+#: lib/kiln/operators/emails.ex:109
+#: lib/kiln/operators/emails.ex:137
+#, elixir-autogen, elixir-format
+msgid "Hi,"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:100
+#, elixir-autogen, elixir-format
+msgid "Hi, click the button below to log in to your account. This link expires in 10 minutes."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:131
+#, elixir-autogen, elixir-format
+msgid "Hi, it looks like you signed up using %{provider}. You can log in with %{provider} instead, or set a password from your account settings."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:27
+#, elixir-autogen, elixir-format
+msgid "Hi, please confirm your email address by clicking the button below or entering the code."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:71
+#, elixir-autogen, elixir-format
+msgid "Hi, we received a request to reset your password. If you didn't make this request, you can ignore this email."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:181
+#: lib/kiln/operators/emails.ex:204
+#: lib/kiln/operators/emails.ex:252
+#: lib/kiln/operators/emails.ex:273
+#: lib/kiln/operators/emails.ex:722
+#: lib/kiln/operators/emails.ex:745
+#, elixir-autogen, elixir-format
+msgid "IP address:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:461
+#: lib/kiln/operators/emails.ex:471
+#, elixir-autogen, elixir-format
+msgid "If this was you, wait for the lockout to expire and try again. If this wasn't you, change your password immediately."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:194
+#: lib/kiln/operators/emails.ex:209
+#: lib/kiln/operators/emails.ex:262
+#: lib/kiln/operators/emails.ex:277
+#, elixir-autogen, elixir-format
+msgid "If this was you, you can safely ignore this email."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:303
+#: lib/kiln/operators/emails.ex:316
+#, elixir-autogen, elixir-format
+msgid "If this was you, you can try again after the lockout period."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:735
+#: lib/kiln/operators/emails.ex:750
+#, elixir-autogen, elixir-format
+msgid "If this wasn't you, reset your password immediately."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:307
+#: lib/kiln/operators/emails.ex:320
+#, elixir-autogen, elixir-format
+msgid "If you did not attempt to log in, we recommend changing your password immediately."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:344
+#: lib/kiln/operators/emails.ex:354
+#, elixir-autogen, elixir-format
+msgid "If you did not enable this, change your password immediately."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:536
+#: lib/kiln/operators/emails.ex:549
+#, elixir-autogen, elixir-format
+msgid "If you did not request this change, click below to cancel it immediately."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_controller.ex:36
+#, elixir-autogen, elixir-format
+msgid "If your email is in our system, you will receive reset instructions shortly."
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:35
+#, elixir-autogen, elixir-format
+msgid "Invalid confirmation code. Please try again."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:139
+#, elixir-autogen, elixir-format
+msgid "It looks like you signed up using %{provider}. You can log in with %{provider} instead, or set a password from your account settings."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:184
+#: lib/kiln/operators/emails.ex:205
+#: lib/kiln/operators/emails.ex:255
+#: lib/kiln/operators/emails.ex:274
+#: lib/kiln/operators/emails.ex:725
+#: lib/kiln/operators/emails.ex:746
+#, elixir-autogen, elixir-format
+msgid "Location:"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:70
+#, elixir-autogen, elixir-format
+msgid "Log in"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:102
+#: lib/kiln/operators/emails.ex:120
+#, elixir-autogen, elixir-format
+msgid "Log in to %{app_name}"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:644
+#, elixir-autogen, elixir-format
+msgid "Log in to your account"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:652
+#, elixir-autogen, elixir-format
+msgid "Log in to your account:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:133
+#, elixir-autogen, elixir-format
+msgid "Log in with %{provider}"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:113
+#, elixir-autogen, elixir-format
+msgid "Log in:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:242
+#: lib/kiln/operators/emails.ex:268
+#, elixir-autogen, elixir-format
+msgid "New Passkey Added"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:174
+#: lib/kiln/operators/emails.ex:200
+#, elixir-autogen, elixir-format
+msgid "New Sign-In Detected"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:286
+#, elixir-autogen, elixir-format
+msgid "New passkey added to your account"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:77
+#, elixir-autogen, elixir-format
+msgid "New password"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:218
+#, elixir-autogen, elixir-format
+msgid "New sign-in to your account"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:196
+#: lib/kiln/operators/emails.ex:264
+#, elixir-autogen, elixir-format
+msgid "Not you? Secure your account"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:211
+#: lib/kiln/operators/emails.ex:279
+#, elixir-autogen, elixir-format
+msgid "Not you? Secure your account:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:540
+#: lib/kiln/operators/emails.ex:612
+#, elixir-autogen, elixir-format
+msgid "Or cancel via this link:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:42
+#: lib/kiln/operators/emails.ex:53
+#: lib/kiln/operators/emails.ex:498
+#, elixir-autogen, elixir-format
+msgid "Or confirm via this link:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:75
+#: lib/kiln/operators/emails.ex:104
+#, elixir-autogen, elixir-format
+msgid "Or use this link:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:715
+#: lib/kiln/operators/emails.ex:741
+#, elixir-autogen, elixir-format
+msgid "Password Changed"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:49
+#, elixir-autogen, elixir-format
+msgid "Please confirm your email address."
+msgstr ""
+
+#: lib/kiln_web/user_auth.ex:444
+#, elixir-autogen, elixir-format
+msgid "Please confirm your email. Check your inbox or request a new confirmation email."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:113
+#, elixir-autogen, elixir-format
+msgid "Request new reset email"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:105
+#, elixir-autogen, elixir-format
+msgid "Reset link expired"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:73
+#: lib/kiln_web/controllers/reset_password_html.ex:90
+#, elixir-autogen, elixir-format
+msgid "Reset password"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:91
+#: lib/kiln/operators/emails.ex:146
+#: lib/kiln/operators/emails.ex:737
+#: lib/kiln_web/controllers/reset_password_html.ex:61
+#, elixir-autogen, elixir-format
+msgid "Reset your password"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:84
+#: lib/kiln/operators/emails.ex:752
+#, elixir-autogen, elixir-format
+msgid "Reset your password:"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:379
+#: lib/kiln/operators/emails.ex:574
+#, elixir-autogen, elixir-format
+msgid "Secure your account"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:387
+#: lib/kiln/operators/emails.ex:582
+#, elixir-autogen, elixir-format
+msgid "Secure your account:"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:89
+#, elixir-autogen, elixir-format
+msgid "Send new confirmation email"
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:41
+#, elixir-autogen, elixir-format
+msgid "Send reset instructions"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:533
+#: lib/kiln/operators/emails.ex:547
+#, elixir-autogen, elixir-format
+msgid "Someone requested to change your %{app_name} account email from this address to %{new_email}. If this was you, no action is needed -- confirm the change from your new email."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:38
+#, elixir-autogen, elixir-format
+msgid "This code expires in 48 hours."
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:83
+#, elixir-autogen, elixir-format
+msgid "This confirmation link has expired or was already used."
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:71
+#: lib/kiln_web/controllers/confirmation_controller.ex:94
+#, elixir-autogen, elixir-format
+msgid "This confirmation link is invalid or has expired."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:501
+#: lib/kiln/operators/emails.ex:512
+#, elixir-autogen, elixir-format
+msgid "This link expires in 24 hours."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:55
+#, elixir-autogen, elixir-format
+msgid "This link expires in 48 hours."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_html.ex:107
+#, elixir-autogen, elixir-format
+msgid "This password reset link has expired or was already used."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:190
+#: lib/kiln/operators/emails.ex:207
+#: lib/kiln/operators/emails.ex:258
+#: lib/kiln/operators/emails.ex:275
+#: lib/kiln/operators/emails.ex:731
+#: lib/kiln/operators/emails.ex:748
+#, elixir-autogen, elixir-format
+msgid "Time:"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:42
+#, elixir-autogen, elixir-format
+msgid "Too many attempts. Please wait a few minutes before trying again."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:480
+#, elixir-autogen, elixir-format
+msgid "Too many failed verification attempts"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:374
+#: lib/kiln/operators/emails.ex:383
+#, elixir-autogen, elixir-format
+msgid "Two-Factor Authentication Disabled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:338
+#: lib/kiln/operators/emails.ex:350
+#, elixir-autogen, elixir-format
+msgid "Two-Factor Authentication Enabled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:394
+#, elixir-autogen, elixir-format
+msgid "Two-factor authentication disabled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:363
+#, elixir-autogen, elixir-format
+msgid "Two-factor authentication enabled"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:341
+#: lib/kiln/operators/emails.ex:352
+#, elixir-autogen, elixir-format
+msgid "Two-factor authentication has been enabled on your %{app_name} account. Your account is now more secure."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:377
+#: lib/kiln/operators/emails.ex:385
+#, elixir-autogen, elixir-format
+msgid "Two-factor authentication was disabled on your %{app_name} account. If this wasn't you, re-enable MFA and change your password."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:455
+#: lib/kiln/operators/emails.ex:467
+#, elixir-autogen, elixir-format
+msgid "Verification Temporarily Locked"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:300
+#: lib/kiln/operators/emails.ex:314
+#, elixir-autogen, elixir-format
+msgid "We detected multiple failed login attempts on your account. For your security, your account has been temporarily locked for 15 minutes."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:458
+#: lib/kiln/operators/emails.ex:469
+#, elixir-autogen, elixir-format
+msgid "We detected multiple failed two-factor authentication attempts on your %{app_name} account. Verification has been temporarily locked for 15 minutes."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:177
+#: lib/kiln/operators/emails.ex:202
+#, elixir-autogen, elixir-format
+msgid "We noticed a new sign-in to your account from an unrecognized device or location."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:82
+#, elixir-autogen, elixir-format
+msgid "We received a request to reset your password. If you didn't make this request, you can ignore this email."
+msgstr ""
+
+#: lib/kiln_web/user_auth.ex:460
+#, elixir-autogen, elixir-format
+msgid "You must confirm your email before logging in. We've sent a new confirmation email."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:854
+#, elixir-autogen, elixir-format
+msgid "You received this email because your %{app_name} account experienced a security event."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:494
+#: lib/kiln/operators/emails.ex:508
+#, elixir-autogen, elixir-format
+msgid "You requested to change your %{app_name} account email to this address. Click the button below to confirm the change."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:846
+#, elixir-autogen, elixir-format
+msgid "You're receiving this email because you have an account with %{app_name}. If you didn't request this, you can safely ignore this email."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:408
+#: lib/kiln/operators/emails.ex:417
+#, elixir-autogen, elixir-format
+msgid "You're running low on backup codes. Generate new ones to ensure you can always access your account."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:671
+#: lib/kiln/operators/emails.ex:678
+#, elixir-autogen, elixir-format
+msgid "Your %{app_name} account and associated data have been permanently removed. If you'd like to use %{app_name} again in the future, you're welcome to create a new account."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:642
+#: lib/kiln/operators/emails.ex:650
+#, elixir-autogen, elixir-format
+msgid "Your %{app_name} account deletion has been cancelled. Your account is active again. You can log in as usual."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:572
+#: lib/kiln/operators/emails.ex:580
+#, elixir-autogen, elixir-format
+msgid "Your %{app_name} account email has been changed to this address. If you did not make this change, secure your account immediately."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:605
+#: lib/kiln/operators/emails.ex:619
+#, elixir-autogen, elixir-format
+msgid "Your %{app_name} account has been deactivated and is scheduled for permanent deletion on %{date}. All sessions have been signed out."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:718
+#: lib/kiln/operators/emails.ex:743
+#, elixir-autogen, elixir-format
+msgid "Your %{app_name} account password was changed."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:685
+#, elixir-autogen, elixir-format
+msgid "Your account has been deleted"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:327
+#, elixir-autogen, elixir-format
+msgid "Your account has been temporarily locked"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:630
+#, elixir-autogen, elixir-format
+msgid "Your account is scheduled for deletion"
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:31
+#: lib/kiln/operators/emails.ex:51
+#, elixir-autogen, elixir-format
+msgid "Your confirmation code:"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:30
+#: lib/kiln_web/controllers/confirmation_controller.ex:57
+#: lib/kiln_web/controllers/confirmation_controller.ex:81
+#, elixir-autogen, elixir-format
+msgid "Your email has been confirmed."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:589
+#, elixir-autogen, elixir-format
+msgid "Your email has been updated"
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_controller.ex:48
+#: lib/kiln_web/controllers/confirmation_controller.ex:111
+#, elixir-autogen, elixir-format
+msgid "Your email is already confirmed."
+msgstr ""
+
+#: lib/kiln_web/controllers/confirmation_html.ex:64
+#, elixir-autogen, elixir-format
+msgid "Your email was already confirmed. You can log in below."
+msgstr ""
+
+#: lib/kiln_web/controllers/reset_password_controller.ex:77
+#, elixir-autogen, elixir-format
+msgid "Your password has been reset."
+msgstr ""
+
+#: lib/kiln/operators/emails.ex:759
+#, elixir-autogen, elixir-format
+msgid "Your password was changed"
+msgstr ""

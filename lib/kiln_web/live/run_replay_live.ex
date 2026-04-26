@@ -59,6 +59,7 @@ defmodule KilnWeb.RunReplayLive do
               |> assign(:pending_tail_count, 0)
               |> assign(:scrubber_max, 0)
               |> assign(:replay_flush_timer, nil)
+              |> stream_configure(:events, dom_id: &"replay-event-#{&1.id}")
               |> stream(:events, [], reset: true)
 
             socket = if(terminal?, do: socket, else: subscribe_run_topics(socket, run))
@@ -109,11 +110,7 @@ defmodule KilnWeb.RunReplayLive do
      |> assign(:unknown_at?, load_status == :unknown_at)
      |> assign(:live_edge?, live_edge?)
      |> assign(:scrubber_max, scrubber_max)
-     |> stream(
-       :events,
-       stream_items(events),
-       reset: true
-     )}
+     |> stream(:events, events, reset: true)}
   end
 
   @impl true
@@ -206,7 +203,7 @@ defmodule KilnWeb.RunReplayLive do
        |> assign(:live_edge?, true)
        |> assign(:pending_tail_count, 0)
        |> assign(:scrubber_max, scrubber_max)
-       |> stream(:events, stream_items(evs), reset: true)}
+       |> stream(:events, evs, reset: true)}
     end
   end
 
@@ -221,54 +218,57 @@ defmodule KilnWeb.RunReplayLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
-      <div id="run-replay" data-run-id={@run.id} class="space-y-6 text-bone">
-        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-ash pb-4">
+      <div id="run-replay" data-run-id={@run.id} class="space-y-6 text-base-content">
+        <div class="flex flex-wrap items-end justify-between gap-4 border-b border-base-300 pb-4">
           <div>
-            <p class="font-mono text-xs text-[var(--color-smoke)]">{@run.id}</p>
-            <h1 class="text-xl font-semibold">Run replay</h1>
-            <p class="mt-1 text-sm text-[var(--color-smoke)]">
+            <p class="font-mono text-xs text-base-content/60">{@run.id}</p>
+            <p class="kiln-eyebrow">Factory</p>
+            <h1 class="kiln-h1 mt-1">Run replay</h1>
+            <p class="mt-1 text-sm text-base-content/60">
               Read-only audit spine for this run.
               <%= if @terminal_run? do %>
-                <span class="ml-2 font-mono text-xs text-[var(--color-smoke)]">Complete</span>
+                <span class="ml-2 font-mono text-xs text-base-content/60">Complete</span>
               <% else %>
-                <span class="ml-2 font-mono text-xs text-ember">Live</span>
+                <span class="ml-2 font-mono text-xs text-primary">Live</span>
               <% end %>
             </p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <.link
-              class="text-sm text-ember underline"
+              class="text-sm text-primary underline"
               navigate={~p"/audit?#{URI.encode_query(%{"run_id" => to_string(@run.id)})}"}
             >
               Open in Audit
             </.link>
-            <.link class="text-sm text-ember underline" navigate={~p"/runs/#{@run.id}"}>
+            <.link class="text-sm text-primary underline" navigate={~p"/runs/#{@run.id}"}>
               Run detail
             </.link>
           </div>
         </div>
 
         <%= if @unknown_at? do %>
-          <div class="rounded border border-clay/50 bg-char px-4 py-2 text-sm text-bone">
+          <div class="rounded border border-warning/50 bg-base-200 px-4 py-2 text-sm text-base-content">
             Selected event is outside the loaded window — showing the latest tail.
           </div>
         <% end %>
 
         <%= if @spine_truncated? do %>
-          <div class="rounded border border-ember/40 bg-char px-4 py-3 text-sm text-bone">
+          <div class="rounded border border-primary/40 bg-base-200 px-4 py-3 text-sm text-base-content">
             Showing first 200 events — refine filters or export from Audit.
           </div>
         <% end %>
 
         <%= if @pending_tail_count > 0 && !@live_edge? do %>
-          <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-ember/40 bg-char px-4 py-3 text-sm text-bone">
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded border border-primary/40 bg-base-200 px-4 py-3 text-sm text-base-content">
             <span>{@pending_tail_count} new events — jump to latest</span>
             <button
               type="button"
               id="replay-jump-latest"
               phx-click="jump_latest"
-              class="rounded border border-ember px-3 py-1.5 text-sm font-semibold text-ember transition-colors hover:bg-ember/10"
+              class="btn btn-sm btn-outline btn-primary"
             >
               Jump to latest
             </button>
@@ -276,7 +276,7 @@ defmodule KilnWeb.RunReplayLive do
         <% end %>
 
         <%= if @events_empty? do %>
-          <p class="text-sm text-[var(--color-smoke)]">No audit events for this run yet.</p>
+          <p class="text-sm text-base-content/60">No audit events for this run yet.</p>
         <% end %>
 
         <div class="flex flex-wrap items-center gap-2">
@@ -284,7 +284,7 @@ defmodule KilnWeb.RunReplayLive do
             type="button"
             id="replay-first"
             phx-click="scrub_first"
-            class="rounded border border-ash px-2 py-1 text-xs text-bone hover:border-ember"
+            class="rounded border border-base-300 px-2 py-1 text-xs text-base-content hover:border-primary"
           >
             First
           </button>
@@ -292,7 +292,7 @@ defmodule KilnWeb.RunReplayLive do
             type="button"
             id="replay-prev"
             phx-click="scrub_prev"
-            class="rounded border border-ash px-2 py-1 text-xs text-bone hover:border-ember"
+            class="rounded border border-base-300 px-2 py-1 text-xs text-base-content hover:border-primary"
           >
             Prev
           </button>
@@ -300,7 +300,7 @@ defmodule KilnWeb.RunReplayLive do
             type="button"
             id="replay-next"
             phx-click="scrub_next"
-            class="rounded border border-ash px-2 py-1 text-xs text-bone hover:border-ember"
+            class="rounded border border-base-300 px-2 py-1 text-xs text-base-content hover:border-primary"
           >
             Next
           </button>
@@ -308,7 +308,7 @@ defmodule KilnWeb.RunReplayLive do
             type="button"
             id="replay-last"
             phx-click="scrub_last"
-            class="rounded border border-ash px-2 py-1 text-xs text-bone hover:border-ember"
+            class="rounded border border-base-300 px-2 py-1 text-xs text-base-content hover:border-primary"
           >
             Last
           </button>
@@ -316,7 +316,7 @@ defmodule KilnWeb.RunReplayLive do
 
         <%= if @scrubber_max > 0 do %>
           <form id="replay-scrubber-form" phx-change="scrub_range" class="max-w-md">
-            <label for="replay-scrubber" class="mb-1 block text-xs text-[var(--color-smoke)]">
+            <label for="replay-scrubber" class="mb-1 block text-xs text-base-content/60">
               Scrub timeline
             </label>
             <input
@@ -333,7 +333,7 @@ defmodule KilnWeb.RunReplayLive do
 
         <div class="grid gap-6 lg:grid-cols-2">
           <div>
-            <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <h2 class="mb-2 kiln-eyebrow">
               Timeline
             </h2>
             <div
@@ -346,11 +346,12 @@ defmodule KilnWeb.RunReplayLive do
                 id={dom_id}
                 class={[
                   "rounded border px-3 py-2 text-sm",
-                  @selected_event && @selected_event.id == event.id && "border-ember bg-iron",
-                  (!@selected_event || @selected_event.id != event.id) && "border-ash bg-char"
+                  @selected_event && @selected_event.id == event.id && "border-primary bg-base-300",
+                  (!@selected_event || @selected_event.id != event.id) &&
+                    "border-base-300 bg-base-200"
                 ]}
               >
-                <div class="font-mono text-xs text-[var(--color-smoke)]">
+                <div class="font-mono text-xs text-base-content/60">
                   {Calendar.strftime(event.occurred_at, "%Y-%m-%d %H:%M:%S.%f")} UTC
                 </div>
                 <div class="mt-1 font-mono text-xs break-all">{event.id}</div>
@@ -359,28 +360,28 @@ defmodule KilnWeb.RunReplayLive do
             </div>
           </div>
           <div>
-            <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <h2 class="mb-2 kiln-eyebrow">
               Event detail
             </h2>
             <%= if @selected_event do %>
-              <div class="space-y-3 rounded border border-ash bg-char p-4 text-sm">
+              <div class="space-y-3 rounded border border-base-300 bg-base-200 p-4 text-sm">
                 <div>
-                  <div class="text-xs uppercase text-[var(--color-smoke)]">Kind</div>
+                  <div class="text-xs uppercase text-base-content/60">Kind</div>
                   <div class="font-mono">{inspect(@selected_event.event_kind)}</div>
                 </div>
                 <div>
-                  <div class="text-xs uppercase text-[var(--color-smoke)]">Occurred at</div>
+                  <div class="text-xs uppercase text-base-content/60">Occurred at</div>
                   <div class="font-mono">
                     {Calendar.strftime(@selected_event.occurred_at, "%Y-%m-%d %H:%M:%S.%f")} UTC
                   </div>
                 </div>
                 <div>
-                  <div class="text-xs uppercase text-[var(--color-smoke)]">Payload</div>
-                  <pre class="mt-1 max-h-64 overflow-auto rounded bg-iron p-2 font-mono text-xs text-bone whitespace-pre-wrap break-all"><%= Jason.encode!(@selected_event.payload) %></pre>
+                  <div class="text-xs uppercase text-base-content/60">Payload</div>
+                  <pre class="mt-1 max-h-64 overflow-auto rounded bg-base-300 p-2 font-mono text-xs text-base-content whitespace-pre-wrap break-all"><%= Jason.encode!(@selected_event.payload) %></pre>
                 </div>
               </div>
             <% else %>
-              <p class="text-sm text-[var(--color-smoke)]">Select an event from the list.</p>
+              <p class="text-sm text-base-content/60">Select an event from the list.</p>
             <% end %>
           </div>
         </div>
@@ -485,10 +486,6 @@ defmodule KilnWeb.RunReplayLive do
       idx ->
         {Enum.at(events, idx), idx}
     end
-  end
-
-  defp stream_items(events) do
-    Enum.map(events, fn e -> {"replay-event-#{e.id}", e} end)
   end
 
   defp replay_at(%Run{} = run, event_id) do

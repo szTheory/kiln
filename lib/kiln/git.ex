@@ -30,9 +30,15 @@ defmodule Kiln.Git do
           module()
           | ([String.t()], keyword() -> {:ok, String.t()} | {:error, Cmd.error_map()})
 
+  @missing_remote_sha String.duplicate("0", 40)
+
   @doc "Returns the default runner module (`Kiln.Git.SystemCmdRunner`)."
   @spec default_runner() :: module()
   def default_runner, do: Kiln.Git.SystemCmdRunner
+
+  @doc "Sentinel SHA used when a remote branch does not exist yet."
+  @spec missing_remote_sha() :: String.t()
+  def missing_remote_sha, do: @missing_remote_sha
 
   @doc """
   Parses the first full SHA from `git ls-remote <remote> <ref>` output.
@@ -126,6 +132,62 @@ defmodule Kiln.Git do
     runner_opts = if(cd, do: [cd: cd], else: [])
 
     git_call(runner, argv, runner_opts)
+  end
+
+  @doc """
+  Validates a local branch name with `git check-ref-format --branch`.
+  """
+  @spec validate_branch_name(String.t(), keyword()) :: :ok | {:error, term()}
+  def validate_branch_name(branch_name, opts \\ []) when is_binary(branch_name) do
+    runner = normalize_runner(Keyword.get(opts, :runner, default_runner()))
+
+    case git_call(runner, ["check-ref-format", "--branch", branch_name], []) do
+      {:ok, _} -> :ok
+      {:error, %{exit_status: code} = err} -> {:error, {:invalid_branch_name, code, err}}
+    end
+  end
+
+  @doc """
+  Returns the current `HEAD` SHA for the repo at `workspace_dir`.
+  """
+  @spec head_sha(String.t(), keyword()) :: {:ok, String.t()} | {:error, term()}
+  def head_sha(workspace_dir, opts \\ []) when is_binary(workspace_dir) do
+    runner = normalize_runner(Keyword.get(opts, :runner, default_runner()))
+
+    case git_call(runner, ["rev-parse", "HEAD"], cd: workspace_dir) do
+      {:ok, sha} -> {:ok, String.trim(sha)}
+      {:error, %{exit_status: code} = err} -> {:error, {:rev_parse_failed, code, err}}
+    end
+  end
+
+  @doc """
+  Switches to `branch_name` in `workspace_dir`, creating it from the current
+  `HEAD` if needed.
+  """
+  @spec ensure_local_branch(String.t(), String.t(), keyword()) :: :ok | {:error, term()}
+  def ensure_local_branch(workspace_dir, branch_name, opts \\ [])
+      when is_binary(workspace_dir) and is_binary(branch_name) do
+    runner = normalize_runner(Keyword.get(opts, :runner, default_runner()))
+
+    with :ok <- validate_branch_name(branch_name, runner: runner),
+         {:ok, listed} <- git_call(runner, ["branch", "--list", branch_name], cd: workspace_dir),
+         {:ok, _} <- switch_branch(runner, workspace_dir, branch_name, listed) do
+      :ok
+    else
+      {:error, %{exit_status: code} = err} -> {:error, {:branch_switch_failed, code, err}}
+      {:error, _} = err -> err
+    end
+  end
+
+  defp switch_branch(runner, workspace_dir, branch_name, listed) do
+    argv =
+      if String.trim(listed) == "" do
+        ["switch", "-c", branch_name]
+      else
+        ["switch", branch_name]
+      end
+
+    git_call(runner, argv, cd: workspace_dir)
   end
 
   defp git_call(runner, argv, opts) when is_function(runner, 2), do: runner.(argv, opts)

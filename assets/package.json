@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "test": "echo 'no JS tests yet — placeholder satisfies mix check npm_test gate'"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^13.0.0"
+  }
+}

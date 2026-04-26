@@ -10,7 +10,13 @@ defmodule Kiln.Specs.SpecDraft do
 
   @type inbox_state :: :open | :archived | :promoted
   @type source ::
-          :freeform | :markdown_import | :github_issue | :run_follow_up | :template
+          :freeform
+          | :markdown_import
+          | :github_issue
+          | :run_follow_up
+          | :template
+          | :attached_repo_intake
+  @type request_kind :: :feature | :bugfix
 
   @type t :: %__MODULE__{}
 
@@ -22,7 +28,14 @@ defmodule Kiln.Specs.SpecDraft do
     field(:body, :string)
 
     field(:source, Ecto.Enum,
-      values: [:freeform, :markdown_import, :github_issue, :run_follow_up, :template]
+      values: [
+        :freeform,
+        :markdown_import,
+        :github_issue,
+        :run_follow_up,
+        :template,
+        :attached_repo_intake
+      ]
     )
 
     field(:inbox_state, Ecto.Enum, values: [:open, :archived, :promoted])
@@ -41,6 +54,11 @@ defmodule Kiln.Specs.SpecDraft do
     field(:source_run_id, :binary_id)
     field(:artifact_refs, {:array, :map}, default: [])
     field(:operator_summary, :string)
+    belongs_to(:attached_repo, Kiln.Attach.AttachedRepo, foreign_key: :attached_repo_id)
+    field(:request_kind, Ecto.Enum, values: [:feature, :bugfix])
+    field(:change_summary, :string)
+    field(:acceptance_criteria, {:array, :string}, default: [])
+    field(:out_of_scope, {:array, :string}, default: [])
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -63,10 +81,37 @@ defmodule Kiln.Specs.SpecDraft do
       :last_synced_at,
       :source_run_id,
       :artifact_refs,
-      :operator_summary
+      :operator_summary,
+      :attached_repo_id,
+      :request_kind,
+      :change_summary,
+      :acceptance_criteria,
+      :out_of_scope
     ])
     |> validate_required([:title, :body, :source])
     |> validate_number(:github_issue_number, greater_than: 0)
+    |> validate_attached_repo_intake_fields()
     |> foreign_key_constraint(:promoted_spec_id)
+    |> foreign_key_constraint(:attached_repo_id)
+  end
+
+  defp validate_attached_repo_intake_fields(changeset) do
+    if get_field(changeset, :source) == :attached_repo_intake do
+      changeset
+      |> validate_required([
+        :attached_repo_id,
+        :request_kind,
+        :change_summary
+      ])
+      |> validate_change(:acceptance_criteria, fn :acceptance_criteria, value ->
+        if Enum.empty?(value || []) do
+          [acceptance_criteria: "must include at least one item"]
+        else
+          []
+        end
+      end)
+    else
+      changeset
+    end
   end
 end

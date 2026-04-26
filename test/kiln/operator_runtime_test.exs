@@ -35,4 +35,10 @@ defmodule Kiln.OperatorRuntimeTest do
     Application.put_env(:kiln, :operator_runtime_mode, :oops, persistent: false)
     assert OperatorRuntime.mode() == :unknown
   end
+
+  test "normalize/1 accepts strings and atoms" do
+    assert OperatorRuntime.normalize(:demo) == :demo
+    assert OperatorRuntime.normalize("live") == :live
+    assert OperatorRuntime.normalize("nope") == :unknown
+  end
 end

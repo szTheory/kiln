@@ -28,6 +28,39 @@ defmodule KilnWeb.OperatorChromeLiveTest do
     assert html =~ "Demo"
   end
 
+  test "mode control renders and updates runtime mode copy", %{conn: conn} do
+    Application.put_env(:kiln, :operator_runtime_mode, :demo, persistent: false)
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#operator-mode-form")
+    assert has_element?(view, "#operator-mode-select")
+
+    view
+    |> form("#operator-mode-form", %{"runtime_mode" => %{"operator_mode" => "live"}})
+    |> render_change()
+
+    assert render(view) =~ "Runtime credentials apply; external APIs may incur cost."
+  end
+
+  test "scenario control renders and updates journey copy", %{conn: conn} do
+    Application.put_env(:kiln, :operator_runtime_mode, :demo, persistent: false)
+
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    assert has_element?(view, "#operator-scenario-form")
+    assert has_element?(view, "#operator-scenario-select")
+    assert render(view) =~ "Solo founder fast proof"
+
+    view
+    |> form("#operator-scenario-form", %{"journey" => %{"scenario_id" => "gameboy-first-project"}})
+    |> render_change()
+
+    html = render(view)
+    assert html =~ "Game Boy first project"
+    assert html =~ "Game Boy vertical slice"
+  end
+
   test "live mode shows Live copy on run board", %{conn: conn} do
     Application.put_env(:kiln, :operator_runtime_mode, :live, persistent: false)
 
@@ -46,6 +79,7 @@ defmodule KilnWeb.OperatorChromeLiveTest do
 
     assert html =~ ~s(id="operator-config-presence")
     assert html =~ "Providers"
+    assert html =~ "Runtime mode"
   end
 
   test "rendered shell does not echo obvious secret-shaped markers", %{conn: conn} do

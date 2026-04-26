@@ -90,6 +90,8 @@ defmodule KilnWeb.RunCompareLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
       <div
         id="run-compare"
@@ -99,63 +101,67 @@ defmodule KilnWeb.RunCompareLive do
         data-candidate-id={@candidate_id_str}
       >
         <%= if not (match?({:ok, _}, @baseline_id) and match?({:ok, _}, @candidate_id)) do %>
-          <p class="text-sm text-[var(--color-smoke)]">
+          <p class="text-sm text-base-content/60">
             Add baseline and candidate query parameters.
           </p>
         <% else %>
           <%= if duplicate_compare?(@baseline_id, @candidate_id) do %>
-            <div class="rounded border border-clay bg-char/80 p-3 text-sm text-bone" role="status">
+            <div
+              class="rounded border border-warning bg-base-200 p-3 text-sm text-base-content"
+              role="status"
+            >
               Baseline and candidate are the same run — comparison is for link sharing only.
             </div>
           <% end %>
 
-          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-ash pb-3">
-            <h1 class="text-xl font-semibold text-bone">Compare runs</h1>
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 pb-3">
+            <p class="kiln-eyebrow">Factory</p>
+            <h1 class="kiln-h1 mt-1">Compare runs</h1>
             <button
               type="button"
               id="run-compare-swap"
               phx-click="swap_sides"
-              class="rounded border border-ash px-3 py-1.5 text-sm text-bone transition-colors hover:border-ember hover:text-ember"
+              class="rounded border border-base-300 px-3 py-1.5 text-sm text-base-content transition-colors hover:border-primary hover:text-primary"
             >
               Swap
             </button>
           </div>
 
           <%= if @snapshot do %>
-            <section class="grid gap-4 rounded border border-ash bg-char/80 p-4 lg:grid-cols-2">
+            <section class="grid gap-4 rounded border border-base-300 bg-base-200 p-4 lg:grid-cols-2">
               <.identity_column title="Baseline" run={@snapshot.baseline_run} />
               <.identity_column title="Candidate" run={@snapshot.candidate_run} />
             </section>
 
-            <section class="rounded border border-ash bg-char/80 p-4">
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <section class="rounded border border-base-300 bg-base-200 p-4">
+              <h2 class="kiln-eyebrow">
                 Cost summary
               </h2>
-              <div class="mt-2 grid gap-4 font-mono text-sm tabular-nums text-bone md:grid-cols-2">
+              <div class="mt-2 grid gap-4 font-mono text-sm tabular-nums text-base-content md:grid-cols-2">
                 <div>
-                  <p class="text-[var(--color-smoke)]">Baseline USD</p>
+                  <p class="text-base-content/60">Baseline USD</p>
                   <p>{format_decimal(sum_cost(@snapshot.rows, :baseline_stage))}</p>
-                  <p class="mt-1 text-[var(--color-smoke)]">Tokens</p>
+                  <p class="mt-1 text-base-content/60">Tokens</p>
                   <p>{sum_tokens(@snapshot.rows, :baseline_stage)}</p>
                 </div>
                 <div>
-                  <p class="text-[var(--color-smoke)]">Candidate USD</p>
+                  <p class="text-base-content/60">Candidate USD</p>
                   <p>{format_decimal(sum_cost(@snapshot.rows, :candidate_stage))}</p>
-                  <p class="mt-1 text-[var(--color-smoke)]">Tokens</p>
+                  <p class="mt-1 text-base-content/60">Tokens</p>
                   <p>{sum_tokens(@snapshot.rows, :candidate_stage)}</p>
                 </div>
               </div>
             </section>
 
-            <section class="rounded border border-ash bg-char/80 p-4">
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <section class="rounded border border-base-300 bg-base-200 p-4">
+              <h2 class="kiln-eyebrow">
                 Stages
               </h2>
               <div class="mt-3 space-y-2">
                 <%= for stage_id <- @snapshot.union_stage_ids do %>
                   <% row = Enum.find(@snapshot.rows, &(&1.workflow_stage_id == stage_id)) %>
                   <div
-                    class="grid gap-2 rounded border border-ash bg-iron/40 p-3 md:grid-cols-2"
+                    class="grid gap-2 rounded border border-base-300 bg-base-300/60 p-3 md:grid-cols-2"
                     data-stage-key={stage_id}
                   >
                     <.stage_cell label="Baseline" row={row} side={:baseline} />
@@ -165,19 +171,19 @@ defmodule KilnWeb.RunCompareLive do
               </div>
             </section>
 
-            <section class="rounded border border-ash bg-char/80 p-4">
-              <h2 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+            <section class="rounded border border-base-300 bg-base-200 p-4">
+              <h2 class="kiln-eyebrow">
                 Artifacts
               </h2>
-              <ul class="mt-3 space-y-2 text-sm text-bone">
+              <ul class="mt-3 space-y-2 text-sm text-base-content">
                 <%= for art <- @snapshot.artifact_rows do %>
-                  <li class="rounded border border-ash bg-iron/30 p-2">
-                    <div class="font-mono text-xs text-[var(--color-smoke)]">{art.logical_key}</div>
+                  <li class="rounded border border-base-300 bg-base-300/40 p-2">
+                    <div class="font-mono text-xs text-base-content/60">{art.logical_key}</div>
                     <div class="mt-1 flex flex-wrap gap-3 text-xs">
                       <span>{artifact_equality_label(art.equality)}</span>
                       <%= if art.baseline_meta && art.workflow_stage_id do %>
                         <.link
-                          class="text-ember underline"
+                          class="text-primary underline"
                           navigate={
                             artifact_diff_href(art.baseline_meta.run_id, art.workflow_stage_id)
                           }
@@ -187,7 +193,7 @@ defmodule KilnWeb.RunCompareLive do
                       <% end %>
                       <%= if art.candidate_meta && art.workflow_stage_id do %>
                         <.link
-                          class="text-ember underline"
+                          class="text-primary underline"
                           navigate={
                             artifact_diff_href(art.candidate_meta.run_id, art.workflow_stage_id)
                           }
@@ -213,16 +219,16 @@ defmodule KilnWeb.RunCompareLive do
   def identity_column(assigns) do
     ~H"""
     <div class="space-y-2">
-      <h3 class="text-xs font-semibold uppercase tracking-wide text-[var(--color-smoke)]">
+      <h3 class="kiln-eyebrow">
         {@title}
       </h3>
       <%= if @run do %>
-        <p class="font-mono text-xs tabular-nums text-bone">{short8(@run.id)}</p>
-        <p class="text-sm text-bone">{@run.workflow_id}</p>
-        <p class="text-xs text-[var(--color-smoke)]">{inspect(@run.state)}</p>
+        <p class="font-mono text-xs tabular-nums text-base-content">{short8(@run.id)}</p>
+        <p class="text-sm text-base-content">{@run.workflow_id}</p>
+        <p class="text-xs text-base-content/60">{inspect(@run.state)}</p>
       <% else %>
-        <p class="text-sm font-semibold text-bone">Run not found</p>
-        <p class="text-xs text-[var(--color-smoke)]">Check the id or return to the board.</p>
+        <p class="text-sm font-semibold text-base-content">Run not found</p>
+        <p class="text-xs text-base-content/60">Check the id or return to the board.</p>
       <% end %>
     </div>
     """
@@ -273,15 +279,15 @@ defmodule KilnWeb.RunCompareLive do
 
     ~H"""
     <div class="text-xs">
-      <p class="font-semibold text-[var(--color-smoke)]">{@label}</p>
+      <p class="font-semibold text-base-content/60">{@label}</p>
       <%= cond do %>
         <% match?(%StageRun{}, @stage) -> %>
-          <p class="mt-1 font-mono text-bone tabular-nums">{@stage.workflow_stage_id}</p>
-          <p class="mt-1 text-[var(--color-smoke)]">{inspect(@stage.state)}</p>
+          <p class="mt-1 font-mono text-base-content tabular-nums">{@stage.workflow_stage_id}</p>
+          <p class="mt-1 text-base-content/60">{inspect(@stage.state)}</p>
         <% is_binary(@gap_copy) -> %>
-          <p class="mt-1 text-[var(--color-smoke)]">{@gap_copy}</p>
+          <p class="mt-1 text-base-content/60">{@gap_copy}</p>
         <% true -> %>
-          <p class="mt-1 text-[var(--color-smoke)]">—</p>
+          <p class="mt-1 text-base-content/60">—</p>
       <% end %>
     </div>
     """
@@ -310,8 +316,7 @@ defmodule KilnWeb.RunCompareLive do
 
   defp uuid_string!(s) when is_binary(s) do
     case Ecto.UUID.cast(s) do
-      {:ok, bin} when byte_size(bin) == 16 -> uuid_string!(bin)
-      {:ok, _} -> ""
+      {:ok, canonical} when is_binary(canonical) -> canonical
       :error -> ""
     end
   end

@@ -19,10 +19,12 @@ defmodule Kiln.Oban.PostMortemMaterializeWorker do
   def perform(%Oban.Job{args: args, meta: meta}) do
     _ = maybe_unpack_ctx(meta)
 
-    with {:ok, run_id, key} <- parse_args(args) do
-      do_perform(run_id, key)
-    else
-      {:error, reason} -> {:error, reason}
+    case parse_args(args) do
+      {:ok, run_id, key} ->
+        do_perform(run_id, key)
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 

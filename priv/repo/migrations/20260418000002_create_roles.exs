@@ -43,6 +43,9 @@ defmodule Kiln.Repo.Migrations.CreateRoles do
       db TEXT := current_database();
     BEGIN
       EXECUTE format('GRANT CONNECT ON DATABASE %I TO kiln_owner, kiln_app', db);
+      -- kiln_owner needs CREATE ON DATABASE to install trusted extensions (e.g. citext)
+      -- when migrations run under KILN_DB_ROLE=kiln_owner (Postgres 13+ trusted extension rule)
+      EXECUTE format('GRANT CREATE ON DATABASE %I TO kiln_owner', db);
     END
     $$ LANGUAGE plpgsql;
     """)
@@ -51,6 +54,10 @@ defmodule Kiln.Repo.Migrations.CreateRoles do
     # Only kiln_owner may CREATE new objects (new tables/types/functions).
     # kiln_app cannot run DDL.
     execute("GRANT CREATE ON SCHEMA public TO kiln_owner")
+    # kiln_owner needs to read/write schema_migrations so KILN_DB_ROLE=kiln_owner
+    # mix ecto.migrate works on subsequent boots (Ecto creates this table as the
+    # connecting superuser before any migration runs).
+    execute("GRANT SELECT, INSERT, UPDATE ON TABLE schema_migrations TO kiln_owner")
 
     # The connecting superuser (default 'postgres' in dev/test) needs
     # membership in the kiln_* roles so test sessions can SET LOCAL ROLE
@@ -80,9 +87,12 @@ defmodule Kiln.Repo.Migrations.CreateRoles do
       db TEXT := current_database();
     BEGIN
       EXECUTE format('REVOKE CONNECT ON DATABASE %I FROM kiln_owner, kiln_app', db);
+      EXECUTE format('REVOKE CREATE ON DATABASE %I FROM kiln_owner', db);
     END
     $$ LANGUAGE plpgsql;
     """)
+
+    execute("REVOKE SELECT, INSERT, UPDATE ON TABLE schema_migrations FROM kiln_owner")
 
     execute("DROP ROLE IF EXISTS kiln_app")
     execute("DROP ROLE IF EXISTS kiln_owner")

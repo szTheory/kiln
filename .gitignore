@@ -48,3 +48,9 @@ priv/artifacts/*
 
 # Dialyzer PLTs (D-27) — rebuilt on CI via cache-keyed restore; never committed.
 /priv/plts/
+
+# Playwright e2e — scaffold is checked in; build artifacts are not.
+/test/e2e/node_modules/
+/test/e2e/playwright-report/
+/test/e2e/test-results/
+/test/e2e/.fixture-ids.json

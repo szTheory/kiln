@@ -9,13 +9,15 @@ defmodule KilnWeb.Components.AgentTicker do
 
   def agent_ticker(assigns) do
     ~H"""
-    <section class="mt-8 rounded border border-ash bg-char/80 p-4">
-      <h2 class="text-sm font-semibold text-bone">Factory activity</h2>
-      <p class="mt-1 text-xs text-[var(--color-smoke)]">
-        Recent state transitions (rate-limited per run).
-      </p>
-      <div class="mt-3">
-        {render_slot(@inner_block)}
+    <section class="card card-bordered bg-base-200 border-base-300 mt-8">
+      <div class="card-body p-5">
+        <h2 class="kiln-eyebrow">Factory activity</h2>
+        <p class="kiln-meta mt-1">
+          Recent state transitions (rate-limited per run).
+        </p>
+        <div class="mt-3">
+          {render_slot(@inner_block)}
+        </div>
       </div>
     </section>
     """

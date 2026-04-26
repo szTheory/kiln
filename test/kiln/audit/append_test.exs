@@ -67,6 +67,7 @@ defmodule Kiln.AuditTest do
   describe "append/1 — invalid payloads are rejected before INSERT" do
     test "run_state_transitioned with bogus 'from' enum value" do
       cid = Ecto.UUID.generate()
+      before_count = Repo.aggregate(Kiln.Audit.Event, :count)
 
       assert {:error, {:audit_payload_invalid, _}} =
                Audit.append(%{
@@ -76,7 +77,7 @@ defmodule Kiln.AuditTest do
                })
 
       # No row persisted.
-      assert Repo.aggregate(Kiln.Audit.Event, :count) == 0
+      assert Repo.aggregate(Kiln.Audit.Event, :count) == before_count
     end
 
     test "stage_started with unknown key (additionalProperties: false)" do

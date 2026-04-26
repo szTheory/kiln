@@ -15,16 +15,25 @@ defmodule Kiln.OperatorRuntime do
   @type mode :: :demo | :live | :unknown
 
   @doc """
+  Normalizes string or atom inputs to a supported runtime mode.
+  """
+  @spec normalize(term()) :: mode()
+  def normalize(mode)
+
+  def normalize(:demo), do: :demo
+  def normalize(:live), do: :live
+  def normalize("demo"), do: :demo
+  def normalize("live"), do: :live
+  def normalize(_), do: :unknown
+
+  @doc """
   Returns `:demo`, `:live`, or `:unknown` from application env.
 
   Unknown values and `nil` normalize to `:unknown` — this function never raises.
   """
   @spec mode() :: mode()
   def mode do
-    case Application.get_env(:kiln, :operator_runtime_mode) do
-      :demo -> :demo
-      :live -> :live
-      _ -> :unknown
-    end
+    Application.get_env(:kiln, :operator_runtime_mode)
+    |> normalize()
   end
 end

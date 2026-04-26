@@ -25,11 +25,129 @@ import {LiveSocket} from "phoenix_live_view"
 import {hooks as colocatedHooks} from "phoenix-colocated/kiln"
 import topbar from "../vendor/topbar"
 
+const OPERATOR_MODE_KEY = "kiln:operator-mode"
+const DEMO_SCENARIO_KEY = "kiln:demo-scenario"
+
+const readOperatorMode = () => {
+  try {
+    const stored = window.localStorage.getItem(OPERATOR_MODE_KEY)
+    return stored === "demo" || stored === "live" ? stored : null
+  } catch {
+    return null
+  }
+}
+
+const writeOperatorMode = (mode) => {
+  if (mode !== "demo" && mode !== "live") return
+
+  try {
+    window.localStorage.setItem(OPERATOR_MODE_KEY, mode)
+  } catch {
+    // Ignore localStorage failures; the server event still updates the page.
+  }
+}
+
+const readDemoScenario = () => {
+  try {
+    const stored = window.localStorage.getItem(DEMO_SCENARIO_KEY)
+    return stored && stored.length > 0 ? stored : null
+  } catch {
+    return null
+  }
+}
+
+const writeDemoScenario = (scenarioId) => {
+  if (!scenarioId || scenarioId.length === 0) return
+
+  try {
+    window.localStorage.setItem(DEMO_SCENARIO_KEY, scenarioId)
+  } catch {
+    // Ignore localStorage failures; the server event still updates the page.
+  }
+}
+
+const OperatorModeControl = {
+  mounted() {
+    this.select = this.el.querySelector("#operator-mode-select")
+
+    this.onChange = (event) => {
+      const value = event.target.value
+      if (value === "demo" || value === "live") writeOperatorMode(value)
+    }
+
+    this.el.addEventListener("change", this.onChange)
+
+    const current = this.el.dataset.currentMode
+    const stored = readOperatorMode()
+
+    if (this.select && stored && this.select.value !== stored) {
+      this.select.value = stored
+    }
+
+    if (stored && stored !== current) {
+      this.pushEvent("operator:set_mode", {mode: stored})
+    } else if (!stored && (current === "demo" || current === "live")) {
+      writeOperatorMode(current)
+    }
+  },
+
+  destroyed() {
+    this.el.removeEventListener("change", this.onChange)
+  },
+}
+
+const OperatorScenarioControl = {
+  mounted() {
+    this.select = this.el.querySelector("#operator-scenario-select")
+    if (!this.select) return
+
+    this.available = new Set(
+      Array.from(this.select.options)
+        .map((option) => option.value)
+        .filter((value) => value.length > 0)
+    )
+
+    this.onChange = (event) => {
+      const value = event.target.value
+      if (this.available.has(value)) writeDemoScenario(value)
+    }
+
+    this.el.addEventListener("change", this.onChange)
+
+    const current = this.el.dataset.currentScenario
+    const stored = readDemoScenario()
+
+    if (current && this.available.has(current)) {
+      if (this.select.value !== current) this.select.value = current
+      if (stored !== current) writeDemoScenario(current)
+      return
+    }
+
+    if (stored && this.available.has(stored)) {
+      if (this.select.value !== stored) this.select.value = stored
+      this.pushEvent("operator:set_scenario", {id: stored})
+    }
+  },
+
+  destroyed() {
+    this.el.removeEventListener("change", this.onChange)
+  },
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
-  params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  params: () => {
+    const operatorMode = readOperatorMode()
+    const operatorScenario = readDemoScenario()
+
+    return {
+      _csrf_token: csrfToken,
+      ...(operatorMode ? {operator_runtime_mode: operatorMode} : {}),
+      ...(operatorScenario ? {operator_demo_scenario: operatorScenario} : {}),
+    }
+  },
+  hooks: {...colocatedHooks, OperatorModeControl, OperatorScenarioControl},
 })
 
 // Show progress bar on live navigation and form submits
@@ -80,4 +198,3 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
-

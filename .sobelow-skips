@@ -1,2 +1,3 @@
 
 Config.CSP: Missing Content-Security-Policy,lib/kiln_web/router.ex:12,1F71C2E
+Config.CSP: Missing Content-Security-Policy,lib/kiln_web/router.ex:14,51AEFA0

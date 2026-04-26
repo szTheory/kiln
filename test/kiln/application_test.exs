@@ -2,11 +2,12 @@ defmodule Kiln.ApplicationTest do
   @moduledoc """
   Supervision-tree shape assertions. Phase 4 removes the global
   `Kiln.Agents.SessionSupervisor` scaffold; agent sessions live only under
-  per-run `Kiln.Runs.RunSubtree`.
+  per-run `Kiln.Runs.RunSubtree`. Phase 36-01 adds `Kiln.Vault` (Cloak
+  vault for Sigra-managed secrets) bringing the total to 15.
 
   Tests cover:
 
-    * Exactly 14 children post-boot.
+    * Exactly 15 children post-boot.
     * All expected module-ids present in `Supervisor.which_children/1`.
     * The named pools (`Kiln.Finch`, `Kiln.RunRegistry`,
       `Kiln.Runs.RunDirector`, `Kiln.Runs.RunSupervisor`,
@@ -15,15 +16,15 @@ defmodule Kiln.ApplicationTest do
   """
   use ExUnit.Case, async: false
 
-  describe "supervision tree (Phase 4, 14 children)" do
-    test "exactly 14 children running under Kiln.Supervisor" do
+  describe "supervision tree (Phase 4 + 36-01, 15 children)" do
+    test "exactly 15 children running under Kiln.Supervisor" do
       child_ids =
         Kiln.Supervisor
         |> Supervisor.which_children()
         |> Enum.map(fn {id, _pid, _type, _mods} -> id end)
 
-      assert length(child_ids) == 14,
-             "Phase 4 requires EXACTLY 14 children, got #{length(child_ids)}: #{inspect(child_ids)}"
+      assert length(child_ids) == 15,
+             "Phase 4 + 36-01 require EXACTLY 15 children, got #{length(child_ids)}: #{inspect(child_ids)}"
     end
 
     test "locked child set includes Phase 3 runtime additions (minus global session sup)" do
@@ -52,7 +53,8 @@ defmodule Kiln.ApplicationTest do
         {"Kiln.Runs.RunSupervisor", &(&1 == Kiln.Runs.RunSupervisor)},
         {"Kiln.Runs.RunDirector", &(&1 == Kiln.Runs.RunDirector)},
         {"Kiln.Policies.StuckDetector", &(&1 == Kiln.Policies.StuckDetector)},
-        {"KilnWeb.Endpoint", &(&1 == KilnWeb.Endpoint)}
+        {"KilnWeb.Endpoint", &(&1 == KilnWeb.Endpoint)},
+        {"Kiln.Vault", &(&1 == Kiln.Vault)}
       ]
 
       for {label, pred} <- expectations do

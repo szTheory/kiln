@@ -16,7 +16,8 @@ defmodule Kiln.Specs.SpecDraftTest do
                })
 
       assert d.inbox_state == :open
-      assert [listed] = Specs.list_open_drafts()
+      open_drafts = Enum.filter(Specs.list_open_drafts(), &(&1.id == d.id))
+      assert [listed] = open_drafts
       assert listed.id == d.id
     end
   end
@@ -29,7 +30,7 @@ defmodule Kiln.Specs.SpecDraftTest do
       assert {:ok, archived} = Specs.archive_draft(d.id)
       assert archived.inbox_state == :archived
       assert archived.archived_at
-      assert Specs.list_open_drafts() == []
+      refute Enum.any?(Specs.list_open_drafts(), &(&1.id == d.id))
     end
 
     test "returns error for non-open draft" do

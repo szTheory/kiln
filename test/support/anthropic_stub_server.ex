@@ -59,7 +59,6 @@ defmodule Kiln.AnthropicStubServer do
     }
   end
 
-  @spec ok_response() :: map()
   def ok_response do
     %{
       "id" => "msg_01ABC",
@@ -78,7 +77,6 @@ defmodule Kiln.AnthropicStubServer do
     }
   end
 
-  @spec rate_limit_response() :: map()
   def rate_limit_response do
     %{
       "type" => "error",

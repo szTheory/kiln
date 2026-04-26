@@ -12,22 +12,21 @@ defmodule KilnWeb.Components.FactoryHeader do
 
   def factory_header(assigns) do
     ~H"""
-    <div
-      id="factory-header"
-      class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded border border-ash bg-iron/30 px-3 py-2 text-xs text-bone"
-    >
-      <div class="font-mono tabular-nums">
-        <span class="text-[var(--color-smoke)]">Active</span>
-        <span class="ml-1 font-semibold text-bone">{@summary.active}</span>
-        <span class="ml-4 text-[var(--color-smoke)]">Blocked</span>
+    <div id="factory-header" class="kiln-status-numeric inline-flex items-center gap-3">
+      <span>
+        <span class="kiln-status-numeric__label">Active</span>
+        <span class="font-semibold tabular-nums">{@summary.active}</span>
+      </span>
+      <span class="opacity-40" aria-hidden="true">·</span>
+      <span>
+        <span class="kiln-status-numeric__label">Blocked</span>
         <span class={[
-          "ml-1 font-semibold tabular-nums",
-          @summary.blocked > 0 && "text-[var(--color-clay)]",
-          @summary.blocked == 0 && "text-bone"
+          "font-semibold tabular-nums",
+          @summary.blocked > 0 && "text-warning"
         ]}>
           {@summary.blocked}
         </span>
-      </div>
+      </span>
     </div>
     """
   end

@@ -62,6 +62,7 @@ defmodule Kiln.CasTestHelper do
     # Store the prior value in process-dict so `cleanup_tmp_cas/1` can
     # restore it. Keyed by the base directory so parallel tests don't
     # clobber each other's saved values.
+    # credo:disable-for-next-line Kiln.Credo.NoProcessPut
     Process.put({__MODULE__, :prior, base}, prior)
 
     Application.put_env(@app, @env_key,

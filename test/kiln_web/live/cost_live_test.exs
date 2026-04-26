@@ -5,8 +5,10 @@ defmodule KilnWeb.CostLiveTest do
 
   alias Kiln.Factory.Run, as: RunFactory
   alias Kiln.Factory.StageRun, as: StageRunFactory
+  alias Kiln.Repo
 
   test "empty spend shows operator copy", %{conn: conn} do
+    Repo.delete_all(Kiln.Stages.StageRun)
     {:ok, view, _html} = live(conn, ~p"/costs")
     html = render(view)
     assert html =~ "No spend recorded yet"

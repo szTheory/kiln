@@ -3,10 +3,13 @@ defmodule KilnWeb.WorkflowLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Kiln.Repo
   alias Kiln.Workflows
   alias Kiln.Workflows.Loader
+  alias Kiln.Workflows.WorkflowDefinitionSnapshot
 
   test "index shows Snapshots label and empty copy when no rows", %{conn: conn} do
+    Repo.delete_all(WorkflowDefinitionSnapshot)
     {:ok, view, _html} = live(conn, ~p"/workflows")
     assert render(view) =~ "Snapshots"
     assert render(view) =~ "No workflows loaded"

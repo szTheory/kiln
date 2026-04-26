@@ -47,6 +47,25 @@ if config_env() == :test do
   db = "kiln_test#{System.get_env("MIX_TEST_PARTITION")}"
   config :kiln, Kiln.Repo, database: db
   config :kiln, Kiln.Repo.VerifierReadRepo, database: db
+
+  config :kiln, :sigra_config,
+    secret_key_base: Application.get_env(:kiln, KilnWeb.Endpoint)[:secret_key_base]
+
+  case System.get_env("DATABASE_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo, url: url
+
+    _ ->
+      :ok
+  end
+
+  case System.get_env("DATABASE_VERIFIER_URL") do
+    url when is_binary(url) and url != "" ->
+      config :kiln, Kiln.Repo.VerifierReadRepo, url: url
+
+    _ ->
+      :ok
+  end
 end
 
 # SPEC-04 (holdouts): optional verifier-only DB URL in production.
@@ -100,6 +119,8 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
     secret_key_base: secret_key_base
+
+  config :kiln, :sigra_config, secret_key_base: secret_key_base
 end
 
 # Phase 21: optional Dev Container / host-published Postgres — allow full DB
@@ -142,6 +163,16 @@ case System.get_env("KILN_DB_ROLE") do
   nil -> :ok
   "" -> :ok
   role -> config :kiln, Kiln.Repo, parameters: [role: role]
+end
+
+case System.get_env("KILN_ATTACH_WORKSPACE_ROOT") do
+  root when is_binary(root) and root != "" ->
+    expanded = Path.expand(root)
+    config :kiln, :attach_workspace_root, expanded
+    config :kiln, :github_workspace_root, expanded
+
+  _ ->
+    :ok
 end
 
 # Phase 999.2: optional operator runtime mode override (demo vs live UI only).

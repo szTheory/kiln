@@ -5,8 +5,19 @@ defmodule KilnWeb.ProviderHealthLiveTest do
   import Phoenix.LiveViewTest
 
   alias Kiln.ModelRegistry
+  alias Kiln.OperatorReadiness
 
   setup do
+    prior = Application.get_env(:kiln, :operator_runtime_mode)
+
+    on_exit(fn ->
+      if prior == nil do
+        Application.delete_env(:kiln, :operator_runtime_mode)
+      else
+        Application.put_env(:kiln, :operator_runtime_mode, prior, persistent: false)
+      end
+    end)
+
     _ = ModelRegistry.provider_health_snapshots()
     tid = :kiln_provider_health_counters
 
@@ -26,8 +37,19 @@ defmodule KilnWeb.ProviderHealthLiveTest do
 
     assert html =~ ~s(id="provider-health")
     assert has_element?(view, "#provider-health")
+    assert has_element?(view, "#provider-health-journey")
     html2 = render(view)
     assert html2 =~ "Operational" or html2 =~ "API key missing"
+  end
+
+  test "live mode with missing setup shows disconnected hero", %{conn: conn} do
+    Application.put_env(:kiln, :operator_runtime_mode, :live, persistent: false)
+    assert {:ok, _} = OperatorReadiness.mark_step(:github, false)
+
+    {:ok, view, _html} = live(conn, ~p"/providers")
+
+    assert has_element?(view, "#provider-health-live-hero")
+    assert render(view) =~ "Open settings checklist"
   end
 
   test "poll tick refreshes cards when error counters move into degraded range", %{conn: conn} do

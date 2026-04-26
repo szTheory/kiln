@@ -20,11 +20,28 @@ defmodule Kiln.Runs do
   import Ecto.Changeset, only: [change: 2]
 
   alias Kiln.Repo
+  alias Kiln.Blockers.BlockedError
+  alias Kiln.OperatorSetup
   alias Kiln.Runs.{Compare, Run}
-  alias Kiln.Specs.Spec
+  alias Kiln.Runs.RunDirector
+  alias Kiln.Secrets
+  alias Kiln.Specs.{Spec, SpecRevision}
   alias Kiln.Templates
   alias Kiln.Workflows
   alias Kiln.Workflows.CompiledGraph
+
+  @type template_start_blocked :: %{
+          reason: :factory_not_ready,
+          blocker: OperatorSetup.checklist_item(),
+          settings_target: String.t()
+        }
+
+  @type promoted_attached_request :: %{
+          required(:spec) => Spec.t(),
+          required(:revision) => SpecRevision.t()
+        }
+
+  @attached_request_workflow_id "elixir_phoenix_feature"
 
   @doc """
   Insert a new run. The `state` field defaults to `:queued`; callers
@@ -84,8 +101,253 @@ defmodule Kiln.Runs do
     end
   end
 
+  @doc """
+  Inserts a queued run for one promoted attached request, preserving explicit
+  links back to the attached repo, spec, and promoted revision.
+  """
+  @spec create_for_attached_request(promoted_attached_request(), Ecto.UUID.t()) ::
+          {:ok, Run.t()}
+          | {:error,
+             Ecto.Changeset.t() | :invalid_attached_request | {:workflow_load_failed, term()}}
+  def create_for_attached_request(
+        %{spec: %Spec{} = spec, revision: %SpecRevision{} = revision},
+        attached_repo_id
+      )
+      when is_binary(attached_repo_id) do
+    with :ok <- validate_attached_request(spec, revision, attached_repo_id),
+         {:ok, %CompiledGraph{} = cg} <- load_attached_request_workflow(revision) do
+      %{
+        attached_repo_id: attached_repo_id,
+        spec_id: spec.id,
+        spec_revision_id: revision.id,
+        workflow_id: cg.id,
+        workflow_version: cg.version,
+        workflow_checksum: Workflows.checksum(cg),
+        correlation_id: Ecto.UUID.generate(),
+        model_profile_snapshot: %{"profile" => cg.model_profile},
+        caps_snapshot: caps_snapshot_from_compiled_graph(cg)
+      }
+      |> create()
+    end
+  end
+
+  @doc """
+  Creates and starts a live run from a promoted template.
+
+  Returns a typed blocked outcome when the operator setup is still missing a
+  deterministic first blocker, and otherwise delegates final start authority to
+  `RunDirector.start_run/1`.
+  """
+  @spec start_for_promoted_template(Spec.t(), String.t(), keyword()) ::
+          {:ok, Run.t()}
+          | {:blocked, template_start_blocked()}
+          | {:error,
+             Ecto.Changeset.t()
+             | :unknown_template
+             | :missing_api_key
+             | {:workflow_load_failed, term()}}
+  def start_for_promoted_template(%Spec{} = spec, template_id, opts \\ [])
+      when is_binary(template_id) do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        do_start_for_promoted_template(spec, template_id, opts)
+
+      blocker ->
+        {:blocked, blocked_start(blocker, template_id, opts)}
+    end
+  end
+
+  @doc """
+  Creates and starts a live run from one promoted attached request.
+
+  Returns the same typed blocked outcome as template starts when operator setup
+  is missing, while keeping attach identity on the run row.
+  """
+  @spec preflight_attached_request_start() ::
+          :ok | {:blocked, template_start_blocked()} | {:error, :missing_api_key}
+  def preflight_attached_request_start do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        case attached_request_missing_provider_keys() do
+          [] ->
+            :ok
+
+          _missing ->
+            {:error, :missing_api_key}
+        end
+
+      blocker ->
+        {:blocked, blocked_start(blocker, nil, [])}
+    end
+  end
+
+  @spec start_for_attached_request(promoted_attached_request(), Ecto.UUID.t(), keyword()) ::
+          {:ok, Run.t()}
+          | {:blocked, template_start_blocked()}
+          | {:error,
+             Ecto.Changeset.t()
+             | :invalid_attached_request
+             | :missing_api_key
+             | {:workflow_load_failed, term()}}
+  def start_for_attached_request(
+        %{spec: %Spec{}, revision: %SpecRevision{}} = promoted_request,
+        attached_repo_id,
+        opts \\ []
+      )
+      when is_binary(attached_repo_id) do
+    case OperatorSetup.first_blocker() do
+      nil ->
+        do_start_for_attached_request(promoted_request, attached_repo_id, opts)
+
+      blocker ->
+        {:blocked, blocked_start(blocker, nil, opts)}
+    end
+  end
+
+  defp do_start_for_promoted_template(%Spec{} = spec, template_id, opts) do
+    with {:ok, run} <- create_for_promoted_template(spec, template_id) do
+      try do
+        case RunDirector.start_run(run.id) do
+          {:ok, started_run} ->
+            {:ok, started_run}
+
+          {:error, :factory_not_ready} ->
+            _ = Repo.delete(run)
+
+            blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
+            {:blocked, blocked_start(blocker, template_id, opts)}
+        end
+      rescue
+        error in [BlockedError] ->
+          case error do
+            %BlockedError{reason: :missing_api_key} ->
+              _ = Repo.delete(run)
+              {:error, :missing_api_key}
+
+            _ ->
+              reraise error, __STACKTRACE__
+          end
+      end
+    end
+  end
+
+  defp do_start_for_attached_request(promoted_request, attached_repo_id, opts) do
+    with {:ok, run} <- create_for_attached_request(promoted_request, attached_repo_id) do
+      try do
+        case RunDirector.start_run(run.id) do
+          {:ok, started_run} ->
+            {:ok, started_run}
+
+          {:error, :factory_not_ready} ->
+            _ = Repo.delete(run)
+
+            blocker = OperatorSetup.first_blocker() || hd(OperatorSetup.summary().checklist)
+            {:blocked, blocked_start(blocker, nil, opts)}
+        end
+      rescue
+        error in [BlockedError] ->
+          case error do
+            %BlockedError{reason: :missing_api_key} ->
+              _ = Repo.delete(run)
+              {:error, :missing_api_key}
+
+            _ ->
+              reraise error, __STACKTRACE__
+          end
+      end
+    end
+  end
+
+  defp blocked_start(blocker, template_id, opts) do
+    %{
+      reason: :factory_not_ready,
+      blocker: blocker,
+      settings_target:
+        OperatorSetup.settings_target(blocker,
+          return_to: Keyword.get(opts, :return_to),
+          template_id: template_id
+        )
+    }
+  end
+
+  defp validate_attached_request(%Spec{id: spec_id}, %SpecRevision{} = revision, attached_repo_id) do
+    cond do
+      is_nil(spec_id) or is_nil(revision.id) ->
+        {:error, :invalid_attached_request}
+
+      revision.spec_id != spec_id ->
+        {:error, :invalid_attached_request}
+
+      revision.attached_repo_id != attached_repo_id ->
+        {:error, :invalid_attached_request}
+
+      true ->
+        :ok
+    end
+  end
+
+  defp load_attached_request_workflow(%SpecRevision{request_kind: _request_kind}) do
+    @attached_request_workflow_id
+    |> Templates.shipped_workflow_yaml_path()
+    |> Workflows.load()
+    |> case do
+      {:ok, %CompiledGraph{} = cg} -> {:ok, cg}
+      {:error, reason} -> {:error, {:workflow_load_failed, reason}}
+    end
+  end
+
   defp caps_snapshot_from_compiled_graph(%CompiledGraph{caps: caps}) when is_map(caps) do
     Jason.decode!(Jason.encode!(caps))
+  end
+
+  defp attached_request_missing_provider_keys do
+    case load_attached_request_workflow(%SpecRevision{request_kind: :feature}) do
+      {:ok, %CompiledGraph{} = cg} ->
+        cg.model_profile
+        |> required_provider_keys_for_profile()
+        |> Enum.reject(&Secrets.present?/1)
+        |> Enum.uniq()
+
+      {:error, _reason} ->
+        []
+    end
+  end
+
+  defp required_provider_keys_for_profile(profile) when is_binary(profile) do
+    roles =
+      case Enum.find(Kiln.ModelRegistry.all_presets(), &(Atom.to_string(&1) == profile)) do
+        nil -> %{}
+        preset -> Kiln.ModelRegistry.resolve(preset)
+      end
+
+    roles
+    |> Map.values()
+    |> Enum.map(&model_id_from_role_spec/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&provider_key_for_model/1)
+  end
+
+  defp model_id_from_role_spec(model) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{model: model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(%{"model" => model}) when is_binary(model), do: model
+  defp model_id_from_role_spec(_), do: nil
+
+  defp provider_key_for_model("claude-" <> _), do: :anthropic_api_key
+  defp provider_key_for_model("gpt-" <> _), do: :openai_api_key
+  defp provider_key_for_model("gemini-" <> _), do: :google_api_key
+
+  defp provider_key_for_model(model) when is_binary(model) do
+    cond do
+      String.contains?(model, "sonnet") or String.contains?(model, "haiku") or
+          String.contains?(model, "opus") ->
+        :anthropic_api_key
+
+      String.contains?(model, "llama") or String.contains?(model, "ollama") ->
+        :ollama_host
+
+      true ->
+        :anthropic_api_key
+    end
   end
 
   @doc """
@@ -101,6 +363,38 @@ defmodule Kiln.Runs do
   """
   @spec get(Ecto.UUID.t()) :: Run.t() | nil
   def get(id), do: Repo.get(Run, id)
+
+  @spec get_for_attached_repo(Ecto.UUID.t(), Ecto.UUID.t()) :: Run.t() | nil
+  def get_for_attached_repo(attached_repo_id, run_id)
+      when is_binary(attached_repo_id) and is_binary(run_id) do
+    from(r in Run,
+      where: r.id == ^run_id and r.attached_repo_id == ^attached_repo_id,
+      left_join: revision in SpecRevision,
+      on: revision.id == r.spec_revision_id,
+      left_join: spec in Spec,
+      on: spec.id == r.spec_id,
+      preload: [spec_revision: revision, spec: spec]
+    )
+    |> Repo.one()
+  end
+
+  @spec list_recent_for_attached_repo(Ecto.UUID.t(), keyword()) :: [Run.t()]
+  def list_recent_for_attached_repo(attached_repo_id, opts \\ [])
+      when is_binary(attached_repo_id) do
+    limit = Keyword.get(opts, :limit, 5)
+
+    from(r in Run,
+      where: r.attached_repo_id == ^attached_repo_id,
+      order_by: [desc: r.inserted_at],
+      left_join: revision in SpecRevision,
+      on: revision.id == r.spec_revision_id,
+      left_join: spec in Spec,
+      on: spec.id == r.spec_id,
+      preload: [spec_revision: revision, spec: spec],
+      limit: ^limit
+    )
+    |> Repo.all()
+  end
 
   @doc """
   Returns every run whose state is NOT terminal (i.e. in the six
@@ -170,8 +464,7 @@ defmodule Kiln.Runs do
   `baseline_id` / `candidate_id` are `Ecto.UUID.t()` binaries or canonical
   UUID strings.
   """
-  @spec compare_snapshot(Ecto.UUID.t() | String.t(), Ecto.UUID.t() | String.t()) ::
-          %Compare.Snapshot{}
+  @spec compare_snapshot(binary(), binary()) :: Compare.Snapshot.t()
   def compare_snapshot(baseline_id, candidate_id)
       when is_binary(baseline_id) and is_binary(candidate_id) do
     Compare.snapshot(baseline_id, candidate_id)

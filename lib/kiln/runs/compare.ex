@@ -53,7 +53,7 @@ defmodule Kiln.Runs.Compare do
     ]
   end
 
-  @spec snapshot(Ecto.UUID.t() | String.t(), Ecto.UUID.t() | String.t()) :: %Snapshot{}
+  @spec snapshot(binary(), binary()) :: Snapshot.t()
   def snapshot(baseline_id, candidate_id)
       when is_binary(baseline_id) and is_binary(candidate_id) do
     baseline_uuid = normalize_uuid(baseline_id)

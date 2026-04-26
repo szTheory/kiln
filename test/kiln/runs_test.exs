@@ -18,7 +18,10 @@ defmodule Kiln.RunsTest do
           workflow_id: "wf-board-b"
         )
 
-      out = Runs.list_for_board()
+      out =
+        Runs.list_for_board()
+        |> Enum.filter(&(&1.workflow_id in ["wf-board-a", "wf-board-b"]))
+
       assert length(out) == 2
 
       assert Enum.any?(out, &(&1.id == r_queued.id))
@@ -44,7 +47,10 @@ defmodule Kiln.RunsTest do
           updated_at: ~U[2026-01-02 00:00:00.000000Z]
         )
 
-      out = Runs.list_for_board() |> Enum.filter(&(&1.state == :coding))
+      out =
+        Runs.list_for_board()
+        |> Enum.filter(&(&1.state == :coding and &1.workflow_id in ["wf-old", "wf-new"]))
+
       assert Enum.map(out, & &1.id) == [newer.id, older.id]
     end
   end

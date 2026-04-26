@@ -170,10 +170,7 @@ defmodule Kiln.ModelRegistry do
     c = health_counters(id)
     now = DateTime.utc_now(:microsecond)
 
-    :ets.insert(@health_ets, {
-      id,
-      %{c | oks: c.oks + 1, last_ok_at: now}
-    })
+    safe_health_insert(id, %{c | oks: c.oks + 1, last_ok_at: now})
 
     :ok
   end
@@ -183,14 +180,18 @@ defmodule Kiln.ModelRegistry do
   def provider_health_record_error(id) when id in @provider_ids do
     ensure_health_ets!()
     c = health_counters(id)
-    :ets.insert(@health_ets, {id, %{c | errors: c.errors + 1}})
+    safe_health_insert(id, %{c | errors: c.errors + 1})
     :ok
   end
 
   defp ensure_health_ets! do
     case :ets.whereis(@health_ets) do
       :undefined ->
-        :ets.new(@health_ets, [:named_table, :public, :set])
+        try do
+          :ets.new(@health_ets, [:named_table, :public, :set])
+        rescue
+          ArgumentError -> :ok
+        end
 
       _tid ->
         :ok
@@ -213,9 +214,34 @@ defmodule Kiln.ModelRegistry do
   end
 
   defp health_counters(id) do
-    case :ets.lookup(@health_ets, id) do
+    case safe_health_lookup(id) do
       [{^id, m}] when is_map(m) -> m
       _ -> %{oks: 0, errors: 0, last_ok_at: nil, rate_limit_remaining: nil}
+    end
+  end
+
+  defp safe_health_lookup(id) do
+    try do
+      :ets.lookup(@health_ets, id)
+    rescue
+      ArgumentError ->
+        ensure_health_ets!()
+
+        try do
+          :ets.lookup(@health_ets, id)
+        rescue
+          ArgumentError -> []
+        end
+    end
+  end
+
+  defp safe_health_insert(id, counters) when is_map(counters) do
+    try do
+      :ets.insert(@health_ets, {id, counters})
+    rescue
+      ArgumentError ->
+        ensure_health_ets!()
+        :ets.insert(@health_ets, {id, counters})
     end
   end
 
@@ -240,7 +266,7 @@ defmodule Kiln.ModelRegistry do
       String.starts_with?(key, "claude-") -> :anthropic
       String.starts_with?(key, "gpt-") -> :openai
       String.starts_with?(key, "gemini-") -> :google
-      key in ["unpriced", nil] -> nil
+      key == "unpriced" -> nil
       true -> :ollama
     end
   end

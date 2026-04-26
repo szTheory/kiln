@@ -254,30 +254,35 @@ defmodule KilnWeb.InboxLive do
       factory_summary={@factory_summary}
       operator_runtime_mode={@operator_runtime_mode}
       operator_snapshots={@operator_snapshots}
+      operator_demo_scenario={@operator_demo_scenario}
+      operator_demo_scenarios={@operator_demo_scenarios}
     >
-      <div id="inbox" class="space-y-8 text-bone">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-ash pb-4">
-          <div>
-            <h1 class="text-xl font-semibold">Inbox</h1>
-            <p class="mt-1 text-sm text-[var(--color-smoke)]">
+      <div id="inbox" class="space-y-8">
+        <div class="flex flex-col gap-3 border-b border-base-300 pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div class="min-w-0">
+            <p class="kiln-eyebrow">Spec intake</p>
+            <h1 class="kiln-h1 mt-1">Inbox</h1>
+            <p class="kiln-meta mt-1">
               Triage spec drafts before they become runnable specs.
             </p>
           </div>
           <.link
             navigate={~p"/templates"}
             id="inbox-browse-templates"
-            class="btn btn-sm border border-ash bg-iron/40 text-bone hover:border-ember"
+            class="btn btn-sm btn-ghost border border-base-300 hover:border-primary"
           >
             Browse templates
           </.link>
         </div>
 
         <%= if @drafts_empty? do %>
-          <section class="rounded border border-ash bg-char/80 p-8">
-            <h2 class="text-lg font-semibold">No drafts in the inbox</h2>
-            <p class="mt-2 text-sm text-[var(--color-smoke)]">
-              Create a spec from text, import markdown, or pull a GitHub issue. Promote a draft when it is ready to run.
-            </p>
+          <section class="card card-bordered bg-base-200 border-base-300">
+            <div class="card-body p-8">
+              <h2 class="kiln-h2">No drafts in the inbox</h2>
+              <p class="kiln-body text-base-content/70 mt-2">
+                Create a spec from text, import markdown, or pull a GitHub issue. Promote a draft when it is ready to run.
+              </p>
+            </div>
           </section>
         <% end %>
 
@@ -285,99 +290,119 @@ defmodule KilnWeb.InboxLive do
           <div
             :for={{dom_id, draft} <- @streams.drafts}
             id={dom_id}
-            class="rounded border border-ash bg-char/80 p-4"
+            class="card card-bordered bg-base-200 border-base-300"
           >
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <h3 class="font-semibold">{draft.title}</h3>
-                <p class="mt-1 line-clamp-3 text-xs text-[var(--color-smoke)]">{draft.body}</p>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  class="btn btn-sm border border-ash bg-iron/40"
-                  phx-click="promote"
-                  phx-value-id={draft.id}
-                >
-                  Promote
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-sm border border-ash bg-iron/40"
-                  phx-click="archive"
-                  phx-value-id={draft.id}
-                >
-                  Archive
-                </button>
-                <.link
-                  patch={~p"/inbox?edit=#{draft.id}"}
-                  class="btn btn-sm border border-ash bg-iron/40"
-                >
-                  Edit
-                </.link>
+            <div class="card-body p-5">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <h3 class="kiln-h2">{draft.title}</h3>
+                  <p class="kiln-body text-base-content/70 mt-1 line-clamp-3">{draft.body}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-primary"
+                    phx-click="promote"
+                    phx-value-id={draft.id}
+                  >
+                    Promote
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-ghost border border-base-300"
+                    phx-click="archive"
+                    phx-value-id={draft.id}
+                  >
+                    Archive
+                  </button>
+                  <.link
+                    patch={~p"/inbox?edit=#{draft.id}"}
+                    class="btn btn-sm btn-ghost border border-base-300"
+                  >
+                    Edit
+                  </.link>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <%= if @edit_form do %>
-          <section class="rounded border border-ember/40 bg-char/80 p-4">
-            <h2 class="text-lg font-semibold">Edit draft</h2>
-            <.form for={@edit_form} id="inbox-edit-form" phx-submit="save_edit" class="mt-4 space-y-3">
-              <.input field={@edit_form[:id]} type="hidden" />
-              <.input field={@edit_form[:title]} type="text" label="Title" />
-              <.input field={@edit_form[:body]} type="textarea" label="Body" rows="12" />
-              <div class="flex flex-wrap gap-2">
-                <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                <button type="button" class="btn btn-ghost btn-sm" phx-click="cancel_edit">
-                  Cancel
-                </button>
-              </div>
-            </.form>
+          <section class="card card-bordered bg-base-200 border-primary/40">
+            <div class="card-body p-5">
+              <h2 class="kiln-h2">Edit draft</h2>
+              <.form
+                for={@edit_form}
+                id="inbox-edit-form"
+                phx-submit="save_edit"
+                class="mt-4 space-y-3"
+              >
+                <.input field={@edit_form[:id]} type="hidden" />
+                <.input field={@edit_form[:title]} type="text" label="Title" />
+                <.input field={@edit_form[:body]} type="textarea" label="Body" rows="12" />
+                <div class="flex flex-wrap gap-2">
+                  <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                  <button type="button" class="btn btn-ghost btn-sm" phx-click="cancel_edit">
+                    Cancel
+                  </button>
+                </div>
+              </.form>
+            </div>
           </section>
         <% end %>
 
-        <section class="grid gap-6 rounded border border-ash bg-char/60 p-4 md:grid-cols-2">
-          <div>
-            <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">New draft</h2>
-            <.form
-              for={@freeform_form}
-              id="inbox-freeform-form"
-              phx-submit="create_freeform"
-              class="mt-3 space-y-2"
-            >
-              <.input field={@freeform_form[:title]} type="text" label="Title" />
-              <.input field={@freeform_form[:body]} type="textarea" label="Body" rows="6" />
-              <button type="submit" class="btn btn-primary btn-sm">Create draft</button>
-            </.form>
-          </div>
-
-          <div class="space-y-4">
+        <section class="card card-bordered bg-base-200 border-base-300">
+          <div class="card-body p-5 grid gap-6 md:grid-cols-2">
             <div>
-              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">
-                Import from GitHub
-              </h2>
+              <h2 class="kiln-eyebrow">New draft</h2>
               <.form
-                for={@github_form}
-                id="inbox-github-form"
-                phx-submit="import_github"
+                for={@freeform_form}
+                id="inbox-freeform-form"
+                phx-submit="create_freeform"
                 class="mt-3 space-y-2"
               >
-                <.input field={@github_form[:ref]} type="text" label="URL or owner/repo#N" />
-                <button type="submit" class="btn btn-primary btn-sm" disabled={@github_busy?}>
-                  {if @github_busy?, do: "Syncing issue…", else: "Import from GitHub"}
-                </button>
+                <.input field={@freeform_form[:title]} type="text" label="Title" />
+                <.input field={@freeform_form[:body]} type="textarea" label="Body" rows="6" />
+                <button type="submit" class="btn btn-primary btn-sm">Create draft</button>
               </.form>
             </div>
 
-            <div>
-              <h2 class="text-sm font-semibold uppercase text-[var(--color-smoke)]">
-                Import markdown
-              </h2>
-              <.form for={%{}} id="inbox-md-form" phx-submit="import_markdown" class="mt-3 space-y-2">
-                <.live_file_input upload={@uploads.markdown} />
-                <button type="submit" class="btn btn-primary btn-sm">Import markdown</button>
-              </.form>
+            <div class="space-y-6">
+              <div>
+                <h2 class="kiln-eyebrow">Import from GitHub</h2>
+                <.form
+                  for={@github_form}
+                  id="inbox-github-form"
+                  phx-submit="import_github"
+                  class="mt-3 space-y-2"
+                >
+                  <.input field={@github_form[:ref]} type="text" label="URL or owner/repo#N" />
+                  <button type="submit" class="btn btn-primary btn-sm" disabled={@github_busy?}>
+                    {if @github_busy?, do: "Syncing issue…", else: "Import from GitHub"}
+                  </button>
+                </.form>
+              </div>
+
+              <div>
+                <h2 class="kiln-eyebrow">Import markdown</h2>
+                <.form
+                  for={%{}}
+                  id="inbox-md-form"
+                  phx-submit="import_markdown"
+                  class="mt-3 space-y-2"
+                >
+                  <label for="inbox-markdown-upload" class="label mb-1 block">
+                    Markdown file
+                  </label>
+                  <.live_file_input
+                    upload={@uploads.markdown}
+                    id="inbox-markdown-upload"
+                    aria-label="Markdown file"
+                    class="file-input file-input-bordered file-input-sm w-full"
+                  />
+                  <button type="submit" class="btn btn-primary btn-sm">Import markdown</button>
+                </.form>
+              </div>
             </div>
           </div>
         </section>

@@ -6,16 +6,44 @@ Kiln is a **software dark factory** — an Elixir/Phoenix LiveView application t
 
 ## Core Value
 
-**Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.**
+**Given a spec, Kiln ships working software — built, verified, merged, and deployed or published — with no human intervention. Safely, visibly, and durably.**
 
 That single promise is what the whole system must deliver. Every design tradeoff defers to it.
 
+## Current State
+
+**Shipped version:** `v0.7.0` on 2026-04-24
+
+Kiln now supports a repeatable daily-driver loop for attached repositories, including PR-sized intake boundaries, advisory brownfield preflight, and proof-cited draft PR delivery.
+
+## Current Milestone: v0.8.0 Remote Factory & Autonomous Delivery
+
+**Goal:** Transition Kiln from a local-only tool into a remote-capable factory that can autonomously merge, release, and verify deployments.
+
+**Target features:**
+- **Remote Dashboard Access:** Secure single-operator auth (Passkey/Password) plus a remote-access deployment profile (Tailscale/Cloudflare).
+- **Autonomous Release Engine:** Auto-versioning from Conventional Commits and binary/library release via GitHub.
+- **SaaS Delivery & SRE Smoke:** Direct-to-provider deploys (Fly.io/Cloudflare) with post-deploy health checks and escalation.
+- **Production Secret Management:** Formalized handling of deploy and registry tokens via `persistent_term` + ENV.
+
 ## Requirements
+
+### Active
+
+<!-- Current scope. Building toward these. -->
+
+- [ ] **REMOTE-01**: Secure the Phoenix dashboard with single-operator Auth (Passkey or Password) for safe remote visibility.
+- [ ] **REMOTE-02**: Provide a `remote` Compose profile with a sidecar tunnel (Tailscale/Cloudflare) for mobile/laptop connectivity.
+- [ ] **DELIVER-01**: Kiln autonomously bumps versions and generates changelogs using Conventional Commits across attached-repo runs.
+- [ ] **DELIVER-02**: Kiln supports binary/library releases via `gh release` and registry publishers (`mix hex.publish`, etc.).
+- [ ] **DELIVER-03**: Kiln supports SaaS deployment (Fly.io/Cloudflare) and surfaces a clickable live URL on the run dashboard.
+- [ ] **DELIVER-04**: Post-deploy SRE smoke check: Kiln verifies health of the deployed service and escalates on failure.
 
 ### Validated
 
 <!-- Shipped and confirmed valuable. -->
 
+- [x] **WORK-01**, **CONT-01**, **SAFE-01**, **SAFE-02**, **TRUST-04**, **UAT-06** — Bounded attached-repo intake, continuity, preflight, and proof-first draft PRs — validated in **v0.7.0** (2026-04-24).
 - [x] **OBS-01**, **OBS-03** — validated in Phase 1 (Foundation & Durability Floor).
 - [x] **ORCH-01** Workflow definition format: YAML/JSON graph, versioned in git, schema-validated at load — validated in Phase 2 (Workflow Engine Core).
 - [x] **ORCH-02** Stage executor runs each stage in a supervised BEAM process with crash isolation — validated in Phase 2.
@@ -36,14 +64,15 @@ That single promise is what the whole system must deliver. Every design tradeoff
 - [x] **REPL-01** — Read-only run timeline / replay MVP — **Validated in Phase 16: read-only-run-replay** (2026-04-22).
 - [x] **COST-01**, **COST-02** — Advisory cost hints + budget threshold alerts — **Validated in Phase 18: cost-hints-budget-alerts** (2026-04-22).
 - [x] **SELF-01**, **FEEDBACK-01** — Merged-run post-mortem artifact + non-blocking operator nudge audit path — **Validated in Phase 19: post-mortems-soft-feedback**; formal verification + planning SSOT in **Phase 20** (`19-VERIFICATION.md`, archived **`.planning/milestones/v0.3.0-REQUIREMENTS.md`**) (2026-04-22).
-
-### Active (v0.4.0)
-
-Tracked in [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for the open milestone:
-
-- [ ] **DOCS-08** — Merge authority matrix (README + `PROJECT.md`).
-- [ ] **NYQ-01** — Nyquist compliant **or** explicit waiver for phases 14/16/17/19 `VALIDATION.md` files.
-- [ ] **UAT-03** — Template → run LiveView smoke + cited verification command.
+- [x] **DOCS-08** — Merge authority SSOT in `.planning/PROJECT.md` (`## Merge authority`) + compact README pointer to `#merge-authority`; Phase 12 `12-01-SUMMARY.md` cited for local PARTIAL vs CI — **Validated in Phase 22: merge-authority-operator-docs** (2026-04-23).
+- [x] **NYQ-01** — Phases 14, 16, 17, and 19 now end with explicit Nyquist compliant or waiver posture — **Validated in Phase 23: nyquist-validation-closure** (2026-04-23).
+- [x] **UAT-03** — Template -> run LiveView smoke with stable ids and verification citation — **Validated in Phase 24: template-run-uat-smoke** (2026-04-23).
+- [x] **SETUP-01**, **SETUP-02**, **DOCS-09** — Local readiness and documentation SSOT validated in **Phase 25: local-live-readiness-ssot** (2026-04-23).
+- [x] **LIVE-01**, **LIVE-02**, **LIVE-03** — First recommended live template run and proof-first run-detail flow validated in **Phase 26: first-live-template-run** (2026-04-24).
+- [x] **UAT-04** — Repository-level local first-run proof validated in **Phase 28: first-run-proof-runtime-closure** (2026-04-24).
+- [x] **ATTACH-01**, **ATTACH-02**, **ATTACH-03** — Attach-to-existing is now a first-class single-repo path from operator entry surfaces through managed workspace hydration — validated across **Phases 29–30** (2026-04-24).
+- [x] **TRUST-01**, **TRUST-02**, **TRUST-03** — Attached repos now refuse unsafe states early and default to branch + draft PR trust ramp without synchronous approval gates — validated across **Phases 30–31** (2026-04-24).
+- [x] **GIT-05**, **UAT-05** — Attached-repo branch push plus draft PR delivery and owning proof command `mix kiln.attach.prove` validated in **Phase 31: draft-pr-trust-ramp-and-attach-proof** (2026-04-24).
 
 ### Out of Scope
 
@@ -97,11 +126,15 @@ Tracked in [.planning/REQUIREMENTS.md](REQUIREMENTS.md) for the open milestone:
 | **No human approval gates** in the execution loop | Defining feature of the dark factory model; bounded autonomy (caps + escalation) handles safety instead | — Pending |
 | **Sandbox = ephemeral Docker + network egress blocked + DTU mocks** | Safety + reproducibility + offline-friendly specs; validated by StrongDM's public writeup | — Pending |
 | **Public repo** at `github.com/szTheory/kiln` from day one | Dogfood GitHub/gh/Actions integration; build in public | ✓ Good |
-| **Scenario runner is sole acceptance oracle** — UAT/integration/E2E fully automated; zero manual QA | Dark factory thesis depends on no manual verification bottleneck; shift-left into CI; human unblocks only for typed blockers (credentials, auth, budget, escalation) | — Pending |
+| **Scenario runner is sole acceptance oracle** — UAT/integration/E2E fully automated; zero manual QA | Dark factory thesis depends on no manual verification bottleneck; shift-left into CI; human unblocks only for typed blockers (credentials, auth, budget, escalation) | ✓ Active policy |
 | **Typed block reasons + remediation playbooks** (not freeform chat) | Structured unblock UX preserves determinism and audit clarity; chat-to-unblock breaks replay and hides intent | — Pending |
 | **Adaptive model routing** with automatic 429/5xx fallback + recorded `actual_model_used` | Avoids Fabro-class silent-fallback cost/quality drift; makes quota/rate-limit visible, not hidden | — Pending |
 | **Opinionated model-profile presets** per software-type scenario; switchable per run/stage | Good defaults are the difference between "it works out of the box" and "another config nightmare"; stays switchable so operators keep control | — Pending |
 | Bump Elixir/OTP baseline to **1.19.5 / 28.1+** per STACK research | Current stable as of April 2026; Phoenix 1.8 generators assume it; starting one major behind on day one is avoidable cost | — Pending |
+| **v0.6.0 prioritizes attach-to-existing over remote ops, CLI/API work, or deploy automation** | Real-project usefulness is the shortest path from demo credibility to everyday value for the current solo-operator persona | ✓ Shipped in v0.6.0 |
+| **First attached-repo runs use branch + draft PR as the default trust ramp** | Conservative output is more useful than another approval architecture and preserves bounded autonomy without pretending attached repos are the same as greenfield templates | ✓ Shipped in v0.6.0 |
+| **v0.6.0 attach scope is single repo only** | Single-repo attach captures most brownfield value with materially less workspace and trust-model complexity than fork, clone-to-stack, or multi-root support | ✓ Shipped in v0.6.0 |
+| **Attach enters through onboarding/templates first, not an advanced-only spec flow** | The first-use boundary is where operators decide whether Kiln is useful on real work; hiding attach behind advanced drafting would blunt the milestone's leverage | ✓ Shipped in v0.6.0 |
 
 ## Evolution
 
@@ -121,27 +154,65 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-## Current Milestone: v0.4.0 — Trust, docs & validation closure
+## Next Milestone Setup
 
-**Goal:** After v0.3.0 feature velocity, make **merge authority**, **Nyquist posture**, and **template→run regression** explicit so solo operators and CI share the same truth.
+Active milestone: **`vNext`**
 
-**Target features:**
+Next command: `/gsd-new-milestone`
 
-- **DOCS-08** — README + `PROJECT.md` merge-authority matrix (CI vs optional local smoke).
-- **NYQ-01** — Close or formally waive Nyquist gaps on Phases **14 / 16 / 17 / 19** validation artifacts.
-- **UAT-03** — One LiveView journey: built-in template → run (stable selectors) with verification citation.
+## Merge authority
 
-**Planning notes:** Phase directories **22+** will be created under `.planning/phases/` when `/gsd-discuss-phase` / `/gsd-plan-phase` runs; prior phase trees remain historical records.
+**Policy:** A pull request may merge into **`main`** once **GitHub Actions** is green for that pull request. Exact enforcement (required checks, review counts) lives in GitHub branch protection; this section maps what operators see in the Actions UI to jobs in **`.github/workflows/ci.yml`**.
 
-## Current State (as of 2026-04-23)
+| Tier | Role | Job `name:` (today) | What it proves |
+|------|------|---------------------|----------------|
+| **A** | PR merge gate | **`mix check`** | `mix compile --warnings-as-errors`, then full **`mix check`** (format, tests, Credo, Dialyzer, Sobelow, `mix_audit`, xref cycle gate, grep gates) on the workflow **Postgres 16** service container |
+| **B** | Durability / DB invariants | Same `check` job | Step **`Kiln boot checks (CI parity — D-34)`** — `KILN_DB_ROLE=kiln_owner mix ecto.migrate && mix kiln.boot_checks` |
+| **C** | Compose integration smoke | **`integration smoke (first_run.sh)`** | After `check`: `bash test/integration/first_run.sh` (Compose + host boot path drift) |
+| **D** | UI / shift-left acceptance | **`Playwright e2e (14 routes x light/dark x mobile/desktop + axe)`** | After `check`: `mix kiln.e2e` coverage for the operator UI path with Playwright + axe |
+| **E** | Tag-only | **`tag vs mix.exs version`** | Runs only on **`v*`** tags; not required for ordinary PRs |
+
+**Workflow SSOT:** reconcile UI labels with YAML `name:` fields in `.github/workflows/ci.yml` — `mix check`, `integration smoke (first_run.sh)`, `Playwright e2e (14 routes x light/dark x mobile/desktop + axe)`, `tag vs mix.exs version`.
+
+### Recommended before push (optional, not merge authority)
+
+These improve local signal **only**; they are **not** merge gates unless duplicated in CI **and** required by branch protection:
+
+- **`just planning-gates`** — CI-parity `mix check` (defaults mirror `.github/workflows/ci.yml`; Postgres must be reachable).
+- **`just shift-left`** — `mix check`, `test/integration/first_run.sh`, then `mix kiln.e2e`; best local mirror of the CI acceptance stack.
+- **`script/precommit.sh`** / **`mix precommit`** — `templates.verify` + `mix check` with CI-like defaults when `.env` is missing.
+- **`DOCS=1 mix docs.verify`** — site/docs link and orphan checks when enabled.
+
+### Local vs CI
+
+CI runs the gates above on GitHub’s **Postgres 16** service and cached PLT. **Local** `mix check` or compose smoke may report **PARTIAL** or fail when Postgres, Docker, Dialyzer PLTs, or environment variables differ from CI. Factual operator log: `.planning/phases/12-local-docker-dx/12-01-SUMMARY.md` (Phase 12 verification; Self-Check: PARTIAL).
+
+**Phase 21** (optional devcontainer) stays documented in `README.md` **below** the canonical host quick start; it does **not** replace GitHub Actions as merge authority for PRs to **`main`**.
+
+## Release History (as of 2026-04-24)
 
 - **v0.1.0 (Phases 1–9)** — Shipped. See `.planning/milestones/v0.1.0.md`.
 - **v0.2.0 (Phases 10–13)** — Shipped; tag **`v0.2.0`**; archives under `.planning/milestones/v0.2.0-*`.
 - **v0.3.0 (Phases 14–21)** — **Shipped**; tag **`v0.3.0`**; archives `.planning/milestones/v0.3.0-ROADMAP.md`, `v0.3.0-REQUIREMENTS.md`, `v0.3.0-MILESTONE-AUDIT.md`. Execution scale (14–16), templates (17), cost hints + alerts (18), post-mortems + soft feedback (19), verification SSOT (20), optional container-first operator DX (21) with **`.devcontainer/`** + **`docker_operator.yml`** CI drift gate; host Phoenix + Compose remains canonical.
-- **v0.4.0 (Phases 22–24)** — **Open** — trust/docs/Nyquist/UAT slice; living [ROADMAP.md](ROADMAP.md) + [REQUIREMENTS.md](REQUIREMENTS.md).
+- **v0.4.0 (Phases 22–24)** — **Shipped**; tag **`v0.4.0`**; archives `.planning/milestones/v0.4.0-ROADMAP.md`, `v0.4.0-REQUIREMENTS.md`, and `v0.4.0-MILESTONE-AUDIT.md`. Scope: merge-authority SSOT, Nyquist closure for carried-over partial validations, and the template -> run LiveView regression.
+- **v0.5.0 (Phases 25–28)** — **Shipped**; tag **`v0.5.0`**; archives `.planning/milestones/v0.5.0-ROADMAP.md`, `v0.5.0-REQUIREMENTS.md`, and `v0.5.0-MILESTONE-AUDIT.md`. Scope: readiness/remediation SSOT, one recommended first local live template, backend launch preflight with `/settings` recovery, and rerun-backed repository first-run proof closure.
+- **v0.6.0 (Phases 29–31)** — **Shipped**; tag **`v0.6.0`**; archives `.planning/milestones/v0.6.0-ROADMAP.md`, `v0.6.0-REQUIREMENTS.md`, and `v0.6.0-MILESTONE-AUDIT.md`. Scope: attach discovery on first-use surfaces, single-repo attach resolution and managed hydration, draft-PR-first attached-repo delivery, and owning proof command `mix kiln.attach.prove`.
 - **Backlog (shipped 999.2):** Operator **demo vs live** shell chrome (`Kiln.OperatorRuntime`, `OperatorChromeHook`, `Layouts.app` strip) plus provider readiness / config presence (names only, **SEC-01**). See `.planning/ROADMAP.md` and `.planning/phases/999.2-operator-demo-vs-live-mode-and-provider-readiness-ux/999.2-VERIFICATION.md`.
-- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** — CI + Postgres-backed workstation remain merge authority for `mix check`.
+- **Tech debt carryover:** `12-01-SUMMARY.md` **Self-Check: PARTIAL** still means CI + Postgres-backed workstation remain merge authority for `mix check`. v0.5.0 closed with accepted planning debt around Phase 26/27 historical artifacts and one deferred orphan-worktree todo; v0.6.0 closes with that todo still deferred plus noisy sandbox ownership logs during repo-wide test execution.
 - **Known operator action:** Host port `5432` may conflict with other Postgres instances.
 
+<details>
+<summary>Archived pre-close milestone framing</summary>
+
+The pre-close v0.6.0 planning narrative focused on turning the first believable local run into the first believable real-project workflow. That framing has now been fulfilled and archived under `.planning/milestones/v0.6.0-ROADMAP.md` and `.planning/milestones/v0.6.0-REQUIREMENTS.md`.
+
+</details>
+
 ---
-*Last updated: 2026-04-23 — opened v0.4.0 (`/gsd-new-milestone`): Phases 22–24, fresh `REQUIREMENTS.md`*
+*Last updated: 2026-04-24 — opened v0.7.0 PR-sized brownfield execution*
+se v0.6.0 planning narrative focused on turning the first believable local run into the first believable real-project workflow. That framing has now been fulfilled and archived under `.planning/milestones/v0.6.0-ROADMAP.md` and `.planning/milestones/v0.6.0-REQUIREMENTS.md`.
+
+</details>
+
+---
+*Last updated: 2026-04-24 — opened v0.7.0 PR-sized brownfield execution*

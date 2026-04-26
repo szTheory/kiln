@@ -6,6 +6,20 @@ Software dark factory written in Elixir/Phoenix LiveView. Given a spec, Kiln shi
 
 See `.planning/PROJECT.md` for the full vision and constraints.
 
+## First hour
+
+**Requires: Docker with Compose v2.** No Elixir install needed.
+
+```bash
+docker compose up
+```
+
+Open **http://localhost:4000** — you'll land on the onboarding flow. Before your first live run visit `/settings` to connect providers and GitHub auth.
+
+First start takes 2–3 min to fetch and compile deps; subsequent starts are fast (deps are cached in a named volume).
+
+> **Host Elixir path (faster inner loop):** if you have Elixir/OTP installed (`asdf install` from `.tool-versions`), you can skip Docker for the app and run `bash script/dev_up.sh` instead — Postgres still runs in Docker, Phoenix runs on your machine.
+
 ## Fair scheduling
 
 Kiln’s **parallelism grain** for factory work is **per active run** at the
@@ -50,7 +64,9 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 - **asdf** (optional) — only if you manage Erlang/Elixir through `.tool-versions`. If you install Elixir another way, ensure `mix` is on your `PATH`; the integration script does **not** run `asdf install` for you.
 - **direnv** (optional) — convenient for loading `.env`; you can `set -a; source .env; set +a` instead.
 
-## Quick start (open `/onboarding` first)
+## Quick start (use `/settings` before your first live run)
+
+**Fastest path (one command):** from the repo root, run **`bash script/dev_up.sh`** (or **`just dev`** if you use [`just`](https://github.com/casey/just)) — starts Compose **Postgres**, runs **`mix setup`**, then **`mix phx.server`** in the foreground (Ctrl+C stops the server). Uses `.env` (creates from `.env.sample` if missing). Same host-port rules as below if `5432` is taken (`KILN_DB_HOST_PORT` + matching `DATABASE_URL`).
 
 **Compose vs host app:** `docker compose` brings up **Postgres** (and optionally **DTU**, **OTel/Jaeger** — see **Traces**). The **Phoenix app runs on your machine** via `mix phx.server` (Elixir/OTP per `.tool-versions`). There is no Kiln `app` service in Compose. For **v0.2.0**, Phase 12 ships an **optional checked-in `justfile`** that names the same primitives as this quick start — host Phoenix plus Compose for the data plane only (see **Optional: Just recipes** below and `.planning/research/LOCAL-DX-AUDIT.md`). **Phase 21** adds an **optional** [`.devcontainer/`](.devcontainer/) path (same Compose data plane; BEAM may run inside the container) — see **Optional: Dev Container** below. No Compose-hosted Kiln `app` service is required for either path.
 
@@ -58,7 +74,7 @@ Operator docs and landing page (Astro + Starlight) are built from **`site/`** an
 2. **Database** — `docker compose up -d db` and wait until Postgres is healthy.
 3. **Migrations (owner role)** — `KILN_DB_ROLE=kiln_owner mix setup` (runs `ecto.create`, `ecto.migrate`, seeds, assets). Runtime sessions use the restricted `kiln_app` role by default.
 4. **Run the app** — `mix phx.server`.
-5. **Open first** — `http://localhost:4000/onboarding` (operator wizard; Phase 8 intake). The root `/` route shows the run board after onboarding completes.
+5. **Open the app** — `http://localhost:4000/onboarding` for the demo-first orientation, then `http://localhost:4000/settings` before your first real live run. `/settings` is the authoritative readiness checklist and remediation surface for local live mode.
 
 ### Digital Twin / sandbox mocks (DTU)
 
@@ -73,6 +89,10 @@ docker compose ps dtu
 
 See service definitions in [`compose.yaml`](compose.yaml) (`db`, `dtu`, `otel-collector`, `jaeger`). Optional **`sandbox-net-anchor`** profile exists for advanced local networking — not required for the default README path.
 
+### Merge authority (CI)
+
+Pull requests targeting **`main`** need green **[GitHub Actions](https://github.com/szTheory/kiln/actions/workflows/ci.yml)**. Full tier table, boot checks, integration smoke, and optional local commands: [`.planning/PROJECT.md#merge-authority`](.planning/PROJECT.md#merge-authority). Local `mix check` may read **PARTIAL** vs CI when Postgres, Docker, Dialyzer PLTs, or env differ — see [`.planning/phases/12-local-docker-dx/12-01-SUMMARY.md`](.planning/phases/12-local-docker-dx/12-01-SUMMARY.md).
+
 ### Other useful URLs
 
 - `http://localhost:4000/ops/dashboard` — Phoenix LiveDashboard
@@ -86,10 +106,11 @@ Use this as a **cold-clone** sanity pass (order matches the happy path above):
 - [ ] **Tooling** — Elixir/OTP per [`.tool-versions`](.tool-versions), Docker with Compose v2, `mix` on `PATH` (see **Prerequisites**).
 - [ ] **Secrets file** — `cp .env.sample .env`; fill at least `SECRET_KEY_BASE`, `DATABASE_URL`, `PORT` / `PHX_HOST` as in **Environment** below.
 - [ ] **Database** — `docker compose up -d db`; Postgres shows **healthy** in `docker compose ps`.
-- [ ] **Port 5432** — If another Postgres or container holds host `5432`, remap in `compose.yaml` + `DATABASE_URL` (see [`test/integration/first_run.sh`](test/integration/first_run.sh) error text).
+- [ ] **Port 5432** — If another Postgres or container holds host `5432`, set **`KILN_DB_HOST_PORT`** (e.g. `5434`) in `.env` and point **`DATABASE_URL`** at the same host port; see **`.env.sample`** (see [`test/integration/first_run.sh`](test/integration/first_run.sh) error text).
 - [ ] **Migrations** — `KILN_DB_ROLE=kiln_owner mix setup` once (creates DB if needed, migrates, seeds, assets). Day-to-day runs leave `KILN_DB_ROLE` unset (`kiln_app`).
 - [ ] **App** — `mix phx.server` without `KILN_SKIP_BOOTCHECKS` (BootChecks must pass).
-- [ ] **Onboarding** — Open `/onboarding` first; complete the wizard or resolve typed blockers (API keys, Docker, `gh` when using GitHub automation).
+- [ ] **Orientation** — Open `/onboarding` first if you want the demo-first tour and scenario framing.
+- [ ] **Live readiness** — Open `/settings` before any real local live attempt; this is the canonical checklist for provider refs, `gh auth`, and Docker readiness.
 - [ ] **Sandbox work** — Before stages that hit mocks: `docker compose up -d dtu` (subsection above).
 - [ ] **Machine smoke (optional)** — `bash test/integration/first_run.sh` or `mix integration.first_run` — DB + migrate + boot + `/health` JSON (does not prove browser onboarding).
 - [ ] **Traces (optional)** — See **Traces (local)**; set `OTEL_EXPORTER_OTLP_ENDPOINT` only when collector/Jaeger are up.
@@ -116,10 +137,11 @@ Use this when you want a **reproducible Linux toolchain** inside Docker and are 
 
 ## Optional: Just recipes (local orchestration)
 
-If you use [**just**](https://github.com/casey/just#installation) (`brew install just` on macOS), the checked-in **`justfile`** wraps the same **Compose + `KILN_DB_ROLE=kiln_owner mix setup` + `test/integration/first_run.sh`** flow as the numbered quick start above. **Phoenix stays on the host** — run **`mix phx.server`** yourself; `just` does **not** replace it.
+If you use [**just**](https://github.com/casey/just#installation) (`brew install just` on macOS), the checked-in **`justfile`** wraps the same **Compose + setup** primitives as the numbered quick start above. **`just dev`** runs **`script/dev_up.sh`** (Postgres + **`mix setup`** + **`mix phx.server`** in one foreground process). Other recipes still assume **Phoenix on the host** unless you use **`just dev`**.
 
 | Command | What it runs |
 |---------|----------------|
+| `just dev` | **`script/dev_up.sh`** — Postgres + **`mix setup`** + **`mix phx.server`** (foreground) |
 | `just db-up` | `docker compose up -d db` |
 | `just dtu-up` | `docker compose up -d dtu` |
 | `just otel-up` | `docker compose up -d otel-collector jaeger` (see **Traces (local)**) |
@@ -127,7 +149,7 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `just smoke` | `bash test/integration/first_run.sh` (same SSOT as **Integration smoke**) |
 | `just dev-deps` | `db-up`, then prints a one-line reminder to start **`mix phx.server`** in another shell |
 | `just planning-gates` | `script/planning_gates.sh` — CI-parity **`mix check`** only (defaults match `.github/workflows/ci.yml`; Postgres must be reachable) |
-| `just shift-left` | `script/shift_left_verify.sh` — **`mix check`** then **`test/integration/first_run.sh`** (Docker + `/health`; full shift-left in one shot) |
+| `just shift-left` | `script/shift_left_verify.sh` — **`mix check`**, **`test/integration/first_run.sh`**, then **`mix kiln.e2e`** (full local mirror of CI acceptance) |
 | `just precommit` | `script/precommit.sh` — same env defaults as CI when `.env` is missing; then **`mix precommit`** (`templates.verify` + `mix check`) |
 | `just before-plan-phase 12` | Runs **`shift-left`**, then prints **`/gsd-plan-phase 12 --gaps`** for GSD gap closure |
 
@@ -157,6 +179,8 @@ If you use [**just**](https://github.com/casey/just#installation) (`brew install
 | `docker compose up -d db` | Yes (local) | No (Actions uses a service container instead of compose) |
 | `mix check` on push / PR | N/A | Yes (`.github/workflows/ci.yml`) |
 | `mix check` + boot checks | N/A | Yes on `main`; tag pushes run the **tag vs `mix.exs` version** gate |
+| `bash test/integration/first_run.sh` / `mix integration.first_run` | N/A | Yes (`integration-smoke` job) |
+| `mix kiln.e2e` / `mix shift_left.verify` UI path | N/A | Yes (`e2e` job; local `shift-left` mirrors CI) |
 
 ## Traces (local, OBS-02)
 
@@ -169,6 +193,21 @@ mix phx.server
 ```
 
 Open Jaeger UI at `http://localhost:16686`. Omit `OTEL_EXPORTER_OTLP_ENDPOINT` to keep the SDK in noop mode.
+
+## Remote access (Phase 36)
+
+Kiln's remote profile keeps the dashboard private over Tailscale and leaves the default local compose path unchanged.
+
+1. Create a Tailscale auth key in the admin console.
+2. Put it in `.env` as `TS_AUTHKEY` (see `.env.sample`).
+3. Start your host Phoenix app as usual (`mix phx.server`).
+4. Start the tunnel sidecar:
+
+```bash
+docker compose --profile remote up -d tailscale
+```
+
+By default the sidecar serves `http://host.docker.internal:4000` on your tailnet MagicDNS name. If you run Kiln on a different local port, set `TAILSCALE_TUNNEL_TARGET` in `.env` before starting the remote profile.
 
 ## Running the test suite
 
@@ -192,6 +231,27 @@ mix integration.first_run
 ```
 
 Header comments in `test/integration/first_run.sh` match this README: **asdf is not invoked** — the script assumes `docker`, `jq`, `curl`, `lsof`, and `mix` are already on `PATH` per the prerequisites above.
+
+## Integration & e2e
+
+Three layers of UI verification ship in CI on every PR. For UI flows covered here, this stack is the acceptance oracle; routine human UAT is not part of phase closure:
+
+1. **`mix check`** — includes `test/kiln_web/live/route_smoke_test.exs` (every LiveView route boots + no retired Phase-reskin tokens in rendered HTML) and `mix kiln.ui.lint` (static grep gate on `lib/kiln_web/**` and `assets/css/app.css`).
+2. **`bash test/integration/first_run.sh`** — Compose DB + host Phoenix + `/health` contract.
+3. **`mix kiln.e2e`** — Playwright: all 14 LiveView routes x light/dark x mobile/desktop + axe-core a11y. Runs locally against the same boot script CI uses.
+
+Local one-liners:
+
+```bash
+mix shift_left.verify   # steps 1 + 2 + 3
+just shift-left         # same, Just recipe
+just e2e                # just the Playwright step (boots Phoenix for you)
+just e2e-ui             # Playwright watch UI
+```
+
+Env escape hatches: `SHIFT_LEFT_SKIP_INTEGRATION=1` (step 1 only), `SHIFT_LEFT_SKIP_E2E=1` (steps 1+2).
+
+Use `$gsd-verify-work` only for typed exceptions the automation cannot cover yet: first-time auth, credentials, budget approvals, third-party blockers, or other explicitly documented human-only checks.
 
 ## Running migrations
 

@@ -5,7 +5,7 @@ defmodule Kiln.Runs.RunParallelFairnessTest do
   `RunDirector.start_run/1`.
   """
 
-  use Kiln.DataCase, async: false
+  use Kiln.RehydrationCase, async: false
 
   alias Kiln.Factory.Run, as: RunFactory
   alias Kiln.Runs.RunDirector
@@ -25,8 +25,11 @@ defmodule Kiln.Runs.RunParallelFairnessTest do
       for key <- [:anthropic_api_key, :openai_api_key, :google_api_key, :ollama_host] do
         Kiln.Secrets.put(key, nil)
       end
+
+      cleanup_runs()
     end)
 
+    reset_run_director_for_test()
     :ok
   end
 
@@ -65,6 +68,7 @@ defmodule Kiln.Runs.RunParallelFairnessTest do
     for run <- runs do
       assert {:ok, updated} = RunDirector.start_run(run.id)
       assert updated.state == :planning
+      allow_session_roles_for_run(run.id)
     end
 
     assert Agent.get(agent, & &1) == length(runs)

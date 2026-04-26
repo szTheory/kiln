@@ -12,6 +12,8 @@ config :kiln,
   generators: [timestamp_type: :utc_datetime, binary_id: true],
   # Phase 999.2: operator shell labels demo vs live; overridden in dev/test/runtime.
   operator_runtime_mode: :live,
+  attach_workspace_root: Path.expand("../var/attach_workspaces", __DIR__),
+  github_workspace_root: Path.expand("../var/attach_workspaces", __DIR__),
   # Plan 06 / D-32: BootChecks.run!/0 reads :kiln, :env at runtime to
   # decide which secrets are required (prod/dev differ). `Mix.env()` is
   # evaluated here at COMPILE time — `config/*.exs` files are part of
@@ -21,8 +23,7 @@ config :kiln,
   env: Mix.env()
 
 # Phase 18 COST-02 — soft budget threshold bands (% of `max_tokens_usd`).
-config :kiln, Kiln.BudgetAlerts,
-  soft_thresholds_pct: [50, 80]
+config :kiln, Kiln.BudgetAlerts, soft_thresholds_pct: [50, 80]
 
 # Configure the endpoint
 config :kiln, KilnWeb.Endpoint,
@@ -105,6 +106,8 @@ config :kiln, Oban,
      ]}
   ]
 
+config :oban_met, reporter: [auto_migrate: false]
+
 # LoggerJSON (D-45, D-46, D-47) — structured JSON logging with the six
 # mandatory metadata keys on every log line (OBS-01). Two parts:
 #
@@ -160,4 +163,45 @@ config :phoenix, :json_library, Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
+
+# Sigra authentication
+config :kiln, :sigra,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator
+
+# Runtime keyword consumed by Sigra admin LiveViews (UsersIndexLive, etc.)
+# via Application.get_env/2 — keep in sync with Kiln.Operators.sigra_config/0.
+config :kiln, :sigra_config,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator,
+  session: [
+    store: Sigra.SessionStores.Ecto,
+    session_schema: Kiln.Operators.UserSession
+  ],
+  audit: [
+    audit_schema: nil
+  ]
+
+# Sigra worker runtime config (used by Oban workers)
+config :sigra,
+  otp_app: :kiln,
+  repo: Kiln.Repo,
+  user_schema: Kiln.Operators.Operator,
+  email_module: Kiln.Operators.Emails,
+  mailer: Kiln.Operators.Mailer
+
+# Sigra passkeys
+config :kiln, :sigra_config,
+  passkeys: [
+    rp_id: "localhost",
+    rp_name: "Kiln",
+    origin: "http://localhost:4000",
+    timeout_ms: 60_000,
+    attestation: :none,
+    user_verification: :preferred,
+    ceremony_rate_limit: [limit: 5, window_ms: 60_000],
+    passkey_primary_enabled: true,
+    user_passkey_schema: Kiln.Operators.UserPasskey
+  ]
+
 import_config "#{config_env()}.exs"

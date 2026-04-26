@@ -14,7 +14,41 @@ defmodule KilnWeb.RunDetailLiveTest do
     {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
 
     assert has_element?(view, "#run-detail")
+    assert has_element?(view, "#run-detail-overview")
+    assert has_element?(view, "#run-detail-current-state")
+    assert has_element?(view, "#run-detail-next-action")
     assert render(view) =~ "Select a stage"
+  end
+
+  test "run detail shows recent evidence and transition timing for first-run proof", %{conn: conn} do
+    inserted_at = ~U[2026-04-24 01:40:00.000000Z]
+    updated_at = ~U[2026-04-24 01:45:00.000000Z]
+
+    run =
+      RunFactory.insert(:run,
+        workflow_id: "wf_first_live_proof",
+        state: :planning,
+        inserted_at: inserted_at,
+        updated_at: updated_at
+      )
+
+    _stage_run =
+      StageRunFactory.insert(:stage_run,
+        run_id: run.id,
+        workflow_stage_id: "plan_factory",
+        state: :running,
+        inserted_at: ~U[2026-04-24 01:44:00.000000Z],
+        updated_at: updated_at
+      )
+
+    {:ok, view, _html} = live(conn, ~p"/runs/#{run.id}")
+
+    assert has_element?(view, "#run-detail-recent-evidence")
+    assert has_element?(view, "#run-detail-transition-timing")
+    assert has_element?(view, "#run-detail-broader-watch")
+    assert has_element?(view, "#run-detail-recent-evidence", "plan_factory")
+    assert has_element?(view, "#run-detail-transition-timing", "2026-04-24 01:45:00 UTC")
+    assert has_element?(view, "#run-detail-broader-watch", "Run board")
   end
 
   test "invalid stage query shows not found", %{conn: conn} do
@@ -105,6 +139,7 @@ defmodule KilnWeb.RunDetailLiveTest do
     assert html =~ "Advisory — does not change run caps"
     assert html =~ "Spend follows routed model"
     assert html =~ "Cap headroom"
+    assert html =~ "Latest attempt finished cleanly"
   end
 
   test "budget_alert pubsub shows banner until dismissed", %{conn: conn} do

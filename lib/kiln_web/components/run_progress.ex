@@ -15,6 +15,8 @@ defmodule KilnWeb.Components.RunProgress do
       assigns
       |> assign(:stale_class, staleness_class(assigns.last_activity_at))
       |> assign(:elapsed_label, format_elapsed(elapsed_s))
+      |> assign(:state_label, state_label(assigns.run.state))
+      |> assign(:activity_label, activity_label(assigns.run.state, assigns.last_activity_at))
 
     ~H"""
     <div
@@ -24,14 +26,17 @@ defmodule KilnWeb.Components.RunProgress do
         @stale_class
       ]}
     >
-      <div class="text-bone">
+      <div class="text-base-content">
+        State {@state_label}
+      </div>
+      <div class="mt-0.5 text-base-content/60">
         Stages {@stages_done}/{@stages_total}
       </div>
-      <div class="mt-0.5 text-[var(--color-smoke)]">
+      <div class="mt-0.5 text-base-content/60">
         Elapsed {@elapsed_label}
       </div>
-      <div class="mt-0.5 text-[var(--color-smoke)]">
-        Not enough history
+      <div class="mt-0.5 text-base-content/60">
+        {@activity_label}
       </div>
     </div>
     """
@@ -46,15 +51,32 @@ defmodule KilnWeb.Components.RunProgress do
   defp format_elapsed(s) when s < 60, do: "#{s}s"
   defp format_elapsed(s), do: "#{div(s, 60)}m #{rem(s, 60)}s"
 
-  defp staleness_class(nil), do: "border-ash text-bone"
+  defp state_label(state),
+    do: state |> to_string() |> String.replace("_", " ") |> String.capitalize()
+
+  defp activity_label(:blocked, _), do: "Needs operator input"
+  defp activity_label(state, _) when state in [:merged, :failed, :escalated], do: "Terminal state"
+  defp activity_label(_, nil), do: "Waiting for first update"
+
+  defp activity_label(_, %DateTime{} = at) do
+    diff = DateTime.diff(DateTime.utc_now(:microsecond), at, :second)
+
+    cond do
+      diff < 30 -> "Fresh activity"
+      diff < 300 -> "Quiet but moving"
+      true -> "Waiting on the next update"
+    end
+  end
+
+  defp staleness_class(nil), do: "border-base-300 text-base-content"
 
   defp staleness_class(%DateTime{} = at) do
     diff = DateTime.diff(DateTime.utc_now(:microsecond), at, :second)
 
     cond do
-      diff < 30 -> "border-emerald-700/60 text-bone"
-      diff < 300 -> "border-amber-600/70 text-bone"
-      true -> "border-[var(--color-clay)] text-bone"
+      diff < 30 -> "border-success/70 text-base-content"
+      diff < 300 -> "border-warning/70 text-base-content"
+      true -> "border-error text-base-content"
     end
   end
 end

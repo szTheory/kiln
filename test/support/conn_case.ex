@@ -8,6 +8,8 @@ defmodule KilnWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Kiln.OperatorReadiness
+
   using do
     quote do
       # The default endpoint for testing
@@ -18,12 +20,39 @@ defmodule KilnWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
+      import KilnWeb.ConnCaseHelpers
       import KilnWeb.ConnCase
     end
   end
 
   setup tags do
     Kiln.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+
+    readiness =
+      if tags[:operator_readiness] == :keep do
+        nil
+      else
+        assert {:ok, _} = OperatorReadiness.mark_step(:anthropic, true)
+        assert {:ok, _} = OperatorReadiness.mark_step(:github, true)
+        assert {:ok, _} = OperatorReadiness.mark_step(:docker, true)
+        :ready
+      end
+
+    # Phase 36-01: Sigra auth guards `:require_authenticated` on all
+    # operator routes. Default the test conn to a logged-in operator so
+    # existing LiveView/controller tests pass without per-file edits.
+    # Opt out per test/module with `@tag :anonymous` (login/redirect
+    # flow tests) or `@moduletag :anonymous`.
+    base_conn = Phoenix.ConnTest.build_conn()
+
+    {conn, user} =
+      if tags[:anonymous] do
+        {base_conn, nil}
+      else
+        u = Kiln.OperatorsFixtures.user_fixture()
+        {KilnWeb.ConnCaseHelpers.log_in_user(base_conn, u), u}
+      end
+
+    {:ok, conn: conn, user: user, operator_readiness: readiness}
   end
 end

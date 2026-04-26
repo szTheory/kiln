@@ -90,7 +90,7 @@ defmodule Kiln.Sandboxes.DockerDriverTest do
         labels: %{
           "kiln.run_id" => Ecto.UUID.generate(),
           "kiln.stage_run_id" => stage_run_id,
-          "kiln.boot_epoch" => 12345,
+          "kiln.boot_epoch" => 12_345,
           "kiln.stage_kind" => "coding"
         },
         dns: ["172.28.0.10"],
@@ -179,7 +179,7 @@ defmodule Kiln.Sandboxes.DockerDriverTest do
         labels: %{
           "kiln.run_id" => run_id,
           "kiln.stage_run_id" => stage_run_id,
-          "kiln.boot_epoch" => 12345
+          "kiln.boot_epoch" => 12_345
         },
         dns: ["172.28.0.10"],
         extra_hosts: ["api.github.com:172.28.0.10"]

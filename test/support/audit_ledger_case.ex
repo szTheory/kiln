@@ -36,8 +36,22 @@ defmodule Kiln.AuditLedgerCase do
   end
 
   setup tags do
-    pid = Sandbox.start_owner!(Kiln.Repo, shared: not tags[:async])
-    on_exit(fn -> Sandbox.stop_owner(pid) end)
+    :ok = Sandbox.checkout(Kiln.Repo)
+
+    if tags[:async] do
+      :ok
+    else
+      Sandbox.mode(Kiln.Repo, {:shared, self()})
+    end
+
+    on_exit(fn ->
+      try do
+        Sandbox.checkin(Kiln.Repo)
+      rescue
+        _ -> :ok
+      end
+    end)
+
     :ok
   end
 

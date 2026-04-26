@@ -1,52 +1,79 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-23 — **Milestone v0.4.0** (Phases **22–24**)
+**Updated:** 2026-04-24 — **Active milestone v0.8.0**
 
-**Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
+**Core value:** Given a spec, Kiln ships working software — built, verified, merged, and deployed or published — with no human intervention. Safely, visibly, and durably.
 
 ## Milestones
 
 - ✅ **v0.1.0** — Phases **1–9** + parking **999.1** — [.planning/milestones/v0.1.0.md](milestones/v0.1.0.md)
-- ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md)
-- ✅ **v0.3.0 — Scale → templates → operator intelligence** — Phases **14–21** (shipped 2026-04-23) — [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md)
-- 🚧 **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [REQUIREMENTS.md](REQUIREMENTS.md)
+- ✅ **v0.2.0 — Operator dogfood** — Phases **10–13** — [.planning/milestones/v0.2.0-ROADMAP.md](milestones/v0.2.0-ROADMAP.md) · [v0.2.0-REQUIREMENTS.md](milestones/v0.2.0-REQUIREMENTS.md)
+- ✅ **v0.3.0 — Scale -> templates -> operator intelligence** — Phases **14–21** — [.planning/milestones/v0.3.0-ROADMAP.md](milestones/v0.3.0-ROADMAP.md) · [v0.3.0-REQUIREMENTS.md](milestones/v0.3.0-REQUIREMENTS.md) · [v0.3.0-MILESTONE-AUDIT.md](milestones/v0.3.0-MILESTONE-AUDIT.md)
+- ✅ **v0.4.0 — Trust, docs & validation closure** — Phases **22–24** — [.planning/milestones/v0.4.0-ROADMAP.md](milestones/v0.4.0-ROADMAP.md) · [v0.4.0-REQUIREMENTS.md](milestones/v0.4.0-REQUIREMENTS.md) · [v0.4.0-MILESTONE-AUDIT.md](milestones/v0.4.0-MILESTONE-AUDIT.md)
+- ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
+- ✅ **v0.6.0 — Attach existing repo first** — Phases **29–31** — [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md) · [v0.6.0-REQUIREMENTS.md](milestones/v0.6.0-REQUIREMENTS.md) · [v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md)
+- ✅ **v0.7.0 — PR-sized brownfield execution** — Phases **32–35** — [.planning/milestones/v0.7.0-ROADMAP.md](milestones/v0.7.0-ROADMAP.md) · [v0.7.0-REQUIREMENTS.md](milestones/v0.7.0-REQUIREMENTS.md)
+- 🚧 **v0.8.0 — Remote Factory & Autonomous Delivery** — Phases **36–39** — [.planning/milestones/v0.8.0-ROADMAP.md](milestones/v0.8.0-ROADMAP.md) · [v0.8.0-REQUIREMENTS.md](milestones/v0.8.0-REQUIREMENTS.md)
 
-## Overview (v0.4.0)
+## Current posture
 
-Close **honest merge-authority** documentation (**DOCS-08**), finish **Nyquist / VALIDATION** posture for the v0.3.0 phases that still showed **`partial`** (**NYQ-01**), and add **one automated operator journey** from template selection into a run (**UAT-03**). Small phases so each stays reviewable.
+`v0.7.0` is shipped on 2026-04-24. Kiln now supports a repeatable, bounded brownfield loop on attached repos. `v0.8.0` expands this into a remote-accessible factory that autonomously releases and verifies live deployments.
 
-## Phases (v0.4.0)
+<details>
+<summary>🚧 v0.8.0 (Phases 36–39) — IN PROGRESS</summary>
 
-- [ ] **Phase 22: Merge authority & operator docs** — DOCS-08 — README + `PROJECT.md` merge-authority matrix; aligns with Phase 12 partial self-check reality.
-- [ ] **Phase 23: Nyquist / VALIDATION closure** — NYQ-01 — Phases 14/16/17/19 validation files: compliant or explicit waiver.
-- [ ] **Phase 24: Template → run UAT smoke** — UAT-03 — LiveView (or integration) test + VERIFICATION command citation.
+- [x] **Phase 36: Remote Access & Operator Auth** — REMOTE-01, REMOTE-02, REMOTE-03 (completed 2026-04-26)
+- [ ] **Phase 37: Autonomous Versioning & Release** — DELIVER-01, DELIVER-02
+- [ ] **Phase 38: SaaS Delivery & SRE Smoke** — DELIVER-03, DELIVER-04, DELIVER-05
+- [ ] **Phase 39: Milestone Proof & Production Readiness** — UAT-07
 
-**Parking / decimals:** Continue using **999.x** only for ad-hoc backlog execution off the integer roadmap.
+**Scope summary:** secure remote dashboard access, auto-versioning from commits, GitHub Release integration, SaaS deploy drivers (Fly.io/Cloudflare), and post-deploy SRE health checks.
 
-## Phase details (v0.4.0 — summary)
+**Plans:** 3 plans
 
-### Phase 22: Merge authority & operator docs
-**Goal:** Operators and contributors share one explicit understanding of what **CI** must prove vs what is optional locally.  
-**Requirements:** DOCS-08  
-**Success criteria (observable):**
-1. `README.md` and `PROJECT.md` contain the same merge-authority table (or README links to `PROJECT.md` as SSOT with one table).
-2. Phase 12 “PARTIAL self-check” is referenced so local green is not implied where unsupported.
+Plans:
 
-### Phase 23: Nyquist / VALIDATION closure
-**Goal:** No v0.3.0 phase remains silently **`nyquist_compliant: false`** without a recorded decision.  
-**Requirements:** NYQ-01  
-**Success criteria:**
-1. Each targeted `*-VALIDATION.md` is updated with compliant=true **or** a dated waiver block listing owner.
-2. `REQUIREMENTS.md` traceability row for NYQ-01 moves to Complete when VERIFICATION passes.
+- [x] 36-01-PLAN.md — Sigra auth scaffold and operator session plumbing
+- [x] 36-02-PLAN.md — remote compose profile and Tailscale sidecar
+- [x] 36-03-PLAN.md — route-gate verification and remote smoke runbook
 
-### Phase 24: Template → run UAT smoke
-**Goal:** Automated regression cover for the **template → run** path the operator relies on for first success.  
-**Requirements:** UAT-03  
-**Success criteria:**
-1. Test exercises UI with stable selectors (ids) from the template flow.
-2. `24-VERIFICATION.md` (or phase-agreed name) cites the exact `mix test …` line run in CI.
+</details>
 
-## Phases (shipped — reference)
+<details>
+<summary>✅ v0.7.0 (Phases 32–35) — SHIPPED 2026-04-24</summary>
+
+- [x] **Phase 32: PR-sized attached-repo intake** — WORK-01 — completed 2026-04-24
+- [x] **Phase 33: Repeat-run continuity on attached repos** — CONT-01 — completed 2026-04-24
+- [x] **Phase 34: Brownfield preflight and narrowing guardrails** — SAFE-01, SAFE-02 — completed 2026-04-24
+- [x] **Phase 35: Draft PR handoff and owning proof** — TRUST-04, UAT-06 — completed 2026-04-24
+
+**Scope summary:** structured bounded intake contracts, repo-scoped continuity recency, advisory brownfield preflight findings, and reviewer-first draft PR delivery built from durable request facts.
+
+</details>
+
+<details>
+<summary>✅ v0.6.0 (Phases 29–31) — SHIPPED 2026-04-24</summary>
+
+- [x] **Phase 29: Attach entry surfaces** — ATTACH-01 — completed 2026-04-24
+- [x] **Phase 30: Attach workspace hydration and safety gates** — ATTACH-02, ATTACH-03, TRUST-02 — completed 2026-04-24
+- [x] **Phase 31: Draft PR trust ramp and attach proof** — TRUST-01, TRUST-03, GIT-05, UAT-05 — completed 2026-04-24
+
+**Scope summary:** first-class attach discovery on operator entry surfaces, single-repo attach resolution and managed hydration, conservative draft-PR-first delivery for attached repos, and one explicit owning proof command.
+
+**Audit note:** closed with accepted tech debt. See [.planning/milestones/v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md).
+
+</details>
+
+<details>
+<summary>✅ v0.4.0 (Phases 22–24) — SHIPPED 2026-04-23</summary>
+
+- [x] **Phase 22: Merge authority & operator docs** — DOCS-08 — completed 2026-04-23
+- [x] **Phase 23: Nyquist / VALIDATION closure** — NYQ-01 — completed 2026-04-23
+- [x] **Phase 24: Template -> run UAT smoke** — UAT-03 — completed 2026-04-23
+
+**Scope summary:** honest merge-authority documentation, explicit Nyquist posture for carried-over partial validations, and one focused operator template-to-run regression.
+
+</details>
 
 <details>
 <summary>✅ v0.3.0 (Phases 14–21) — SHIPPED 2026-04-23</summary>
@@ -78,7 +105,7 @@ Close **honest merge-authority** documentation (**DOCS-08**), finish **Nyquist /
 
 **Canonical refs (seed):** `CLAUDE.md` (SEC-01), `lib/kiln_web/live/provider_health_live.ex`, `.cursor/plans/GB dogfood note backlog-6d919cbd.plan.md` (intent note; do not treat as executable spec).
 
-**Plans:** 2/2 plans complete
+**Plans:** 3/3 plans complete
 
 Plans:
 
@@ -86,5 +113,31 @@ Plans:
 - [x] 999.2-02 — `KilnWeb.OperatorChromeHook` (assigns + 5s refresh)
 - [x] 999.2-03 — `Layouts.app` chrome + LiveView tests
 
+### Phase 999.4: Planning state and validation debt cleanup (BACKLOG)
+
+**Goal:** Clean up the non-blocking artifact debt left after v0.5.0 closure so planning routing is trustworthy again, historical verification artifacts no longer imply stale failures, and the remaining orphan worktree residue is either incorporated deliberately or removed cleanly.
+
+**Requirements:** TBD (promote with `/gsd-review-backlog`).
+
+**Canonical refs (seed):** `.planning/milestones/v0.5.0-MILESTONE-AUDIT.md`, `.planning/STATE.md`, `.planning/phases/26-first-live-template-run/26-VERIFICATION.md`, `.planning/phases/26-first-live-template-run/deferred-items.md`, `.planning/phases/27-local-first-run-proof/27-VALIDATION.md`, `.planning/todos/pending/2026-04-24-review-orphan-phase-03-worktree-residue.md`.
+
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
+### Phase 999.3: Immersive code graph visualization and Kiln-native microcopy (BACKLOG)
+
+**Goal:** Explore a **web-native, highly intuitive code understanding surface** for Kiln that lets operators and builders visually inspect and navigate code, relationships, and system behavior without dropping into raw file trees first. Prefer **HTML/CSS/JS-native** approaches where possible (including D3-class graphing or other lightweight browser visualization), with richer rendering options only if they materially improve clarity. In parallel, raise the quality bar for **toast notifications and operator-facing UX microcopy** so status updates feel clear, persona-aware, and distinctly **Kiln-native** rather than generic programmer text.
+
+**Requirements:** TBD (promote with `/gsd-review-backlog`).
+
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (promote with `/gsd-review-backlog` when ready)
+
 ---
-*Milestone v0.4.0 opened: 2026-04-23*
+*Active milestone: v0.7.0 on 2026-04-24; latest shipped milestone: v0.6.0*

@@ -25,7 +25,8 @@ services:
       POSTGRES_PASSWORD: kiln_dev
       POSTGRES_DB: kiln_dev
     ports:
-      - "5432:5432"
+      # Host port is configurable when 5432 is already taken (see `.env.sample`).
+      - "${KILN_DB_HOST_PORT:-5432}:5432"
     volumes:
       - kiln_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -55,6 +56,56 @@ services:
       timeout: 5s
       retries: 3
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - kiln_app_build:/app/_build
+      - kiln_app_deps:/app/deps
+      # Docker socket lets the app spawn sandbox containers via System.cmd("docker", ...).
+      # Never forward DOCKER_HOST into the spawned stage containers themselves.
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      MIX_ENV: dev
+      KILN_DEV_BIND_ALL: "1"
+      DATABASE_URL: "ecto://kiln:kiln_dev@db:5432/kiln_dev"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE:-}"
+      # Sigra/Cloak vault key (Phase 36-01). docker_dev_start.sh auto-generates if unset.
+      CLOAK_KEY: "${CLOAK_KEY:-}"
+      PHX_HOST: "${PHX_HOST:-localhost}"
+      PORT: "${PORT:-4000}"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tailscale:
+    image: tailscale/tailscale:stable
+    profiles: ["remote"]
+    hostname: ${TAILSCALE_HOSTNAME:-kiln}
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME:-kiln}
+      TAILSCALE_TUNNEL_TARGET: ${TAILSCALE_TUNNEL_TARGET:-http://host.docker.internal:4000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - kiln_tailscale_state:/var/lib/tailscale
+    command:
+      - sh
+      - -ec
+      - |
+        : "$${TS_AUTHKEY:?set TS_AUTHKEY before starting the remote profile}"
+        tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking &
+        tailscaled_pid=$$!
+        until tailscale status >/dev/null 2>&1; do sleep 1; done
+        tailscale up --auth-key="$${TS_AUTHKEY}" --hostname="$${TAILSCALE_HOSTNAME}" --accept-dns=false --accept-routes=false
+        tailscale serve --bg --https=443 "$${TAILSCALE_TUNNEL_TARGET}"
+        wait "$$tailscaled_pid"
+
 networks:
   kiln-sandbox:
     internal: true
@@ -66,3 +117,6 @@ networks:
 
 volumes:
   kiln_pgdata:
+  kiln_tailscale_state:
+  kiln_app_build:
+  kiln_app_deps:

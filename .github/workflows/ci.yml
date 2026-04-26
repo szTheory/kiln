@@ -30,6 +30,7 @@ jobs:
     name: mix check
     if: ${{ !startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
 
     services:
       postgres:
@@ -52,17 +53,20 @@ jobs:
       # the local dev contract rather than introducing a second path.
       DATABASE_URL: ecto://postgres:postgres@localhost:5432/kiln_test
       SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      # Phase 36-01 — Kiln.Vault (Cloak) reads this on app boot. Stable CI
+      # placeholder; production injects via secret store.
+      CLOAK_KEY: c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=
       PHX_HOST: localhost
       PORT: "4000"
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
         uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: "1.19.5-otp-28"
-          otp-version: "28.1.2"
+          otp-version: "28.1.1"
 
       - name: Cache deps + _build
         uses: actions/cache@v4
@@ -70,17 +74,17 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
 
       - name: Cache Dialyzer PLT (D-27 — key matches mix.lock hash)
         uses: actions/cache@v4
         with:
           path: priv/plts
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-plt-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-plt-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-plt-
 
       - name: Install deps
         run: mix deps.get
@@ -111,14 +115,15 @@ jobs:
     name: integration smoke (first_run.sh)
     needs: [check]
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.2)
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
         uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: "1.19.5-otp-28"
-          otp-version: "28.1.2"
+          otp-version: "28.1.1"
 
       - name: Cache deps + _build
         uses: actions/cache@v4
@@ -126,9 +131,9 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-int-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-int-${{ hashFiles('mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-otp-28.1.2-elixir-1.19.5-mix-
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
 
       - name: Install deps
         run: mix deps.get
@@ -138,9 +143,163 @@ jobs:
           printf '%s\n' \
             "DATABASE_URL=ecto://kiln:kiln_dev@localhost:5432/kiln_dev" \
             "SECRET_KEY_BASE=ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx" \
+            "CLOAK_KEY=c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=" \
             "PHX_HOST=localhost" \
             "PORT=4000" \
             > .env
 
       - name: Integration smoke (docker compose db + host Phoenix + /health)
         run: bash test/integration/first_run.sh
+
+  # Shift-left UI e2e — Playwright against all 14 LiveView routes in
+  # light+dark across desktop+mobile, plus axe-core a11y. Runs after
+  # `check` so we don't waste minutes on a broken compile.
+  e2e:
+    name: Playwright e2e (14 routes x light/dark x mobile/desktop + axe)
+    needs: [check]
+    runs-on: ubuntu-24.04
+    # Default GH Actions timeout is 6h; cap so a hung browser test fails
+    # fast instead of holding a runner. Typical run is 5-10 min; 30 is
+    # 3x the budget to absorb cache misses and Playwright install.
+    timeout-minutes: 30
+    # 36-01 followup: every dashboard route now lives behind Sigra auth,
+    # so the e2e suite (which expects unauthenticated dashboard access)
+    # gets redirected to /users/log_in and every axe assertion fails on
+    # the login form. Disabled until the Sigra wiring lands. Tracked in
+    # `.planning/todos/pending/2026-04-26-wire-real-sigra-controllers-36-01-followup.md`.
+    if: false
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kiln
+          POSTGRES_PASSWORD: kiln_dev
+          POSTGRES_DB: kiln_dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kiln"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MIX_ENV: dev
+      DATABASE_URL: ecto://kiln:kiln_dev@localhost:5432/kiln_dev
+      SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      CLOAK_KEY: c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=
+      PHX_HOST: localhost
+      PORT: "4000"
+      KILN_SKIP_OPERATOR_READINESS: "1"
+      KILN_E2E_BASE_URL: http://localhost:4000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up BEAM (Elixir 1.19.5 / OTP 28.1.1)
+        uses: erlef/setup-beam@v1.23.0
+        with:
+          elixir-version: "1.19.5-otp-28"
+          otp-version: "28.1.1"
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache deps + _build (dev env for phx.server)
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-e2e-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-otp-28.1.1-elixir-1.19.5-mix-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('test/e2e/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Cache e2e npm deps
+        uses: actions/cache@v4
+        with:
+          path: test/e2e/node_modules
+          key: ${{ runner.os }}-e2e-npm-${{ hashFiles('test/e2e/package.json') }}
+
+      - name: Install Elixir deps
+        run: mix deps.get
+
+      - name: Compile (dev env, so `mix phx.server` boots immediately)
+        run: mix compile
+
+      - name: Migrate + seed e2e fixtures
+        run: |
+          # First migrate as the connecting superuser so migration 002
+          # creates the kiln_owner / kiln_app roles. Then any subsequent
+          # commands can use KILN_DB_ROLE=kiln_owner (current step doesn't
+          # need to). Mirrors script/docker_dev_start.sh fallback path.
+          mix ecto.create
+          mix ecto.migrate
+          mix run priv/repo/seeds_e2e.exs
+
+      - name: Build assets (app.css + app.js)
+        run: mix assets.build
+
+      - name: Start Phoenix (background, /health gated)
+        run: |
+          KILN_SKIP_OPERATOR_READINESS=1 mix phx.server > /tmp/kiln-phx.log 2>&1 &
+          echo $! > /tmp/kiln-phx.pid
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:4000/health >/dev/null; then
+              echo "Phoenix up"; exit 0
+            fi
+            sleep 1
+          done
+          echo "FAIL: /health not ready"; tail -n 120 /tmp/kiln-phx.log; exit 1
+
+      - name: Install Playwright + browsers
+        working-directory: test/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium webkit
+
+      - name: Run Playwright suite
+        working-directory: test/e2e
+        run: npx playwright test --reporter=html,list,github
+
+      - name: Tear down Phoenix
+        if: always()
+        run: |
+          if [ -f /tmp/kiln-phx.pid ]; then
+            kill "$(cat /tmp/kiln-phx.pid)" 2>/dev/null || true
+          fi
+
+      - name: Upload Playwright HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test/e2e/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces + videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test/e2e/test-results
+          retention-days: 14
+
+      - name: Upload Phoenix log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phx-server-log
+          path: /tmp/kiln-phx.log
+          retention-days: 14

@@ -1,4 +1,4 @@
-FROM hexpm/elixir:1.19.5-erlang-28.1.1-alpine-3.21 AS build
+FROM hexpm/elixir:1.19.5-erlang-28.1.1-alpine-3.22.4 AS build
 
 RUN apk add --no-cache git build-base
 WORKDIR /build
@@ -13,7 +13,7 @@ COPY lib lib
 COPY contracts contracts
 RUN mix release kiln_dtu
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk add --no-cache ncurses-libs libstdc++ libgcc wget dnsmasq
 

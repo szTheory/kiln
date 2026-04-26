@@ -3,12 +3,15 @@ defmodule KilnWeb.InboxLiveTest do
 
   import Phoenix.LiveViewTest
 
+  alias Kiln.Repo
   alias Kiln.Specs
+  alias Kiln.Specs.SpecDraft
 
   @req_stub __MODULE__.ReqStub
 
   describe "inbox without github stub" do
     test "renders empty inbox copy and id=inbox", %{conn: conn} do
+      Repo.delete_all(SpecDraft)
       {:ok, view, html} = live(conn, ~p"/inbox")
 
       assert html =~ ~s(id="inbox")
