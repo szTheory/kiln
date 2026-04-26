@@ -52,6 +52,9 @@ jobs:
       # the local dev contract rather than introducing a second path.
       DATABASE_URL: ecto://postgres:postgres@localhost:5432/kiln_test
       SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      # Phase 36-01 — Kiln.Vault (Cloak) reads this on app boot. Stable CI
+      # placeholder; production injects via secret store.
+      CLOAK_KEY: c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=
       PHX_HOST: localhost
       PORT: "4000"
 
@@ -138,6 +141,7 @@ jobs:
           printf '%s\n' \
             "DATABASE_URL=ecto://kiln:kiln_dev@localhost:5432/kiln_dev" \
             "SECRET_KEY_BASE=ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx" \
+            "CLOAK_KEY=c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=" \
             "PHX_HOST=localhost" \
             "PORT=4000" \
             > .env
@@ -172,6 +176,7 @@ jobs:
       MIX_ENV: dev
       DATABASE_URL: ecto://kiln:kiln_dev@localhost:5432/kiln_dev
       SECRET_KEY_BASE: ci_only_64_byte_placeholder_replace_in_prod_xxxxxxxxxxxxxxxxxxxx
+      CLOAK_KEY: c5gK3XJNYcpOkeZgqHrLtL78G1aptfiMwQ7A69fEI8c=
       PHX_HOST: localhost
       PORT: "4000"
       KILN_SKIP_OPERATOR_READINESS: "1"
