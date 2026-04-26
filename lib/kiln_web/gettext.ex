@@ -3,5 +3,5 @@ defmodule KilnWeb.Gettext do
   Internationalization backend for the web layer.
   """
 
-  use Gettext, otp_app: :kiln
+  use Gettext.Backend, otp_app: :kiln
 end

@@ -132,6 +132,18 @@ defmodule KilnWeb.Router do
       get "/sudo", Auth.SudoController, :new
       post "/sudo", Auth.SudoController, :create
 
+    # 36-01 followup stubs — see lib/kiln_web/controllers/sigra_stub_controllers.ex.
+    # Routes the Sigra-backed scaffolding emits redirects/links to but were
+    # never wired. Stubs return 501; replacement tracked as a 36-01 followup.
+    get "/settings", SettingsController, :show
+    get "/settings/mfa", MFASettingsController, :show
+    get "/settings/mfa/enroll", MFASettingsController, :enroll
+    post "/settings/mfa/disable", MFASettingsController, :disable
+    post "/settings/mfa/confirm", MFASettingsController, :confirm
+    post "/settings/mfa/complete", MFASettingsController, :complete
+    post "/settings/mfa/regenerate", MFASettingsController, :regenerate
+    post "/settings/mfa/revoke-trust", MFASettingsController, :revoke_trust
+    get "/reactivation", ReactivationController, :new
   end
 
   scope "/users", KilnWeb do
