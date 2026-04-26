@@ -27,6 +27,15 @@ setup:
 smoke:
     bash test/integration/first_run.sh
 
+# Dockerized-app smoke (compose `app` service to /health). Fast cached re-run.
+# See `script/compose_smoke.sh`.
+compose-smoke:
+    bash script/compose_smoke.sh
+
+# Same, but `down -v` first → exercises first-boot bootstrap (migration 002 grants).
+compose-smoke-fresh:
+    bash script/compose_smoke.sh --clean
+
 # Start DB only, then hand off to host Phoenix in another shell.
 dev-deps: db-up
     @echo 'Postgres is up — run `mix phx.server` in another terminal (Phoenix stays on the host).'
