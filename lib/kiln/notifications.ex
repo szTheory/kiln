@@ -194,8 +194,12 @@ defmodule Kiln.Notifications do
             {err, code} -> {:linux, {:error, {code, err}}}
           end
         rescue
-          e in ErlangError when e.original == :enoent ->
-            {:linux, {:error, :notify_send_not_found}}
+          e in ErlangError ->
+            if e.original == :enoent do
+              {:linux, {:error, :notify_send_not_found}}
+            else
+              reraise e, __STACKTRACE__
+            end
         end
 
       other ->

@@ -74,6 +74,8 @@ services:
       KILN_DEV_BIND_ALL: "1"
       DATABASE_URL: "ecto://kiln:kiln_dev@db:5432/kiln_dev"
       SECRET_KEY_BASE: "${SECRET_KEY_BASE:-}"
+      # Sigra/Cloak vault key (Phase 36-01). docker_dev_start.sh auto-generates if unset.
+      CLOAK_KEY: "${CLOAK_KEY:-}"
       PHX_HOST: "${PHX_HOST:-localhost}"
       PORT: "${PORT:-4000}"
     depends_on:
