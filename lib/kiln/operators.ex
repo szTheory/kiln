@@ -288,29 +288,31 @@ defmodule Kiln.Operators do
   controller needs `session.hashed_token` to mark sudo confirmation.
   """
   def get_user_and_session_by_token(raw_token) when is_binary(raw_token) do
-    with {:ok, raw_bytes} <- Base.url_decode64(raw_token, padding: false) do
-      hashed = Sigra.Token.hash_token(raw_bytes)
-      config = sigra_config()
-      session_config = config.session
-      store = Keyword.fetch!(session_config, :store)
+    case Base.url_decode64(raw_token, padding: false) do
+      {:ok, raw_bytes} ->
+        hashed = Sigra.Token.hash_token(raw_bytes)
+        config = sigra_config()
+        session_config = config.session
+        store = Keyword.fetch!(session_config, :store)
 
-      store_opts = [
-        repo: config.repo,
-        session_schema: Keyword.fetch!(session_config, :session_schema)
-      ]
+        store_opts = [
+          repo: config.repo,
+          session_schema: Keyword.fetch!(session_config, :session_schema)
+        ]
 
-      case store.fetch(hashed, store_opts) do
-        {:ok, session} ->
-          case Repo.get(Operator, session.user_id) do
-            nil -> nil
-            user -> {user, session}
-          end
+        case store.fetch(hashed, store_opts) do
+          {:ok, session} ->
+            case Repo.get(Operator, session.user_id) do
+              nil -> nil
+              user -> {user, session}
+            end
 
-        {:error, :not_found} ->
-          nil
-      end
-    else
-      _ -> nil
+          {:error, :not_found} ->
+            nil
+        end
+
+      _ ->
+        nil
     end
   end
 
