@@ -56,6 +56,30 @@ services:
       timeout: 5s
       retries: 3
 
+  tailscale:
+    image: tailscale/tailscale:stable
+    profiles: ["remote"]
+    hostname: ${TAILSCALE_HOSTNAME:-kiln}
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME:-kiln}
+      TAILSCALE_TUNNEL_TARGET: ${TAILSCALE_TUNNEL_TARGET:-http://host.docker.internal:4000}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - kiln_tailscale_state:/var/lib/tailscale
+    command:
+      - sh
+      - -ec
+      - |
+        : "$${TS_AUTHKEY:?set TS_AUTHKEY before starting the remote profile}"
+        tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking &
+        tailscaled_pid=$$!
+        until tailscale status >/dev/null 2>&1; do sleep 1; done
+        tailscale up --auth-key="$${TS_AUTHKEY}" --hostname="$${TAILSCALE_HOSTNAME}" --accept-dns=false --accept-routes=false
+        tailscale serve --bg --https=443 "$${TAILSCALE_TUNNEL_TARGET}"
+        wait "$$tailscaled_pid"
+
 networks:
   kiln-sandbox:
     internal: true
@@ -67,3 +91,4 @@ networks:
 
 volumes:
   kiln_pgdata:
+  kiln_tailscale_state:

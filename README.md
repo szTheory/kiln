@@ -180,6 +180,21 @@ mix phx.server
 
 Open Jaeger UI at `http://localhost:16686`. Omit `OTEL_EXPORTER_OTLP_ENDPOINT` to keep the SDK in noop mode.
 
+## Remote access (Phase 36)
+
+Kiln's remote profile keeps the dashboard private over Tailscale and leaves the default local compose path unchanged.
+
+1. Create a Tailscale auth key in the admin console.
+2. Put it in `.env` as `TS_AUTHKEY` (see `.env.sample`).
+3. Start your host Phoenix app as usual (`mix phx.server`).
+4. Start the tunnel sidecar:
+
+```bash
+docker compose --profile remote up -d tailscale
+```
+
+By default the sidecar serves `http://host.docker.internal:4000` on your tailnet MagicDNS name. If you run Kiln on a different local port, set `TAILSCALE_TUNNEL_TARGET` in `.env` before starting the remote profile.
+
 ## Running the test suite
 
 ```bash
