@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: vNext
-milestone_name: — Next milestone goals TBD
-status: ready_to_research
-last_updated: "2026-04-24T18:30:00.000Z"
-last_activity: 2026-04-24 -- Milestone v0.7.0 archived
+milestone: v0.8.0
+milestone_name: — Remote Factory & Autonomous Delivery
+status: Ready to research
+last_updated: "2026-04-26T07:53:57.700Z"
+last_activity: 2026-04-24 -- Milestone v0.8.0 opened
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
+  percent: 100
 ---
 
 # Project State
@@ -19,20 +19,20 @@ progress:
 
 See: [.planning/PROJECT.md](PROJECT.md)
 
-**Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
+**Core value:** Given a spec, Kiln ships working software — built, verified, merged, and deployed or published — with no human intervention. Safely, visibly, and durably.
 
 ## Current Position
 
-Phase: vNext
-Plan: Not started
-Status: Ready to research
-Last activity: 2026-04-24 -- Milestone v0.7.0 archived
+Phase: v0.8.0
+Plan: 36-03 complete
+Status: Phase 36 complete
+Last activity: 2026-04-26 -- Completed phase 36 plan 03
 
 ## Current focus
 
-Active milestone: **vNext — Next milestone goals TBD** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md)
+Active milestone: **v0.8.0 — Remote Factory & Autonomous Delivery** — [ROADMAP.md](ROADMAP.md) · [PROJECT.md](PROJECT.md)
 
-Immediate next step: **`/gsd-new-milestone`** — start the next milestone (research → requirements → roadmap).
+Immediate next step: **`/gsd-plan-phase 37`** — start Phase 37: Autonomous Versioning & Release.
 
 ## Milestone note
 
@@ -48,7 +48,7 @@ Immediate next step: **`/gsd-new-milestone`** — start the next milestone (rese
 
 **Last milestone execution:** v0.7.0 — shipped 2026-04-24.
 
-**Last phase execution:** 35 (Draft PR handoff and owning proof) — completed 2026-04-24.
+**Last phase execution:** 36 (Remote Access & Operator Auth) — completed 2026-04-26.
 
 ## Accumulated Context
 

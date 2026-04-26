@@ -1,8 +1,8 @@
 # Roadmap: Kiln
 
-**Updated:** 2026-04-24 — **Active milestone vNext**
+**Updated:** 2026-04-24 — **Active milestone v0.8.0**
 
-**Core value:** Given a spec, Kiln ships working software with no human intervention — safely, visibly, and durably.
+**Core value:** Given a spec, Kiln ships working software — built, verified, merged, and deployed or published — with no human intervention. Safely, visibly, and durably.
 
 ## Milestones
 
@@ -13,11 +13,31 @@
 - ✅ **v0.5.0 — Local first success** — Phases **25–28** — [.planning/milestones/v0.5.0-ROADMAP.md](milestones/v0.5.0-ROADMAP.md) · [v0.5.0-REQUIREMENTS.md](milestones/v0.5.0-REQUIREMENTS.md) · [v0.5.0-MILESTONE-AUDIT.md](milestones/v0.5.0-MILESTONE-AUDIT.md)
 - ✅ **v0.6.0 — Attach existing repo first** — Phases **29–31** — [.planning/milestones/v0.6.0-ROADMAP.md](milestones/v0.6.0-ROADMAP.md) · [v0.6.0-REQUIREMENTS.md](milestones/v0.6.0-REQUIREMENTS.md) · [v0.6.0-MILESTONE-AUDIT.md](milestones/v0.6.0-MILESTONE-AUDIT.md)
 - ✅ **v0.7.0 — PR-sized brownfield execution** — Phases **32–35** — [.planning/milestones/v0.7.0-ROADMAP.md](milestones/v0.7.0-ROADMAP.md) · [v0.7.0-REQUIREMENTS.md](milestones/v0.7.0-REQUIREMENTS.md)
-- 🚧 **vNext** — Next milestone goals TBD — [PROJECT.md](PROJECT.md)
+- 🚧 **v0.8.0 — Remote Factory & Autonomous Delivery** — Phases **36–39** — [.planning/milestones/v0.8.0-ROADMAP.md](milestones/v0.8.0-ROADMAP.md) · [v0.8.0-REQUIREMENTS.md](milestones/v0.8.0-REQUIREMENTS.md)
 
 ## Current posture
 
-`v0.7.0` is shipped on 2026-04-24. Kiln now supports a repeatable, bounded brownfield loop on attached repos with continuity and safety guardrails.
+`v0.7.0` is shipped on 2026-04-24. Kiln now supports a repeatable, bounded brownfield loop on attached repos. `v0.8.0` expands this into a remote-accessible factory that autonomously releases and verifies live deployments.
+
+<details>
+<summary>🚧 v0.8.0 (Phases 36–39) — IN PROGRESS</summary>
+
+- [x] **Phase 36: Remote Access & Operator Auth** — REMOTE-01, REMOTE-02, REMOTE-03 (completed 2026-04-26)
+- [ ] **Phase 37: Autonomous Versioning & Release** — DELIVER-01, DELIVER-02
+- [ ] **Phase 38: SaaS Delivery & SRE Smoke** — DELIVER-03, DELIVER-04, DELIVER-05
+- [ ] **Phase 39: Milestone Proof & Production Readiness** — UAT-07
+
+**Scope summary:** secure remote dashboard access, auto-versioning from commits, GitHub Release integration, SaaS deploy drivers (Fly.io/Cloudflare), and post-deploy SRE health checks.
+
+**Plans:** 3 plans
+
+Plans:
+
+- [x] 36-01-PLAN.md — Sigra auth scaffold and operator session plumbing
+- [x] 36-02-PLAN.md — remote compose profile and Tailscale sidecar
+- [x] 36-03-PLAN.md — route-gate verification and remote smoke runbook
+
+</details>
 
 <details>
 <summary>✅ v0.7.0 (Phases 32–35) — SHIPPED 2026-04-24</summary>
