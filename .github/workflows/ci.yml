@@ -228,7 +228,12 @@ jobs:
 
       - name: Migrate + seed e2e fixtures
         run: |
-          KILN_DB_ROLE=kiln_owner mix ecto.migrate
+          # First migrate as the connecting superuser so migration 002
+          # creates the kiln_owner / kiln_app roles. Then any subsequent
+          # commands can use KILN_DB_ROLE=kiln_owner (current step doesn't
+          # need to). Mirrors script/docker_dev_start.sh fallback path.
+          mix ecto.create
+          mix ecto.migrate
           mix run priv/repo/seeds_e2e.exs
 
       - name: Build assets (app.css + app.js)

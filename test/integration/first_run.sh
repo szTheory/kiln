@@ -85,7 +85,23 @@ for _ in $(seq 1 30); do
 done
 
 echo "[first_run] mix setup (KILN_DB_ROLE=kiln_owner for DDL)..."
-KILN_DB_ROLE=kiln_owner mix setup
+# Mirror script/docker_dev_start.sh: try kiln_owner first; on a fresh
+# postgres the role doesn't exist yet, so fall back to the connecting
+# superuser to bootstrap roles via migration 002.
+SETUP_LOG=$(mktemp)
+if ! KILN_DB_ROLE=kiln_owner mix setup >"$SETUP_LOG" 2>&1; then
+  if grep -qE 'role "kiln_owner" does not exist|FATAL 22023' "$SETUP_LOG"; then
+    echo "[first_run]   first-time bootstrap — creating roles via migration..."
+    mix ecto.create 2>/dev/null || true
+    mix ecto.migrate
+    mix run priv/repo/seeds.exs
+  else
+    cat "$SETUP_LOG" >&2
+    rm -f "$SETUP_LOG"
+    exit 1
+  fi
+fi
+rm -f "$SETUP_LOG"
 
 echo "[first_run] starting phx.server in background as kiln_app..."
 KILN_DB_ROLE=kiln_app mix phx.server &
