@@ -38,6 +38,21 @@ defmodule KilnWeb.ConnCase do
         :ready
       end
 
-    {:ok, conn: Phoenix.ConnTest.build_conn(), operator_readiness: readiness}
+    # Phase 36-01: Sigra auth guards `:require_authenticated` on all
+    # operator routes. Default the test conn to a logged-in operator so
+    # existing LiveView/controller tests pass without per-file edits.
+    # Opt out per test/module with `@tag :anonymous` (login/redirect
+    # flow tests) or `@moduletag :anonymous`.
+    base_conn = Phoenix.ConnTest.build_conn()
+
+    {conn, user} =
+      if tags[:anonymous] do
+        {base_conn, nil}
+      else
+        u = Kiln.OperatorsFixtures.user_fixture()
+        {KilnWeb.ConnCaseHelpers.log_in_user(base_conn, u), u}
+      end
+
+    {:ok, conn: conn, user: user, operator_readiness: readiness}
   end
 end

@@ -25,6 +25,20 @@ router entries. This makes `mix check` pass but every operator-auth
 flow involving register, MFA settings, or reactivation hits a 501
 wall.
 
+## Skipped tests (re-enable when wiring lands)
+
+- `test/kiln/audit_bridge_test.exs` — `@describetag :skip` on the
+  "auth audit forwarding" describe block. Sigra→Kiln.Audit bridge not
+  yet emitting events on password / passkey sign-in.
+- `test/kiln/specs/holdout_priv_test.exs:58` — `@tag :skip` on
+  "VerifierReadRepo connects as kiln_verifier database role". The
+  `kiln_verifier` Postgres role and matching grants need to be added
+  to the role-bootstrap migration (or a sibling) before this can pass.
+
+Test-time auth UX in `KilnWeb.ConnCase` already defaults to a
+logged-in operator with `@moduletag :anonymous` opt-out (added 2026-04-26
+to unblock PR #1) — that part doesn't need rework.
+
 ## Solution
 
 Wire each stub against the real Sigra implementations:

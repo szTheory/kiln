@@ -1,6 +1,8 @@
 defmodule KilnWeb.RouteGateTest do
   use KilnWeb.ConnCase, async: false
 
+  @moduletag :anonymous
+
   import Phoenix.LiveViewTest
   import Kiln.OperatorsFixtures, only: [valid_user_password: 0]
 

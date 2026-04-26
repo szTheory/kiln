@@ -1,6 +1,8 @@
 defmodule KilnWeb.SessionControllerTest do
   use KilnWeb.ConnCase, async: false
 
+  @moduletag :anonymous
+
   import Phoenix.LiveViewTest
 
   import Kiln.OperatorsFixtures
