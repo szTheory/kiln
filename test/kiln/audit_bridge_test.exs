@@ -116,10 +116,15 @@ defmodule Kiln.AuditBridgeTest do
 
     response =
       %{
-        "clientDataJSON" => Base.url_encode64(~s({"type":"webauthn.get","challenge":"test"}), padding: false),
+        "clientDataJSON" =>
+          Base.url_encode64(~s({"type":"webauthn.get","challenge":"test"}), padding: false),
         "authenticatorData" => Base.url_encode64("authenticator-data", padding: false),
         "signature" => Base.url_encode64("signature", padding: false),
-        "userHandle" => if(user_handle, do: Base.url_encode64(to_string(user_handle), padding: false), else: nil),
+        "userHandle" =>
+          if(user_handle,
+            do: Base.url_encode64(to_string(user_handle), padding: false),
+            else: nil
+          ),
         "attestationObject" => Base.url_encode64("attestation-object", padding: false),
         "transports" => ["internal"]
       }

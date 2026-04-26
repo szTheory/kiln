@@ -24,9 +24,16 @@ defmodule Kiln.Repo.Migrations.CreateSigraAuthTables do
     end
 
     # Partial unique index: only enforce email uniqueness for active users
-    create unique_index(:operators, [:email], where: "deleted_at IS NULL", name: :operators_email_active_index)
+    create unique_index(:operators, [:email],
+             where: "deleted_at IS NULL",
+             name: :operators_email_active_index
+           )
+
     # Partial unique index on pending_email
-    create unique_index(:operators, [:pending_email], where: "pending_email IS NOT NULL", name: :operators_pending_email_index)
+    create unique_index(:operators, [:pending_email],
+             where: "pending_email IS NOT NULL",
+             name: :operators_pending_email_index
+           )
 
     create table(:user_tokens, primary_key: false) do
       add :id, :binary_id, primary_key: true

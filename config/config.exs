@@ -190,7 +190,6 @@ config :sigra,
   email_module: Kiln.Operators.Emails,
   mailer: Kiln.Operators.Mailer
 
-
 # Sigra passkeys
 config :kiln, :sigra_config,
   passkeys: [

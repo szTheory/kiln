@@ -27,10 +27,8 @@ defmodule Kiln.Operators.Scope do
 
   @type t :: %__MODULE__{
           user: %Operator{} | nil,
-
           active_organization: nil,
           membership: nil,
-
           impersonating_from: %Operator{} | nil
         }
 

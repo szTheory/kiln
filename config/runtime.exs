@@ -44,9 +44,10 @@ config :kiln, KilnWeb.Endpoint, http: http_opts
 # MIX_TEST_PARTITION support (parallel CI DBs) — lives here to keep compile-time
 # config free of env-var reads per T-02 mitigation.
 if config_env() == :test do
-  db = "kiln_test#{System.get_env("MIX_TEST_PARTITION")}" 
+  db = "kiln_test#{System.get_env("MIX_TEST_PARTITION")}"
   config :kiln, Kiln.Repo, database: db
   config :kiln, Kiln.Repo.VerifierReadRepo, database: db
+
   config :kiln, :sigra_config,
     secret_key_base: Application.get_env(:kiln, KilnWeb.Endpoint)[:secret_key_base]
 
@@ -119,8 +120,7 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
-  config :kiln, :sigra_config,
-    secret_key_base: secret_key_base
+  config :kiln, :sigra_config, secret_key_base: secret_key_base
 end
 
 # Phase 21: optional Dev Container / host-published Postgres — allow full DB

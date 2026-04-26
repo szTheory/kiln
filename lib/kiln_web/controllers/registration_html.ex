@@ -25,8 +25,13 @@ defmodule KilnWeb.RegistrationHTML do
       <.form :let={f} for={@form} id="registration_form" action={~p"/users/register"} method="post">
         <% # Add custom fields here (e.g., :name, :company) %>
         <.input field={f[:email]} type="email" label="Email" autocomplete="username" required />
-        <.input field={f[:password]} type="password" label="Password" autocomplete="new-password" required />
-
+        <.input
+          field={f[:password]}
+          type="password"
+          label="Password"
+          autocomplete="new-password"
+          required
+        />
 
         <% # @passkey_primary_enabled gates signup-time passkey enrollment. %>
         <%= if assigns[:passkey_primary_enabled] do %>
@@ -40,7 +45,6 @@ defmodule KilnWeb.RegistrationHTML do
             </span>
           </label>
         <% end %>
-
 
         <.button class="btn btn-primary w-full">
           Create an account <span aria-hidden="true">&rarr;</span>

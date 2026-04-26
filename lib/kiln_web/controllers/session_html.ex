@@ -28,7 +28,6 @@ defmodule KilnWeb.SessionHTML do
         </:subtitle>
       </.header>
 
-
       <%= if @passkey_primary_enabled do %>
         <% # Passkey-primary section %>
         <.form
@@ -39,7 +38,13 @@ defmodule KilnWeb.SessionHTML do
           method="post"
           data-options-path={~p"/users/log_in/passkey/options"}
         >
-          <.input field={f[:email]} type="email" label="Email" autocomplete="username webauthn" required />
+          <.input
+            field={f[:email]}
+            type="email"
+            label="Email"
+            autocomplete="username webauthn"
+            required
+          />
           <input type="hidden" name="passkey[response]" id="passkey_login_response" />
 
           <.button type="button" id="passkey_login_button" class="btn btn-primary w-full">
@@ -52,9 +57,22 @@ defmodule KilnWeb.SessionHTML do
         </div>
 
         <% # Magic link recovery remains visible in passkey-primary mode. %>
-        <.form :let={f} for={@magic_link_form} id="magic_link_form" action={~p"/users/log_in"} method="post" class="mt-3">
+        <.form
+          :let={f}
+          for={@magic_link_form}
+          id="magic_link_form"
+          action={~p"/users/log_in"}
+          method="post"
+          class="mt-3"
+        >
           <input type="hidden" name="_action" value="magic_link" />
-          <.input field={f[:email]} type="email" label="Email for recovery link" autocomplete="username" required />
+          <.input
+            field={f[:email]}
+            type="email"
+            label="Email for recovery link"
+            autocomplete="username"
+            required
+          />
 
           <.button class="btn btn-outline w-full">
             Email me a magic link
@@ -73,7 +91,13 @@ defmodule KilnWeb.SessionHTML do
 
         <.form :let={f} for={@form} id="login_form" action={~p"/users/log_in"} method="post">
           <.input field={f[:email]} type="email" label="Email" autocomplete="username" required />
-          <.input field={f[:password]} type="password" label="Password" autocomplete="current-password" required />
+          <.input
+            field={f[:password]}
+            type="password"
+            label="Password"
+            autocomplete="current-password"
+            required
+          />
 
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-sm">
@@ -111,9 +135,14 @@ defmodule KilnWeb.SessionHTML do
           })
         </script>
       <% else %>
-
         <% # Magic link section %>
-        <.form :let={f} for={@magic_link_form} id="magic_link_form" action={~p"/users/log_in"} method="post">
+        <.form
+          :let={f}
+          for={@magic_link_form}
+          id="magic_link_form"
+          action={~p"/users/log_in"}
+          method="post"
+        >
           <input type="hidden" name="_action" value="magic_link" />
           <.input field={f[:email]} type="email" label="Email" autocomplete="username" required />
 
@@ -135,7 +164,13 @@ defmodule KilnWeb.SessionHTML do
         <% # Password section %>
         <.form :let={f} for={@form} id="login_form" action={~p"/users/log_in"} method="post">
           <.input field={f[:email]} type="email" label="Email" autocomplete="username" required />
-          <.input field={f[:password]} type="password" label="Password" autocomplete="current-password" required />
+          <.input
+            field={f[:password]}
+            type="password"
+            label="Password"
+            autocomplete="current-password"
+            required
+          />
 
           <div class="flex items-center justify-between">
             <label class="flex items-center gap-2 text-sm">
@@ -148,9 +183,7 @@ defmodule KilnWeb.SessionHTML do
             Log in <span aria-hidden="true">&rarr;</span>
           </.button>
         </.form>
-
       <% end %>
-
     </div>
     """
   end

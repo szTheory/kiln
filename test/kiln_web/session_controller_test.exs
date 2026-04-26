@@ -49,7 +49,8 @@ defmodule KilnWeb.SessionControllerTest do
 
   describe "POST /users/log_in/passkey" do
     test "successful passkey login establishes a signed operator session", %{conn: conn} do
-      %{user: user, passkey: passkey, response: response} = authenticate_with_passkey(confirmed_user_fixture())
+      %{user: user, passkey: passkey, response: response} =
+        authenticate_with_passkey(confirmed_user_fixture())
 
       conn = issue_passkey_challenge(conn, :authentication)
 

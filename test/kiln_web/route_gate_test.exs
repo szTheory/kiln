@@ -8,7 +8,9 @@ defmodule KilnWeb.RouteGateTest do
   alias Kiln.Repo
 
   describe "remote dashboard route gate" do
-    test "/health stays public while dashboard routes redirect unauthenticated visitors", %{conn: conn} do
+    test "/health stays public while dashboard routes redirect unauthenticated visitors", %{
+      conn: conn
+    } do
       assert get(conn, "/health").status == 200
 
       for path <- [~p"/", ~p"/templates", ~p"/inbox", ~p"/settings", ~p"/audit"] do

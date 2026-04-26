@@ -96,7 +96,6 @@ defmodule KilnWeb.Router do
 
     get "/mfa", MFAChallengeController, :new
     post "/mfa", MFAChallengeController, :create
-
   end
 
   scope "/users", KilnWeb do
@@ -116,12 +115,10 @@ defmodule KilnWeb.Router do
     get "/confirm/:token", ConfirmationController, :confirm
     post "/confirm/resend", ConfirmationController, :resend
 
-
     get "/reset-password", ResetPasswordController, :new
     post "/reset-password", ResetPasswordController, :create
     get "/reset-password/:token", ResetPasswordController, :edit
     put "/reset-password/:token", ResetPasswordController, :update
-
   end
 
   scope "/users", KilnWeb do
@@ -129,8 +126,8 @@ defmodule KilnWeb.Router do
 
     delete "/log_out", SessionController, :delete
 
-      get "/sudo", Auth.SudoController, :new
-      post "/sudo", Auth.SudoController, :create
+    get "/sudo", Auth.SudoController, :new
+    post "/sudo", Auth.SudoController, :create
 
     # 36-01 followup stubs — see lib/kiln_web/controllers/sigra_stub_controllers.ex.
     # Routes the Sigra-backed scaffolding emits redirects/links to but were
@@ -148,31 +145,28 @@ defmodule KilnWeb.Router do
 
   scope "/users", KilnWeb do
     pipe_through [:browser, :require_authenticated, :require_sudo]
-
   end
 
+  # Sigra passkeys
+  scope "/users", KilnWeb do
+    pipe_through [:browser]
 
-# Sigra passkeys
-scope "/users", KilnWeb do
-  pipe_through [:browser]
+    post "/mfa/passkey", SessionController, :complete_mfa_passkey
+    post "/mfa/passkey/options", SessionController, :passkey_mfa_options
+  end
 
-  post "/mfa/passkey", SessionController, :complete_mfa_passkey
-  post "/mfa/passkey/options", SessionController, :passkey_mfa_options
-end
+  scope "/users", KilnWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
 
-scope "/users", KilnWeb do
-  pipe_through [:browser, :redirect_if_user_is_authenticated]
+    post "/log_in/passkey", SessionController, :complete_passkey
+    post "/log_in/passkey/options", SessionController, :passkey_authentication_options
+  end
 
-  post "/log_in/passkey", SessionController, :complete_passkey
-  post "/log_in/passkey/options", SessionController, :passkey_authentication_options
-end
+  scope "/users", KilnWeb do
+    pipe_through [:browser, :require_authenticated, :require_sudo]
 
-scope "/users", KilnWeb do
-  pipe_through [:browser, :require_authenticated, :require_sudo]
-
-  post "/settings/mfa/passkeys/options", SessionController, :passkey_registration_options
-  post "/settings/mfa/passkeys", SessionController, :complete_passkey_registration
-  post "/settings/mfa/passkeys/:id/delete", SessionController, :delete_passkey
-end
-
+    post "/settings/mfa/passkeys/options", SessionController, :passkey_registration_options
+    post "/settings/mfa/passkeys", SessionController, :complete_passkey_registration
+    post "/settings/mfa/passkeys/:id/delete", SessionController, :delete_passkey
+  end
 end

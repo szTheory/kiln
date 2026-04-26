@@ -123,7 +123,6 @@ defmodule KilnWeb.MFASettingsHTML do
             </.form>
           </div>
         <% end %>
-
       <% else %>
         <% # Enrollment UI %>
         <%= case @enrollment_step do %>
@@ -138,7 +137,6 @@ defmodule KilnWeb.MFASettingsHTML do
                 Set up two-factor authentication
               </.link>
             </div>
-
           <% :qr -> %>
             <.header>
               Two-Factor Authentication
@@ -200,7 +198,6 @@ defmodule KilnWeb.MFASettingsHTML do
                 </.form>
               </div>
             </div>
-
           <% :backup_codes -> %>
             <.header>
               Save your backup codes
@@ -246,8 +243,7 @@ defmodule KilnWeb.MFASettingsHTML do
                   value="true"
                   required
                   class="rounded border-gray-300"
-                />
-                I have saved these backup codes in a safe place
+                /> I have saved these backup codes in a safe place
               </label>
 
               <.button class="w-full mt-4">

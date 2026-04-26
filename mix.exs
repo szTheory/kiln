@@ -148,7 +148,11 @@ defmodule Kiln.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       # Shift-left: `mix check` + `test/integration/first_run.sh` (see `script/shift_left_verify.sh`).
       shift_left: ["shift_left.verify"],
-      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing", "cmd --cd assets npm install"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing",
+        "cmd --cd assets npm install"
+      ],
       "assets.build": ["tailwind kiln", "esbuild kiln"],
       "assets.deploy": ["tailwind kiln --minify", "esbuild kiln --minify", "phx.digest"],
       # Phase 10 / D-1005 — single SSOT: shell script only (no duplicated compose/migrate logic).
