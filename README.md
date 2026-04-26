@@ -8,12 +8,17 @@ See `.planning/PROJECT.md` for the full vision and constraints.
 
 ## First hour
 
-1. **Configure** — `cp .env.sample .env`, fill in `SECRET_KEY_BASE` (use `mix phx.gen.secret`)
-2. **Start** — `just dev` (or `bash script/dev_up.sh`) — starts Postgres, runs migrations, launches Phoenix
-3. **Open** — `http://localhost:4000` — lands on the onboarding flow
-4. **Before a live run** — visit `/settings` to connect LLM providers and GitHub auth
+**Requires: Docker with Compose v2.** No Elixir install needed.
 
-> Need sandbox stages? Run `docker compose up -d dtu` in a second terminal after Phoenix boots.
+```bash
+docker compose up
+```
+
+Open **http://localhost:4000** — you'll land on the onboarding flow. Before your first live run visit `/settings` to connect providers and GitHub auth.
+
+First start takes 2–3 min to fetch and compile deps; subsequent starts are fast (deps are cached in a named volume).
+
+> **Host Elixir path (faster inner loop):** if you have Elixir/OTP installed (`asdf install` from `.tool-versions`), you can skip Docker for the app and run `bash script/dev_up.sh` instead — Postgres still runs in Docker, Phoenix runs on your machine.
 
 ## Fair scheduling
 

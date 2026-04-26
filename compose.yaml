@@ -56,6 +56,30 @@ services:
       timeout: 5s
       retries: 3
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - kiln_app_build:/app/_build
+      - kiln_app_deps:/app/deps
+      # Docker socket lets the app spawn sandbox containers via System.cmd("docker", ...).
+      # Never forward DOCKER_HOST into the spawned stage containers themselves.
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "${PORT:-4000}:4000"
+    environment:
+      MIX_ENV: dev
+      KILN_DEV_BIND_ALL: "1"
+      DATABASE_URL: "ecto://kiln:kiln_dev@db:5432/kiln_dev"
+      SECRET_KEY_BASE: "${SECRET_KEY_BASE:-}"
+      PHX_HOST: "${PHX_HOST:-localhost}"
+      PORT: "${PORT:-4000}"
+    depends_on:
+      db:
+        condition: service_healthy
+
   tailscale:
     image: tailscale/tailscale:stable
     profiles: ["remote"]
@@ -92,3 +116,5 @@ networks:
 volumes:
   kiln_pgdata:
   kiln_tailscale_state:
+  kiln_app_build:
+  kiln_app_deps:
